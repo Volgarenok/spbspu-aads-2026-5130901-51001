@@ -3,5 +3,5 @@
 
 std::ostream & kitserov::out_credentials(std::ostream & out)
 {
-  return out << "kitserov.mihuil";
+  return out << "kitserov.mihail";
 }
