@@ -1,6 +1,7 @@
 #include <iostream>
+#include "credentials.hpp"
 
 int main()
 {
-  std::cout << "kitserov.mihail" << "\n";
+  kitserov::out_credentials(std::cout) << "\n";
 }
