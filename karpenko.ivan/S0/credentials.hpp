@@ -7,4 +7,5 @@ namespace karpenko
 {
   std::ostream  & out_credentials(std::ostream & out);
 }
+
 #endif
