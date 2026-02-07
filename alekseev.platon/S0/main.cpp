@@ -1,6 +1,8 @@
 #include <iostream>
+#include "identity.hpp"
 
 int main()
 {
-  std::cout << "alekseev.platon" << std::endl;
+  alekseev::print_identity(std::cout) << '\n';
+  return 0;
 }
