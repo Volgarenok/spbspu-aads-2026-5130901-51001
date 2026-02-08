@@ -3,5 +3,5 @@
 
 std::ostream & losev::out_credentials(std::ostream & out)
 {
-  return out << "losev.timofei";
+  return out << "losev.timofey";
 }
