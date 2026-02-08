@@ -1,10 +1,7 @@
 #include "identity.hpp"
 #include <ostream>
 
-namespace alekseev
+std::ostream & alekseev::print_identity(std::ostream & out)
 {
-  std::ostream & print_identity(std::ostream & out)
-  {
-    return out << "alekseev.platon";
-  }
+  return out << "alekseev.platon";
 }
