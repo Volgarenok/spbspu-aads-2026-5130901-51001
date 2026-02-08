@@ -1,9 +1,9 @@
-#define BOOST_TEST_MODULE Test credentials
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
+#include <iostream>
 
 BOOST_AUTO_TEST_CASE(credentials_test)
 {
-	int i = 1;
-	BOOST_TEST(i);
-	BOOST_TEST(i == 2);
+	std::ostringstream out;
+	nabieva::out_credentials(out);
+	BOOST_TEST(out.str() = "nabieva.liia");
 }
