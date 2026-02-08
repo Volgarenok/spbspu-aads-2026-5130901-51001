@@ -4,7 +4,7 @@
 
 namespace vishnaykov
 {
-  std::ostream & vishnaykov::out_credentials(std::ostream & out);
+  std::ostream & out_credentials(std::ostream & out);
 }
 
 #endif
