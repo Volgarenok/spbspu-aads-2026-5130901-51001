@@ -1,7 +1,7 @@
 #include "credentials.hpp"
 #include <iostream>
 
-std::ostream & krivoshapov::out_credentials(std::ostream &out)
+std::ostream &krivoshapov::out_credentials(std::ostream &out)
 {
-    return out << "krivoshapov.ivan";
+  return out << "krivoshapov.ivan";
 }
