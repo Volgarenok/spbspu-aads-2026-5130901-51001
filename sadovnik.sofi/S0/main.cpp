@@ -1,6 +1,8 @@
 #include <iostream>
+#include "credentials.hpp"
+
 
 int main()
 {
-  std::cout << "sadovnik.sofi" << "\n";
+  sadovnik::out_credentials(std::cout) << "\n";
 }
