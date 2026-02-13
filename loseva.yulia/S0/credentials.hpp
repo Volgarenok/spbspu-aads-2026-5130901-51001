@@ -3,6 +3,6 @@
 #include <iosfwd>
 namespace loseva
 {
-  std::ostream &out_credentials(std::ostream & out);
+  std::ostream & out_credentials(std::ostream & out);
 }
 #endif
