@@ -1,4 +1,4 @@
-#include <boost/test/unit_test.cpp>
+#include <boost/test/unit_test.hpp>
 #include <sstream>
 #include "credentials.hpp"
 
