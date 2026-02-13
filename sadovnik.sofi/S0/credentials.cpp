@@ -3,5 +3,5 @@
 
 std::ostream & sadovnik::out_credentials(std::ostream & out)
 {
-  return out << "sadovnik.sonik";
+  return out << "sadovnik.sofi";
 }
