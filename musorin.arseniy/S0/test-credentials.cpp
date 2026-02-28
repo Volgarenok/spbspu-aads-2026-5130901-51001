@@ -6,5 +6,5 @@ BOOST_AUTO_TEST_CASE(credential_test)
 {
   std::ostringstream out;
   musorin::out_credentials(out);
-  BOOST_TEST(out.str() == "musorin.arseniy"); 
+  BOOST_TEST(out.str() == "musorin.arseniy");
 }
