@@ -1,4 +1,3 @@
-#define BOOST_TEST_MODULE Test credentials
 #include <boost/test/included/unit_test.hpp>
 #include "credentials.hpp"
 #include <sstream>
