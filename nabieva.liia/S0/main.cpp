@@ -3,5 +3,5 @@
 
 int main()
 {
-	nabieva::out_credentials(std::cout) << "\n";
+  nabieva::out_credentials(std::cout) << "\n";
 }
