@@ -71,6 +71,7 @@ namespace alekseev
   }
 
   template< class T >
+
   List< T >::List(List && other):
     List()
   {
