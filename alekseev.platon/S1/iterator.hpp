@@ -50,6 +50,109 @@ namespace alekseev
   private:
     const detail::NodeBase * node_;
   };
+
+  template< class T >
+  LIter< T >::LIter():
+    node_(nullptr)
+  {}
+
+  template< class T >
+  LIter< T >::LIter(detail::NodeBase * node):
+    node_(node)
+  {}
+
+  template< class T >
+  T & LIter< T >::operator*() const
+  {
+    return static_cast< detail::Node< T > * >(node_)->data;
+  }
+
+  template< class T >
+  T * LIter< T >::operator->() const
+  {
+    return &(static_cast< detail::Node< T > * >(node_)->data);
+  }
+
+  template< class T >
+  LIter< T > & LIter< T >::operator++()
+  {
+    node_ = node_->next;
+    return *this;
+  }
+
+  template< class T >
+  LIter< T > LIter< T >::operator++(int)
+  {
+    LIter tmp(*this);
+    node_ = node_->next;
+    return tmp;
+  }
+
+  template< class T >
+  bool LIter< T >::operator==(const LIter & rhs) const
+  {
+    return node_ == rhs.node_;
+  }
+
+  template< class T >
+  bool LIter< T >::operator!=(const LIter & rhs) const
+  {
+    return node_ != rhs.node_;
+  }
+
+  template< class T >
+  LCIter< T >::LCIter():
+    node_(nullptr)
+  {}
+
+  template< class T >
+  LCIter< T >::LCIter(const detail::NodeBase * node):
+    node_(node)
+  {}
+
+  template< class T >
+  LCIter< T >::LCIter(const LIter< T > & other):
+    node_(other.node_)
+  {}
+
+  template< class T >
+  const T & LCIter< T >::operator*() const
+  {
+    return static_cast< const detail::Node< T > * >(node_)->data;
+  }
+
+  template< class T >
+  const T * LCIter< T >::operator->() const
+  {
+    return &(static_cast< const detail::Node< T > * >(node_)->data);
+  }
+
+  template< class T >
+  LCIter< T > & LCIter< T >::operator++()
+  {
+    node_ = node_->next;
+    return *this;
+  }
+
+  template< class T >
+  LCIter< T > LCIter< T >::operator++(int)
+  {
+    LCIter tmp(*this);
+    node_ = node_->next;
+    return tmp;
+  }
+
+  template< class T >
+  bool LCIter< T >::operator==(const LCIter & rhs) const
+  {
+    return node_ == rhs.node_;
+  }
+
+  template< class T >
+  bool LCIter< T >::operator!=(const LCIter & rhs) const
+  {
+    return node_ != rhs.node_;
+  }
 }
 
 #endif
