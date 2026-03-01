@@ -145,6 +145,33 @@ namespace alekseev
       pop_front();
     }
   }
+
+  template< class T >
+  typename List< T >::iterator List< T >::insert_after(iterator pos, const T & value)
+  {
+    detail::Node< T > * node = new detail::Node< T >(value);
+    node->next = pos.node_->next;
+    pos.node_->next = node;
+    return iterator(node);
+  }
+
+  template< class T >
+  typename List< T >::iterator List< T >::insert_after(iterator pos, T && value)
+  {
+    detail::Node< T > * node = new detail::Node< T >(static_cast< T && >(value));
+    node->next = pos.node_->next;
+    pos.node_->next = node;
+    return iterator(node);
+  }
+
+  template< class T >
+  typename List< T >::iterator List< T >::erase_after(iterator pos)
+  {
+    detail::NodeBase * target = pos.node_->next;
+    pos.node_->next = target->next;
+    delete static_cast< detail::Node< T > * >(target);
+    return iterator(pos.node_->next);
+  }
 }
 
 #endif
