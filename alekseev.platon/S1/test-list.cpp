@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(push_front_lifo_order)
   ++it;
   BOOST_TEST(*it == 1);
   ++it;
-  BOOST_TEST(it == lst.end());
+  BOOST_CHECK(it == lst.end());
 }
 
 BOOST_AUTO_TEST_CASE(clear_makes_empty)
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(insert_after_before_begin)
   BOOST_TEST(*it == 1); ++it;
   BOOST_TEST(*it == 2); ++it;
   BOOST_TEST(*it == 3); ++it;
-  BOOST_TEST(it == lst.end());
+  BOOST_CHECK(it == lst.end());
 }
 
 BOOST_AUTO_TEST_CASE(erase_after_removes_element)
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(copy_ctor)
   List< int >::iterator it = b.begin();
   BOOST_TEST(*it == 10); ++it;
   BOOST_TEST(*it == 20); ++it;
-  BOOST_TEST(it == b.end());
+  BOOST_CHECK(it == b.end());
 }
 
 BOOST_AUTO_TEST_CASE(copy_assign)
