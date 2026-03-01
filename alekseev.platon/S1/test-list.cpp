@@ -290,4 +290,12 @@ BOOST_AUTO_TEST_CASE(named_seq_fill)
   BOOST_TEST(s.nums.front() == 1ULL);
 }
 
+BOOST_AUTO_TEST_CASE(named_seq_empty_nums)
+{
+  alekseev::NamedSeq s;
+  s.name = "d";
+  BOOST_TEST(s.nums.empty());
+  BOOST_TEST(s.name == "d");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

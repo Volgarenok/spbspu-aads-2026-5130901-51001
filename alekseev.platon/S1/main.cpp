@@ -134,17 +134,20 @@ namespace alekseev
       sums_tail = sums.insert_after(sums_tail, row_sum);
     }
 
-    if (has_rows)
+    if (!has_rows)
     {
-      List< unsigned long long >::const_iterator s = sums.cbegin();
-      out << *s;
-      ++s;
-      for (; s != sums.cend(); ++s)
-      {
-        out << ' ' << *s;
-      }
-      out << '\n';
+      out << 0 << '\n';
+      return 0;
     }
+
+    List< unsigned long long >::const_iterator s = sums.cbegin();
+    out << *s;
+    ++s;
+    for (; s != sums.cend(); ++s)
+    {
+      out << ' ' << *s;
+    }
+    out << '\n';
     return 0;
   }
 }
