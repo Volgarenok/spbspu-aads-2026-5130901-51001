@@ -71,9 +71,24 @@ namespace alekseev
   }
 
   template< class T >
+  List< T >::List(List && other):
+    List()
+  {
+    swap(other);
+  }
+
+  template< class T >
   List< T > & List< T >::operator=(const List & other)
   {
     List tmp(other);
+    swap(tmp);
+    return *this;
+  }
+
+  template< class T >
+  List< T > & List< T >::operator=(List && other)
+  {
+    List tmp(static_cast< List && >(other));
     swap(tmp);
     return *this;
   }
