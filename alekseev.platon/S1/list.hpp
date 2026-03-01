@@ -60,6 +60,25 @@ namespace alekseev
   }
 
   template< class T >
+  List< T >::List(const List & other):
+    List()
+  {
+    iterator tail = before_begin();
+    for (const_iterator it = other.cbegin(); it != other.cend(); ++it)
+    {
+      tail = insert_after(tail, *it);
+    }
+  }
+
+  template< class T >
+  List< T > & List< T >::operator=(const List & other)
+  {
+    List tmp(other);
+    swap(tmp);
+    return *this;
+  }
+
+  template< class T >
   typename List< T >::iterator List< T >::before_begin()
   {
     return iterator(&sentinel_);
@@ -171,6 +190,14 @@ namespace alekseev
     pos.node_->next = target->next;
     delete static_cast< detail::Node< T > * >(target);
     return iterator(pos.node_->next);
+  }
+
+  template< class T >
+  void List< T >::swap(List & other)
+  {
+    detail::NodeBase * tmp = sentinel_.next;
+    sentinel_.next = other.sentinel_.next;
+    other.sentinel_.next = tmp;
   }
 }
 
