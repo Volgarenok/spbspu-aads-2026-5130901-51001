@@ -112,6 +112,39 @@ namespace alekseev
   {
     return static_cast< const detail::Node< T > * >(sentinel_.next)->data;
   }
+
+  template< class T >
+  void List< T >::push_front(const T & value)
+  {
+    detail::Node< T > * node = new detail::Node< T >(value);
+    node->next = sentinel_.next;
+    sentinel_.next = node;
+  }
+
+  template< class T >
+  void List< T >::push_front(T && value)
+  {
+    detail::Node< T > * node = new detail::Node< T >(static_cast< T && >(value));
+    node->next = sentinel_.next;
+    sentinel_.next = node;
+  }
+
+  template< class T >
+  void List< T >::pop_front()
+  {
+    detail::NodeBase * old = sentinel_.next;
+    sentinel_.next = old->next;
+    delete static_cast< detail::Node< T > * >(old);
+  }
+
+  template< class T >
+  void List< T >::clear()
+  {
+    while (sentinel_.next != nullptr)
+    {
+      pop_front();
+    }
+  }
 }
 
 #endif
