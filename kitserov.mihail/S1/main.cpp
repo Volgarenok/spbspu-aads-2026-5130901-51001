@@ -5,6 +5,10 @@ namespace kitserov
   class LIter
   {
     friend class List< T >;
+    List<T>* node;
+    LIter(List< T >* n) : node(n) {}
+  public:
+    LIter() : node(nullptr) {}
     
   };
 
@@ -18,7 +22,10 @@ namespace kitserov
   template< class T >
   class List
   {
-    
+  public:
+    T data;
+    List< T >* next;
+    List(T v, List< T >* n) : data(v), next(n) {}
   };
 }
 
