@@ -9,7 +9,29 @@ namespace kitserov
     LIter(List< T >* n) : node(n) {}
   public:
     LIter() : node(nullptr) {}
-    
+    T& operator*() const
+    {
+      return node->data;
+    }
+    T* operator->() const
+    {
+      return &node->data;
+    }
+    LIter& operator++()
+    {
+      if (node) {
+      	node = node->next;
+      }
+      return *this;
+    }
+    bool operator==(const LIter& other) const
+    {
+      return node == other.node;
+    }
+    bool operator!=(const LIter& other) const
+    {
+      return node != other.node;
+    }
   };
 
   template< class T >
