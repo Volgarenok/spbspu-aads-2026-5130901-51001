@@ -150,7 +150,7 @@ namespace kitserov
     {
       clear(begin(), end());
     }
-    size_t getSize() {
+    size_t get_size() {
       return size;
     }
   private:
@@ -185,6 +185,21 @@ int main()
   std::cout << "\n";
   for (LIter< std::string > it = names.begin(); it != names.end(); ++it) {
     std::cout << *it << " ";
+  }
+  std::cout << "\n";
+  size_t max_size = 0;
+  for (LIter< List< int > > it = list_of_lists.begin(); it != list_of_lists.end(); ++it) {
+    size_t s = (*it).get_size();
+    if (s > max_size) {
+      max_size = s;
+    }
+  }
+  for (size_t i = 0; i < max_size; i++) {
+    for (size_t j = 0; j < list_of_lists.get_size(); j++) {
+      if ((*(list_of_lists[j])).get_size() > i) {
+        std::cout << *((*(list_of_lists[j]))[i]) << " ";
+      }
+    }
   }
   names.clear();
   for (LIter< List< int > > it = list_of_lists.begin(); it != list_of_lists.end(); ++it) {
