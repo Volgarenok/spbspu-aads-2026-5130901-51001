@@ -33,7 +33,7 @@ namespace kitserov
     }
     bool operator!=(const LIter& other) const
     {
-      return node_ != other.node;
+      return node_ != other.node_;
     }
   };
 
@@ -87,6 +87,9 @@ namespace kitserov
     Node* insert(T v, LIter< T > pos)
     {
       size++;
+      if (!pos.node_) {
+        return add(v);
+      }
       Node* newNode = new Node(v, pos.node_->next);
       pos.node_->next = newNode;
       return newNode;
@@ -94,7 +97,7 @@ namespace kitserov
     Node* insert_tail(T v)
     {
       size++;
-      return insert(v, this[size - 1]);
+      return insert(v, (*this)[size - 1]);
     }
     T& front()
     {
@@ -108,7 +111,7 @@ namespace kitserov
       if (!size) {
         throw std::out_of_range("list is empty");
       }
-      return *(this[size - 1]);
+      return *((*this)[size - 1]);
     }
     void clear(LIter< T > from, LIter< T > to)
     {
@@ -145,18 +148,10 @@ namespace kitserov
     }
     void clear()
     {
-      LIter< T > from = begin();
-      LIter< T > to = end();
-      if (from.node_ == nullptr) {
-        throw "first on nullptr";
-      }
-      Node* current = from.node_;
-      while (current != to.node_) {
-        Node* tmp = current->next;
-        delete current;
-        current = tmp;
-        size--;
-      }
+      clear(begin(), end());
+    }
+    size_t getSize() {
+      return size;
     }
   private:
     Node* head;
@@ -169,32 +164,32 @@ namespace kitserov
 int main()
 {
   using namespace kitserov;
-  size_t names_cap = 8;
-  size_t names_count = 0;
-  std::string* names = new std::string[names_cap];
+  List< std::string > names;
+  List< List< int > > list_of_lists;
+  std::string name;
   while (true) {
-    std::string name;
     if (!(std::cin >> name)) {
       break;
     }
-    names[names_count] = name;
-    names_count++;
-    if (names_count >= names_cap) {
-      names_cap *= 2;
-      std::string* tmp = new std::string[names_cap];
-      for (size_t i = 0; i < names_count; ++i) {
-        tmp[i] = names[i];
-      }
-      delete[] names;
-      names = tmp;
+    names.insert_tail(name);
+    List< int > numbers;
+    int num;
+    while (std::cin >> num) {
+      numbers.insert_tail(num);
     }
-    while (true) {
-      
+    if (std::cin.eof()) {
+      list_of_lists.insert_tail(numbers);
+      break;
     }
   }
   std::cout << "\n";
-  for (size_t i = 0; i < names_count; ++i) {
-    std::cout << names[i] << " ";
+  for (LIter< std::string > it = names.begin(); it != names.end(); ++it) {
+    std::cout << *it << " ";
   }
+  names.clear();
+  for (LIter< List< int > > it = list_of_lists.begin(); it != list_of_lists.end(); ++it) {
+    (*it).clear();
+  }
+  list_of_lists.clear();
   return 0;
 }
