@@ -1,3 +1,5 @@
+#include <utility>
+#include <limits>
 #include <iostream>
 #include <string>
 
@@ -51,12 +53,30 @@ namespace kitserov
     struct Node {
       T data;
       Node* next;
-      Node(T v, Node* n = nullptr) : data(v), next(n) {}
+      Node(T&& v, Node* n = nullptr) : data(std::move(v)), next(n) {}
     };
     List() : head(nullptr), size(0) {}
     ~List()
     {
       clear();
+    }
+    List(const List&) = delete;
+    List& operator=(const List&) = delete;
+    List(List&& other) noexcept : head(other.head), size(other.size)
+    {
+      other.head = nullptr;
+      other.size = 0;
+    }
+    List& operator=(List&& other) noexcept
+    {
+      if (this != &other) {
+        clear();
+        head = other.head;
+        size = other.size;
+        other.head = nullptr;
+        other.size = 0;
+      }
+      return *this;
     }
     LIter< T > begin() 
     {
@@ -77,27 +97,29 @@ namespace kitserov
       }
       return LIter< T >(current);
     }
-    Node* add(T v)
+    Node* add(T&& v)
     {
-      Node* newNode = new Node(v, head);
+      Node* newNode = new Node(std::move(v), head);
       head = newNode;
       size++;
       return newNode;
     }
-    Node* insert(T v, LIter< T > pos)
+    Node* insert(T&& v, LIter< T > pos)
     {
       size++;
       if (!pos.node_) {
-        return add(v);
+        return add(std::move(v));
       }
-      Node* newNode = new Node(v, pos.node_->next);
+      Node* newNode = new Node(std::move(v), pos.node_->next);
       pos.node_->next = newNode;
       return newNode;
     }
-    Node* insert_tail(T v)
+    Node* insert_tail(T&& v)
     {
-      size++;
-      return insert(v, (*this)[size - 1]);
+      if (size == 0) {
+        return add(std::move(v));
+      }
+      return insert(std::move(v), (*this)[size - 1]);
     }
     T& front()
     {
@@ -116,7 +138,7 @@ namespace kitserov
     void clear(LIter< T > from, LIter< T > to)
     {
       if (from.node_ == nullptr) {
-        throw "first on nullptr";
+        return;
       }
       if (head == from.node_) {
         Node* newHead = to.node_;
@@ -148,7 +170,9 @@ namespace kitserov
     }
     void clear()
     {
-      clear(begin(), end());
+      if (head) {
+        clear(begin(), end());
+      }
     }
     size_t get_size() {
       return size;
@@ -157,8 +181,6 @@ namespace kitserov
     Node* head;
     size_t size;
   };
-
-
 }
 
 int main()
@@ -171,15 +193,20 @@ int main()
     if (!(std::cin >> name)) {
       break;
     }
-    names.insert_tail(name);
+    names.insert_tail(std::move(name));
     List< int > numbers;
     int num;
     while (std::cin >> num) {
-      numbers.insert_tail(num);
+      numbers.insert_tail(std::move(num));
     }
     if (std::cin.eof()) {
-      list_of_lists.insert_tail(numbers);
+      list_of_lists.insert_tail(std::move(numbers));
       break;
+    }
+    if (std::cin.fail()) {
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+      list_of_lists.insert_tail(std::move(numbers));
     }
   }
   std::cout << "\n";
@@ -189,17 +216,19 @@ int main()
   std::cout << "\n";
   size_t max_size = 0;
   for (LIter< List< int > > it = list_of_lists.begin(); it != list_of_lists.end(); ++it) {
-    size_t s = (*it).get_size();
+    size_t s = it->get_size();
     if (s > max_size) {
       max_size = s;
     }
   }
   for (size_t i = 0; i < max_size; i++) {
     for (size_t j = 0; j < list_of_lists.get_size(); j++) {
-      if ((*(list_of_lists[j])).get_size() > i) {
-        std::cout << *((*(list_of_lists[j]))[i]) << " ";
+      List< int >& curList = *(list_of_lists[j]);
+      if (curList.get_size() > i) {
+        std::cout << *(curList[i]) << " ";
       }
     }
+    std::cout << "\n";
   }
   names.clear();
   for (LIter< List< int > > it = list_of_lists.begin(); it != list_of_lists.end(); ++it) {
