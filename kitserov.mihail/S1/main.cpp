@@ -110,6 +110,54 @@ namespace kitserov
       }
       return *(this[size - 1]);
     }
+    void clear(LIter< T > from, LIter< T > to)
+    {
+      if (from.node_ == nullptr) {
+        throw "first on nullptr";
+      }
+      if (head == from.node_) {
+        Node* newHead = to.node_;
+        Node* current = head;
+        while (current != to.node_) {
+          Node* tmp = current->next;
+          delete current;
+          current = tmp;
+          --size;
+        }
+        head = newHead;
+        return;
+      }
+      Node* prev = head;
+      while (prev != nullptr && prev->next != from.node_) {
+        prev = prev->next;
+      }
+      if (prev == nullptr) {
+        throw "first iterator haven't founde";
+      }
+      Node* current = from.node_;
+      while (current != to.node_) {
+        Node* tmp = current->next;
+        delete current;
+        current = tmp;
+        size--;
+      }
+      prev->next = current;
+    }
+    void clear()
+    {
+      LIter< T > from = begin();
+      LIter< T > to = end();
+      if (from.node_ == nullptr) {
+        throw "first on nullptr";
+      }
+      Node* current = from.node_;
+      while (current != to.node_) {
+        Node* tmp = current->next;
+        delete current;
+        current = tmp;
+        size--;
+      }
+    }
   private:
     Node* head;
     size_t size;
@@ -124,7 +172,6 @@ int main()
   size_t names_cap = 8;
   size_t names_count = 0;
   std::string* names = new std::string[names_cap];
-  List< List < int > > list_of_lists;
   while (true) {
     std::string name;
     if (!(std::cin >> name)) {
