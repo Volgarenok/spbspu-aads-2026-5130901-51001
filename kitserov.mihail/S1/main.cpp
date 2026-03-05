@@ -8,32 +8,32 @@ namespace kitserov
   class LIter
   {
     friend class List< T >;
-    List< T >* node;
-    LIter(List< T >* n) : node(n) {}
+    typename List< T >::Node* node_;
   public:
-    LIter() : node(nullptr) {}
+    LIter() : node_(nullptr) {}
+    LIter(typename List<T>::Node* n) : node_(n) {}
     T& operator*() const
     {
-      return node->data;
+      return node_->data;
     }
     T* operator->() const
     {
-      return &node->data;
+      return &node_->data;
     }
     LIter& operator++()
     {
-      if (node) {
-      	node = node->next;
+      if (node_) {
+      	node_ = node_->next;
       }
       return *this;
     }
     bool operator==(const LIter& other) const
     {
-      return node == other.node;
+      return node_ == other.node;
     }
     bool operator!=(const LIter& other) const
     {
-      return node != other.node;
+      return node_ != other.node;
     }
   };
 
@@ -45,16 +45,14 @@ namespace kitserov
   };
 
   template< class T >
-  class List
+  struct List
   {
+  public:
     struct Node {
       T data;
       Node* next;
       Node(T v, Node* n = nullptr) : data(v), next(n) {}
     };
-    Node* head;
-    size_t size;
-  public:
     List() : head(nullptr), size(0) {}
     ~List()
     {
@@ -68,24 +66,53 @@ namespace kitserov
     {
       return LIter< T >(nullptr);
     }
-    List< T >* add(T v)
+    LIter< T > operator[](size_t index)
     {
-      List< T >* newNode = new List< T >(v, this);
+      if (index >= size) {
+        throw std::out_of_range("out_of_range");
+      }
+      Node* current = head;
+      for (size_t i = 0; i < index; i++) {
+        current = current->next;
+      }
+      return LIter< T >(current);
+    }
+    Node* add(T v)
+    {
+      Node* newNode = new Node(v, head);
+      head = newNode;
       size++;
       return newNode;
     }
-    List< T >* insert(T v)
+    Node* insert(T v, LIter< T > pos)
     {
-      List< T >* newNode = next->add(v);
-      next = newNode;
+      size++;
+      Node* newNode = new Node(v, pos.node_->next);
+      pos.node_->next = newNode;
       return newNode;
+    }
+    Node* insert_tail(T v)
+    {
+      size++;
+      return insert(v, this[size - 1]);
     }
     T& front()
     {
-      if (!size)
+      if (!size) {
         throw std::out_of_range("list is empty");
+      }
       return head->data;
     }
+    T& back()
+    {
+      if (!size) {
+        throw std::out_of_range("list is empty");
+      }
+      return *(this[size - 1]);
+    }
+  private:
+    Node* head;
+    size_t size;
   };
 
 
