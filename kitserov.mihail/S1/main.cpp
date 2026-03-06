@@ -51,7 +51,7 @@ namespace kitserov
     struct Node {
       T data;
       Node* next;
-      Node(T&& v, Node* n = nullptr) : data(std::move(v)), next(n) {}
+      Node(T& v, Node* n = nullptr) : data(std::move(v)), next(n) {}
     };
     List() : head(nullptr), size(0) {}
     ~List()
@@ -95,29 +95,29 @@ namespace kitserov
       }
       return LIter< T >(current);
     }
-    Node* add(T&& v)
+    Node* add(T& v)
     {
-      Node* newNode = new Node(std::move(v), head);
+      Node* newNode = new Node(v, head);
       head = newNode;
       size++;
       return newNode;
     }
-    Node* insert(T&& v, LIter< T > pos)
+    Node* insert(T& v, LIter< T > pos)
     {
       size++;
       if (!pos.node_) {
-        return add(std::move(v));
+        return add(v);
       }
-      Node* newNode = new Node(std::move(v), pos.node_->next);
+      Node* newNode = new Node(v, pos.node_->next);
       pos.node_->next = newNode;
       return newNode;
     }
-    Node* insert_tail(T&& v)
+    Node* insert_tail(T& v)
     {
       if (size == 0) {
-        return add(std::move(v));
+        return add(v);
       }
-      return insert(std::move(v), (*this)[size - 1]);
+      return insert(v, (*this)[size - 1]);
     }
     T& front()
     {
@@ -191,19 +191,19 @@ int main()
     if (!(std::cin >> name)) {
       break;
     }
-    names.insert_tail(std::move(name));
+    names.insert_tail(name);
     List< int > numbers;
     int num;
     while (std::cin >> num) {
-      numbers.insert_tail(std::move(num));
+      numbers.insert_tail(num);
     }
     if (std::cin.eof()) {
-      list_of_lists.insert_tail(std::move(numbers));
+      list_of_lists.insert_tail(numbers);
       break;
     }
     if (std::cin.fail()) {
       std::cin.clear();
-      list_of_lists.insert_tail(std::move(numbers));
+      list_of_lists.insert_tail(numbers);
     }
   }
   std::cout << "\n";
