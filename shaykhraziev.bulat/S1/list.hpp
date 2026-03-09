@@ -1,38 +1,10 @@
 #ifndef LIST_HPP
 #define LIST_HPP
 
-#include <utility>
+#include "node.hpp"
 
 namespace shaykhraziev
 {
-  namespace detail
-  {
-    struct NodeBase
-    {
-      NodeBase* next_;
-
-      NodeBase() :
-        next_(nullptr)
-      {}
-    };
-
-    template< class T >
-    struct Node : public NodeBase
-    {
-      T data_;
-
-      explicit Node(const T& val) :
-        NodeBase(),
-        data_(val)
-      {}
-
-      explicit Node(T&& val) :
-        NodeBase(),
-        data_(std::move(val))
-      {}
-    };
-  }
-
   template< class T >
   class LCIter;
 
@@ -44,18 +16,18 @@ namespace shaykhraziev
     using pointer = T*;
     using reference = T&;
 
-    explicit LIter(detail::NodeBase* node) :
+    explicit LIter(NodeBase* node) :
       node_(node)
     {}
 
     reference operator*() const
     {
-      return static_cast< detail::Node< T >* >(node_)->data_;
+      return static_cast< Node< T >* >(node_)->data_;
     }
 
     pointer operator->() const
     {
-      return &(static_cast< detail::Node< T >* >(node_)->data_);
+      return &(static_cast< Node< T >* >(node_)->data_);
     }
 
     LIter& operator++()
@@ -83,7 +55,7 @@ namespace shaykhraziev
 
     operator LCIter< T >() const;
 
-    detail::NodeBase* node_;
+    NodeBase* node_;
   };
 
   template< class T >
@@ -94,18 +66,18 @@ namespace shaykhraziev
     using pointer = const T*;
     using reference = const T&;
 
-    explicit LCIter(const detail::NodeBase* node) :
+    explicit LCIter(const NodeBase* node) :
       node_(node)
     {}
 
     reference operator*() const
     {
-      return static_cast< const detail::Node< T >* >(node_)->data_;
+      return static_cast< const Node< T >* >(node_)->data_;
     }
 
     pointer operator->() const
     {
-      return &(static_cast< const detail::Node< T >* >(node_)->data_);
+      return &(static_cast< const Node< T >* >(node_)->data_);
     }
 
     LCIter& operator++()
@@ -131,7 +103,7 @@ namespace shaykhraziev
       return node_ != other.node_;
     }
 
-    const detail::NodeBase* node_;
+    const NodeBase* node_;
   };
 
   template< class T >
@@ -231,33 +203,33 @@ namespace shaykhraziev
 
     T& front()
     {
-      return static_cast< detail::Node< T >* >(sentinel_.next_)->data_;
+      return static_cast< Node< T >* >(sentinel_.next_)->data_;
     }
 
     const T& front() const
     {
-      return static_cast< const detail::Node< T >* >(sentinel_.next_)->data_;
+      return static_cast< const Node< T >* >(sentinel_.next_)->data_;
     }
 
     void push_front(const T& val)
     {
-      detail::Node< T >* newNode = new detail::Node< T >(val);
+      Node< T >* newNode = new Node< T >(val);
       newNode->next_ = sentinel_.next_;
       sentinel_.next_ = newNode;
     }
 
     void push_front(T&& val)
     {
-      detail::Node< T >* newNode = new detail::Node< T >(std::move(val));
+      Node< T >* newNode = new Node< T >(std::move(val));
       newNode->next_ = sentinel_.next_;
       sentinel_.next_ = newNode;
     }
 
     void pop_front()
     {
-      detail::NodeBase* toDelete = sentinel_.next_;
+      NodeBase* toDelete = sentinel_.next_;
       sentinel_.next_ = toDelete->next_;
-      delete static_cast< detail::Node< T >* >(toDelete);
+      delete static_cast< Node< T >* >(toDelete);
     }
 
     void clear() noexcept
@@ -270,7 +242,7 @@ namespace shaykhraziev
 
     iterator insert_after(iterator pos, const T& val)
     {
-      detail::Node< T >* newNode = new detail::Node< T >(val);
+      Node< T >* newNode = new Node< T >(val);
       newNode->next_ = pos.node_->next_;
       pos.node_->next_ = newNode;
       return iterator(newNode);
@@ -278,7 +250,7 @@ namespace shaykhraziev
 
     iterator insert_after(iterator pos, T&& val)
     {
-      detail::Node< T >* newNode = new detail::Node< T >(std::move(val));
+      Node< T >* newNode = new Node< T >(std::move(val));
       newNode->next_ = pos.node_->next_;
       pos.node_->next_ = newNode;
       return iterator(newNode);
@@ -286,18 +258,18 @@ namespace shaykhraziev
 
     iterator erase_after(iterator pos)
     {
-      detail::NodeBase* toDelete = pos.node_->next_;
+      NodeBase* toDelete = pos.node_->next_;
       pos.node_->next_ = toDelete->next_;
-      delete static_cast< detail::Node< T >* >(toDelete);
+      delete static_cast< Node< T >* >(toDelete);
       return iterator(pos.node_->next_);
     }
 
   private:
-    detail::NodeBase sentinel_;
+    NodeBase sentinel_;
 
     void swapWith(List& other) noexcept
     {
-      detail::NodeBase* tmp = sentinel_.next_;
+      NodeBase* tmp = sentinel_.next_;
       sentinel_.next_ = other.sentinel_.next_;
       other.sentinel_.next_ = tmp;
     }
