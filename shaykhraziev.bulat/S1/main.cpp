@@ -1,8 +1,14 @@
+#include "app.hpp"
 #include <iostream>
 
 int main()
 {
-  std::cout << "shaykhraziev.bulat\n";
-  return 0;
+  shaykhraziev::List< shaykhraziev::NamedSeq > seqs = shaykhraziev::detail::readInput(std::cin);
+  if (seqs.empty())
+  {
+    std::cout << "0\n";
+    return 0;
+  }
+  shaykhraziev::detail::printNames(std::cout, seqs);
+  return shaykhraziev::detail::printSequences(std::cout, std::cerr, seqs);
 }
-
