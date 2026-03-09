@@ -1,4 +1,5 @@
 #include "app.hpp"
+#include "io.hpp"
 #include <limits>
 
 shaykhraziev::List< shaykhraziev::NamedSeq > shaykhraziev::readInput(std::istream& in)

@@ -120,7 +120,7 @@ namespace shaykhraziev
     using const_iterator = LCIter< T >;
 
     List() :
-      sentinel_()
+      fake_()
     {}
 
     ~List()
@@ -129,13 +129,13 @@ namespace shaykhraziev
     }
 
     List(const List& other) :
-      sentinel_()
+      fake_()
     {
       copyFrom(other);
     }
 
     List(List&& other) noexcept :
-      sentinel_()
+      fake_()
     {
       swapWith(other);
     }
@@ -153,32 +153,32 @@ namespace shaykhraziev
 
     iterator before_begin() noexcept
     {
-      return iterator(&sentinel_);
+      return iterator(&fake_);
     }
 
     const_iterator before_begin() const noexcept
     {
-      return const_iterator(&sentinel_);
+      return const_iterator(&fake_);
     }
 
     const_iterator cbefore_begin() const noexcept
     {
-      return const_iterator(&sentinel_);
+      return const_iterator(&fake_);
     }
 
     iterator begin() noexcept
     {
-      return iterator(sentinel_.next_);
+      return iterator(fake_.next_);
     }
 
     const_iterator begin() const noexcept
     {
-      return const_iterator(sentinel_.next_);
+      return const_iterator(fake_.next_);
     }
 
     const_iterator cbegin() const noexcept
     {
-      return const_iterator(sentinel_.next_);
+      return const_iterator(fake_.next_);
     }
 
     iterator end() noexcept
@@ -198,37 +198,37 @@ namespace shaykhraziev
 
     bool empty() const noexcept
     {
-      return sentinel_.next_ == nullptr;
+      return fake_.next_ == nullptr;
     }
 
     T& front()
     {
-      return static_cast< Node< T >* >(sentinel_.next_)->data_;
+      return static_cast< Node< T >* >(fake_.next_)->data_;
     }
 
     const T& front() const
     {
-      return static_cast< const Node< T >* >(sentinel_.next_)->data_;
+      return static_cast< const Node< T >* >(fake_.next_)->data_;
     }
 
     void push_front(const T& val)
     {
       Node< T >* newNode = new Node< T >(val);
-      newNode->next_ = sentinel_.next_;
-      sentinel_.next_ = newNode;
+      newNode->next_ = fake_.next_;
+      fake_.next_ = newNode;
     }
 
     void push_front(T&& val)
     {
       Node< T >* newNode = new Node< T >(std::move(val));
-      newNode->next_ = sentinel_.next_;
-      sentinel_.next_ = newNode;
+      newNode->next_ = fake_.next_;
+      fake_.next_ = newNode;
     }
 
     void pop_front()
     {
-      NodeBase* toDelete = sentinel_.next_;
-      sentinel_.next_ = toDelete->next_;
+      NodeBase* toDelete = fake_.next_;
+      fake_.next_ = toDelete->next_;
       delete static_cast< Node< T >* >(toDelete);
     }
 
@@ -265,13 +265,13 @@ namespace shaykhraziev
     }
 
   private:
-    NodeBase sentinel_;
+    NodeBase fake_;
 
     void swapWith(List& other) noexcept
     {
-      NodeBase* tmp = sentinel_.next_;
-      sentinel_.next_ = other.sentinel_.next_;
-      other.sentinel_.next_ = tmp;
+      NodeBase* tmp = fake_.next_;
+      fake_.next_ = other.fake_.next_;
+      other.fake_.next_ = tmp;
     }
 
     void copyFrom(const List& other)
