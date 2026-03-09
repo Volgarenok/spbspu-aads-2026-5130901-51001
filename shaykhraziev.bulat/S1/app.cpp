@@ -62,6 +62,8 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
     }
   }
 
+  List< List< size_t > > rows;
+  List< List< size_t > >::iterator rowTail = rows.before_begin();
   List< size_t > sums;
   List< size_t >::iterator sumTail = sums.before_begin();
 
@@ -69,7 +71,8 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
   while (anyRow)
   {
     anyRow = false;
-    bool firstVal = true;
+    List< size_t > rowVals;
+    List< size_t >::iterator rvTail = rowVals.before_begin();
     size_t rowSum = 0;
 
     LIter< List< size_t >::const_iterator > it = iters.begin();
@@ -80,13 +83,8 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
       if (*it != s->nums.cend())
       {
         anyRow = true;
-        if (!firstVal)
-        {
-          out << ' ';
-        }
         size_t val = **it;
-        out << val;
-        firstVal = false;
+        rvTail = rowVals.insert_after(rvTail, val);
         size_t newSum = 0;
         if (!addChecked(rowSum, val, newSum))
         {
@@ -102,12 +100,31 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
 
     if (anyRow)
     {
-      out << '\n';
+      rowTail = rows.insert_after(rowTail, std::move(rowVals));
       sumTail = sums.insert_after(sumTail, rowSum);
     }
   }
 
-  if (!sums.empty())
+  for (LCIter< List< size_t > > r = rows.cbegin(); r != rows.cend(); ++r)
+  {
+    bool firstVal = true;
+    for (LCIter< size_t > v = r->cbegin(); v != r->cend(); ++v)
+    {
+      if (!firstVal)
+      {
+        out << ' ';
+      }
+      out << *v;
+      firstVal = false;
+    }
+    out << '\n';
+  }
+
+  if (sums.empty())
+  {
+    out << 0 << '\n';
+  }
+  else
   {
     bool firstSum = true;
     for (LCIter< size_t > si = sums.cbegin(); si != sums.cend(); ++si)
