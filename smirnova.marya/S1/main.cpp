@@ -25,7 +25,7 @@ namespace smirnova
 
   template < class T >
   class LCIter;
-  
+
   template< class T >
   class List
   {
@@ -187,7 +187,7 @@ namespace smirnova
       return node != nullptr;
     }
     void next()
-    { 
+    {
       if (node){
         node = node->next;
       }
@@ -203,7 +203,7 @@ namespace smirnova
       if (!node) {
         throw std::out_of_range("Invalid iterator");
       }
-      return node->data; 
+      return node->data;
     }
   };
 
@@ -222,7 +222,7 @@ namespace smirnova
       return node;
     }
     void next()
-    { 
+    {
       if (node) {
         node = node->next;
       }
@@ -238,7 +238,7 @@ namespace smirnova
       if (!node) {
         throw std::out_of_range("Invalid iterator");
       }
-      return node->data; 
+      return node->data;
     }
   };
 
