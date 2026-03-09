@@ -4,6 +4,7 @@
 #include <sstream>
 #include <utility>
 #include <stdexcept>
+#include <climits>
 
 namespace smirnova
 {
@@ -56,6 +57,7 @@ namespace smirnova
         push_back(it.value());
       }
     }
+
     List& operator=(const List& other)
     {
       if (this != &other) {
@@ -67,10 +69,12 @@ namespace smirnova
       }
       return *this;
     }
+
     bool empty() const noexcept
     {
       return sz == 0;
     }
+
     size_t size() const noexcept
     {
       return sz;
@@ -264,26 +268,27 @@ namespace smirnova
       {
         LIter< int >& it_list = it_it.value();
         if (it_list.valid()) {
-          std::cout << std::setw(5) << it_list.value() << " ";
+          std::cout << it_list.value() << " ";
           it_list.next();
-        } else {
-          std::cout << "     ";
         }
+        std::cout << " ";
       }
-      std::cout << std::endl;
+      std::cout << "\n";
     }
 
     for (LIter< std::pair< std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
     {
-      int sum = 0;
-      const List< int >& lst = it.value().second;
-      for (LCIter< int > jt = lst.begin(); jt.valid(); jt.next())
+      unsigned long long sum = 0;
+      for (LCIter< size_t > jt = it.value().second.begin(); jt.valid(); jt.next())
       {
+        if (jt.value() > ULLONG_MAX - sum) {
+          throw std::overflow_error("Overflow in list " + it.value().first);
+        }
         sum += jt.value();
       }
-      std::cout << std::setw(5) << sum << " ";
+      std::cout << sum << " ";
     }
-    std::cout << std::endl;
+    std::cout << "\n";
   }
 }
 
@@ -314,26 +319,26 @@ int main() {
     }
 
     if (seq.empty()) {
-      std::cout << 0 << std::endl;
+      std::cout << 0 << "\n";
       return 0;
     }
 
-    std::cout << std::endl;
+    std::cout << "\n";
     for (LIter< std::pair<std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
     {
       std::cout << it.value().first << " ";
     }
-    std::cout << std::endl;
+    std::cout << "\n";
 
     formColSeq(seq);
 
     seq.clear();
 
   } catch(const std::exception& e) {
-    std::cerr << "Exception: " << e.what() << std::endl;
+    std::cerr << "Exception: " << e.what() << "\n";
     return 1;
   } catch(...) {
-    std::cerr << "Unknown exception" << std::endl;
+    std::cerr << "Unknown exception" << "\n";
     return 1;
   }
 
