@@ -279,9 +279,10 @@ namespace smirnova
     for (LIter< std::pair< std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
     {
       unsigned long long sum = 0;
-      for (LCIter< int > jt = it.value().second.begin(); jt.valid(); jt.next())
+      const List< int >& sublist = it.value().second;
+      for (LCIter< int > jt = sublist.begin(); jt.valid(); jt.next())
       {
-        if (jt.value() > ULLONG_MAX - sum) {
+        if (static_cast< unsigned long long >(jt.value()) > ULLONG_MAX - sum) {
           throw std::overflow_error("Overflow in list " + it.value().first);
         }
         sum += jt.value();
