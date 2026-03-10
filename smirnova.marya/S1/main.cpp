@@ -197,6 +197,7 @@ void processSequences(List<std::pair<std::string, List<int>>>& seq) {
 
     if (maxSize == 0) { std::cout << "0\n"; return; }
 
+    // вывод строк чисел
     for (size_t row = 0; row < maxSize; ++row) {
         bool firstInRow = true;
         for (LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid(); it.next()) {
@@ -210,6 +211,7 @@ void processSequences(List<std::pair<std::string, List<int>>>& seq) {
         if (!firstInRow) std::cout << "\n";
     }
 
+    // вычисление суммы с проверкой переполнения
     List<int> sums;
     for (size_t row = 0; row < maxSize; ++row) {
         int sum = 0;
@@ -217,7 +219,6 @@ void processSequences(List<std::pair<std::string, List<int>>>& seq) {
             if (row < it.value().second.size()) {
                 LCIter<int> numIt = getElementAt(it.value().second, row);
                 if (numIt.value() > 0 && sum > INT_MAX - numIt.value()) {
-                    // 1️⃣ Бросаем исключение вместо return
                     throw std::overflow_error("overflow");
                 }
                 sum += numIt.value();
@@ -259,6 +260,7 @@ int main() {
         sequences.push_back(std::make_pair(name, std::move(numbers)));
     }
 
+    // переполнение при вводе
     if (overflowOccurred) {
         std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
         return 1;
@@ -269,6 +271,7 @@ int main() {
         return 0;
     }
 
+    // вывод названий
     bool first = true;
     for (LCIter<std::pair<std::string, List<int>>> it = sequences.cbegin(); it.valid(); it.next()) {
         if (!first) std::cout << " ";
@@ -277,12 +280,11 @@ int main() {
     }
     std::cout << "\n";
 
-    // 2️⃣ Вызов оборачиваем в try/catch для перехвата переполнения
+    // вычисление и вывод суммы с обработкой переполнения
     try {
         processSequences(sequences);
-    }
-    catch (const std::overflow_error&) {
-        std::cerr << "overflow\n";
+    } catch (const std::overflow_error&) {
+        std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
         return 1;
     }
 
