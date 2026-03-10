@@ -298,7 +298,7 @@ int main() {
           if (!iss.eof()) {
               throw std::out_of_range("number exceeds int range");
           }
-         
+
           sequences.push_back(std::make_pair(name, std::move(numbers)));
       }
       catch (const std::out_of_range&) {
@@ -314,7 +314,7 @@ int main() {
           std::istringstream iss(line);
           std::string name;
           iss >> name;
-        
+
           List<int> numbers;
           try {
             int x;
@@ -324,7 +324,7 @@ int main() {
                 }
             }
 
-            if (!iss.eof()) {  
+            if (!iss.eof()) {
                 throw std::out_of_range("number exceeds int range");
             }
 
@@ -360,4 +360,3 @@ int main() {
 
     return 0;
 }
-
