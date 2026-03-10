@@ -118,4 +118,19 @@ namespace krivoshapov
     check(*it == 1, "bidir: step back to 1");
     check(it == lst.begin(), "bidir: back at begin");
   }
+  static void testPostfixOperators()
+  {
+    List<int> lst;
+    lst.pushBack(7);
+    lst.pushBack(8);
+
+    auto it = lst.begin();
+    auto prev = it++;
+    check(*prev == 7, "postfix++: old value == 7");
+    check(*it == 8, "postfix++: new position == 8");
+
+    auto prev2 = it--;
+    check(*prev2 == 8, "postfix--: old value == 8");
+    check(*it == 7, "postfix--: new position == 7");
+  }
 }
