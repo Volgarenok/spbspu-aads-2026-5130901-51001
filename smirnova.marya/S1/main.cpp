@@ -194,6 +194,11 @@ public:
 // Вспомогательная функция для вывода списка
 template <typename T>
 void printList(const List<T>& list) {
+    if (list.empty()) {
+        std::cout << "0\n";
+        return;
+    }
+
     bool first = true;
     for (LCIter<T> it = list.cbegin(); it.valid(); it.next()) {
         if (!first) std::cout << " ";
@@ -221,7 +226,10 @@ void processSequences(List<std::pair<std::string, List<int>>>& seq) {
         if (it.value().second.size() > maxSize)
             maxSize = it.value().second.size();
     }
-
+    if (maxSize == 0) {
+    std::cout << "0\n";
+    return;
+  }
     // Вывод "по строкам"
     for (size_t row = 0; row < maxSize; ++row) {
         bool firstInRow = true;
@@ -270,18 +278,60 @@ int main() {
     List<std::pair<std::string, List<int>>> sequences;
     std::string line;
 
+    while (std::getline(std::cin, line)) {
+      if (line.empty()) continue;
+
+      std::istringstream iss(line);
+      std::string name;
+      iss >> name;
+
+      List<int> numbers;
+
+      try {
+          int x;
+          while (iss >> x) {
+              if (x < 1000000) {
+                  numbers.push_back(x);
+              }
+          }
+
+          if (!iss.eof()) {
+              throw std::out_of_range("number exceeds int range");
+          }
+         
+          sequences.push_back(std::make_pair(name, std::move(numbers)));
+      }
+      catch (const std::out_of_range&) {
+          throw;
+      }
+  }
+
+
+
     try {
         while (std::getline(std::cin, line)) {
-            if (line.empty()) continue;
-            std::istringstream iss(line);
-            std::string name;
-            iss >> name;
-
-            List<int> numbers;
+          if (line.empty()) continue;
+          std::istringstream iss(line);
+          std::string name;
+          iss >> name;
+        
+          List<int> numbers;
+          try {
             int x;
-            while (iss >> x) numbers.push_back(x);
+            while (iss >> x) {
+                if (x < INT_MAX) {
+                  numbers.push_back(x);
+                }
+            }
+
+            if (!iss.eof()) {  
+                throw std::out_of_range("number exceeds int range");
+            }
 
             sequences.push_back(std::make_pair(name, std::move(numbers)));
+          } catch (const std::out_of_range&) {
+              throw;
+          }
         }
 
         if (sequences.empty()) {
