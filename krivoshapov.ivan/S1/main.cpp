@@ -158,7 +158,7 @@ int main()
   if (!inputOk)
   {
     std::cerr << "Error: integer overflow in input\n";
-    return 2;
+    return 1;
   }
 
   if (seqs.empty())
