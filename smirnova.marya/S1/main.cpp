@@ -2,6 +2,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <stdexcept>
 #include <climits>
 
 namespace smirnova {
@@ -30,6 +31,19 @@ public:
         fake->next = fake;
         fake->prev = fake;
     }
+
+    void clear() noexcept {              // <-- clear объявлен до деструктора
+        Node<T>* curr = fake->next;
+        while (curr != fake) {
+            Node<T>* tmp = curr->next;
+            delete curr;
+            curr = tmp;
+        }
+        fake->next = fake;
+        fake->prev = fake;
+        sz = 0;
+    }
+
     ~List() { clear(); delete fake; }
 
     void push_back(const T& val) {
@@ -116,8 +130,6 @@ void processSequences(List<std::pair<std::string, List<int>>>& seq) {
                 sum += numIt.value();
             }
         }
-        // Можно выводить сумму, если нужно
-        // std::cout << sum << " ";
     }
 }
 
@@ -135,8 +147,10 @@ int main() {
         std::istringstream iss(line);
         std::string name;
         iss >> name;
+
         List<int> numbers;
         unsigned long long temp;
+
         while (iss >> temp) {
             if (temp > static_cast<unsigned long long>(INT_MAX)) {
                 overflowOccurred = true;
@@ -144,6 +158,7 @@ int main() {
                 numbers.push_back(static_cast<int>(temp));
             }
         }
+
         sequences.push_back(std::make_pair(name, std::move(numbers)));
     }
 
@@ -166,7 +181,7 @@ int main() {
     }
     std::cout << "\n";
 
-    // Обернем в try/catch на случай переполнения при сумме
+    // Обработка сумм с try/catch на переполнение
     try {
         processSequences(sequences);
     } catch (const std::overflow_error&) {
