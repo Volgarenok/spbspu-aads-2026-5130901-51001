@@ -104,6 +104,23 @@ namespace krivoshapov
 
     return !overflowed;
   }
+  static void printSums(const List<long long> &sums)
+  {
+    bool first = true;
+    for (auto it = sums.cbegin(); it != sums.cend(); ++it)
+    {
+      if (!first)
+      {
+        std::cout << ' ';
+      }
+      std::cout << *it;
+      first = false;
+    }
+    if (!sums.empty())
+    {
+      std::cout << '\n';
+    }
+  }
 }
 
 int main()
