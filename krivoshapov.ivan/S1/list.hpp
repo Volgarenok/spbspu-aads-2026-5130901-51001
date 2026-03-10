@@ -196,6 +196,109 @@ namespace krivoshapov
       Node *node = new Node(static_cast<T &&>(value));
       linkBack(node);
     }
+    void popFront()
+    {
+      Node *tmp = head_;
+      head_ = head_->next_;
+      if (head_ != nullptr)
+      {
+        head_->prev_ = nullptr;
+      }
+      else
+      {
+        tail_ = nullptr;
+      }
+      delete tmp;
+      --size_;
+    }
+
+    void popBack()
+    {
+      Node *tmp = tail_;
+      tail_ = tail_->prev_;
+      if (tail_ != nullptr)
+      {
+        tail_->next_ = nullptr;
+      }
+      else
+      {
+        head_ = nullptr;
+      }
+      delete tmp;
+      --size_;
+    }
+
+    iterator insert(const_iterator pos, const T &value)
+    {
+      if (pos.node_ == nullptr)
+      {
+        pushBack(value);
+        return iterator(tail_);
+      }
+      Node *next = const_cast<Node *>(pos.node_);
+      Node *prev = next->prev_;
+      Node *node = new Node(value);
+      node->next_ = next;
+      node->prev_ = prev;
+      if (prev != nullptr)
+      {
+        prev->next_ = node;
+      }
+      else
+      {
+        head_ = node;
+      }
+      next->prev_ = node;
+      ++size_;
+      return iterator(node);
+    }
+
+    void clear()
+    {
+      while (head_ != nullptr)
+      {
+        Node *tmp = head_;
+        head_ = head_->next_;
+        delete tmp;
+      }
+      tail_ = nullptr;
+      size_ = 0;
+    }
+
+  private:
+    using Node = detail::Node<T>;
+
+    void linkFront(Node *node)
+    {
+      if (head_ == nullptr)
+      {
+        head_ = node;
+        tail_ = node;
+      }
+      else
+      {
+        node->next_ = head_;
+        head_->prev_ = node;
+        head_ = node;
+      }
+      ++size_;
+    }
+
+    void linkBack(Node *node)
+    {
+      if (tail_ == nullptr)
+      {
+        head_ = node;
+        tail_ = node;
+      }
+      else
+      {
+        node->prev_ = tail_;
+        tail_->next_ = node;
+        tail_ = node;
+      }
+      ++size_;
+    }
   };
 }
 #endif
