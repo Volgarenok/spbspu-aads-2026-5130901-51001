@@ -125,4 +125,26 @@ namespace krivoshapov
 
 int main()
 {
+  krivoshapov::List<krivoshapov::NamedSeq> seqs;
+  krivoshapov::readInput(seqs);
+
+  if (seqs.empty())
+  {
+    std::cout << 0 << '\n';
+    return 0;
+  }
+
+  krivoshapov::printNames(seqs);
+
+  krivoshapov::List<long long> rowSums;
+  const bool ok = krivoshapov::processZip(seqs, rowSums);
+
+  if (!ok)
+  {
+    std::cerr << "Error: integer overflow when calculating row sums\n";
+    return 1;
+  }
+
+  krivoshapov::printSums(rowSums);
+  return 0;
 }
