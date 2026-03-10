@@ -3,8 +3,10 @@
 #include <limits>
 
 #include "list.hpp"
+
 namespace krivoshapov
 {
+
   static int passed = 0;
   static int failed = 0;
 
@@ -29,6 +31,7 @@ namespace krivoshapov
     check(lst.begin() == lst.end(), "empty list: begin() == end()");
     check(lst.cbegin() == lst.cend(), "empty list: cbegin() == cend()");
   }
+
   static void testPushBackAndIterate()
   {
     List<int> lst;
@@ -69,6 +72,7 @@ namespace krivoshapov
     ++it;
     check(*it == 3, "pushFront iterate: 3rd == 3");
   }
+
   static void testPopFront()
   {
     List<int> lst;
@@ -101,6 +105,7 @@ namespace krivoshapov
     lst.popBack();
     check(lst.empty(), "popBack: empty after all pops");
   }
+
   static void testBidirectionalIteration()
   {
     List<int> lst;
@@ -118,6 +123,7 @@ namespace krivoshapov
     check(*it == 1, "bidir: step back to 1");
     check(it == lst.begin(), "bidir: back at begin");
   }
+
   static void testPostfixOperators()
   {
     List<int> lst;
@@ -133,6 +139,7 @@ namespace krivoshapov
     check(*prev2 == 8, "postfix--: old value == 8");
     check(*it == 7, "postfix--: new position == 7");
   }
+
   static void testConstIterator()
   {
     List<int> lst;
@@ -150,6 +157,7 @@ namespace krivoshapov
     LCIter<int> ci = lst.begin();
     check(*ci == 5, "LIter->LCIter: value == 5");
   }
+
   static void testCopyConstructor()
   {
     List<int> a;
@@ -184,6 +192,7 @@ namespace krivoshapov
     b = b;
     check(b.size() == 2, "copy assign self: size unchanged");
   }
+
   static void testMoveConstructor()
   {
     List<int> a;
@@ -245,6 +254,7 @@ namespace krivoshapov
     check(lst.back() == 2, "insert end: back == 2");
     check(lst.size() == 2, "insert end: size == 2");
   }
+
   static void testClear()
   {
     List<int> lst;
@@ -286,4 +296,36 @@ namespace krivoshapov
     check(lst.back() == "world", "string list: back == world");
     check(lst.size() == 2, "string list: size == 2");
   }
+
+}
+
+int main()
+{
+  krivoshapov::testEmptyList();
+  krivoshapov::testPushBackAndIterate();
+  krivoshapov::testPushFrontAndIterate();
+  krivoshapov::testPopFront();
+  krivoshapov::testPopBack();
+  krivoshapov::testBidirectionalIteration();
+  krivoshapov::testPostfixOperators();
+  krivoshapov::testConstIterator();
+  krivoshapov::testCopyConstructor();
+  krivoshapov::testCopyAssignment();
+  krivoshapov::testMoveConstructor();
+  krivoshapov::testMoveAssignment();
+  krivoshapov::testInsertMiddle();
+  krivoshapov::testInsertAtBegin();
+  krivoshapov::testInsertAtEnd();
+  krivoshapov::testClear();
+  krivoshapov::testSingleElement();
+  krivoshapov::testStringList();
+
+  const int total = krivoshapov::passed + krivoshapov::failed;
+  if (krivoshapov::failed == 0)
+  {
+    std::cout << "All " << total << " tests passed.\n";
+    return 0;
+  }
+  std::cout << krivoshapov::failed << " / " << total << " tests FAILED.\n";
+  return 1;
 }
