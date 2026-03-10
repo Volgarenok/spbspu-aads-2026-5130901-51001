@@ -1,370 +1,312 @@
 #include <iostream>
-#include <iomanip>
-#include <string>
 #include <sstream>
+#include <string>
 #include <utility>
 #include <stdexcept>
 #include <climits>
+#include <limits>
 
-namespace smirnova
-{
-  template < class T >
-  struct Node {
+namespace smirnova {
+
+template <class T>
+struct Node {
     T data;
     Node* next;
     Node* prev;
 
-    Node(const T& d) :
-      data(d),
-      next(nullptr),
-      prev(nullptr)
-    {}
-  };
+    Node(const T& d) : data(d), next(nullptr), prev(nullptr) {}
+    Node(T&& d) : data(std::move(d)), next(nullptr), prev(nullptr) {}
+};
 
-  template < class T >
-  class LIter;
+template <class T>
+class LIter;
 
-  template < class T >
-  class LCIter;
+template <class T>
+class LCIter;
 
-  template< class T >
-  class List
-  {
-  private:
+template <class T>
+class List {
+private:
     Node<T>* fake;
     size_t sz;
 
-  public:
-    List() :
-      sz(0)
-    {
-      fake = new Node< T >(T());
-      fake->next = nullptr;
-      fake->prev = nullptr;
+public:
+    List() : sz(0) {
+        fake = new Node<T>(T());
+        fake->next = fake;
+        fake->prev = fake;
     }
 
-    ~List()
-    {
-      clear();
-      delete fake;
-    }
-
-    List(const List& other) :
-      List()
-    {
-      for (LCIter< T > it = other.begin(); it.valid(); it.next())
-      {
-        push_back(it.value());
-      }
-    }
-
-    List& operator=(const List& other)
-    {
-      if (this != &other) {
+    ~List() {
         clear();
-        for (LCIter< T > it = other.begin(); it.valid(); it.next())
-        {
-          push_back(it.value());
+        delete fake;
+    }
+
+    List(const List& other) : List() {
+        for (LCIter<T> it = other.cbegin(); it.valid(); it.next())
+            push_back(it.value());
+    }
+
+    List(List&& other) noexcept : fake(other.fake), sz(other.sz) {
+        other.fake = new Node<T>(T());
+        other.fake->next = other.fake;
+        other.fake->prev = other.fake;
+        other.sz = 0;
+    }
+
+    List& operator=(const List& other) {
+        if (this != &other) {
+            List tmp(other);
+            swap(tmp);
         }
-      }
-      return *this;
+        return *this;
     }
 
-    bool empty() const noexcept
-    {
-      return sz == 0;
+    List& operator=(List&& other) noexcept {
+        if (this != &other) {
+            clear();
+            delete fake;
+            fake = other.fake;
+            sz = other.sz;
+            other.fake = new Node<T>(T());
+            other.fake->next = other.fake;
+            other.fake->prev = other.fake;
+            other.sz = 0;
+        }
+        return *this;
     }
 
-    size_t size() const noexcept
-    {
-      return sz;
+    void swap(List& other) noexcept {
+        std::swap(fake, other.fake);
+        std::swap(sz, other.sz);
     }
 
-    void push_back(const T& val)
-    {
-      Node< T >* n = new Node< T >(val);
-      n->next = nullptr;
-      if (empty()) {
-        fake->next = n;
+    bool empty() const noexcept { return sz == 0; }
+    size_t size() const noexcept { return sz; }
+
+    void push_back(const T& val) {
+        Node<T>* n = new Node<T>(val);
+        n->next = fake;
+        n->prev = fake->prev;
+        fake->prev->next = n;
         fake->prev = n;
+        ++sz;
+    }
+
+    void push_back(T&& val) {
+        Node<T>* n = new Node<T>(std::move(val));
+        n->next = fake;
+        n->prev = fake->prev;
+        fake->prev->next = n;
+        fake->prev = n;
+        ++sz;
+    }
+
+    void push_front(const T& val) {
+        Node<T>* n = new Node<T>(val);
         n->prev = fake;
-      } else {
-        Node< T >* tail = fake->prev;
-        tail->next = n;
-        n->prev = tail;
-        fake->prev = n;
-      }
-      ++sz;
-    }
-
-    void push_front(const T& val)
-    {
-      Node< T >* n = new Node< T >(val);
-      n->next = fake->next;
-      n->prev = fake;
-      if (fake->next) {
+        n->next = fake->next;
         fake->next->prev = n;
-      }
-      fake->next = n;
-      if (sz == 0) {
-        fake->prev = n;
-      }
-      ++sz;
+        fake->next = n;
+        ++sz;
     }
 
-    void pop_front()
-    {
-      if (empty() || !fake->next) {
-        throw std::out_of_range("pop_front on empty list");
-      }
-      Node< T >* tmp = fake->next;
-      fake->next = tmp->next;
-      if (tmp->next) {
+    void push_front(T&& val) {
+        Node<T>* n = new Node<T>(std::move(val));
+        n->prev = fake;
+        n->next = fake->next;
+        fake->next->prev = n;
+        fake->next = n;
+        ++sz;
+    }
+
+    void pop_front() {
+        if (empty()) throw std::out_of_range("pop_front on empty list");
+        Node<T>* tmp = fake->next;
+        fake->next = tmp->next;
         tmp->next->prev = fake;
-      } else {
-        fake->prev = nullptr;
-      }
-      delete tmp;
-      --sz;
+        delete tmp;
+        --sz;
     }
 
-    void pop_back()
-    {
-      if (empty()) {
-        throw std::out_of_range("pop_back on empty list");
-      }
-      Node< T >* tail = fake->prev;
-      if (tail == fake->next) {
-        fake->next = nullptr;
-        fake->prev = nullptr;
-      } else {
+    void pop_back() {
+        if (empty()) throw std::out_of_range("pop_back on empty list");
+        Node<T>* tail = fake->prev;
         fake->prev = tail->prev;
-        tail->prev->next = nullptr;
-      }
-      delete tail;
-      --sz;
+        tail->prev->next = fake;
+        delete tail;
+        --sz;
     }
 
-    void clear() noexcept
-    {
-      Node< T >* curr = fake->next;
-      while (curr) {
-        Node< T >* tmp = curr->next;
-        delete curr;
-        curr = tmp;
-      }
-      fake->next = nullptr;
-      fake->prev = nullptr;
-      sz = 0;
-    }
-
-    LIter< T > begin()
-    {
-      return LIter< T >(fake->next);
-    }
-    LIter< T > tail()
-    {
-      return LIter< T >(fake->prev);
-    }
-    LCIter< T > begin() const
-    {
-      return LCIter< T >(fake->next);
-    }
-    LCIter< T > tail() const
-    {
-      return LCIter< T >(fake->prev);
-    }
-  };
-
-  template < class T >
-  class LIter
-  {
-    friend class List< T >;
-  private:
-    Node< T >* node;
-  public:
-    LIter(Node< T >* n = nullptr) :
-      node(n)
-    {}
-    bool valid() const
-    {
-      return node != nullptr;
-    }
-    void next()
-    {
-      if (node){
-        node = node->next;
-      }
-    }
-    void prev()
-    {
-      if (node) {
-        node = node->prev;
-      }
-    }
-    T& value()
-    {
-      if (!node) {
-        throw std::out_of_range("Invalid iterator");
-      }
-      return node->data;
-    }
-  };
-
-  template < class T >
-  class LCIter
-  {
-    friend class List< T >;
-  private:
-    const Node< T >* node;
-  public:
-    LCIter(const Node< T >* n = nullptr) :
-      node(n)
-    {}
-    bool valid() const
-    {
-      return node;
-    }
-    void next()
-    {
-      if (node) {
-        node = node->next;
-      }
-    }
-    void prev()
-    {
-      if (node) {
-        node = node->prev;
-      }
-    }
-    const T& value()
-    {
-      if (!node) {
-        throw std::out_of_range("Invalid iterator");
-      }
-      return node->data;
-    }
-  };
-
-  void formColSeq(List< std::pair< std::string, List<  int > > >& seq) {
-    size_t maxSize = 0;
-    for (LIter< std::pair< std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
-    {
-      if (it.value().second.size() > maxSize) {
-        maxSize = it.value().second.size();
-      }
-    }
-    List< int > sums;
-    for (size_t i = 0; i < maxSize; ++i)
-    {
-      sums.push_back(0);
-    }
-
-    List< LIter< int > > iterators;
-    for (LIter< std::pair< std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
-    {
-      iterators.push_back(it.value().second.begin());
-    }
-
-    for (size_t row = 0; row < maxSize; ++row)
-    {
-      bool firstCol = true;
-      LIter< int > sum_it = sums.begin();
-      for (LIter< LIter< int > > it_it = iterators.begin(); it_it.valid(); it_it.next())
-      {
-        LIter< int >& it_list = it_it.value();
-        if (it_list.valid()) {
-          int val = it_list.value();
-          if (val > INT_MAX - sum_it.value()) {
-            throw std::overflow_error("overflow");
-          }
-          sum_it.value() += val;
-          if (!firstCol) {
-            std::cout << " ";
-          }
-
-          std::cout << val;
-          it_list.next();
-          firstCol = false;
+    void clear() noexcept {
+        Node<T>* curr = fake->next;
+        while (curr != fake) {
+            Node<T>* tmp = curr->next;
+            delete curr;
+            curr = tmp;
         }
-        sum_it.next();
-      }
-      std::cout << "\n";
+        fake->next = fake;
+        fake->prev = fake;
+        sz = 0;
     }
-    for (LIter< std::pair< std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
-    {
-      int sum = 0;
-      const List< int >& sublist = it.value().second;
-      for (LCIter< int > jt = sublist.begin(); jt.valid(); jt.next())
-      {
-        if (jt.value() > INT_MAX - sum) {
-          throw std::overflow_error("Overflow in list " + it.value().first);
-        }
-        sum += jt.value();
-      }
-      std::cout << sum << " ";
+
+    LIter<T> begin() { return LIter<T>(fake->next, fake); }
+    LIter<T> end() { return LIter<T>(fake, fake); }
+    LCIter<T> begin() const { return LCIter<T>(fake->next, fake); }
+    LCIter<T> end() const { return LCIter<T>(fake, fake); }
+    LCIter<T> cbegin() const { return LCIter<T>(fake->next, fake); }
+    LCIter<T> cend() const { return LCIter<T>(fake, fake); }
+};
+
+// Итератор для изменения элементов
+template <class T>
+class LIter {
+private:
+    Node<T>* node;
+    Node<T>* fake;
+
+public:
+    LIter(Node<T>* n = nullptr, Node<T>* f = nullptr) : node(n), fake(f) {}
+
+    bool valid() const { return node != fake; }
+    void next() { if (node) node = node->next; }
+    void prev() { if (node) node = node->prev; }
+    T& value() { return node->data; }
+};
+
+// Константный итератор
+template <class T>
+class LCIter {
+private:
+    const Node<T>* node;
+    const Node<T>* fake;
+
+public:
+    LCIter(const Node<T>* n = nullptr, const Node<T>* f = nullptr) : node(n), fake(f) {}
+    LCIter(const LIter<T>& iter) : node(iter.node), fake(iter.fake) {}
+
+    bool valid() const { return node != fake; }
+    void next() { if (node) node = node->next; }
+    void prev() { if (node) node = node->prev; }
+    const T& value() const { return node->data; }
+};
+
+// Вспомогательная функция для вывода списка
+template <typename T>
+void printList(const List<T>& list) {
+    bool first = true;
+    for (LCIter<T> it = list.cbegin(); it.valid(); it.next()) {
+        if (!first) std::cout << " ";
+        std::cout << it.value();
+        first = false;
     }
     std::cout << "\n";
-  }
 }
 
+// Получение элемента по индексу
+template <typename T>
+LCIter<T> getElementAt(const List<T>& list, size_t index) {
+    LCIter<T> it = list.cbegin();
+    size_t i = 0;
+    while (it.valid() && i < index) { it.next(); ++i; }
+    return it;
+}
+
+// Обработка последовательностей
+void processSequences(List<std::pair<std::string, List<int>>>& seq) {
+    if (seq.empty()) return;
+
+    size_t maxSize = 0;
+    for (LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid(); it.next()) {
+        if (it.value().second.size() > maxSize)
+            maxSize = it.value().second.size();
+    }
+
+    // Вывод "по строкам"
+    for (size_t row = 0; row < maxSize; ++row) {
+        bool firstInRow = true;
+        for (LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid(); it.next()) {
+            if (row < it.value().second.size()) {
+                LCIter<int> numIt = getElementAt(it.value().second, row);
+                if (!firstInRow) std::cout << " ";
+                std::cout << numIt.value();
+                firstInRow = false;
+            }
+        }
+        if (!firstInRow) std::cout << "\n";
+    }
+
+    // Вычисление суммы "по строкам"
+    List<int> sums;
+    bool sumPossible = true;
+
+    for (size_t row = 0; row < maxSize && sumPossible; ++row) {
+        long long sum = 0;
+        for (LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid() && sumPossible; it.next()) {
+            if (row < it.value().second.size()) {
+                LCIter<int> numIt = getElementAt(it.value().second, row);
+                if (numIt.value() > 0 && sum > std::numeric_limits<long long>::max() - numIt.value()) {
+                    sumPossible = false;
+                } else {
+                    sum += numIt.value();
+                }
+            }
+        }
+        if (sumPossible) {
+            if (sum > std::numeric_limits<int>::max()) sumPossible = false;
+            else sums.push_back(static_cast<int>(sum));
+        }
+    }
+
+    if (sumPossible && !sums.empty()) printList(sums);
+    else if (!sumPossible) throw std::overflow_error("overflow");
+}
+
+} // namespace smirnova
+
 int main() {
-  using namespace smirnova;
+    using namespace smirnova;
 
-  List< std::pair< std::string, List< int > > > seq;
-  std::string line;
+    List<std::pair<std::string, List<int>>> sequences;
+    std::string line;
 
-  try {
-    while (std::getline(std::cin, line)) {
-      if (line.empty()) {
-        continue;
-      }
-      std::istringstream iss(line);
-      std::string name;
-      iss >> name;
+    try {
+        while (std::getline(std::cin, line)) {
+            if (line.empty()) continue;
+            std::istringstream iss(line);
+            std::string name;
+            iss >> name;
 
-      List< int > numbers;
-      int x;
+            List<int> numbers;
+            int x;
+            while (iss >> x) numbers.push_back(x);
 
-      while (iss >> x) {
-        numbers.push_back(x);
-      }
-      if (!iss.eof()) {
-        throw std::overflow_error("overflow");
-      }
-      seq.push_back({ name, numbers });
-      if (std::cin.peek() == '\n') {
-        std::cin.get();
-      }
+            sequences.push_back(std::make_pair(name, std::move(numbers)));
+        }
+
+        if (sequences.empty()) {
+            std::cout << "0\n";
+            return 0;
+        }
+
+        // Вывод названий
+        bool first = true;
+        for (LCIter<std::pair<std::string, List<int>>> it = sequences.cbegin(); it.valid(); it.next()) {
+            if (!first) std::cout << " ";
+            std::cout << it.value().first;
+            first = false;
+        }
+        std::cout << "\n";
+
+        processSequences(sequences);
+
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << "\n";
+        return 1;
+    } catch (...) {
+        std::cerr << "Unknown error\n";
+        return 1;
     }
 
-    if (seq.empty()) {
-      std::cout << 0 << "\n";
-      return 0;
-    }
-
-    bool first = true;
-    for (LIter< std::pair<std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
-    {
-      if (!first) {
-        std::cout << " ";
-      }
-      std::cout << it.value().first;
-      first = false;
-    }
-    std::cout << "\n";
-
-    formColSeq(seq);
-
-    seq.clear();
-
-  } catch(const std::exception& e) {
-    std::cerr << "Exception: " << e.what() << "\n";
-    return 1;
-  } catch(...) {
-    std::cerr << "Unknown exception" << "\n";
-    return 1;
-  }
-
-  return 0;
+    return 0;
 }
