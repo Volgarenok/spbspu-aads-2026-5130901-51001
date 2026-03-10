@@ -4,21 +4,36 @@
 
 #include "list.hpp"
 #include "named-seq.hpp"
+
 namespace krivoshapov
 {
-  static void readInput(List<NamedSeq> &seqs)
+
+  static bool readInput(List<NamedSeq> &seqs)
   {
     std::string name;
     while (std::cin >> name)
     {
       NamedSeq seq(name);
-      while (std::cin.peek() != '\n' && !std::cin.eof())
+      while (true)
       {
+        int p = std::cin.peek();
+        if (p == '\n' || p == EOF)
+        {
+          break;
+        }
+        if (p == ' ' || p == '\t')
+        {
+          std::cin.get();
+          continue;
+        }
+        if ((p >= 'a' && p <= 'z') || (p >= 'A' && p <= 'Z'))
+        {
+          break;
+        }
         int n = 0;
         if (!(std::cin >> n))
         {
-          std::cin.clear();
-          break;
+          return false;
         }
         seq.nums.pushBack(n);
       }
@@ -28,6 +43,7 @@ namespace krivoshapov
       }
       seqs.pushBack(static_cast<NamedSeq &&>(seq));
     }
+    return true;
   }
 
   static void printNames(const List<NamedSeq> &seqs)
@@ -44,6 +60,7 @@ namespace krivoshapov
     }
     std::cout << '\n';
   }
+
   static bool processZip(List<NamedSeq> &seqs, List<long long> &rowSums)
   {
     List<LIter<int>> iters;
@@ -104,8 +121,14 @@ namespace krivoshapov
 
     return !overflowed;
   }
+
   static void printSums(const List<long long> &sums)
   {
+    if (sums.empty())
+    {
+      std::cout << 0 << '\n';
+      return;
+    }
     bool first = true;
     for (auto it = sums.cbegin(); it != sums.cend(); ++it)
     {
@@ -116,17 +139,21 @@ namespace krivoshapov
       std::cout << *it;
       first = false;
     }
-    if (!sums.empty())
-    {
-      std::cout << '\n';
-    }
+    std::cout << '\n';
   }
+
 }
 
 int main()
 {
   krivoshapov::List<krivoshapov::NamedSeq> seqs;
-  krivoshapov::readInput(seqs);
+  const bool inputOk = krivoshapov::readInput(seqs);
+
+  if (!inputOk)
+  {
+    std::cerr << "Error: integer overflow in input\n";
+    return 1;
+  }
 
   if (seqs.empty())
   {
@@ -137,9 +164,9 @@ int main()
   krivoshapov::printNames(seqs);
 
   krivoshapov::List<long long> rowSums;
-  const bool ok = krivoshapov::processZip(seqs, rowSums);
+  const bool zipOk = krivoshapov::processZip(seqs, rowSums);
 
-  if (!ok)
+  if (!zipOk)
   {
     std::cerr << "Error: integer overflow when calculating row sums\n";
     return 1;
