@@ -30,25 +30,40 @@ namespace krivoshapov
         {
           break;
         }
-        unsigned long long raw = 0;
-        if (!(std::cin >> raw))
+
+        std::string token;
+        if (!(std::cin >> token))
         {
           return false;
         }
-        const unsigned long long maxInt =
-            static_cast<unsigned long long>(std::numeric_limits<int>::max());
-        if (raw > maxInt)
+
+        long long value = 0;
+        try
+        {
+          value = std::stoll(token);
+        }
+        catch (...)
         {
           return false;
         }
-        seq.nums.pushBack(static_cast<int>(raw));
+
+        if (value > std::numeric_limits<int>::max() ||
+            value < std::numeric_limits<int>::min())
+        {
+          return false;
+        }
+
+        seq.nums.pushBack(static_cast<int>(value));
       }
+
       if (!std::cin.eof())
       {
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
       }
+
       seqs.pushBack(static_cast<NamedSeq &&>(seq));
     }
+
     return true;
   }
 
@@ -111,8 +126,10 @@ namespace krivoshapov
               rowSum += val;
             }
           }
+
           ++(*iterIt);
         }
+
         ++seqIt;
         ++iterIt;
       }
@@ -121,6 +138,7 @@ namespace krivoshapov
       {
         break;
       }
+
       std::cout << '\n';
       rowSums.pushBack(rowSum);
     }
@@ -135,6 +153,7 @@ namespace krivoshapov
       std::cout << 0 << '\n';
       return;
     }
+
     bool first = true;
     for (auto it = sums.cbegin(); it != sums.cend(); ++it)
     {
@@ -145,6 +164,7 @@ namespace krivoshapov
       std::cout << *it;
       first = false;
     }
+
     std::cout << '\n';
   }
 
@@ -179,5 +199,6 @@ int main()
   }
 
   krivoshapov::printSums(rowSums);
+
   return 0;
 }
