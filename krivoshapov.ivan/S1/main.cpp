@@ -44,6 +44,66 @@ namespace krivoshapov
     }
     std::cout << '\n';
   }
+  static bool processZip(List<NamedSeq> &seqs, List<long long> &rowSums)
+  {
+    List<LIter<int>> iters;
+    for (auto it = seqs.begin(); it != seqs.end(); ++it)
+    {
+      iters.pushBack(it->nums.begin());
+    }
+
+    bool overflowed = false;
+
+    while (true)
+    {
+      bool rowHasData = false;
+      long long rowSum = 0;
+      bool firstInRow = true;
+
+      auto iterIt = iters.begin();
+      auto seqIt = seqs.begin();
+
+      while (seqIt != seqs.end())
+      {
+        if (*iterIt != seqIt->nums.end())
+        {
+          const int val = **iterIt;
+          if (!firstInRow)
+          {
+            std::cout << ' ';
+          }
+          std::cout << val;
+          firstInRow = false;
+          rowHasData = true;
+
+          if (!overflowed)
+          {
+            const long long maxll = std::numeric_limits<long long>::max();
+            if (val > 0 && rowSum > maxll - val)
+            {
+              overflowed = true;
+            }
+            else
+            {
+              rowSum += val;
+            }
+          }
+          ++(*iterIt);
+        }
+        ++seqIt;
+        ++iterIt;
+      }
+
+      if (!rowHasData)
+      {
+        break;
+      }
+      std::cout << '\n';
+      rowSums.pushBack(rowSum);
+    }
+
+    return !overflowed;
+  }
 }
 
 int main()
