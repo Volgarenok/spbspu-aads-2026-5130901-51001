@@ -150,4 +150,38 @@ namespace krivoshapov
     LCIter<int> ci = lst.begin();
     check(*ci == 5, "LIter->LCIter: value == 5");
   }
+  static void testCopyConstructor()
+  {
+    List<int> a;
+    a.pushBack(1);
+    a.pushBack(2);
+    a.pushBack(3);
+
+    List<int> b(a);
+    check(b.size() == 3, "copy ctor: size == 3");
+    check(b.front() == 1, "copy ctor: front == 1");
+    check(b.back() == 3, "copy ctor: back == 3");
+
+    b.popFront();
+    check(b.size() == 2, "copy ctor: b shrinks independently");
+    check(a.size() == 3, "copy ctor: a unchanged");
+  }
+
+  static void testCopyAssignment()
+  {
+    List<int> a;
+    a.pushBack(10);
+    a.pushBack(20);
+
+    List<int> b;
+    b.pushBack(99);
+    b = a;
+
+    check(b.size() == 2, "copy assign: size == 2");
+    check(b.front() == 10, "copy assign: front == 10");
+    check(b.back() == 20, "copy assign: back == 20");
+
+    b = b;
+    check(b.size() == 2, "copy assign self: size unchanged");
+  }
 }
