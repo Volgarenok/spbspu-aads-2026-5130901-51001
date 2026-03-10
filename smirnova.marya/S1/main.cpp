@@ -246,7 +246,7 @@ namespace smirnova
     }
   };
 
-  void formColSeq(List< std::pair< std::string, List< int > > >& seq) {
+  void formColSeq(List< std::pair< std::string, List<  int > > >& seq) {
     size_t maxSize = 0;
 
     for (LIter< std::pair< std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
@@ -278,11 +278,11 @@ namespace smirnova
 
     for (LIter< std::pair< std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
     {
-      unsigned long long sum = 0;
+      int sum = 0;
       const List< int >& sublist = it.value().second;
       for (LCIter< int > jt = sublist.begin(); jt.valid(); jt.next())
       {
-        if (static_cast< unsigned long long >(jt.value()) > ULLONG_MAX - sum) {
+        if (jt.value() > INT_MAX - sum) {
           throw std::overflow_error("Overflow in list " + it.value().first);
         }
         sum += jt.value();
@@ -325,9 +325,14 @@ int main() {
     }
 
     std::cout << "\n";
+    bool first = 0;
     for (LIter< std::pair<std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
     {
-      std::cout << it.value().first << " ";
+      if (!first) {
+        std::cout << " ";
+      }
+      std::cout << it.value().first;
+      first = false;
     }
     std::cout << "\n";
 
