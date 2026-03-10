@@ -101,4 +101,21 @@ namespace krivoshapov
     lst.popBack();
     check(lst.empty(), "popBack: empty after all pops");
   }
+  static void testBidirectionalIteration()
+  {
+    List<int> lst;
+    lst.pushBack(1);
+    lst.pushBack(2);
+    lst.pushBack(3);
+
+    auto it = lst.begin();
+    ++it;
+    ++it;
+    check(*it == 3, "bidir: reached 3rd element");
+    --it;
+    check(*it == 2, "bidir: step back to 2");
+    --it;
+    check(*it == 1, "bidir: step back to 1");
+    check(it == lst.begin(), "bidir: back at begin");
+  }
 }
