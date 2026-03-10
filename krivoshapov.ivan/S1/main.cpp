@@ -16,7 +16,7 @@ namespace krivoshapov
       NamedSeq seq(name);
       while (true)
       {
-        int p = std::cin.peek();
+        const int p = std::cin.peek();
         if (p == '\n' || p == EOF)
         {
           break;
@@ -30,12 +30,18 @@ namespace krivoshapov
         {
           break;
         }
-        int n = 0;
-        if (!(std::cin >> n))
+        unsigned long long raw = 0;
+        if (!(std::cin >> raw))
         {
           return false;
         }
-        seq.nums.pushBack(n);
+        const unsigned long long maxInt =
+            static_cast<unsigned long long>(std::numeric_limits<int>::max());
+        if (raw > maxInt)
+        {
+          return false;
+        }
+        seq.nums.pushBack(static_cast<int>(raw));
       }
       if (!std::cin.eof())
       {
