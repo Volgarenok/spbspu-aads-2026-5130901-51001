@@ -184,4 +184,65 @@ namespace krivoshapov
     b = b;
     check(b.size() == 2, "copy assign self: size unchanged");
   }
+  static void testMoveConstructor()
+  {
+    List<int> a;
+    a.pushBack(1);
+    a.pushBack(2);
+
+    List<int> b(static_cast<List<int> &&>(a));
+    check(b.size() == 2, "move ctor: b.size == 2");
+    check(b.front() == 1, "move ctor: b.front == 1");
+    check(a.empty(), "move ctor: a empty after move");
+  }
+
+  static void testMoveAssignment()
+  {
+    List<int> a;
+    a.pushBack(3);
+    a.pushBack(4);
+
+    List<int> b;
+    b = static_cast<List<int> &&>(a);
+    check(b.size() == 2, "move assign: b.size == 2");
+    check(b.front() == 3, "move assign: b.front == 3");
+    check(a.empty(), "move assign: a empty after move");
+  }
+
+  static void testInsertMiddle()
+  {
+    List<int> lst;
+    lst.pushBack(1);
+    lst.pushBack(3);
+
+    auto it = lst.begin();
+    ++it;
+    lst.insert(it, 2);
+
+    check(lst.size() == 3, "insert middle: size == 3");
+    auto cur = lst.begin();
+    check(*cur == 1, "insert middle: 1st == 1");
+    ++cur;
+    check(*cur == 2, "insert middle: 2nd == 2");
+    ++cur;
+    check(*cur == 3, "insert middle: 3rd == 3");
+  }
+
+  static void testInsertAtBegin()
+  {
+    List<int> lst;
+    lst.pushBack(2);
+    lst.insert(lst.begin(), 1);
+    check(lst.front() == 1, "insert begin: front == 1");
+    check(lst.size() == 2, "insert begin: size == 2");
+  }
+
+  static void testInsertAtEnd()
+  {
+    List<int> lst;
+    lst.pushBack(1);
+    lst.insert(lst.end(), 2);
+    check(lst.back() == 2, "insert end: back == 2");
+    check(lst.size() == 2, "insert end: size == 2");
+  }
 }
