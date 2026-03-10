@@ -157,7 +157,7 @@ int main()
 
   if (!inputOk)
   {
-    std::cerr << "Error: integer overflow in input\n";
+    std::cerr << "overflow\n";
     return 1;
   }
 
@@ -174,7 +174,7 @@ int main()
 
   if (!zipOk)
   {
-    std::cerr << "Error: integer overflow when calculating row sums\n";
+    std::cerr << "overflow\n";
     return 1;
   }
 
