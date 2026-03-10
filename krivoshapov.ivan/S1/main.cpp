@@ -152,43 +152,32 @@ namespace krivoshapov
 
 int main()
 {
-  try
+  krivoshapov::List<krivoshapov::NamedSeq> seqs;
+  const bool inputOk = krivoshapov::readInput(seqs);
+
+  if (!inputOk)
   {
-    krivoshapov::List<krivoshapov::NamedSeq> seqs;
-    const bool inputOk = krivoshapov::readInput(seqs);
-
-    if (!inputOk)
-    {
-      std::cerr << "overflow\n"
-                << std::flush;
-      return 1;
-    }
-
-    if (seqs.empty())
-    {
-      std::cout << 0 << '\n';
-      return 0;
-    }
-
-    krivoshapov::printNames(seqs);
-
-    krivoshapov::List<long long> rowSums;
-    const bool zipOk = krivoshapov::processZip(seqs, rowSums);
-
-    if (!zipOk)
-    {
-      std::cerr << "overflow\n"
-                << std::flush;
-      return 1;
-    }
-
-    krivoshapov::printSums(rowSums);
-    return 0;
-  }
-  catch (...)
-  {
-    std::cerr << "overflow\n"
-              << std::flush;
+    std::cerr << "Error: integer overflow in input\n";
     return 1;
   }
+
+  if (seqs.empty())
+  {
+    std::cout << 0 << '\n';
+    return 0;
+  }
+
+  krivoshapov::printNames(seqs);
+
+  krivoshapov::List<long long> rowSums;
+  const bool zipOk = krivoshapov::processZip(seqs, rowSums);
+
+  if (!zipOk)
+  {
+    std::cerr << "Error: integer overflow when calculating row sums\n";
+    return 1;
+  }
+
+  krivoshapov::printSums(rowSums);
+  return 0;
 }
