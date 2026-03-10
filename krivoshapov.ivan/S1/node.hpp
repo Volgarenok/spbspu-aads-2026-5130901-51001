@@ -12,7 +12,20 @@ namespace krivoshapov
       T value_;
       Node *next_;
       Node *prev_;
-    }
+
+      explicit Node(const T &v) : value_(v),
+                                  next_(nullptr),
+                                  prev_(nullptr)
+      {
+      }
+
+      explicit Node(T &&v) : value_(static_cast<T &&>(v)),
+                             next_(nullptr),
+                             prev_(nullptr)
+      {
+      }
+    };
+
   }
 }
 
