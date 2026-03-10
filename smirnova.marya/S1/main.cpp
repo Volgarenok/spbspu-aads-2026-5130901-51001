@@ -217,8 +217,8 @@ void processSequences(List<std::pair<std::string, List<int>>>& seq) {
             if (row < it.value().second.size()) {
                 LCIter<int> numIt = getElementAt(it.value().second, row);
                 if (numIt.value() > 0 && sum > INT_MAX - numIt.value()) {
-                    std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-                    exit(1);
+                    // 1️⃣ Бросаем исключение вместо return
+                    throw std::overflow_error("overflow");
                 }
                 sum += numIt.value();
             }
@@ -277,7 +277,14 @@ int main() {
     }
     std::cout << "\n";
 
-    processSequences(sequences);
+    // 2️⃣ Вызов оборачиваем в try/catch для перехвата переполнения
+    try {
+        processSequences(sequences);
+    }
+    catch (const std::overflow_error&) {
+        std::cerr << "overflow\n";
+        return 1;
+    }
 
     return 0;
 }
