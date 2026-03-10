@@ -29,6 +29,21 @@ namespace krivoshapov
       seqs.pushBack(static_cast<NamedSeq &&>(seq));
     }
   }
+
+  static void printNames(const List<NamedSeq> &seqs)
+  {
+    bool first = true;
+    for (auto it = seqs.cbegin(); it != seqs.cend(); ++it)
+    {
+      if (!first)
+      {
+        std::cout << ' ';
+      }
+      std::cout << it->name;
+      first = false;
+    }
+    std::cout << '\n';
+  }
 }
 
 int main()
