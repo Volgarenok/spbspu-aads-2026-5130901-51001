@@ -69,4 +69,36 @@ namespace krivoshapov
     ++it;
     check(*it == 3, "pushFront iterate: 3rd == 3");
   }
+  static void testPopFront()
+  {
+    List<int> lst;
+    lst.pushBack(10);
+    lst.pushBack(20);
+    lst.pushBack(30);
+
+    lst.popFront();
+    check(lst.size() == 2, "popFront: size == 2");
+    check(lst.front() == 20, "popFront: new front == 20");
+
+    lst.popFront();
+    lst.popFront();
+    check(lst.empty(), "popFront: empty after all pops");
+    check(lst.begin() == lst.end(), "popFront: begin == end when empty");
+  }
+
+  static void testPopBack()
+  {
+    List<int> lst;
+    lst.pushBack(10);
+    lst.pushBack(20);
+    lst.pushBack(30);
+
+    lst.popBack();
+    check(lst.size() == 2, "popBack: size == 2");
+    check(lst.back() == 20, "popBack: new back == 20");
+
+    lst.popBack();
+    lst.popBack();
+    check(lst.empty(), "popBack: empty after all pops");
+  }
 }
