@@ -4,6 +4,7 @@
 #include <utility>
 #include <stdexcept>
 #include <climits>
+#include <limits>
 
 namespace smirnova {
 
@@ -12,12 +13,16 @@ struct Node {
     T data;
     Node* next;
     Node* prev;
+
     Node(const T& d) : data(d), next(nullptr), prev(nullptr) {}
     Node(T&& d) : data(std::move(d)), next(nullptr), prev(nullptr) {}
 };
 
-template <class T> class LIter;
-template <class T> class LCIter;
+template <class T>
+class LIter;
+
+template <class T>
+class LCIter;
 
 template <class T>
 class List {
@@ -31,7 +36,11 @@ public:
         fake->next = fake;
         fake->prev = fake;
     }
-    ~List() { clear(); delete fake; }
+
+    ~List() {
+        clear();
+        delete fake;
+    }
 
     List(const List& other) : List() {
         for (LCIter<T> it = other.cbegin(); it.valid(); it.next())
@@ -46,7 +55,10 @@ public:
     }
 
     List& operator=(const List& other) {
-        if (this != &other) { List tmp(other); swap(tmp); }
+        if (this != &other) {
+            List tmp(other);
+            swap(tmp);
+        }
         return *this;
     }
 
@@ -68,6 +80,7 @@ public:
         std::swap(fake, other.fake);
         std::swap(sz, other.sz);
     }
+
     bool empty() const noexcept { return sz == 0; }
     size_t size() const noexcept { return sz; }
 
@@ -79,6 +92,7 @@ public:
         fake->prev = n;
         ++sz;
     }
+
     void push_back(T&& val) {
         Node<T>* n = new Node<T>(std::move(val));
         n->next = fake;
@@ -87,6 +101,7 @@ public:
         fake->prev = n;
         ++sz;
     }
+
     void push_front(const T& val) {
         Node<T>* n = new Node<T>(val);
         n->prev = fake;
@@ -95,6 +110,7 @@ public:
         fake->next = n;
         ++sz;
     }
+
     void push_front(T&& val) {
         Node<T>* n = new Node<T>(std::move(val));
         n->prev = fake;
@@ -103,6 +119,7 @@ public:
         fake->next = n;
         ++sz;
     }
+
     void pop_front() {
         if (empty()) throw std::out_of_range("pop_front on empty list");
         Node<T>* tmp = fake->next;
@@ -111,6 +128,7 @@ public:
         delete tmp;
         --sz;
     }
+
     void pop_back() {
         if (empty()) throw std::out_of_range("pop_back on empty list");
         Node<T>* tail = fake->prev;
@@ -119,6 +137,7 @@ public:
         delete tail;
         --sz;
     }
+
     void clear() noexcept {
         Node<T>* curr = fake->next;
         while (curr != fake) {
@@ -216,10 +235,7 @@ void processSequences(List<std::pair<std::string, List<int>>>& seq) {
         for (LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid(); it.next()) {
             if (row < it.value().second.size()) {
                 LCIter<int> numIt = getElementAt(it.value().second, row);
-                if (numIt.value() > 0 && sum > INT_MAX - numIt.value()) {
-                    std::cerr << "number exceeds int range\n";
-                    exit(1); // прерывание программы с ошибкой
-                }
+                if (sum > INT_MAX - numIt.value()) throw std::overflow_error("overflow");
                 sum += numIt.value();
             }
         }
@@ -236,7 +252,7 @@ int main() {
 
     List<std::pair<std::string, List<int>>> sequences;
     std::string line;
-    bool overflowOccurred = false; // флаг переполнения
+    bool overflowOccurred = false;
 
     while (std::getline(std::cin, line)) {
         if (line.empty()) continue;
@@ -250,7 +266,7 @@ int main() {
 
         while (iss >> temp) {
             if (temp > static_cast<unsigned long long>(INT_MAX)) {
-                overflowOccurred = true; // помечаем переполнение
+                overflowOccurred = true;
             } else {
                 numbers.push_back(static_cast<int>(temp));
             }
@@ -259,7 +275,7 @@ int main() {
         sequences.push_back(std::make_pair(name, std::move(numbers)));
     }
 
-    // Проверка переполнения после всего ввода
+    // После формирования всех списков проверяем переполнение
     if (overflowOccurred) {
         std::cerr << "number exceeds int range\n";
         return 1;
@@ -283,4 +299,3 @@ int main() {
 
     return 0;
 }
-
