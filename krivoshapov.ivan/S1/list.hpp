@@ -6,6 +6,7 @@
 
 namespace krivoshapov
 {
+
   template <class T>
   class List
   {
@@ -36,44 +37,7 @@ namespace krivoshapov
         throw;
       }
     }
-    List(List &&other) noexcept : head_(other.head_),
-                                  tail_(other.tail_),
-                                  size_(other.size_)
-    {
-      other.head_ = nullptr;
-      other.tail_ = nullptr;
-      other.size_ = 0;
-    }
 
-    ~List()
-    {
-      clear();
-    }
-
-    List &operator=(const List &other)
-    {
-      if (this != &other)
-      {
-        List tmp(other);
-        swapWith(tmp);
-      }
-      return *this;
-    }
-
-    List &operator=(List &&other) noexcept
-    {
-      if (this != &other)
-      {
-        clear();
-        head_ = other.head_;
-        tail_ = other.tail_;
-        size_ = other.size_;
-        other.head_ = nullptr;
-        other.tail_ = nullptr;
-        other.size_ = 0;
-      }
-      return *this;
-    }
     List(List &&other) noexcept : head_(other.head_),
                                   tail_(other.tail_),
                                   size_(other.size_)
@@ -196,6 +160,7 @@ namespace krivoshapov
       Node *node = new Node(static_cast<T &&>(value));
       linkBack(node);
     }
+
     void popFront()
     {
       Node *tmp = head_;
@@ -299,6 +264,25 @@ namespace krivoshapov
       }
       ++size_;
     }
+
+    void swapWith(List &other) noexcept
+    {
+      Node *tmpHead = head_;
+      Node *tmpTail = tail_;
+      const int tmpSize = size_;
+      head_ = other.head_;
+      tail_ = other.tail_;
+      size_ = other.size_;
+      other.head_ = tmpHead;
+      other.tail_ = tmpTail;
+      other.size_ = tmpSize;
+    }
+
+    Node *head_;
+    Node *tail_;
+    int size_;
   };
+
 }
+
 #endif
