@@ -248,12 +248,16 @@ namespace smirnova
 
   void formColSeq(List< std::pair< std::string, List<  int > > >& seq) {
     size_t maxSize = 0;
-
     for (LIter< std::pair< std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
     {
       if (it.value().second.size() > maxSize) {
         maxSize = it.value().second.size();
       }
+    }
+    List< int > sums;
+    for (size_t i = 0; i < maxSize; ++i)
+    {
+      sums.push_back(0);
     }
 
     List< LIter< int > > iterators;
@@ -264,18 +268,29 @@ namespace smirnova
 
     for (size_t row = 0; row < maxSize; ++row)
     {
+      bool firstCol = true;
+      LIter< int > sum_it = sums.begin();
       for (LIter< LIter< int > > it_it = iterators.begin(); it_it.valid(); it_it.next())
       {
         LIter< int >& it_list = it_it.value();
         if (it_list.valid()) {
-          std::cout << it_list.value() << " ";
+          int val = it_list.value();
+          if (val > INT_MAX - sum_it.value()) {
+            throw std::overflow_error("overflow");
+          }
+          sum_it.value() += val;
+          if (!firstCol) {
+            std::cout << " ";
+          }
+
+          std::cout << val;
           it_list.next();
+          firstCol = false;
         }
-        std::cout << " ";
+        sum_it.next();
       }
       std::cout << "\n";
     }
-
     for (LIter< std::pair< std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
     {
       int sum = 0;
@@ -310,8 +325,12 @@ int main() {
 
       List< int > numbers;
       int x;
+
       while (iss >> x) {
         numbers.push_back(x);
+      }
+      if (!iss.eof()) {
+        throw std::overflow_error("overflow");
       }
       seq.push_back({ name, numbers });
       if (std::cin.peek() == '\n') {
@@ -324,8 +343,7 @@ int main() {
       return 0;
     }
 
-    std::cout << "\n";
-    bool first = 0;
+    bool first = true;
     for (LIter< std::pair<std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
     {
       if (!first) {
