@@ -133,4 +133,21 @@ namespace krivoshapov
     check(*prev2 == 8, "postfix--: old value == 8");
     check(*it == 7, "postfix--: new position == 7");
   }
+  static void testConstIterator()
+  {
+    List<int> lst;
+    lst.pushBack(5);
+    lst.pushBack(6);
+
+    const List<int> &cref = lst;
+    auto it = cref.cbegin();
+    check(*it == 5, "const iter: 1st == 5");
+    ++it;
+    check(*it == 6, "const iter: 2nd == 6");
+    ++it;
+    check(it == cref.cend(), "const iter: reaches cend");
+
+    LCIter<int> ci = lst.begin();
+    check(*ci == 5, "LIter->LCIter: value == 5");
+  }
 }
