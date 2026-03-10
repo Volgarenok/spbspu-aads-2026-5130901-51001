@@ -245,4 +245,45 @@ namespace krivoshapov
     check(lst.back() == 2, "insert end: back == 2");
     check(lst.size() == 2, "insert end: size == 2");
   }
+  static void testClear()
+  {
+    List<int> lst;
+    lst.pushBack(1);
+    lst.pushBack(2);
+    lst.clear();
+
+    check(lst.empty(), "clear: empty after clear");
+    check(lst.size() == 0, "clear: size == 0");
+    check(lst.begin() == lst.end(), "clear: begin == end");
+
+    lst.pushBack(42);
+    check(lst.size() == 1, "clear: reuse after clear size");
+    check(lst.front() == 42, "clear: reuse after clear value");
+  }
+
+  static void testSingleElement()
+  {
+    List<int> lst;
+    lst.pushBack(99);
+    check(lst.size() == 1, "single: size == 1");
+    check(lst.front() == 99, "single: front == 99");
+    check(lst.back() == 99, "single: back == 99");
+
+    lst.popFront();
+    check(lst.empty(), "single: empty after popFront");
+
+    lst.pushBack(99);
+    lst.popBack();
+    check(lst.empty(), "single: empty after popBack");
+  }
+
+  static void testStringList()
+  {
+    List<std::string> lst;
+    lst.pushBack("hello");
+    lst.pushBack("world");
+    check(lst.front() == "hello", "string list: front == hello");
+    check(lst.back() == "world", "string list: back == world");
+    check(lst.size() == 2, "string list: size == 2");
+  }
 }
