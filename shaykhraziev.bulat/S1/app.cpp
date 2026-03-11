@@ -116,6 +116,14 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
     }
   }
 
+  if (overflow)
+  {
+    err << "overflow\n";
+    return 1;
+  }
+
+  printNames(out, seqs);
+
   for (LCIter< List< size_t > > r = rows.cbegin(); r != rows.cend(); ++r)
   {
     bool firstVal = true;
@@ -150,11 +158,6 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
     out << '\n';
   }
 
-  if (overflow)
-  {
-    err << "overflow\n";
-    return 1;
-  }
   return 0;
 }
 

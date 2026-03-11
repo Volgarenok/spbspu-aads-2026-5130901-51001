@@ -9,6 +9,5 @@ int main()
     std::cout << "0\n";
     return 0;
   }
-  shaykhraziev::printNames(std::cout, seqs);
   return shaykhraziev::printSequences(std::cout, std::cerr, seqs);
 }
