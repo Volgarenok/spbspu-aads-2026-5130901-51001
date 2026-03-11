@@ -1,3 +1,4 @@
+#include <limits>
 #include <iostream>
 #include <string>
 
@@ -261,7 +262,7 @@ namespace kitserov
     std::cout << "\n";
   }
   template< class T >
-  void clear_list_of_lists(List< List< T > > list_of_lists)
+  void clear_list_of_lists(List< List< T > >& list_of_lists)
   {
     for (LIter< List< T > > it = list_of_lists.begin(); it != list_of_lists.end(); ++it) {
       (*it).clear();
@@ -322,8 +323,13 @@ int main()
     for (size_t j = 0; j < list_of_lists.get_size(); j++) {
       List< int >& curList = *(list_of_lists[j]);
       if (curList.get_size() > i) {
-        std::cout << *(curList[i]) << " ";
-        sum += *(curList[i]);
+        int val = *(curList[i]);
+        std::cout << val << " ";
+        if (sum > std::numeric_limits< int >::max() - val) {
+          std::cerr << "Overflow\n";
+          return 1;
+        }
+        sum += val;
       }
     }
     summes.insert_tail(sum);
