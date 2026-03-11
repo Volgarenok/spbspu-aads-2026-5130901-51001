@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstddef>
 #include <limits>
+#include <stdexcept>
 
 namespace karpenko
 {
@@ -446,10 +447,11 @@ int main()
   }
 
   List< long long > sums;
+  bool overflow = false;
 
   for (size_t pos = 0; pos < max_len; ++pos)
   {
-    long long sum = 0;
+    unsigned long long sum = 0;
     bool has_element = false;
 
     for (List< std::pair< std::string, List< int > > >::const_iterator
@@ -468,7 +470,16 @@ int main()
           std::cout << ' ';
         }
         std::cout << *num_it;
-        sum += *num_it;
+
+        if (sum > std::numeric_limits< unsigned long long >::max() - static_cast< unsigned long long >(*num_it))
+        {
+          overflow = true;
+        }
+        else
+        {
+          sum += static_cast< unsigned long long >(*num_it);
+        }
+        
         has_element = true;
       }
     }
@@ -476,8 +487,17 @@ int main()
     if (has_element)
     {
       std::cout << '\n';
-      sums.push_back(sum);
+      if (!overflow)
+      {
+        sums.push_back(static_cast< long long >(sum));
+      }
     }
+  }
+
+  if (overflow)
+  {
+    std::cerr << "Overflow occurred while summing numbers\n";
+    return 1;
   }
 
   if (!sums.empty())
@@ -493,6 +513,10 @@ int main()
       first = false;
     }
     std::cout << '\n';
+  }
+  else
+  {
+    std::cout << "0\n";
   }
 
   return 0;
