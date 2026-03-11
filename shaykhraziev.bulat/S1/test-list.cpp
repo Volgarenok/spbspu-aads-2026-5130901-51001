@@ -99,8 +99,8 @@ BOOST_AUTO_TEST_CASE(test_copy_constructor)
 
   List< int > copy(original);
 
-  auto it_orig = original.begin();
-  auto it_copy = copy.begin();
+  List< int >::iterator it_orig = original.begin();
+  List< int >::iterator it_copy = copy.begin();
   while (it_orig != original.end() && it_copy != copy.end())
   {
     BOOST_TEST(*it_orig == *it_copy);
@@ -150,8 +150,8 @@ BOOST_AUTO_TEST_CASE(test_copy_assignment)
   List< int > b;
   b = a;
 
-  auto it_a = a.begin();
-  auto it_b = b.begin();
+  List< int >::iterator it_a = a.begin();
+  List< int >::iterator it_b = b.begin();
   while (it_a != a.end() && it_b != b.end())
   {
     BOOST_TEST(*it_a == *it_b);
@@ -167,10 +167,8 @@ BOOST_AUTO_TEST_CASE(test_self_assignment)
   List< int > lst;
   lst.push_front(1);
   lst.push_front(2);
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wself-assign-overloaded"
-  lst = lst;
-#pragma clang diagnostic pop
+  List< int >& ref = lst;
+  lst = ref;
   BOOST_TEST(lst.front() == 2);
 }
 
@@ -208,7 +206,7 @@ BOOST_AUTO_TEST_CASE(test_iterator_traverse)
 
   int expected[] = {1, 2, 3};
   int i = 0;
-  for (auto it = lst.begin(); it != lst.end(); ++it, ++i)
+  for (List< int >::iterator it = lst.begin(); it != lst.end(); ++it, ++i)
   {
     BOOST_TEST(*it == expected[i]);
   }
@@ -225,7 +223,7 @@ BOOST_AUTO_TEST_CASE(test_const_iterator_traverse)
   const List< int >& clst = lst;
   int expected[] = {1, 2, 3};
   int i = 0;
-  for (auto it = clst.cbegin(); it != clst.cend(); ++it, ++i)
+  for (List< int >::const_iterator it = clst.cbegin(); it != clst.cend(); ++it, ++i)
   {
     BOOST_TEST(*it == expected[i]);
   }
@@ -238,8 +236,8 @@ BOOST_AUTO_TEST_CASE(test_iterator_postincrement)
   lst.push_front(2);
   lst.push_front(1);
 
-  auto it = lst.begin();
-  auto old = it++;
+  List< int >::iterator it = lst.begin();
+  List< int >::iterator old = it++;
   BOOST_TEST(*old == 1);
   BOOST_TEST(*it == 2);
 }
@@ -250,7 +248,7 @@ BOOST_AUTO_TEST_CASE(test_iterator_arrow_operator)
   lst.push_front("world");
   lst.push_front("hello");
 
-  auto it = lst.begin();
+  List< std::string >::iterator it = lst.begin();
   BOOST_TEST(it->size() == 5u);
 }
 
@@ -268,8 +266,8 @@ BOOST_AUTO_TEST_CASE(test_before_begin)
 {
   List< int > lst;
   lst.push_front(1);
-  auto bb = lst.before_begin();
-  auto it = bb;
+  List< int >::iterator bb = lst.before_begin();
+  List< int >::iterator it = bb;
   ++it;
   BOOST_CHECK(it == lst.begin());
 }
@@ -289,12 +287,12 @@ BOOST_AUTO_TEST_CASE(test_insert_after_middle)
   lst.push_front(3);
   lst.push_front(1);
 
-  auto it = lst.begin(); // points to 1
+  List< int >::iterator it = lst.begin(); // points to 1
   lst.insert_after(it, 2);
 
   int expected[] = {1, 2, 3};
   int i = 0;
-  for (auto jt = lst.begin(); jt != lst.end(); ++jt, ++i)
+  for (List< int >::iterator jt = lst.begin(); jt != lst.end(); ++jt, ++i)
   {
     BOOST_TEST(*jt == expected[i]);
   }
@@ -310,7 +308,7 @@ BOOST_AUTO_TEST_CASE(test_insert_after_rvalue)
 BOOST_AUTO_TEST_CASE(test_insert_after_returns_iterator)
 {
   List< int > lst;
-  auto it = lst.insert_after(lst.before_begin(), 99);
+  List< int >::iterator it = lst.insert_after(lst.before_begin(), 99);
   BOOST_TEST(*it == 99);
 }
 
@@ -333,12 +331,12 @@ BOOST_AUTO_TEST_CASE(test_erase_after_middle)
   lst.push_front(2);
   lst.push_front(1);
 
-  auto it = lst.begin(); // points to 1
+  List< int >::iterator it = lst.begin(); // points to 1
   lst.erase_after(it);   // erases 2
 
   int expected[] = {1, 3};
   int i = 0;
-  for (auto jt = lst.begin(); jt != lst.end(); ++jt, ++i)
+  for (List< int >::iterator jt = lst.begin(); jt != lst.end(); ++jt, ++i)
   {
     BOOST_TEST(*jt == expected[i]);
   }
@@ -350,7 +348,7 @@ BOOST_AUTO_TEST_CASE(test_erase_after_returns_iterator)
   lst.push_front(2);
   lst.push_front(1);
 
-  auto it = lst.erase_after(lst.before_begin());
+  List< int >::iterator it = lst.erase_after(lst.before_begin());
   BOOST_TEST(*it == 2);
 }
 
@@ -371,9 +369,5 @@ BOOST_AUTO_TEST_CASE(test_const_front)
   const List< int >& clst = lst;
   BOOST_TEST(clst.front() == 55);
 }
-
-
-
-
 
 
