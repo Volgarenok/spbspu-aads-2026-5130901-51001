@@ -68,12 +68,14 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
   List< size_t >::iterator sumTail = sums.before_begin();
 
   bool anyRow = true;
+  bool overflow = false;
   while (anyRow)
   {
     anyRow = false;
     List< size_t > rowVals;
     List< size_t >::iterator rvTail = rowVals.before_begin();
     size_t rowSum = 0;
+    bool rowOverflow = false;
 
     LIter< List< size_t >::const_iterator > it = iters.begin();
     LCIter< NamedSeq > s = seqs.cbegin();
@@ -85,13 +87,19 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
         anyRow = true;
         size_t val = **it;
         rvTail = rowVals.insert_after(rvTail, val);
-        size_t newSum = 0;
-        if (!addChecked(rowSum, val, newSum))
+        if (!rowOverflow)
         {
-          err << "overflow\n";
-          return 1;
+          size_t newSum = 0;
+          if (!addChecked(rowSum, val, newSum))
+          {
+            rowOverflow = true;
+            overflow = true;
+          }
+          else
+          {
+            rowSum = newSum;
+          }
         }
-        rowSum = newSum;
         ++(*it);
       }
       ++it;
@@ -101,7 +109,10 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
     if (anyRow)
     {
       rowTail = rows.insert_after(rowTail, std::move(rowVals));
-      sumTail = sums.insert_after(sumTail, rowSum);
+      if (!rowOverflow)
+      {
+        sumTail = sums.insert_after(sumTail, rowSum);
+      }
     }
   }
 
@@ -139,7 +150,11 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
     out << '\n';
   }
 
+  if (overflow)
+  {
+    err << "overflow\n";
+    return 1;
+  }
   return 0;
 }
-
 
