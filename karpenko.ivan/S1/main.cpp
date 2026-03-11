@@ -479,7 +479,7 @@ int main()
         {
           sum += static_cast< unsigned long long >(*num_it);
         }
-        
+
         has_element = true;
       }
     }
