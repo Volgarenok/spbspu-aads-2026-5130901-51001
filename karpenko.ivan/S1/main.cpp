@@ -422,19 +422,6 @@ int main()
     return 0;
   }
 
-  bool first = true;
-  for (List< std::pair< std::string, List< size_t > > >::const_iterator it =
-         sequences.begin(); it != sequences.end(); ++it)
-  {
-    if (!first)
-    {
-      std::cout << ' ';
-    }
-    std::cout << it->first;
-    first = false;
-  }
-  std::cout << '\n';
-
   size_t max_len = 0;
   for (List< std::pair< std::string, List< size_t > > >::const_iterator it =
          sequences.begin(); it != sequences.end(); ++it)
@@ -486,6 +473,19 @@ int main()
     std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
     return 1;
   }
+
+  bool first = true;
+  for (List< std::pair< std::string, List< size_t > > >::const_iterator it =
+         sequences.begin(); it != sequences.end(); ++it)
+  {
+    if (!first)
+    {
+      std::cout << ' ';
+    }
+    std::cout << it->first;
+    first = false;
+  }
+  std::cout << '\n';
 
   bool has_any_element = false;
   for (size_t pos = 0; pos < max_len; ++pos)
