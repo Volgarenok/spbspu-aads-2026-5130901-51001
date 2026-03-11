@@ -21,39 +21,31 @@ namespace krivoshapov
         {
           break;
         }
+
         if (p == ' ' || p == '\t')
         {
           std::cin.get();
           continue;
         }
+
         if ((p >= 'a' && p <= 'z') || (p >= 'A' && p <= 'Z'))
         {
           break;
         }
 
-        std::string token;
-        if (!(std::cin >> token))
+        unsigned long long raw = 0;
+
+        if (!(std::cin >> raw))
         {
           return false;
         }
 
-        long long value = 0;
-        try
-        {
-          value = std::stoll(token);
-        }
-        catch (...)
+        if (raw > static_cast<unsigned long long>(std::numeric_limits<int>::max()))
         {
           return false;
         }
 
-        if (value > std::numeric_limits<int>::max() ||
-            value < std::numeric_limits<int>::min())
-        {
-          return false;
-        }
-
-        seq.nums.pushBack(static_cast<int>(value));
+        seq.nums.pushBack(static_cast<int>(raw));
       }
 
       if (!std::cin.eof())
