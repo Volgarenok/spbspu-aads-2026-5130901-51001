@@ -368,6 +368,34 @@ namespace karpenko
   {
     lhs.swap(rhs);
   }
+
+  bool read_sequence(
+    std::istream& in,
+    std::string& name,
+    List< int >& numbers)
+  {
+    if (!(in >> name))
+    {
+      return false;
+    }
+    numbers.clear();
+    while (in.peek() != '\n' && in.peek() != EOF)
+    {
+      int value = 0;
+      if (in >> value)
+      {
+        numbers.push_back(value);
+      }
+      else
+      {
+        in.clear();
+        in.ignore();
+        break;
+      }
+    }
+    in.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+    return true;
+  }
 }
 
 int main()
