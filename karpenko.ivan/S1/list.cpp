@@ -1,5 +1,4 @@
 #include "list.hpp"
-#include <cassert>
 #include <limits>
 #include <stdexcept>
 #include <iostream>
@@ -116,41 +115,53 @@ namespace karpenko
   template< typename T >
   T& List< T >::front()
   {
-    assert(!empty());
+    if (empty())
+    {
+      throw std::out_of_range("List is empty");
+    }
     return *begin();
   }
 
   template< typename T >
   const T& List< T >::front() const
   {
-    assert(!empty());
+    if (empty())
+    {
+      throw std::out_of_range("List is empty");
+    }
     return *begin();
   }
 
   template< typename T >
   T& List< T >::back()
   {
-    assert(!empty());
+    if (empty())
+    {
+      throw std::out_of_range("List is empty");
+    }
     return *iterator(tail_);
   }
 
   template< typename T >
   const T& List< T >::back() const
   {
-    assert(!empty());
+    if (empty())
+    {
+      throw std::out_of_range("List is empty");
+    }
     return *const_iterator(tail_);
   }
 
   template< typename T >
   void List< T >::push_front(const T& value)
   {
-    insert_after(begin(), value);
+    insert_after(iterator(head_), value);
   }
 
   template< typename T >
   void List< T >::push_front(T&& value)
   {
-    insert_after(begin(), std::move(value));
+    insert_after(iterator(head_), std::move(value));
   }
 
   template< typename T >
@@ -182,7 +193,10 @@ namespace karpenko
   template< typename T >
   void List< T >::pop_front()
   {
-    assert(!empty());
+    if (empty())
+    {
+      throw std::out_of_range("List is empty");
+    }
     detail::NodeBase* old = head_->next;
     head_->next = old->next;
     if (tail_ == old)
@@ -196,7 +210,10 @@ namespace karpenko
   template< typename T >
   void List< T >::pop_back()
   {
-    assert(!empty());
+    if (empty())
+    {
+      throw std::out_of_range("List is empty");
+    }
     if (head_->next == tail_)
     {
       pop_front();
@@ -240,8 +257,10 @@ namespace karpenko
   template< typename T >
   typename List< T >::iterator List< T >::erase_after(iterator pos)
   {
-    assert(pos.get_ptr() != head_);
-    assert(pos.get_ptr()->next != head_);
+    if (pos.get_ptr() == head_ || pos.get_ptr()->next == head_)
+    {
+      throw std::out_of_range("Invalid position for erase_after");
+    }
     detail::NodeBase* to_delete = pos.get_ptr()->next;
     pos.get_ptr()->next = to_delete->next;
     if (tail_ == to_delete)
@@ -290,6 +309,7 @@ namespace karpenko
     lhs.swap(rhs);
   }
 
+  template class List< int >;
   template class List< size_t >;
   template class List< std::pair< std::string, List< size_t > > >;
   template class List< List< size_t > >;
