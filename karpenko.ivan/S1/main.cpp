@@ -446,12 +446,12 @@ int main()
     }
   }
 
-  List< unsigned long long > sums;
+  List< size_t > sums;
   bool overflow = false;
 
   for (size_t pos = 0; pos < max_len; ++pos)
   {
-    unsigned long long sum = 0;
+    size_t sum = 0;
     bool has_element = false;
 
     for (List< std::pair< std::string, List< int > > >::const_iterator
@@ -471,12 +471,11 @@ int main()
         }
         std::cout << *num_it;
 
-        unsigned long long value = static_cast< unsigned long long >(*num_it);
-        if (sum > std::numeric_limits< unsigned long long >::max() - value)
+        if (*num_it > 0 && sum > std::numeric_limits< size_t >::max() - static_cast< size_t >(*num_it))
         {
           overflow = true;
         }
-        sum += value;
+        sum += static_cast< size_t >(*num_it);
         has_element = true;
       }
     }
@@ -500,7 +499,7 @@ int main()
   if (!sums.empty())
   {
     first = true;
-    for (List< unsigned long long >::const_iterator it = sums.begin(); it != sums.end(); ++it)
+    for (List< size_t >::const_iterator it = sums.begin(); it != sums.end(); ++it)
     {
       if (!first)
       {
