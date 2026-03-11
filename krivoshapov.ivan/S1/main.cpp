@@ -16,7 +16,7 @@ namespace krivoshapov
       NamedSeq seq(name);
       while (true)
       {
-        const int p = std::cin.peek();
+        int p = std::cin.peek();
         if (p == '\n' || p == EOF)
         {
           break;
@@ -30,25 +30,40 @@ namespace krivoshapov
         {
           break;
         }
-        unsigned long long raw = 0;
-        if (!(std::cin >> raw))
+
+        std::string token;
+        if (!(std::cin >> token))
         {
           return false;
         }
-        const unsigned long long maxInt =
-            static_cast<unsigned long long>(std::numeric_limits<int>::max());
-        if (raw > maxInt)
+
+        long long value = 0;
+        try
+        {
+          value = std::stoll(token);
+        }
+        catch (...)
         {
           return false;
         }
-        seq.nums.pushBack(static_cast<int>(raw));
+
+        if (value > std::numeric_limits<int>::max() ||
+            value < std::numeric_limits<int>::min())
+        {
+          return false;
+        }
+
+        seq.nums.pushBack(static_cast<int>(value));
       }
+
       if (!std::cin.eof())
       {
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
       }
+
       seqs.pushBack(static_cast<NamedSeq &&>(seq));
     }
+
     return true;
   }
 
@@ -75,8 +90,6 @@ namespace krivoshapov
       iters.pushBack(it->nums.begin());
     }
 
-    bool overflowed = false;
-
     while (true)
     {
       bool rowHasData = false;
@@ -90,29 +103,27 @@ namespace krivoshapov
       {
         if (*iterIt != seqIt->nums.end())
         {
-          const int val = **iterIt;
+          int val = **iterIt;
+
           if (!firstInRow)
           {
             std::cout << ' ';
           }
+
           std::cout << val;
           firstInRow = false;
           rowHasData = true;
 
-          if (!overflowed)
+          if (rowSum > std::numeric_limits<long long>::max() - val)
           {
-            const long long maxll = std::numeric_limits<long long>::max();
-            if (val > 0 && rowSum > maxll - val)
-            {
-              overflowed = true;
-            }
-            else
-            {
-              rowSum += val;
-            }
+            return false;
           }
+
+          rowSum += val;
+
           ++(*iterIt);
         }
+
         ++seqIt;
         ++iterIt;
       }
@@ -121,11 +132,12 @@ namespace krivoshapov
       {
         break;
       }
+
       std::cout << '\n';
       rowSums.pushBack(rowSum);
     }
 
-    return !overflowed;
+    return true;
   }
 
   static void printSums(const List<long long> &sums)
@@ -135,6 +147,7 @@ namespace krivoshapov
       std::cout << 0 << '\n';
       return;
     }
+
     bool first = true;
     for (auto it = sums.cbegin(); it != sums.cend(); ++it)
     {
@@ -145,6 +158,7 @@ namespace krivoshapov
       std::cout << *it;
       first = false;
     }
+
     std::cout << '\n';
   }
 
@@ -153,11 +167,10 @@ namespace krivoshapov
 int main()
 {
   krivoshapov::List<krivoshapov::NamedSeq> seqs;
-  const bool inputOk = krivoshapov::readInput(seqs);
 
-  if (!inputOk)
+  if (!krivoshapov::readInput(seqs))
   {
-    std::cerr << "Error: integer overflow in input\n";
+    std::cerr << "Error\n";
     return 1;
   }
 
@@ -170,14 +183,14 @@ int main()
   krivoshapov::printNames(seqs);
 
   krivoshapov::List<long long> rowSums;
-  const bool zipOk = krivoshapov::processZip(seqs, rowSums);
 
-  if (!zipOk)
+  if (!krivoshapov::processZip(seqs, rowSums))
   {
-    std::cerr << "Error: overflow when calculating row sums\n";
+    std::cerr << "Error\n";
     return 1;
   }
 
   krivoshapov::printSums(rowSums);
+
   return 0;
 }
