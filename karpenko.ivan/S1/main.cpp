@@ -180,6 +180,62 @@ namespace karpenko
       }
       return *this;
     }
+
+    iterator begin() noexcept
+    {
+      return iterator(head_->next);
+    }
+    const_iterator begin() const noexcept
+    {
+      return const_iterator(head_->next);
+    }
+    iterator end() noexcept
+    {
+      return iterator(head_);
+    }
+    const_iterator end() const noexcept
+    {
+      return const_iterator(head_);
+    }
+
+    bool empty() const noexcept
+    {
+      return head_->next == head_;
+    }
+
+    T& front()
+    {
+      assert(!empty());
+      return *begin();
+    }
+
+    const T& front() const
+    {
+      assert(!empty());
+      return *begin();
+    }
+
+    T& back()
+    {
+      assert(!empty());
+      return *iterator(tail_);
+    }
+
+    const T& back() const
+    {
+      assert(!empty());
+      return *const_iterator(tail_);
+    }
+
+    size_type size() const noexcept
+    {
+      size_type count = 0;
+      for (const_iterator it = begin(); it != end(); ++it)
+      {
+        ++count;
+      }
+      return count;
+    }
   };
 }
 
