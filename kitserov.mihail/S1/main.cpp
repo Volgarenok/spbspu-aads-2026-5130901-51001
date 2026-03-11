@@ -252,13 +252,21 @@ namespace kitserov
     Node* head;
     size_t size;
   };
-  template < class T >
+  template< class T >
   void print_list(List< T >& list)
   {
     for (LIter< T > it = list.begin(); it != list.end(); ++it) {
       std::cout << *it << " ";
     }
     std::cout << "\n";
+  }
+  template< class T >
+  void clear_list_of_lists(List< List< T > > list_of_lists)
+  {
+    for (LIter< List< T > > it = list_of_lists.begin(); it != list_of_lists.end(); ++it) {
+      (*it).clear();
+    }
+    list_of_lists.clear();
   }
 }
 
@@ -267,24 +275,32 @@ int main()
   using namespace kitserov;
   List< std::string > names;
   List< List< int > > list_of_lists;
+  List< int > numbers;
   std::string name;
   while (true) {
-    if (!(std::cin >> name)) {
-      break;
-    }
-    names.insert_tail(name);
-    List< int > numbers;
-    int num;
-    while (std::cin >> num) {
-      numbers.insert_tail(num);
-    }
-    if (std::cin.eof()) {
-      list_of_lists.insert_tail(numbers);
-      break;
-    }
-    if (std::cin.fail()) {
-      std::cin.clear();
-      list_of_lists.insert_tail(numbers);
+    try {
+      if (!(std::cin >> name)) {
+        break;
+      }
+      names.insert_tail(name);
+      int num;
+      while (std::cin >> num) {
+        numbers.insert_tail(num);
+      }
+      if (std::cin.eof()) {
+        list_of_lists.insert_tail(numbers);
+        break;
+      }
+      if (std::cin.fail()) {
+        std::cin.clear();
+        list_of_lists.insert_tail(numbers);
+      }
+    } catch(...) {
+      numbers.clear();
+      names.clear();
+      clear_list_of_lists(list_of_lists);
+      std::cerr << "bad allocated memory\n";
+      return 2;
     }
   }
   if (names.get_size() == 0) {
@@ -314,11 +330,8 @@ int main()
     std::cout << "\n";
   }
   print_list(summes);
+  summes.clear();
   names.clear();
-  for (LIter< List< int > > it = list_of_lists.begin(); it != list_of_lists.end(); ++it) {
-    (*it).clear();
-  }
-  list_of_lists.clear();
-
+  clear_list_of_lists(list_of_lists);
   return 0;
 }
