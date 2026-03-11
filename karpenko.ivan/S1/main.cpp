@@ -475,14 +475,14 @@ int main()
         ++curr;
         ++num_it;
       }
-      
+
       if (num_it != seq_it->second.end())
       {
         new_seq.push_back(*num_it);
         has_numbers = true;
       }
     }
-    
+
     if (!new_seq.empty())
     {
       transposed.push_back(std::move(new_seq));
@@ -536,7 +536,7 @@ int main()
       std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
       return 1;
     }
-    
+
     sums.push_back(sum);
   }
 
