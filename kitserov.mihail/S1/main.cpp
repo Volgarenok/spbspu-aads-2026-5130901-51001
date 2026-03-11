@@ -1,14 +1,14 @@
-#include "list.hpp"
-#include "utils.hpp"
 #include <limits>
 #include <iostream>
 #include <string>
+#include "list.hpp"
+#include "utils.hpp"
 
 int main()
 {
   using namespace kitserov;
   List< std::string > names;
-  List< List< int > > list_of_lists;
+  List< List< int > > listOfLists;
   std::string name;
   while (true) {
     try {
@@ -22,28 +22,27 @@ int main()
         numbers.insert_tail(num);
       }
       if (std::cin.eof()) {
-        list_of_lists.insert_tail(numbers);
+        listOfLists.insert_tail(numbers);
         numbers.clear();
         break;
       }
       if (std::cin.fail()) {
         std::cin.clear();
         std::cin >> std::ws;
-        int next_char = std::cin.peek();
-        if (next_char != EOF && std::isdigit(static_cast< unsigned char >(next_char)))
-        {
+        int nextChar = std::cin.peek();
+        if (nextChar != EOF && std::isdigit(static_cast< unsigned char >(nextChar))) {
           std::cerr << "Overflow\n";
           numbers.clear();
           names.clear();
-          clear_list_of_lists(list_of_lists);
+          clearListOfLists(listOfLists);
           return 1;
         }
-        list_of_lists.insert_tail(numbers);
+        listOfLists.insert_tail(numbers);
       }
       numbers.clear();
-    } catch(...) {
+    } catch (...) {
       names.clear();
-      clear_list_of_lists(list_of_lists);
+      clearListOfLists(listOfLists);
       std::cerr << "bad allocated memory\n";
       return 2;
     }
@@ -53,19 +52,19 @@ int main()
     return 0;
   }
   std::cout << "\n";
-  print_list(names);
-  size_t max_size = 0;
-  for (LIter< List< int > > it = list_of_lists.begin(); it != list_of_lists.end(); ++it) {
+  printList(names);
+  size_t maxSize = 0;
+  for (LIter< List< int > > it = listOfLists.begin(); it != listOfLists.end(); ++it) {
     size_t s = it->get_size();
-    if (s > max_size) {
-      max_size = s;
+    if (s > maxSize) {
+      maxSize = s;
     }
   }
   List< int > summes;
-  for (size_t i = 0; i < max_size; i++) {
+  for (size_t i = 0; i < maxSize; i++) {
     int sum = 0;
-    for (size_t j = 0; j < list_of_lists.get_size(); j++) {
-      List< int >& curList = *(list_of_lists[j]);
+    for (size_t j = 0; j < listOfLists.get_size(); j++) {
+      List< int >& curList = *(listOfLists[j]);
       if (curList.get_size() > i) {
         int val = *(curList[i]);
         std::cout << val << " ";
@@ -73,7 +72,7 @@ int main()
           std::cerr << "Overflow sum\n";
           summes.clear();
           names.clear();
-          clear_list_of_lists(list_of_lists);
+          clearListOfLists(listOfLists);
           return 1;
         }
         sum += val;
@@ -82,9 +81,9 @@ int main()
     summes.insert_tail(sum);
     std::cout << "\n";
   }
-  print_list(summes);
+  printList(summes);
   summes.clear();
   names.clear();
-  clear_list_of_lists(list_of_lists);
+  clearListOfLists(listOfLists);
   return 0;
 }

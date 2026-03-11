@@ -1,26 +1,27 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include "list.hpp"
 #include <iostream>
+#include "list.hpp"
 
 namespace kitserov
 {
   template< class T >
-  void print_list(List< T >& list)
+  void printList(List< T >& list)
   {
     for (LIter< T > it = list.begin(); it != list.end(); ++it) {
       std::cout << *it << " ";
     }
     std::cout << "\n";
   }
+
   template< class T >
-  void clear_list_of_lists(List< List< T > >& list_of_lists)
+  void clearListOfLists(List< List< T > >& listOfLists)
   {
-    for (LIter< List< T > > it = list_of_lists.begin(); it != list_of_lists.end(); ++it) {
-      (*it).clear();
+    for (LIter< List< T > > it = listOfLists.begin(); it != listOfLists.end(); ++it) {
+      it->clear();
     }
-    list_of_lists.clear();
+    listOfLists.clear();
   }
 }
 
