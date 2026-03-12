@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include <stdexcept>
 #include <string>
 
 #include "list.hpp"
@@ -8,7 +9,7 @@
 namespace krivoshapov
 {
 
-  static bool readInput(List<NamedSeq> &seqs)
+  static void readInput(List<NamedSeq> &seqs)
   {
     std::string name;
     while (std::cin >> name)
@@ -16,47 +17,39 @@ namespace krivoshapov
       NamedSeq seq(name);
       while (true)
       {
-        int p = std::cin.peek();
+        const int p = std::cin.peek();
         if (p == '\n' || p == EOF)
         {
           break;
         }
-
         if (p == ' ' || p == '\t')
         {
           std::cin.get();
           continue;
         }
-
         if ((p >= 'a' && p <= 'z') || (p >= 'A' && p <= 'Z'))
         {
           break;
         }
-
-        unsigned long long raw = 0;
-
+        size_t raw = 0;
         if (!(std::cin >> raw))
         {
-          return false;
+          throw std::overflow_error("integer overflow in input");
         }
-
-        if (raw > static_cast<unsigned long long>(std::numeric_limits<int>::max()))
+        const size_t maxVal =
+            static_cast<size_t>(std::numeric_limits<int>::max());
+        if (raw > maxVal)
         {
-          return false;
+          throw std::overflow_error("integer overflow in input");
         }
-
         seq.nums.pushBack(static_cast<int>(raw));
       }
-
       if (!std::cin.eof())
       {
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
       }
-
       seqs.pushBack(static_cast<NamedSeq &&>(seq));
     }
-
-    return true;
   }
 
   static void printNames(const List<NamedSeq> &seqs)
@@ -74,7 +67,7 @@ namespace krivoshapov
     std::cout << '\n';
   }
 
-  static bool processZip(List<NamedSeq> &seqs, List<long long> &rowSums)
+  static void processZip(List<NamedSeq> &seqs, List<size_t> &rowSums)
   {
     List<LIter<int>> iters;
     for (auto it = seqs.begin(); it != seqs.end(); ++it)
@@ -85,7 +78,7 @@ namespace krivoshapov
     while (true)
     {
       bool rowHasData = false;
-      long long rowSum = 0;
+      size_t rowSum = 0;
       bool firstInRow = true;
 
       auto iterIt = iters.begin();
@@ -95,27 +88,23 @@ namespace krivoshapov
       {
         if (*iterIt != seqIt->nums.end())
         {
-          int val = **iterIt;
-
+          const int val = **iterIt;
           if (!firstInRow)
           {
             std::cout << ' ';
           }
-
           std::cout << val;
           firstInRow = false;
           rowHasData = true;
 
-          if (rowSum > std::numeric_limits<long long>::max() - val)
+          const size_t maxst = std::numeric_limits<size_t>::max();
+          if (rowSum > maxst - static_cast<size_t>(val))
           {
-            return false;
+            throw std::overflow_error("overflow when calculating row sums");
           }
-
-          rowSum += val;
-
+          rowSum += static_cast<size_t>(val);
           ++(*iterIt);
         }
-
         ++seqIt;
         ++iterIt;
       }
@@ -124,22 +113,18 @@ namespace krivoshapov
       {
         break;
       }
-
       std::cout << '\n';
       rowSums.pushBack(rowSum);
     }
-
-    return true;
   }
 
-  static void printSums(const List<long long> &sums)
+  static void printSums(const List<size_t> &sums)
   {
     if (sums.empty())
     {
       std::cout << 0 << '\n';
       return;
     }
-
     bool first = true;
     for (auto it = sums.cbegin(); it != sums.cend(); ++it)
     {
@@ -150,7 +135,6 @@ namespace krivoshapov
       std::cout << *it;
       first = false;
     }
-
     std::cout << '\n';
   }
 
@@ -159,10 +143,13 @@ namespace krivoshapov
 int main()
 {
   krivoshapov::List<krivoshapov::NamedSeq> seqs;
-
-  if (!krivoshapov::readInput(seqs))
+  try
   {
-    std::cerr << "Error\n";
+    krivoshapov::readInput(seqs);
+  }
+  catch (const std::exception &e)
+  {
+    std::cerr << e.what() << '\n';
     return 1;
   }
 
@@ -174,15 +161,17 @@ int main()
 
   krivoshapov::printNames(seqs);
 
-  krivoshapov::List<long long> rowSums;
-
-  if (!krivoshapov::processZip(seqs, rowSums))
+  krivoshapov::List<size_t> rowSums;
+  try
   {
-    std::cerr << "Error\n";
+    krivoshapov::processZip(seqs, rowSums);
+  }
+  catch (const std::exception &e)
+  {
+    std::cerr << e.what() << '\n';
     return 1;
   }
 
   krivoshapov::printSums(rowSums);
-
   return 0;
 }
