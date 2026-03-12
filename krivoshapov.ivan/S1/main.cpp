@@ -15,40 +15,18 @@ namespace krivoshapov
     while (std::cin >> name)
     {
       NamedSeq seq(name);
-      while (true)
+      if (std::cin.eof())
       {
-        const int p = std::cin.peek();
-        if (p == '\n' || p == EOF)
-        {
-          break;
-        }
-        if (p == ' ' || p == '\t')
-        {
-          std::cin.get();
-          continue;
-        }
-        if ((p >= 'a' && p <= 'z') || (p >= 'A' && p <= 'Z'))
-        {
-          break;
-        }
-        size_t raw = 0;
-        if (!(std::cin >> raw))
-        {
-          throw std::overflow_error("integer overflow in input");
-        }
-        const size_t maxVal =
-            static_cast<size_t>(std::numeric_limits<int>::max());
-        if (raw > maxVal)
-        {
-          throw std::overflow_error("integer overflow in input");
-        }
-        seq.nums.pushBack(static_cast<int>(raw));
+        seqs.pushBack(static_cast<NamedSeq &&>(seq));
+        break;
       }
-      if (!std::cin.eof())
+      size_t num = 0;
+      while (std::cin >> num)
       {
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        seq.nums.pushBack(num);
       }
       seqs.pushBack(static_cast<NamedSeq &&>(seq));
+      std::cin.clear();
     }
   }
 
@@ -67,9 +45,19 @@ namespace krivoshapov
     std::cout << '\n';
   }
 
+  static size_t checkedSum(size_t a, size_t b)
+  {
+    const size_t maxst = std::numeric_limits<size_t>::max();
+    if (maxst - a < b)
+    {
+      throw std::overflow_error("overflow when calculating row sums");
+    }
+    return a + b;
+  }
+
   static void processZip(List<NamedSeq> &seqs, List<size_t> &rowSums)
   {
-    List<LIter<int>> iters;
+    List<LIter<size_t>> iters;
     for (auto it = seqs.begin(); it != seqs.end(); ++it)
     {
       iters.pushBack(it->nums.begin());
@@ -78,8 +66,7 @@ namespace krivoshapov
     while (true)
     {
       bool rowHasData = false;
-      size_t rowSum = 0;
-      bool firstInRow = true;
+      List<size_t> rowVals;
 
       auto iterIt = iters.begin();
       auto seqIt = seqs.begin();
@@ -88,21 +75,8 @@ namespace krivoshapov
       {
         if (*iterIt != seqIt->nums.end())
         {
-          const int val = **iterIt;
-          if (!firstInRow)
-          {
-            std::cout << ' ';
-          }
-          std::cout << val;
-          firstInRow = false;
+          rowVals.pushBack(**iterIt);
           rowHasData = true;
-
-          const size_t maxst = std::numeric_limits<size_t>::max();
-          if (rowSum > maxst - static_cast<size_t>(val))
-          {
-            throw std::overflow_error("overflow when calculating row sums");
-          }
-          rowSum += static_cast<size_t>(val);
           ++(*iterIt);
         }
         ++seqIt;
@@ -113,7 +87,24 @@ namespace krivoshapov
       {
         break;
       }
+
+      bool firstInRow = true;
+      for (auto it = rowVals.cbegin(); it != rowVals.cend(); ++it)
+      {
+        if (!firstInRow)
+        {
+          std::cout << ' ';
+        }
+        std::cout << *it;
+        firstInRow = false;
+      }
       std::cout << '\n';
+
+      size_t rowSum = 0;
+      for (auto it = rowVals.cbegin(); it != rowVals.cend(); ++it)
+      {
+        rowSum = checkedSum(rowSum, *it);
+      }
       rowSums.pushBack(rowSum);
     }
   }

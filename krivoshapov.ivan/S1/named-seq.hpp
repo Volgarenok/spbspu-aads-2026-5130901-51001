@@ -10,7 +10,7 @@ namespace krivoshapov
   struct NamedSeq
   {
     std::string name;
-    List<int> nums;
+    List<size_t> nums;
 
     explicit NamedSeq(const std::string &n) : name(n),
                                               nums()
