@@ -131,6 +131,12 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
     out << '\n';
   }
 
+  if (overflow)
+  {
+    err << "overflow\n";
+    return 1;
+  }
+
   if (sums.empty())
   {
     out << 0 << '\n';
@@ -150,11 +156,6 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
     out << '\n';
   }
 
-  if (overflow)
-  {
-    err << "overflow\n";
-    return 1;
-  }
   return 0;
 }
 
