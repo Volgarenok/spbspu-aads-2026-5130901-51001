@@ -19,7 +19,7 @@ namespace kitserov
       node_(nullptr)
     {}
 
-    explicit LIter(typename List< T >::Node* n) :
+    LIter(typename List< T >::Node* n) :
       node_(n)
     {}
 
@@ -125,8 +125,29 @@ namespace kitserov
       clear();
     }
 
-    List(const List&) = delete;
-    List& operator=(const List&) = delete;
+    List(List& other)
+    {
+      for (LIter< T > it = other.begin(); it != other.end(); ++it) {
+        insert_tail(T(*it));
+      }
+    }
+    void operator()(List& other)
+    {
+      (*this).swap(other);
+    }
+    void swap(List& other) noexcept
+    {
+      std::swap(head_, other.head_);
+      std::swap(size_, other.size_);
+    }
+    List& operator=(List& other)
+    {
+      if (this != &other) {
+        List tmp(other);
+        swap(tmp);
+      }
+      return *this;
+    }
 
     List(List&& other) noexcept :
       head_(other.head_),
@@ -222,6 +243,14 @@ namespace kitserov
     }
 
     LIter< T > insert_tail(T& v)
+    {
+      if (size_ == 0) {
+        return add(v);
+      }
+      return insert(v, (*this)[size_ - 1]);
+    }
+
+    LIter< T > insert_tail(T&& v)
     {
       if (size_ == 0) {
         return add(v);

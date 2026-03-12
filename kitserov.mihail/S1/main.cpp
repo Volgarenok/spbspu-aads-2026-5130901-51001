@@ -10,6 +10,7 @@ int main()
   List< std::string > names;
   List< List< int > > listOfLists;
   std::string name;
+  bool hasNumbers = false;
   while (true) {
     try {
       if (!(std::cin >> name)) {
@@ -17,29 +18,34 @@ int main()
       }
       names.insert_tail(name);
       List< int > numbers;
-      int num;
-      while (std::cin >> num) {
-        numbers.insert_tail(num);
-      }
-      if (std::cin.eof()) {
-        listOfLists.insert_tail(numbers);
-        numbers.clear();
-        break;
-      }
-      if (std::cin.fail()) {
-        std::cin.clear();
-        std::cin >> std::ws;
-        int nextChar = std::cin.peek();
-        if (nextChar != EOF && std::isdigit(static_cast< unsigned char >(nextChar))) {
+      size_t value;
+      while (true) {
+        if(!(std::cin >> value)) {
+          if (std::cin.eof()) break;
+          std::cin.clear();
+          std::cin >> std::ws;
+          int nextChar = std::cin.peek();
+          if (nextChar != EOF && std::isdigit(static_cast< unsigned char >(nextChar))) {
+            std::cerr << "Overflow\n";
+            numbers.clear();
+            names.clear();
+            clearListOfLists(listOfLists);
+            return 1;
+          }
+          break;
+        }
+        if (value > std::numeric_limits< int >::max()) {
           std::cerr << "Overflow\n";
           numbers.clear();
           names.clear();
           clearListOfLists(listOfLists);
           return 1;
         }
-        listOfLists.insert_tail(numbers);
+        int intValue = static_cast< int >(value);
+        numbers.insert_tail(intValue);
+        hasNumbers = true;
       }
-      numbers.clear();
+      listOfLists.insert_tail(numbers);
     } catch (...) {
       names.clear();
       clearListOfLists(listOfLists);
@@ -47,8 +53,8 @@ int main()
       return 2;
     }
   }
-  if (names.get_size() == 0) {
-    std::cout << "0\n";
+  if (names.get_size() == 0 || !hasNumbers) {
+    std::cout << "\n0\n";
     return 0;
   }
   std::cout << "\n";
