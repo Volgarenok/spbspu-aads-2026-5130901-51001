@@ -34,6 +34,19 @@ T get_element_at(const List< T >& list, size_t index) {
   return *it;
 }
 
+bool read_number(const std::string& token, unsigned long long& result) {
+  if (token.empty()) return false;
+
+  char* endptr;
+  errno = 0;
+  result = strtoull(token.c_str(), &endptr, 10);
+
+  if (errno == ERANGE || *endptr != '\0') {
+    return false;
+  }
+  return true;
+}
+
 }
 int main() {
   using namespace losev;
@@ -51,6 +64,11 @@ int main() {
         std::cin.clear();
         std::string token;
         std::cin >> token;
+        unsigned long long big_num;
+        if (!read_number(token, big_num)) {
+          std::cerr << "overflow" << std::endl;
+          std::exit(1);
+        }
         std::cerr << "overflow" << "\n";
         std::exit(1);
       }
