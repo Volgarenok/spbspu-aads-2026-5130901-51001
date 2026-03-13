@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <limits>
 #include "list.h"
 
 namespace losev {
@@ -31,7 +32,39 @@ T get_element_at(const List< T >& list, size_t index) {
   return *it;
 }
 
+bool add_checked(size_t a, size_t b, size_t& result) {
+  if (b > std::numeric_limits<size_t>::max() - a) {
+    return false;
+  }
+  result = a + b;
+  return true;
 }
+
+void skip_spaces(std::istream& in) {
+  while (in.peek() == ' ' || in.peek() == '\t') {
+    in.get();
+  }
+}
+
+bool is_line_end(std::istream& in) {
+  int c = in.peek();
+  return c == '\n' || c == '\r' || c == EOF;
+}
+
+void skip_line(std::istream& in) {
+  while (!is_line_end(in)) {
+    in.get();
+  }
+  if (in.peek() == '\r') {
+    in.get();
+  }
+  if (in.peek() == '\n') {
+    in.get();
+  }
+}
+
+}
+
 int main() {
   using namespace losev;
 
@@ -42,23 +75,20 @@ int main() {
   while (std::cin >> name) {
     NamedList seq;
     seq.name = name;
+    skip_spaces(std::cin);
 
-    int num;
-    while (std::cin.peek() != '\n' && std::cin.peek() != EOF) {
+    while (!is_line_end(std::cin)) {
+      size_t num = 0;
       if (!(std::cin >> num)) {
         overflow_detected = true;
         std::cin.clear();
-        std::string token;
-        std::cin >> token;
+        skip_line(std::cin);
         break;
       }
       seq.numbers.push_front(num);
+      skip_spaces(std::cin);
     }
-
-    if (std::cin.peek() == '\n') {
-      std::cin.ignore();
-    }
-
+    skip_line(std::cin);
     seq.numbers = reverse(seq.numbers);
     sequences.push_front(seq);
   }
@@ -66,7 +96,7 @@ int main() {
   sequences = reverse(sequences);
 
   if (sequences.empty()) {
-    std::cout << "0" << "\n";
+    std::cout << "0\n";
     return 0;
   }
 
@@ -84,50 +114,61 @@ int main() {
     if (len > max_len) max_len = len;
   }
 
+  if (max_len == 0) {
+    std::cout << "0\n";
+    return 0;
+  }
+
   for (size_t i = 0; i < max_len; ++i) {
     first = true;
     for (List< NamedList >::iterator seq_it = sequences.begin(); seq_it != sequences.end(); ++seq_it) {
       size_t len = length(seq_it->numbers);
       if (i < len) {
-        int value = get_element_at(seq_it->numbers, i);
         if (!first) std::cout << " ";
-        std::cout << value;
+        std::cout << get_element_at(seq_it->numbers, i);
         first = false;
       }
     }
     std::cout << "\n";
   }
 
-  if (!overflow_detected) {
-    List< int > row_sums;
-    for (size_t i = 0; i < max_len; ++i) {
-      row_sums.push_front(0);
-    }
-    row_sums = reverse(row_sums);
 
-    for (size_t i = 0; i < max_len; ++i) {
-      List< int >::iterator sum_it = row_sums.begin();
-      for (size_t pos = 0; pos < i; ++pos) ++sum_it;
+  bool first_sum = true;
+  bool sum_overflow = false;
 
-      for (List< NamedList >::iterator seq_it = sequences.begin(); seq_it != sequences.end(); ++seq_it) {
-        size_t len = length(seq_it->numbers);
-        if (i < len) {
-          int value = get_element_at(seq_it->numbers, i);
-          *sum_it += value;
+  for (size_t i = 0; i < max_len; ++i) {
+    size_t sum = 0;
+    bool row_overflow = false;
+    for (List< NamedList >::iterator seq_it = sequences.begin(); seq_it != sequences.end(); ++seq_it) {
+      size_t len = length(seq_it->numbers);
+      if (i < len) {
+        size_t val = get_element_at(seq_it->numbers, i);
+        size_t new_sum;
+        if (!add_checked(sum, val, new_sum)) {
+          row_overflow = true;
+          sum_overflow = true;
+        } else {
+          sum = new_sum;
         }
       }
     }
 
-    first = true;
-    for (List< int >::iterator sum_it = row_sums.begin(); sum_it != row_sums.end(); ++sum_it) {
-      if (!first) std::cout << " ";
-      std::cout << *sum_it;
-      first = false;
+    if (!row_overflow) {
+      if (!first_sum) std::cout << " ";
+      std::cout << sum;
+      first_sum = false;
     }
-    std::cout << "\n";
-    return 0;
-  } else {
-    std::cerr << "overflow" << "\n";
+  }
+
+  if (first_sum) {
+    std::cout << "0";
+  }
+  std::cout << "\n";
+
+  if (sum_overflow || overflow_detected) {
+    std::cerr << "overflow\n";
     return 1;
   }
+
+  return 0;
 }

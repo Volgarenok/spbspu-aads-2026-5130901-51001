@@ -48,6 +48,7 @@ public:
   LCIter operator++(int);
   bool operator==(const LCIter& other) const;
   bool operator!=(const LCIter& other) const;
+  LCIter(const LIter<T>& iter);
 };
 
 template<class T>

@@ -90,6 +90,9 @@ bool LCIter<T>::operator!=(const LCIter& other) const {
   return ptr_ != other.ptr_;
 }
 
+template<class T>
+LCIter<T>::LCIter(const LIter<T>& iter) : ptr_(iter.ptr_) {}
+
 // List
 template<class T>
 List<T>::List(const List& other) : head_(nullptr) {
@@ -144,4 +147,6 @@ template class LCIter<int>;
 template class LCIter<NamedList>;
 template class List<int>;
 template class List<NamedList>;
+template LCIter<int>::LCIter(const LIter<int>&);
+template LCIter<NamedList>::LCIter(const LIter<NamedList>&);
 }
