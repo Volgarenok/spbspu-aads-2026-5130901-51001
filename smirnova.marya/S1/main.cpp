@@ -254,44 +254,52 @@ int main() {
     bool overflowOccurred = false;
 
     while(std::getline(std::cin, line)) {
-        if(line.empty()) continue;
+      if(line.empty()) continue;
 
-        std::istringstream iss(line);
-        std::string name;
-        iss >> name;
+      std::istringstream iss(line);
+      std::string name;
+      iss >> name;
 
-        List<int> numbers;
-        std::string token;
-        while(iss >> token) {
-            try {
-                long long val = std::stoll(token);
-                if(val > INT_MAX || val < INT_MIN) throw std::overflow_error("overflow");
-                numbers.push_back(static_cast<int>(val));
-            } catch(...) {
-                overflowOccurred = true;
-            }
-        }
-        sequences.push_back({name, std::move(numbers)});
-    }
+      List<int> numbers;
+      std::string token;
+      while(iss >> token) {
+          try {
+              long long val = std::stoll(token);
+              if(val > INT_MAX || val < INT_MIN) {
+                  overflowOccurred = true;  // переполнение при чтении
+              } else {
+                  numbers.push_back(static_cast<int>(val));
+              }
+          } catch(...) {
+              overflowOccurred = true;
+          }
+      }
+      sequences.push_back({name, std::move(numbers)});
+  }
 
-    // Выводим имена
-    bool first = true;
-    for(LCIter<std::pair<std::string, List<int>>> it = sequences.cbegin(); it.valid(); it.next()) {
-        if(!first) std::cout << " ";
-        std::cout << it.value().first;
-        first = false;
-    }
-    std::cout << "\n";
+  // Выводим имена
+  bool first = true;
+  for(LCIter<std::pair<std::string, List<int>>> it = sequences.cbegin(); it.valid(); it.next()) {
+      if(!first) std::cout << " ";
+      std::cout << it.value().first;
+      first = false;
+  }
+  std::cout << "\n";
 
-    if(sequences.empty()) { std::cout << "0\n"; return 0; }
+  // Обработка пустого списка
+  if(sequences.empty()) {
+      std::cout << "0\n";
+      return 0;
+  }
 
-    if(overflowOccurred) {
-        std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-        return 1;
-    }
+  // Проверка переполнения после чтения чисел
+  if(overflowOccurred) {
+      std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
+      return 1;
+  }
 
-    if(!processSequences(sequences)) return 1;
+  // Обработка чисел по строкам с проверкой переполнения при сумме
+  if(!processSequences(sequences)) return 1;
 
-    return 0;
+  return 0;
 }
-
