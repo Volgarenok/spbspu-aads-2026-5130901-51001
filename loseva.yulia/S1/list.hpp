@@ -19,6 +19,8 @@ private:
   Node* head;
   Node* tail;
   size_t size;
+  void clear() noexcept;
+  void copy_from(const List& other);
 public:
   class Iterator {
     friend class List<T>;
@@ -80,6 +82,14 @@ public:
   explicit List(size_t count, const T& value = T());
   List(std::initializer_list<T> init);
   ~List();
+
+  List(const List& other);
+  List(List&& other) noexcept;
+
+  List& operator=(const List& other);
+  List& operator=(List&& other) noexcept;
+  List& operator=(std::initializer_list<T> init);
+
   T& front();
   const T& front() const;
   T& back();
