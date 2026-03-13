@@ -46,7 +46,9 @@ int main()
     }
   }
   if (names.get_size() == 0 || !hasNumbers) {
-    printList(names);
+    if (names.get_size() != 0) {
+      printList(names);
+    }
     std::cout << "0\n";
     names.clear();
     return 0;
