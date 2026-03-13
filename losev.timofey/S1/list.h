@@ -26,6 +26,7 @@ public:
   LCIter operator++(int);
   bool operator==(const LCIter& other) const;
   bool operator!=(const LCIter& other) const;
+  const T* operator->() const;
 };
 
 template<class T>
@@ -41,6 +42,8 @@ public:
   const T& operator*() const;
   LIter& operator++();
   LIter operator++(int);
+  T* operator->();
+  const T* operator->() const;
 };
 
 template<class T>
@@ -58,6 +61,8 @@ public:
 
   List(const List& other);
 
+  ~List();
+
   bool empty() const { return head_ == nullptr; }
 
   void push_front(const T& value) {
@@ -71,6 +76,7 @@ public:
     delete temp;
   }
 
+  void clear();
 
 private:
   Node<T>* head_;

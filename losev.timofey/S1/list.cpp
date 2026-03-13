@@ -98,6 +98,30 @@ void List<T>::copy_from(const List& other) {
     current_other = current_other->next;
   }
 }
+
+template<class T>
+List<T>::~List() {
+  clear();
+}
+
+template<class T>
+void List<T>::clear() {
+  while (head_ != nullptr) {
+    Node<T>* temp = head_;
+    head_ = head_->next;
+    delete temp;
+  }
+}
+
+template<class T>
+T* LIter<T>::operator->() { return &(ptr_->data); }
+
+template<class T>
+const T* LIter<T>::operator->() const { return &(ptr_->data); }
+
+template<class T>
+const T* LCIter<T>::operator->() const { return &(ptr_->data); }
+
 template struct Node<int>;
 template class List<int>;
 template class LIter<int>;
