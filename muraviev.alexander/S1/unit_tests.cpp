@@ -88,3 +88,35 @@ BOOST_AUTO_TEST_CASE(test_list_pop_back)
   }
   BOOST_TEST(i == 2);
 }
+
+BOOST_AUTO_TEST_CASE(test_list_erase_middle)
+{
+  List< int > lst;
+  lst.pushFront(3);
+  lst.pushFront(2);
+  lst.pushFront(1);
+
+  List< int >::iter it = lst.begin();
+  ++it;
+  lst.erase(it);
+
+  int expected[2] = {1, 3};
+  size_t i = 0;
+  for (List< int >::c_iter jt = lst.begin(); jt != lst.end(); ++jt) {
+    BOOST_TEST(*jt == expected[i]);
+    ++i;
+  }
+  BOOST_TEST(i == 2);
+}
+
+BOOST_AUTO_TEST_CASE(test_list_clear)
+{
+  List< int > lst;
+  lst.pushFront(1);
+  lst.pushFront(2);
+  lst.pushFront(3);
+
+  lst.clear();
+
+  BOOST_TEST(lst.empty());
+}
