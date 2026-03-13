@@ -89,7 +89,7 @@ private:
   const Node< T >* ptr_;
 };
 
-template< typename T >
+template< class T >
 class LIter
 {
   friend class List< T >;
@@ -163,3 +163,44 @@ private:
   Node< T >* ptr_;
 };
 
+template< class T >
+class List
+{
+public:
+  using iterator = LIter< T >;
+  using const_iterator = LCIter< T >;
+  
+  List() :
+  head_(nullptr),
+  tail_(nullptr),
+  size_(0)
+  {
+  }
+  
+  List(const List& other) :
+  head_(nullptr),
+  tail_(nullptr),
+  size_(0)
+  {
+    try
+    {
+    }
+    catch (...)
+    {
+    }
+  }
+  
+  List(List&& other) noexcept :
+  head_(other.head_),
+  tail_(other.tail_),
+  size_(other.size_)
+  {
+    other.head_ = nullptr;
+    other.tail_ = nullptr;
+    other.size_ = 0;
+  }
+  
+  ~List()
+  {
+    this->clear();
+  }
