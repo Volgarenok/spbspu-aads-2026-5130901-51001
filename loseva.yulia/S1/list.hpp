@@ -28,3 +28,14 @@ public:
   const T& front() const;
   T& back();
   const T& back() const;
+  bool empty() const noexcept;
+  size_t get_size() const noexcept;
+  void push_front(const T& value);
+  void push_front(T&& value);
+  void push_back(const T& value);
+  void push_back(T&& value);
+  void pop_front();
+  void pop_back();
+  void clear();
+  };
+}
