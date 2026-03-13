@@ -5,27 +5,27 @@
 
 namespace losev {
 
-template<typename T>
-List<T> reverse(const List<T>& list) {
-  List<T> result;
-  for (typename List<T>::const_iterator it = list.begin(); it != list.end(); ++it) {
+template< typename T >
+List< T > reverse(const List< T >& list) {
+  List< T > result;
+  for (typename List< T >::const_iterator it = list.begin(); it != list.end(); ++it) {
     result.push_front(*it);
   }
   return result;
 }
 
-template<typename T>
-size_t length(const List<T>& list) {
+template< typename T >
+size_t length(const List< T >& list) {
   size_t len = 0;
-  for (typename List<T>::const_iterator it = list.begin(); it != list.end(); ++it) {
+  for (typename List< T >::const_iterator it = list.begin(); it != list.end(); ++it) {
     ++len;
   }
   return len;
 }
 
-template<typename T>
-T get_element_at(const List<T>& list, size_t index) {
-  typename List<T>::const_iterator it = list.begin();
+template< typename T >
+T get_element_at(const List< T >& list, size_t index) {
+  typename List< T >::const_iterator it = list.begin();
   for (size_t i = 0; i < index; ++i) {
     ++it;
   }
@@ -37,7 +37,7 @@ T get_element_at(const List<T>& list, size_t index) {
 int main() {
   using namespace losev;
 
-  List<NamedList> sequences;
+  List< NamedList > sequences;
   std::string name;
 
   while (std::cin >> name) {
@@ -62,7 +62,7 @@ int main() {
   }
 
   bool first = true;
-  for (List<NamedList>::iterator it = sequences.begin(); it != sequences.end(); ++it) {
+  for (List< NamedList >::iterator it = sequences.begin(); it != sequences.end(); ++it) {
     if (!first) std::cout << " ";
     std::cout << it->name;
     first = false;
@@ -70,12 +70,12 @@ int main() {
   std::cout << std::endl;
 
   size_t max_len = 0;
-  for (List<NamedList>::iterator seq_it = sequences.begin(); seq_it != sequences.end(); ++seq_it) {
+  for (List< NamedList >::iterator seq_it = sequences.begin(); seq_it != sequences.end(); ++seq_it) {
     size_t len = length(seq_it->numbers);
     if (len > max_len) max_len = len;
   }
 
-  List<int> row_sums;
+  List< int > row_sums;
   for (size_t i = 0; i < max_len; ++i) {
     row_sums.push_front(0);
   }
@@ -83,10 +83,10 @@ int main() {
 
   for (size_t i = 0; i < max_len; ++i) {
     first = true;
-    List<int>::iterator sum_it = row_sums.begin();
+    List< int >::iterator sum_it = row_sums.begin();
     for (size_t pos = 0; pos < i; ++pos) ++sum_it;
 
-    for (List<NamedList>::iterator seq_it = sequences.begin(); seq_it != sequences.end(); ++seq_it) {
+    for (List< NamedList >::iterator seq_it = sequences.begin(); seq_it != sequences.end(); ++seq_it) {
       size_t len = length(seq_it->numbers);
       if (i < len) {
         int value = get_element_at(seq_it->numbers, i);
@@ -100,7 +100,7 @@ int main() {
   }
 
   first = true;
-  for (List<int>::iterator sum_it = row_sums.begin(); sum_it != row_sums.end(); ++sum_it) {
+  for (List< int >::iterator sum_it = row_sums.begin(); sum_it != row_sums.end(); ++sum_it) {
     if (!first) std::cout << " ";
     std::cout << *sum_it;
     first = false;
