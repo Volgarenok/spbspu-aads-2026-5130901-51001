@@ -139,12 +139,14 @@ void List<T>::clear() {
   }
 }
 
-template struct Node<int>;
+template struct Node<size_t>;
 template struct Node<NamedList>;
-template class LIter<int>;
+template class LIter<size_t>;
 template class LIter<NamedList>;
-template class LCIter<int>;
+template class LCIter<size_t>;
 template class LCIter<NamedList>;
-template class List<int>;
+template class List<size_t>;
 template class List<NamedList>;
+template LCIter<size_t>::LCIter(const LIter<size_t>&);
+template LCIter<NamedList>::LCIter(const LIter<NamedList>&);
 }
