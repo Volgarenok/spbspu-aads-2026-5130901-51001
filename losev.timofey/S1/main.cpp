@@ -131,6 +131,6 @@ int main() {
     first = false;
   }
   std::cout << std::endl;
-  
+
   return 0;
 }
