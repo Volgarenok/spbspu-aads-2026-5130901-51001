@@ -1,17 +1,6 @@
 #include <iostream>
 
 namespace petrenko {
-  template< class T > class List;
-  template< class T >
-  class LIter {
-  friend class List< T >;
-  ...
-  };
-  template< class T >
-  class LCIter {
-  friend class List< T >;
-  ...
-  };
   template< class T >
   class List {
   public:
@@ -24,19 +13,90 @@ namespace petrenko {
   private:
     size_t Size;
 
-    template<typename T>
     class Node {
     public:
       Node * pNext;
       T data;
 
-      Node(T data = T(), Node *pNext = nullptr)
-      {
+      Node(T data = T(), Node *pNext = nullptr) {
 	this->data = data;
 	this->pNext = pNext;
       }
     };
+
+    Node *head;
   };
+
+  template< class T >
+  class LIter {
+  friend class List< T >;
+  //
+  };
+  template< class T >
+  class LCIter {
+  friend class List< T >;
+  //
+  };
+
+  template< class T >
+  List<T>::List() {
+    Size = 0;
+    head = nullptr;
+  }
+
+  template< class T >
+  List<T>::~List() {
+    clear();
+  }
+
+  template< class T >
+  void List<T>::insert(T data, int index) {
+    if (index == 0) {
+      head = new Node(data, head);
+      ++Size;
+    } else {
+      Node *previous = this->head;
+
+      for (int i = 0; i < index - 1; i++) {
+        previous = previous->pNext;
+      }
+
+      Node *newNode = new Node(data, previous->pNext);
+      previous->pNext = newNode;
+      Size++;
+    }
+  }
+
+  template< class T >
+  void List<T>::removeAt(int index) {
+    if (index == 0) {
+      Node *temp = head;
+      head = head->pNext;
+      delete temp;
+      Size--;
+    } else {
+      Node *previous = this->head;
+      for (int i = 0; i < index - 1; i++) {
+        previous = previous->pNext;
+      }
+
+      Node *toDelete = previous->pNext;
+      previous->pNext = toDelete->pNext;
+
+      delete toDelete;
+      Size--;
+    }
+  }
+
+  template< class T >
+  void List<T>::clear() {
+    while (Size) {
+      Node *temp = head;
+      head = head->pNext;
+      delete temp;
+      Size--;
+    }
+  }
 }
 
 int main()
