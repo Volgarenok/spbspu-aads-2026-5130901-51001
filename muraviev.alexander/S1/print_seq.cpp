@@ -28,3 +28,24 @@ size_t muraviev::getValueAt(const List< size_t >& numbers, size_t index)
   return 0;
 }
 
+size_t muraviev::sumChecked(size_t left, size_t right)
+{
+  if (std::numeric_limits< size_t >::max() - left < right) {
+    throw std::overflow_error("sum overflow");
+  }
+  return left + right;
+}
+
+size_t muraviev::getRowSum(const List< namedSequence >& sequences, size_t index)
+{
+  size_t sum = 0;
+
+  for (List< namedSequence >::c_iter it = sequences.begin(); it != sequences.end(); ++it) {
+    if (hasIndex(it->numbers, index)) {
+      size_t value = getValueAt(it->numbers, index);
+      sum = sumChecked(sum, value);
+    }
+  }
+
+  return sum;
+}
