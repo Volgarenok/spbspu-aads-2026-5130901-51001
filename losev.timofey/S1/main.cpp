@@ -125,7 +125,6 @@ int main() {
       first = false;
     }
     std::cout << "\n";
-    
     return 0;
   } else {
     std::cerr << "overflow" << "\n";
