@@ -71,11 +71,15 @@ int main()
   List< int > summes;
   for (size_t i = 0; i < maxSize; i++) {
     int sum = 0;
-    for (size_t j = 0; j < listOfLists.get_size(); j++) {
+    size_t s = listOfLists.get_size();
+    for (size_t j = 0; j < s; j++) {
       List< int >& curList = *(listOfLists[j]);
       if (curList.get_size() > i) {
         int val = *(curList[i]);
-        std::cout << val << " ";
+        std::cout << val;
+        if (j + 1 != s) {
+          std::cout << " ";
+        }
         if (sum > std::numeric_limits< int >::max() - val) {
           std::cerr << "Overflow sum\n";
           summes.clear();
