@@ -1,19 +1,31 @@
 #ifndef SEQUENCE_HPP
 #define SEQUENCE_HPP
 
-#include <string>
-#include <utility>
-#include "list.hpp"
+#include <cstddef>
 
-namespace loseva
+namespace loseva {
+
+template <typename T>
+class Sequence
 {
+public:
+  virtual ~Sequence();
 
-using Seq = List<int>;
-using NamedSeq = std::pair<std::string, Seq>;
-using Storage = List<NamedSeq>;
+  virtual void pushBack(const T &value) = 0;
+  virtual void pushFront(const T &value) = 0;
 
-void read_sequences(Storage& data);
-void print_names(const Storage& data);
+  virtual void popBack() = 0;
+  virtual void popFront() = 0;
+
+  virtual std::size_t size() const = 0;
+  virtual bool empty() const = 0;
+
+  virtual T &front() = 0;
+  virtual const T &front() const = 0;
+
+  virtual T &back() = 0;
+  virtual const T &back() const = 0;
+};
 
 }
 
