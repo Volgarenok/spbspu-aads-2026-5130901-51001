@@ -159,6 +159,7 @@ int main() {
         sum = new_sum;
       }
     }
+
     if (!global_overflow) {
       if (!first_sum) std::cout << " ";
       std::cout << sum;
@@ -170,7 +171,6 @@ int main() {
     std::cerr << "overflow\n";
     return 1;
   }
-
   if (first_sum) {
     std::cout << "0";
   }
