@@ -1,16 +1,14 @@
-#include <iostream>
 #include "sequence.hpp"
 
-namespace yarmolinskaya
-{
+#include <iostream>
 
-void readSequences(List<NamedSequence>& data)
+void yarmolinskaya::readSequences(List< NamedSequence >& data)
 {
   std::string name;
 
   while (std::cin >> name)
   {
-    List<int> nums;
+    List< int > nums;
     int value;
 
     while (std::cin >> value)
@@ -19,31 +17,7 @@ void readSequences(List<NamedSequence>& data)
     }
 
     std::cin.clear();
-    data.push_back(NamedSequence{name, nums});
+
+    data.push_back(NamedSequence(name, std::move(nums)));
   }
-}
-
-void printNames(const List<NamedSequence>& data)
-{
-  bool first = true;
-
-  for (auto it = data.cbegin(); it != data.cend(); ++it)
-  {
-    if (!first)
-    {
-      std::cout << " ";
-    }
-
-    std::cout << (*it).first;
-    first = false;
-  }
-
-  std::cout << "\n";
-}
-
-void processSequences(const List<NamedSequence>&)
-{
-  std::cout << "processing not implemented yet\n";
-}
-
 }
