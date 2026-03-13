@@ -19,8 +19,8 @@ namespace petrenko {
       T data;
 
       Node(T data = T(), Node *pNext = nullptr) {
-	this->data = data;
-	this->pNext = pNext;
+        this->data = data;
+        this->pNext = pNext;
       }
     };
 
