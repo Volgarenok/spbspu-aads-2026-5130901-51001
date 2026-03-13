@@ -21,11 +21,6 @@ namespace yarmolinskaya
     class Iterator
     {
       friend class List< T >;
-    private:
-      Node* node_;
-      explicit Iterator(Node* node):
-        node_(node)
-      {}
 
     public:
       Iterator():
@@ -59,16 +54,17 @@ namespace yarmolinskaya
       {
         return node_ != other.node_;
       }
+
+    private:
+      Node* node_;
+      explicit Iterator(Node* node):
+        node_(node)
+      {}
     };
 
     class ConstIterator
     {
       friend class List< T >;
-    private:
-      Node* node_;
-      explicit ConstIterator(Node* node):
-        node_(node)
-      {}
 
     public:
       ConstIterator():
@@ -102,6 +98,12 @@ namespace yarmolinskaya
       {
         return node_ != other.node_;
       }
+
+    private:
+      Node* node_;
+      explicit ConstIterator(Node* node):
+        node_(node)
+      {}
     };
 
   private:
