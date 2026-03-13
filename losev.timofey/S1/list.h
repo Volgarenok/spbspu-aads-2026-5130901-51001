@@ -21,7 +21,7 @@ struct Node {
 template<class T>
 class LIter {
   friend class List<T>;
-  friend class LCIter<T>; 
+  friend class LCIter<T>;
 private:
   Node<T>* ptr_;
   explicit LIter(Node<T>* ptr = nullptr);
