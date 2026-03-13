@@ -87,6 +87,31 @@ public:
   iterator emplace(const_iterator pos, Args&&... args);
   iterator erase(const_iterator pos);
   iterator erase(const_iterator first, const_iterator last);
+  void splice(const_iterator pos, List& other);
+  void splice(const_iterator pos, List&& other);
+  void splice(const_iterator pos, List& other, const_iterator it);
+  void splice(const_iterator pos, List&& other, const_iterator it);
+  void splice(const_iterator pos, List& other, const_iterator first, const_iterator last);
+  void splice(const_iterator pos, List&& other, const_iterator first, const_iterator last);
+
+  void remove(const T& value);
+  template<typename Predicate>
+  void remove_if(Predicate pred);
+
+  void reverse() noexcept;
+  void unique();
+  template<typename BinaryPredicate>
+  void unique(BinaryPredicate pred);
+  void sort();
+  template<typename Compare>
+  void sort(Compare comp);
+  private:
+    void merge_sort(Node*& start);
+    Node* merge(Node* left, Node* right);
+    template<typename Compare>
+    Node* merge(Node* left, Node* right, Compare comp);
+    void split(Node* source, Node*& front, Node*& back);
+
   template<typename... Args>
   void emplace_front(Args&&... args);
   template<typename... Args>
