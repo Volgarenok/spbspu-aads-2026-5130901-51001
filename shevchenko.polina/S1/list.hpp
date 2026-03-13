@@ -184,9 +184,15 @@ public:
   {
     try
     {
+      for (Node< T >* curr = other.head_; curr != nullptr; curr = curr->next)
+      {
+        this->pushBack(curr->data);
+      }
     }
     catch (...)
     {
+      this->clear();
+      throw;
     }
   }
   
@@ -203,4 +209,29 @@ public:
   ~List()
   {
     this->clear();
+  }
+  
+  List< T >& operator=(const List& other)
+  {
+    if (this != &other)
+    {
+      List< T > tmp(other);
+      this->swap(tmp);
+    }
+    return *this;
+  }
+  
+  List< T >& operator=(List&& other) noexcept
+  {
+    if (this != &other)
+    {
+      this->clear();
+      head_ = other.head_;
+      tail_ = other.tail_;
+      size_ = other.size_;
+      other.head_ = nullptr;
+      other.tail_ = nullptr;
+      other.size_ = 0;
+    }
+    return *this;
   }
