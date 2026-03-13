@@ -370,7 +370,160 @@ namespace loseva {
     }
     return *this;
   }
+  template<typename T>
+  typename List<T>::iterator List<T>::insert(const_iterator pos, const T& value) {
+    if (pos.current == head) {
+      push_front(value);
+      return iterator(head);
+    }
+    if (pos.current == nullptr) {
+      push_back(value);
+      return iterator(tail);
+    }
+    Node* new_node = detail::create_node<T>(value, pos.current, pos.current->prev);
+    if (pos.current->prev) {
+      pos.current->prev->next = new_node;
+    }
+    pos.current->prev = new_node;
+    if (pos.current == head) {
+      head = new_node;
+    }
+    ++size;
+    return iterator(new_node);
+  }
+
+  template<typename T>
+  typename List<T>::iterator List<T>::insert(const_iterator pos, T&& value) {
+    if (pos.current == head) {
+      push_front(std::move(value));
+      return iterator(head);
+    }
+    if (pos.current == nullptr) {
+      push_back(std::move(value));
+      return iterator(tail);
+    }
+    Node* new_node = detail::create_node<T>(std::move(value), pos.current, pos.current->prev);
+    if (pos.current->prev) {
+      pos.current->prev->next = new_node;
+    }
+    pos.current->prev = new_node;
+    if (pos.current == head) {
+      head = new_node;
+    }
+    ++size;
+    return iterator(new_node);
+  }
+  template<typename T>
+  typename List<T>::iterator List<T>::erase(const_iterator pos) {
+    if (pos.current == nullptr) {
+      return iterator(nullptr);
+    }
+    Node* to_delete = pos.current;
+    Node* next_node = to_delete->next;
+    if (to_delete->prev) {
+      to_delete->prev->next = next_node;
+    } else {
+      head = next_node;
+    }
+    if (next_node) {
+      next_node->prev = to_delete->prev;
+    } else {
+      tail = to_delete->prev;
+    }
+    delete to_delete;
+    --size;
+    return iterator(next_node);
+  }
+
+  template<typename T>
+  typename List<T>::iterator List<T>::erase(const_iterator first, const_iterator last) {
+    while (first != last) {
+      first = erase(first);
+    }
+    return iterator(last.current);
+  }
+  template<typename T>
+  template<typename... Args>
+  void List<T>::emplace_front(Args&&... args) {
+    Node* new_node = detail::create_node<T>(std::forward<Args>(args)..., head, nullptr);
+    if (head) {
+      head->prev = new_node;
+    } else {
+      tail = new_node;
+    }
+    head = new_node;
+    ++size;
+  }
+
+  template<typename T>
+  template<typename... Args>
+  void List<T>::emplace_back(Args&&... args) {
+    Node* new_node = detail::create_node<T>(std::forward<Args>(args)..., nullptr, tail);
+    if (tail) {
+      tail->next = new_node;
+    } else {
+      head = new_node;
+    }
+    tail = new_node;
+    ++size;
+  }
+
+  template<typename T>
+  template<typename... Args>
+  typename List<T>::iterator List<T>::emplace(const_iterator pos, Args&&... args) {
+    if (pos.current == head) {
+      emplace_front(std::forward<Args>(args)...);
+      return iterator(head);
+    }
+    if (pos.current == nullptr) {
+      emplace_back(std::forward<Args>(args)...);
+      return iterator(tail);
+    }
+    Node* new_node = detail::create_node<T>(std::forward<Args>(args)..., pos.current, pos.current->prev);
+    if (pos.current->prev) {
+      pos.current->prev->next = new_node;
+    }
+    pos.current->prev = new_node;
+    if (pos.current == head) {
+      head = new_node;
+    }
+    ++size;
+    return iterator(new_node);
+  }
+
+  template<typename T>
+  void List<T>::resize(size_t count) {
+    if (count < size) {
+      while (size > count) {
+        pop_back();
+      }
+    } else if (count > size) {
+      for (size_t i = size; i < count; ++i) {
+        push_back(T());
+      }
+    }
+  }
+  template<typename T>
+  void List<T>::resize(size_t count, const T& value) {
+    if (count < size) {
+      while (size > count) {
+        pop_back();
+      }
+    } else if (count > size) {
+      for (size_t i = size; i < count; ++i) {
+        push_back(value);
+      }
+    }
+  }
+
+  template<typename T>
+  void List<T>::swap(List& other) noexcept {
+    std::swap(head, other.head);
+    std::swap(tail, other.tail);
+    std::swap(size, other.size);
+  }
 }
+
 
 #endif
 
