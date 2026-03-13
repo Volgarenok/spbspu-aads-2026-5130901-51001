@@ -1,9 +1,10 @@
 #ifndef SEQUENCE_HPP
 #define SEQUENCE_HPP
 
+#include "list.hpp"
+
 #include <string>
 #include <utility>
-#include "list.hpp"
 
 namespace yarmolinskaya
 {
