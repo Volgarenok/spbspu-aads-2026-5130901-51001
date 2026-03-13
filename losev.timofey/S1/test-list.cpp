@@ -50,4 +50,12 @@ BOOST_AUTO_TEST_CASE(iterator_increment_test)
   BOOST_TEST(*it == 5);
 }
 
+BOOST_AUTO_TEST_CASE(const_iterator_test)
+{
+  losev::List<int> list;
+  list.push_front(5);
+  const losev::List<int>& const_list = list;
+  BOOST_TEST(*(const_list.begin()) == 5);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
