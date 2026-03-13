@@ -63,3 +63,18 @@ size_t muraviev::getRowSum(const List< namedSequence >& sequences, size_t index)
 
   return sum;
 }
+
+void muraviev::printNames(std::ostream& out, const List< namedSequence >& sequences)
+{
+  bool first = true;
+
+  for (List< namedSequence >::c_iter it = sequences.begin(); it != sequences.end(); ++it) {
+    if (!first) {
+      out << ' ';
+    }
+    out << it->name;
+    first = false;
+  }
+
+  out << '\n';
+}
