@@ -2,7 +2,6 @@
 #include <sstream>
 #include <string>
 #include <utility>
-#include <stdexcept>
 #include <climits>
 
 namespace smirnova {
@@ -33,7 +32,7 @@ public:
         fake->prev = fake;
     }
 
-    void clear() noexcept {
+    void clear() noexcept {              // <-- clear объявлен до деструктора
         Node<T>* curr = fake->next;
         while (curr != fake) {
             Node<T>* tmp = curr->next;
@@ -141,7 +140,6 @@ void processSequences(List<std::pair<std::string, List<int>>>& seq) {
             }
             sum += val;
         }
-        sums.push_back(sum);
     }
 
     printList(sums);
@@ -163,7 +161,6 @@ int main() {
         std::istringstream iss(line);
         std::string name;
         iss >> name;
-
         List<int> numbers;
         unsigned long long temp;
         while (iss >> temp) {
@@ -173,7 +170,6 @@ int main() {
                 numbers.push_back(static_cast<int>(temp));
             }
         }
-
         sequences.push_back(std::make_pair(name, std::move(numbers)));
     }
 
@@ -195,6 +191,7 @@ int main() {
     }
     std::cout << "\n";
 
+    // Обработка сумм с try/catch на переполнение
     try {
         processSequences(sequences);
     } catch (const std::overflow_error&) {
