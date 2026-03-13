@@ -21,6 +21,24 @@ void muraviev::skipLineSpaces(std::istream& in)
   }
 }
 
+void muraviev::pushNumber(List< size_t >& numbers, size_t value)
+{
+  if (numbers.empty()) {
+    numbers.pushFront(value);
+  } else {
+    numbers.insert(numbers.last(), value);
+  }
+}
+
+void muraviev::pushSequence(List< namedSequence >& sequences, const namedSequence& sequence)
+{
+  if (sequences.empty()) {
+    sequences.pushFront(sequence);
+  } else {
+    sequences.insert(sequences.last(), sequence);
+  }
+}
+
 muraviev::List< muraviev::namedSequence > muraviev::readSequences(std::istream& in)
 {
   List< namedSequence > sequences = {};
@@ -46,6 +64,11 @@ muraviev::List< muraviev::namedSequence > muraviev::readSequences(std::istream& 
         break;
       }
       pushNumber(seq.numbers, value);
+    }
+
+    skipLineSpaces(in);
+    if (in.peek() == '\n') {
+      in.get();
     }
 
     pushSequence(sequences, seq);
