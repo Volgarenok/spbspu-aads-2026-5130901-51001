@@ -44,13 +44,13 @@ LIter<T> LIter<T>::operator++(int) {
 }
 
 template<class T>
-T* LIter<T>::operator->() { 
-  return &(ptr_->data); 
+T* LIter<T>::operator->() {
+  return &(ptr_->data);
 }
 
 template<class T>
-const T* LIter<T>::operator->() const { 
-  return &(ptr_->data); 
+const T* LIter<T>::operator->() const {
+  return &(ptr_->data);
 }
 
 // LCIter
@@ -119,7 +119,7 @@ void List<T>::copy_from(const List& other) {
   head_ = new Node<T>(other.head_->data, nullptr);
   Node<T>* current_new = head_;
   Node<T>* current_other = other.head_->next;
-  
+
   while (current_other != nullptr) {
     current_new->next = new Node<T>(current_other->data, nullptr);
     current_new = current_new->next;
