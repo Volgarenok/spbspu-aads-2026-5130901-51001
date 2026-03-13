@@ -522,6 +522,78 @@ namespace loseva {
     std::swap(tail, other.tail);
     std::swap(size, other.size);
   }
+  template<typename T>
+  void List<T>::reverse() noexcept {
+    if (size <= 1) return;
+    Node* current = head;
+    Node* temp = nullptr;
+    while (current) {
+      temp = current->prev;
+      current->prev = current->next;
+      current->next = temp;
+      current = current->prev;
+    }
+    temp = head;
+    head = tail;
+    tail = temp;
+  }
+
+  template<typename T>
+  void List<T>::remove(const T& value) {
+    auto it = begin();
+    while (it != end()) {
+      if (*it == value) {
+        it = erase(it);
+      } else {
+        ++it;
+      }
+    }
+  }
+
+  template<typename T>
+  template<typename Predicate>
+  void List<T>::remove_if(Predicate pred) {
+    auto it = begin();
+    while (it != end()) {
+      if (pred(*it)) {
+        it = erase(it);
+      } else {
+        ++it;
+      }
+    }
+  }
+  template<typename T>
+  void List<T>::unique() {
+    if (size <= 1) return;
+    auto it = begin();
+    auto next = it;
+    ++next;
+    while (next != end()) {
+      if (*it == *next) {
+        next = erase(next);
+      } else {
+        it = next;
+        ++next;
+      }
+    }
+  }
+
+  template<typename T>
+  template<typename BinaryPredicate>
+  void List<T>::unique(BinaryPredicate pred) {
+    if (size <= 1) return;
+    auto it = begin();
+    auto next = it;
+    ++next;
+    while (next != end()) {
+      if (pred(*it, *next)) {
+        next = erase(next);
+      } else {
+        it = next;
+        ++next;
+      }
+    }
+  }
 }
 
 
