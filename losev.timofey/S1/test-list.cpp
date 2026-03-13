@@ -66,4 +66,12 @@ BOOST_AUTO_TEST_CASE(copy_test)
   BOOST_TEST(*(copy.begin()) == 5);
 }
 
+BOOST_AUTO_TEST_CASE(clear_test)
+{
+  losev::List<int> list;
+  list.push_front(5);
+  list.clear();
+  BOOST_TEST(list.empty() == true);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
