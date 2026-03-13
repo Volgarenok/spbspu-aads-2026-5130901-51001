@@ -12,6 +12,8 @@ namespace vishnyakov
   {
     friend class List< T >;
 
+    using Node = vishnaykov::Node< T >;
+
     Node* node_;
 
   public:
@@ -57,14 +59,17 @@ namespace vishnyakov
   class LCIter
   {
     friend class List< T >;
+
+    using Node = vishnaykov::Node< T >;
+
     Node* node_;
 
   public:
-    LIter(const Node* node = nullptr):
+    LCIter(const Node* node = nullptr):
       node_(node)
     {}
 
-    LIter(const LIter< T > it):
+    LCIter(const LIter< T > it):
       node_(it.node_)
     {}
 
@@ -78,25 +83,25 @@ namespace vishnyakov
       return *node_->data_;
     }
 
-    LIter& operator++()
+    LCIter& operator++()
     {
       node_ = node_->next_;
       return *this;
     }
 
-    LIter* operator++(int)
+    LCIter* operator++(int)
     {
       LIter tmp = *this;
       ++(*this);
       return tmp;
     }
 
-    bool operator==(const LIter& other) const
+    bool operator==(const LCIter& other) const
     {
       return node_ == other.node_;
     }
 
-    bool operator!=(const LIter& other) const
+    bool operator!=(const LCIter& other) const
     {
       return !(node_ == other);
     }
@@ -105,6 +110,8 @@ namespace vishnyakov
   template< class T >
   class List
   {
+    using Node = vishnaykov::Node< T >;
+
     Node* pseudoknot_;
     size_t size_;
 
@@ -229,6 +236,7 @@ namespace vishnyakov
     {
       insert_after(LIter< T >(pseudoknot_), value);
     }
+
 
     void push_front(T&& value)
     {
