@@ -77,7 +77,7 @@ int main()
           summes.clear();
           names.clear();
           clearListOfLists(listOfLists);
-          return 1;
+          exit(1);
         }
         sum += val;
       }
