@@ -264,15 +264,17 @@ int main() {
       std::string token;
       while (iss >> token) {
         try {
-          long long val = std::stoll(token);
-          if (val > INT_MAX || val < INT_MIN)
-            throw std::overflow_error("overflow");
-          numbers.push_back(static_cast<int>(val));
-        } catch(...) {
+          unsigned long long uval = std::stoull(token);
+          if (uval > static_cast<unsigned long long>(INT_MAX)) {
             std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
             return 1;
+            }
+            numbers.push_back(static_cast<int>(uval));
+        } catch (...) {
+          std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
+          return 1;
         }
-      }
+    }
       sequences.push_back({name, std::move(numbers)});
   }
 
