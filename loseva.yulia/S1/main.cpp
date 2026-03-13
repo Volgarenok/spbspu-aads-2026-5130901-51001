@@ -1,19 +1,18 @@
 #include <iostream>
-#include "sequence.hpp"
+
+#include "list.hpp"
 
 int main()
 {
-  loseva::Storage data;
+  loseva::List<int> list;
 
-  loseva::read_sequences(data);
+  list.pushBack(10);
+  list.pushBack(20);
+  list.pushFront(5);
 
-  if (data.empty())
-  {
-    std::cout << 0;
-    return 0;
-  }
-
-  loseva::print_names(data);
+  std::cout << list.front() << std::endl;
+  std::cout << list.back() << std::endl;
+  std::cout << list.size() << std::endl;
 
   return 0;
 }
