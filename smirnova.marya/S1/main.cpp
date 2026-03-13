@@ -2,9 +2,9 @@
 #include <sstream>
 #include <string>
 #include <utility>
-#include <stdexcept>
 #include <climits>
-#include <limits>
+#include <cstdlib>
+#include <cstdint>
 
 namespace smirnova {
 
@@ -13,16 +13,12 @@ struct Node {
     T data;
     Node* next;
     Node* prev;
-
     Node(const T& d) : data(d), next(nullptr), prev(nullptr) {}
     Node(T&& d) : data(std::move(d)), next(nullptr), prev(nullptr) {}
 };
 
-template <class T>
-class LIter;
-
-template <class T>
-class LCIter;
+template <class T> class LIter;
+template <class T> class LCIter;
 
 template <class T>
 class List {
@@ -37,16 +33,31 @@ public:
         fake->prev = fake;
     }
 
+    // Очистка списка — объявлена ДО деструктора
+    void clear() noexcept {
+        Node<T>* curr = fake->next;
+        while (curr != fake) {
+            Node<T>* tmp = curr->next;
+            delete curr;
+            curr = tmp;
+        }
+        fake->next = fake;
+        fake->prev = fake;
+        sz = 0;
+    }
+
     ~List() {
-        clear();
+        clear();  // Безопасно вызывается
         delete fake;
     }
 
+    // Конструктор копирования
     List(const List& other) : List() {
         for (LCIter<T> it = other.cbegin(); it.valid(); it.next())
             push_back(it.value());
     }
 
+    // Конструктор перемещения
     List(List&& other) noexcept : fake(other.fake), sz(other.sz) {
         other.fake = new Node<T>(T());
         other.fake->next = other.fake;
@@ -54,6 +65,7 @@ public:
         other.sz = 0;
     }
 
+    // Копирующее присваивание
     List& operator=(const List& other) {
         if (this != &other) {
             List tmp(other);
@@ -62,6 +74,7 @@ public:
         return *this;
     }
 
+    // Перемещающее присваивание
     List& operator=(List&& other) noexcept {
         if (this != &other) {
             clear();
@@ -76,6 +89,7 @@ public:
         return *this;
     }
 
+    // Обмен списками
     void swap(List& other) noexcept {
         std::swap(fake, other.fake);
         std::swap(sz, other.sz);
@@ -138,18 +152,7 @@ public:
         --sz;
     }
 
-    void clear() noexcept {
-        Node<T>* curr = fake->next;
-        while (curr != fake) {
-            Node<T>* tmp = curr->next;
-            delete curr;
-            curr = tmp;
-        }
-        fake->next = fake;
-        fake->prev = fake;
-        sz = 0;
-    }
-
+    // Итераторы
     LIter<T> begin() { return LIter<T>(fake->next, fake); }
     LIter<T> end() { return LIter<T>(fake, fake); }
     LCIter<T> begin() const { return LCIter<T>(fake->next, fake); }
@@ -158,108 +161,87 @@ public:
     LCIter<T> cend() const { return LCIter<T>(fake, fake); }
 };
 
-// Итератор для изменения элементов
-template <class T>
-class LIter {
-private:
-    Node<T>* node;
-    Node<T>* fake;
-
-public:
-    LIter(Node<T>* n = nullptr, Node<T>* f = nullptr) : node(n), fake(f) {}
-
-    bool valid() const { return node != fake; }
-    void next() { if (node) node = node->next; }
-    void prev() { if (node) node = node->prev; }
-    T& value() { return node->data; }
-};
-
-// Константный итератор
 template <class T>
 class LCIter {
 private:
     const Node<T>* node;
     const Node<T>* fake;
-
 public:
     LCIter(const Node<T>* n = nullptr, const Node<T>* f = nullptr) : node(n), fake(f) {}
-    LCIter(const LIter<T>& iter) : node(iter.node), fake(iter.fake) {}
-
     bool valid() const { return node != fake; }
-    void next() { if (node) node = node->next; }
-    void prev() { if (node) node = node->prev; }
+    void next() { if(node) node = node->next; }
     const T& value() const { return node->data; }
 };
-
-// Вспомогательная функция для вывода списка
-template <typename T>
-void printList(const List<T>& list) {
-    bool first = true;
-    for (LCIter<T> it = list.cbegin(); it.valid(); it.next()) {
-        if (!first) std::cout << " ";
-        std::cout << it.value();
-        first = false;
-    }
-    std::cout << "\n";
-}
 
 // Получение элемента по индексу
 template <typename T>
 LCIter<T> getElementAt(const List<T>& list, size_t index) {
     LCIter<T> it = list.cbegin();
     size_t i = 0;
-    while (it.valid() && i < index) { it.next(); ++i; }
+    while(it.valid() && i < index) { it.next(); ++i; }
     return it;
 }
 
+// Печать списка чисел
+template <typename T>
+void printList(const List<T>& list) {
+    if(list.empty()) { std::cout << "0\n"; return; }
+    bool first = true;
+    for(LCIter<T> it = list.cbegin(); it.valid(); it.next()) {
+        if(!first) std::cout << " ";
+        std::cout << it.value();
+        first = false;
+    }
+    std::cout << "\n";
+}
+
+// Проверка переполнения при сложении
+bool sumWillOverflow(int a, int b) {
+    if (b > 0 && a > INT_MAX - b) return true;
+    if (b < 0 && a < INT_MIN - b) return true;
+    return false;
+}
+
 // Обработка последовательностей
-void processSequences(List<std::pair<std::string, List<int>>>& seq) {
-    if (seq.empty()) return;
+bool processSequences(const List<std::pair<std::string, List<int>>>& seq) {
+    if(seq.empty()) return true;
 
     size_t maxSize = 0;
-    for (LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid(); it.next()) {
-        if (it.value().second.size() > maxSize)
-            maxSize = it.value().second.size();
-    }
+    for(LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid(); it.next())
+        if(it.value().second.size() > maxSize) maxSize = it.value().second.size();
 
-    // Вывод "по строкам"
-    for (size_t row = 0; row < maxSize; ++row) {
+    // Вывод чисел "по строкам"
+    for(size_t row = 0; row < maxSize; ++row) {
         bool firstInRow = true;
-        for (LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid(); it.next()) {
-            if (row < it.value().second.size()) {
-                LCIter<int> numIt = getElementAt(it.value().second, row);
-                if (!firstInRow) std::cout << " ";
-                std::cout << numIt.value();
-                firstInRow = false;
-            }
+        for(LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid(); it.next()) {
+          if (row < it.value().second.size()) { // Если элемент существует
+            LCIter<int> numIt = getElementAt(it.value().second, row);
+            if (!firstInRow) std::cout << " ";
+            std::cout << numIt.value();
+            firstInRow = false;
+          }
         }
-        if (!firstInRow) std::cout << "\n";
+        if(!firstInRow) std::cout << "\n";
     }
 
-    // Вычисление суммы "по строкам"
+    // Вычисление суммы с проверкой переполнения
     List<int> sums;
-    bool sumPossible = true;
-
-    for (size_t row = 0; row < maxSize && sumPossible; ++row) {
-        long long sum = 0;
-        for (LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid() && sumPossible; it.next()) {
-            if (row < it.value().second.size()) {
-                LCIter<int> numIt = getElementAt(it.value().second, row);
-                if (numIt.value() > 0 && sum > std::numeric_limits<long long>::max() - numIt.value()) {
-                    sumPossible = false;
-                } else {
-                    sum += numIt.value();
+    for(size_t row = 0; row < maxSize; ++row) {
+        int sum = 0;
+        for(LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid(); it.next()) {
+            if(row < it.value().second.size()) {
+                int val = getElementAt(it.value().second, row).value();
+                if(sumWillOverflow(sum, val)) {
+                    std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
+                    return false;
                 }
+                sum += val;
             }
         }
-        if (sumPossible) {
-            if (sum > std::numeric_limits<int>::max()) sumPossible = false;
-            else sums.push_back(static_cast<int>(sum));
-        }
+        sums.push_back(sum);
     }
-
-    if (sumPossible && !sums.empty()) printList(sums);
-    else if (!sumPossible) throw std::overflow_error("overflow");
+    printList(sums);
+    return true;
 }
 
 } // namespace smirnova
@@ -269,44 +251,46 @@ int main() {
 
     List<std::pair<std::string, List<int>>> sequences;
     std::string line;
+    bool overflowOccurred = false;
 
-    try {
-        while (std::getline(std::cin, line)) {
-            if (line.empty()) continue;
-            std::istringstream iss(line);
-            std::string name;
-            iss >> name;
+    while(std::getline(std::cin, line)) {
+        if(line.empty()) continue;
 
-            List<int> numbers;
-            int x;
-            while (iss >> x) numbers.push_back(x);
+        std::istringstream iss(line);
+        std::string name;
+        iss >> name;
 
-            sequences.push_back(std::make_pair(name, std::move(numbers)));
+        List<int> numbers;
+        std::string token;
+        while(iss >> token) {
+            try {
+                long long val = std::stoll(token);
+                if(val > INT_MAX || val < INT_MIN) throw std::overflow_error("overflow");
+                numbers.push_back(static_cast<int>(val));
+            } catch(...) {
+                overflowOccurred = true;
+            }
         }
+        sequences.push_back({name, std::move(numbers)});
+    }
 
-        if (sequences.empty()) {
-            std::cout << "0\n";
-            return 0;
-        }
+    // Выводим имена
+    bool first = true;
+    for(LCIter<std::pair<std::string, List<int>>> it = sequences.cbegin(); it.valid(); it.next()) {
+        if(!first) std::cout << " ";
+        std::cout << it.value().first;
+        first = false;
+    }
+    std::cout << "\n";
 
-        // Вывод названий
-        bool first = true;
-        for (LCIter<std::pair<std::string, List<int>>> it = sequences.cbegin(); it.valid(); it.next()) {
-            if (!first) std::cout << " ";
-            std::cout << it.value().first;
-            first = false;
-        }
-        std::cout << "\n";
+    if(sequences.empty()) { std::cout << "0\n"; return 0; }
 
-        processSequences(sequences);
-
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << "\n";
-        return 1;
-    } catch (...) {
-        std::cerr << "Unknown error\n";
+    if(overflowOccurred) {
+        std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
         return 1;
     }
+
+    if(!processSequences(sequences)) return 1;
 
     return 0;
 }
