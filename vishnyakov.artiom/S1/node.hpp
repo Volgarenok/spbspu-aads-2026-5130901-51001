@@ -1,6 +1,8 @@
 #ifndef NODE_HPP
 #define NODE_HPP
 
+#include <iostream>
+
 namespace vishnaykov
 {
   template< class T >
@@ -15,7 +17,7 @@ namespace vishnaykov
     {}
 
     explicit Node(T&& value, Node* next = nullptr):
-      data_(std::move(val)),
+      data_(std::move(value)),
       next_(next)
     {}
   };

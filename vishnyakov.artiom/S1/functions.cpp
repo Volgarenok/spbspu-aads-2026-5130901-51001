@@ -2,16 +2,14 @@
 
 vishnyakov::List< vishnyakov::Sequence > vishnyakov::readInput(std::istream& in)
 {
-  List< Sequence > seqs();
+  List< Sequence >* seqs;
   std::string name;
   while (in >> name)
   {
-    Sequence seq();
-
-    // List< size_t > a;
-
+    Sequence seq;
   }
 }
+
 void vishnyakov::getWitoutSkips(std::istream& in)
 {
   while (in.peek() == ' ' || in.peek() == '\t')

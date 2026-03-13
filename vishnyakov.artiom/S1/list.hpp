@@ -265,16 +265,16 @@ namespace vishnyakov
 
     LIter< T > insert_after(LIter< T > pos, const T& value)
     {
-      Node* new_node = new Node(value, pos.ptr_->next_);
-      pos.ptr_->next_ = new_node;
+      Node* new_node = new Node(value, pos.node_->next_);
+      pos.node_->next_ = new_node;
       ++size_;
       return LIter< T >(new_node);
     }
 
     LIter< T > insert_after(LIter< T > pos, T&& value)
     {
-      Node* new_node = new Node(std::move(value), pos.ptr_->next_);
-      pos.ptr_->next_ = new_node;
+      Node* new_node = new Node(std::move(value), pos.node_->next_);
+      pos.node_->next_ = new_node;
       ++size_;
       return LIter< T >(new_node);
     }
@@ -309,17 +309,17 @@ namespace vishnyakov
 
     LIter< T > erase_after(LIter< T > pos)
     {
-      if (pos.ptr_->next_ == pseudoknot_)
+      if (pos.node_->next_ == pseudoknot_)
       {
         return end();
       }
 
-      Node* to_delete = pos.ptr_->next_;
-      pos.ptr_->next_ = to_delete->next_;
+      Node* to_delete = pos.node_->next_;
+      pos.node_->next_ = to_delete->next_;
       delete to_delete;
       --size_;
 
-      return LIter< T >(pos.ptr_->next_);
+      return LIter< T >(pos.node_->next_);
     }
 
     void clear()

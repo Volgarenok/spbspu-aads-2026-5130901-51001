@@ -7,7 +7,11 @@
 
 namespace vishnyakov
 {
-  using Sequence = std::pair<std::string, List< size_t >>;
+  struct Sequence
+  {
+    std::string name;
+    List< size_t >* nums;
+  };
 
   List< Sequence > readInput(std::istream& in);
   void getWitoutSkips(std::istream& in);
