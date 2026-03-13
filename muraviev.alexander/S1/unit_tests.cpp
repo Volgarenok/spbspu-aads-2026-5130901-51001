@@ -120,3 +120,39 @@ BOOST_AUTO_TEST_CASE(test_list_clear)
 
   BOOST_TEST(lst.empty());
 }
+
+BOOST_AUTO_TEST_CASE(test_list_copy_constructor)
+{
+  List< int > a;
+  a.pushFront(3);
+  a.pushFront(2);
+  a.pushFront(1);
+
+  List< int > b(a);
+
+  List< int >::c_iter it1 = a.begin();
+  List< int >::c_iter it2 = b.begin();
+  while (it1 != a.end() && it2 != b.end()) {
+    BOOST_TEST(*it1 == *it2);
+    ++it1;
+    ++it2;
+  }
+  BOOST_TEST(it1 == a.end());
+  BOOST_TEST(it2 == b.end());
+}
+
+BOOST_AUTO_TEST_CASE(test_list_iterators_on_loop)
+{
+  List< int > lst;
+  lst.pushFront(3);
+  lst.pushFront(2);
+  lst.pushFront(1);
+
+  int expected[3] = {1, 2, 3};
+  size_t i = 0;
+  for (List< int >::iter it = lst.begin(); it != lst.end(); ++it) {
+    BOOST_TEST(*it == expected[i]);
+    ++i;
+  }
+  BOOST_TEST(i == 3);
+}
