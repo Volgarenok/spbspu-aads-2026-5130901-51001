@@ -5,6 +5,7 @@
 #include <climits>
 #include <cstdlib>
 #include <cstdint>
+#include <limits>
 
 namespace smirnova {
 
@@ -214,12 +215,12 @@ bool processSequences(const List<std::pair<std::string, List<int>>>& seq) {
     for(size_t row = 0; row < maxSize; ++row) {
         bool firstInRow = true;
         for(LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid(); it.next()) {
-          if (row < it.value().second.size()) { // Если элемент существует
-            LCIter<int> numIt = getElementAt(it.value().second, row);
-            if (!firstInRow) std::cout << " ";
-            std::cout << numIt.value();
-            firstInRow = false;
-          }
+            if(row < it.value().second.size()) {
+                LCIter<int> numIt = getElementAt(it.value().second, row);
+                if(!firstInRow) std::cout << " ";
+                std::cout << numIt.value();
+                firstInRow = false;
+            }
         }
         if(!firstInRow) std::cout << "\n";
     }
@@ -231,7 +232,8 @@ bool processSequences(const List<std::pair<std::string, List<int>>>& seq) {
         for(LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid(); it.next()) {
             if(row < it.value().second.size()) {
                 int val = getElementAt(it.value().second, row).value();
-                if(sumWillOverflow(sum, val)) {
+                if((val > 0 && sum > std::numeric_limits<int>::max() - val) ||
+                   (val < 0 && sum < std::numeric_limits<int>::min() - val)) {
                     std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
                     return false;
                 }
@@ -254,49 +256,34 @@ int main() {
     bool overflowOccurred = false;
 
     while(std::getline(std::cin, line)) {
-      if(line.empty()) continue;
+    if(line.empty()) continue;
 
-      std::istringstream iss(line);
-      std::string name;
-      iss >> name;
+    std::istringstream iss(line);
+    std::string name;
+    iss >> name;
 
-      List<int> numbers;
-      std::string token;
-      while (iss >> token) {
+    List<int> numbers;
+    std::string token;
+    while(iss >> token) {
         try {
-          unsigned long long uval = std::stoull(token);
-          if (uval > static_cast<unsigned long long>(INT_MAX)) {
-            std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-            return 1;
-            }
-            numbers.push_back(static_cast<int>(uval));
-        } catch (...) {
-          std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-          return 1;
-        }
+          long long val = std::stoll(token);
+          if(val > std::numeric_limits<int>::max() || val < std::numeric_limits<int>::min()) {
+              overflowOccurred = true;  // пометка переполнения
+              break;
+          }
+          numbers.push_back(static_cast<int>(val));
+      } catch(...) {
+          overflowOccurred = true;
+          break;
+      }
     }
-      sequences.push_back({name, std::move(numbers)});
+
+    sequences.push_back({name, std::move(numbers)});
   }
 
-  // Обработка пустого списка
-  if(sequences.empty()) {
-      std::cout << "0\n";
-      return 0;
-  }
-
-  // Выводим имена
-  bool first = true;
-  for(LCIter<std::pair<std::string, List<int>>> it = sequences.cbegin(); it.valid(); it.next()) {
-      if(!first) std::cout << " ";
-      std::cout << it.value().first;
-      first = false;
-  }
-  std::cout << "\n";
-
-  // Проверка переполнения после чтения чисел
   if(overflowOccurred) {
-      std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-      return 1;
+    std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
+    return 1;
   }
 
   // Обработка чисел по строкам с проверкой переполнения при сумме
