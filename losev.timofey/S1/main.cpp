@@ -67,7 +67,7 @@ int main() {
         unsigned long long big_num;
         if (!read_number(token, big_num)) {
           std::cerr << "overflow" << std::endl;
-          std::exit(1);
+          return 0;
         }
         std::cerr << "overflow" << "\n";
         std::exit(1);
