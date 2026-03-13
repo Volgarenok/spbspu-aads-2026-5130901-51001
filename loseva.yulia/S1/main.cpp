@@ -1,50 +1,19 @@
 #include <iostream>
 #include "sequence.hpp"
 
-namespace loseva
+int main()
 {
+  loseva::Storage data;
 
-void ReadSequences(Storage& data)
-{
-  std::string name;
+  loseva::read_sequences(data);
 
-  while (std::cin >> name)
+  if (data.empty())
   {
-    Seq seq;
-
-    int value;
-
-    while (std::cin.peek() != '\n' && std::cin >> value)
-    {
-      seq.push_front(value);
-    }
-
-    data.push_front({name, seq});
+    std::cout << 0;
+    return 0;
   }
-}
 
-void PrintNames(const Storage& data)
-{
-  for (auto it = data.begin(); it != data.end(); ++it)
-  {
-    std::cout << (*it).first << " ";
-  }
-  std::cout << "\n";
-}
+  loseva::print_names(data);
 
-void Process(const Storage& data)
-{
-  for (auto it = data.begin(); it != data.end(); ++it)
-  {
-    auto seq = (*it).second;
-
-    for (auto sit = seq.begin(); sit != seq.end(); ++sit)
-    {
-      std::cout << *sit << " ";
-    }
-
-    std::cout << "\n";
-  }
-}
-
+  return 0;
 }
