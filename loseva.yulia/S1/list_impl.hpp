@@ -594,8 +594,138 @@ namespace loseva {
       }
     }
   }
-}
+  template<typename T>
+  void List<T>::split(Node* source, Node*& front, Node*& back) {
+    if (!source || !source->next) {
+      front = source;
+      back = nullptr;
+      return;
+    }
+    Node* slow = source;
+    Node* fast = source->next;
+    while (fast) {
+      fast = fast->next;
+      if (fast) {
+        slow = slow->next;
+        fast = fast->next;
+      }
+    }
+    front = source;
+    back = slow->next;
+    slow->next = nullptr;
+    if (back) back->prev = nullptr;
+  }
 
+  template<typename T>
+  typename List<T>::Node* List<T>::merge(Node* left, Node* right) {
+    if (!left) {
+      return right;
+    };
+    if (!right) {
+      return left;
+    };
+    if (left->data <= right->data) {
+      left->next = merge(left->next, right);
+      if (left->next) {
+        left->next->prev = left;
+      };
+      left->prev = nullptr;
+      return left;
+    } else {
+      right->next = merge(left, right->next);
+      if (right->next) {
+        right->next->prev = right;
+      };
+      right->prev = nullptr;
+      return right;
+    }
+  }
+  template<typename T>
+  template<typename Compare>
+  typename List<T>::Node* List<T>::merge(Node* left, Node* right, Compare comp) {
+    if (!left) {
+      return right;
+    };
+    if (!right) {
+      return left;
+    };
+    if (comp(left->data, right->data)) {
+      left->next = merge(left->next, right, comp);
+      if (left->next) {
+        left->next->prev = left;
+      };
+      left->prev = nullptr;
+      return left;
+    } else {
+      right->next = merge(left, right->next, comp);
+      if (right->next) {
+        right->next->prev = right;
+      };
+      right->prev = nullptr;
+      return right;
+    }
+  }
+  template<typename T>
+  void List<T>::merge_sort(Node*& start) {
+    if (!start || !start->next) {
+      return;
+    }
+    Node* front;
+    Node* back;
+    split(start, front, back);
+    merge_sort(front);
+    merge_sort(back);
+    start = merge(front, back);
+  }
+  template<typename T>
+  void List<T>::sort() {
+    merge_sort(head);
+    if (head) {
+      tail = head;
+      while (tail->next) {
+        tail = tail->next;
+      }
+    } else {
+      tail = nullptr;
+    }
+  }
+  template<typename T>
+  void List<T>::splice(const_iterator pos, List& other) {
+    if (other.empty()) return;
+    Node* first = other.head;
+    Node* last = other.tail;
+    other.head = nullptr;
+    other.tail = nullptr;
+    other.size = 0;
+    if (pos.current == head) {
+      last->next = head;
+      if (head) head->prev = last;
+      head = first;
+      if (!tail) tail = last;
+    } else if (pos.current == nullptr) {
+      if (tail) {
+        tail->next = first;
+        first->prev = tail;
+        tail = last;
+      } else {
+        head = first;
+        tail = last;
+      }
+    } else {
+      Node* prev_node = pos.current->prev;
+      last->next = pos.current;
+      pos.current->prev = last;
+      if (prev_node) {
+        prev_node->next = first;
+        first->prev = prev_node;
+      } else {
+        head = first;
+      }
+    }
+    size += other.size;
+    other.size = 0;
+  }
+}
 
 #endif
 
