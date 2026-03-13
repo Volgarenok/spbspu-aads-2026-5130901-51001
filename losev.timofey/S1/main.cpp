@@ -63,10 +63,6 @@ void skip_line(std::istream& in) {
   }
 }
 
-bool check_overflow(size_t num) {
-  return num == std::numeric_limits<size_t>::max();
-}
-
 }
 
 int main() {
@@ -74,7 +70,7 @@ int main() {
 
   List< NamedList > sequences;
   std::string name;
-  bool overflow_detected = false;
+  bool input_overflow = false;
 
   while (std::cin >> name) {
     NamedList seq;
@@ -84,7 +80,7 @@ int main() {
     while (!is_line_end(std::cin)) {
       size_t num = 0;
       if (!(std::cin >> num)) {
-        overflow_detected = true;
+        input_overflow = true;
         std::cin.clear();
         skip_line(std::cin);
         break;
@@ -104,6 +100,37 @@ int main() {
     return 0;
   }
 
+  size_t max_len = 0;
+  for (List< NamedList >::iterator seq_it = sequences.begin(); seq_it != sequences.end(); ++seq_it) {
+    size_t len = length(seq_it->numbers);
+    if (len > max_len) max_len = len;
+  }
+
+  bool has_overflow = input_overflow;
+
+  if (!has_overflow) {
+    for (size_t i = 0; i < max_len && !has_overflow; ++i) {
+      size_t sum = 0;
+      for (List< NamedList >::iterator seq_it = sequences.begin(); seq_it != sequences.end() && !has_overflow; ++seq_it) {
+        size_t len = length(seq_it->numbers);
+        if (i < len) {
+          size_t val = get_element_at(seq_it->numbers, i);
+          size_t new_sum;
+          if (!add_checked(sum, val, new_sum)) {
+            has_overflow = true;
+          } else {
+            sum = new_sum;
+          }
+        }
+      }
+    }
+  }
+
+  if (has_overflow) {
+    std::cerr << "overflow\n";
+    return 1;
+  }
+
   bool first = true;
   for (List< NamedList >::iterator it = sequences.begin(); it != sequences.end(); ++it) {
     if (!first) std::cout << " ";
@@ -111,17 +138,6 @@ int main() {
     first = false;
   }
   std::cout << "\n";
-
-  size_t max_len = 0;
-  for (List< NamedList >::iterator seq_it = sequences.begin(); seq_it != sequences.end(); ++seq_it) {
-    size_t len = length(seq_it->numbers);
-    if (len > max_len) max_len = len;
-  }
-
-  if (max_len == 0) {
-    std::cout << "0\n";
-    return 0;
-  }
 
   for (size_t i = 0; i < max_len; ++i) {
     first = true;
@@ -136,43 +152,18 @@ int main() {
     std::cout << "\n";
   }
 
-
-  if (overflow_detected) {
-    std::cerr << "overflow\n";
-    return 1;
-  }
-
-  bool first_sum = true;
-  bool global_overflow = false;
-
-  for (size_t i = 0; i < max_len && !global_overflow; ++i) {
+  first = true;
+  for (size_t i = 0; i < max_len; ++i) {
     size_t sum = 0;
     for (List< NamedList >::iterator seq_it = sequences.begin(); seq_it != sequences.end(); ++seq_it) {
       size_t len = length(seq_it->numbers);
       if (i < len) {
-        size_t val = get_element_at(seq_it->numbers, i);
-        size_t new_sum;
-        if (!add_checked(sum, val, new_sum)) {
-          global_overflow = true;
-          break;
-        }
-        sum = new_sum;
+        sum += get_element_at(seq_it->numbers, i);
       }
     }
-
-    if (!global_overflow) {
-      if (!first_sum) std::cout << " ";
-      std::cout << sum;
-      first_sum = false;
-    }
-  }
-
-  if (global_overflow) {
-    std::cerr << "overflow\n";
-    return 1;
-  }
-  if (first_sum) {
-    std::cout << "0";
+    if (!first) std::cout << " ";
+    std::cout << sum;
+    first = false;
   }
   std::cout << "\n";
 
