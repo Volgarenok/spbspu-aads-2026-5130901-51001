@@ -2,6 +2,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <climits>    // <-- для INT_MAX и INT_MIN
 #include <limits>
 #include <stdexcept>
 
@@ -29,13 +30,26 @@ private:
     size_t length;
 
 public:
+    // --- Объявляем clear ДО деструктора ---
+    void clear() noexcept {
+        Node<T>* curr = sentinel->next;
+        while (curr != sentinel) {
+            Node<T>* tmp = curr->next;
+            delete curr;
+            curr = tmp;
+        }
+        sentinel->next = sentinel;
+        sentinel->prev = sentinel;
+        length = 0;
+    }
+
     List() : length(0) {
         sentinel = new Node<T>(T());
         sentinel->next = sentinel;
         sentinel->prev = sentinel;
     }
 
-    ~List() { clear(); delete sentinel; }
+    ~List() { this->clear(); delete sentinel; }  // <-- используем this->clear()
 
     List(const List& other) : List() {
         for (LCIter<T> it = other.cbegin(); it.valid(); it.next())
@@ -59,7 +73,7 @@ public:
 
     List& operator=(List&& other) noexcept {
         if (this != &other) {
-            clear();
+            this->clear();  // <-- используем this->clear()
             delete sentinel;
             sentinel = other.sentinel;
             length = other.length;
@@ -133,7 +147,7 @@ public:
         --length;
     }
 
-    // Итераторы
+    // --- Итераторы ---
     LIter<T> begin() { return LIter<T>(sentinel->next, sentinel); }
     LIter<T> end() { return LIter<T>(sentinel, sentinel); }
     LCIter<T> begin() const { return LCIter<T>(sentinel->next, sentinel); }
@@ -155,8 +169,6 @@ public:
     bool valid() const { return current != sentinel; }
     void next() { if(current) current = current->next; }
     const T& value() const { return current->data; }
-
-    // Добавлен operator* для удобного доступа
     const T& operator*() const { return current->data; }
 };
 
