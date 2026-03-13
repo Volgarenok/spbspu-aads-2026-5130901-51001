@@ -2,20 +2,18 @@
 #include <sstream>
 #include <string>
 #include <utility>
-#include <climits>
-#include <cstdlib>
-#include <cstdint>
 #include <limits>
+#include <stdexcept>
 
 namespace smirnova {
 
 template <class T>
 struct Node {
-    T data;
+    T value;
     Node* next;
     Node* prev;
-    Node(const T& d) : data(d), next(nullptr), prev(nullptr) {}
-    Node(T&& d) : data(std::move(d)), next(nullptr), prev(nullptr) {}
+    Node(const T& v) : value(v), next(nullptr), prev(nullptr) {}
+    Node(T&& v) : value(std::move(v)), next(nullptr), prev(nullptr) {}
 };
 
 template <class T> class LIter;
@@ -24,226 +22,117 @@ template <class T> class LCIter;
 template <class T>
 class List {
 private:
-    Node<T>* fake;
-    size_t sz;
-
+    Node<T>* sentinel;
+    size_t count;
 public:
-    List() : sz(0) {
-        fake = new Node<T>(T());
-        fake->next = fake;
-        fake->prev = fake;
+    List() : count(0) {
+        sentinel = new Node<T>(T());
+        sentinel->next = sentinel;
+        sentinel->prev = sentinel;
     }
+    ~List() { clear(); delete sentinel; }
 
-    // Очистка списка — объявлена ДО деструктора
     void clear() noexcept {
-        Node<T>* curr = fake->next;
-        while (curr != fake) {
-            Node<T>* tmp = curr->next;
-            delete curr;
-            curr = tmp;
+        Node<T>* current = sentinel->next;
+        while (current != sentinel) {
+            Node<T>* tmp = current->next;
+            delete current;
+            current = tmp;
         }
-        fake->next = fake;
-        fake->prev = fake;
-        sz = 0;
+        sentinel->next = sentinel;
+        sentinel->prev = sentinel;
+        count = 0;
     }
 
-    ~List() {
-        clear();  // Безопасно вызывается
-        delete fake;
-    }
-
-    // Конструктор копирования
-    List(const List& other) : List() {
-        for (LCIter<T> it = other.cbegin(); it.valid(); it.next())
-            push_back(it.value());
-    }
-
-    // Конструктор перемещения
-    List(List&& other) noexcept : fake(other.fake), sz(other.sz) {
-        other.fake = new Node<T>(T());
-        other.fake->next = other.fake;
-        other.fake->prev = other.fake;
-        other.sz = 0;
-    }
-
-    // Копирующее присваивание
-    List& operator=(const List& other) {
-        if (this != &other) {
-            List tmp(other);
-            swap(tmp);
-        }
-        return *this;
-    }
-
-    // Перемещающее присваивание
-    List& operator=(List&& other) noexcept {
-        if (this != &other) {
-            clear();
-            delete fake;
-            fake = other.fake;
-            sz = other.sz;
-            other.fake = new Node<T>(T());
-            other.fake->next = other.fake;
-            other.fake->prev = other.fake;
-            other.sz = 0;
-        }
-        return *this;
-    }
-
-    // Обмен списками
-    void swap(List& other) noexcept {
-        std::swap(fake, other.fake);
-        std::swap(sz, other.sz);
-    }
-
-    bool empty() const noexcept { return sz == 0; }
-    size_t size() const noexcept { return sz; }
+    bool empty() const noexcept { return count == 0; }
+    size_t size() const noexcept { return count; }
 
     void push_back(const T& val) {
-        Node<T>* n = new Node<T>(val);
-        n->next = fake;
-        n->prev = fake->prev;
-        fake->prev->next = n;
-        fake->prev = n;
-        ++sz;
-    }
-
-    void push_back(T&& val) {
-        Node<T>* n = new Node<T>(std::move(val));
-        n->next = fake;
-        n->prev = fake->prev;
-        fake->prev->next = n;
-        fake->prev = n;
-        ++sz;
+        Node<T>* node = new Node<T>(val);
+        node->next = sentinel;
+        node->prev = sentinel->prev;
+        sentinel->prev->next = node;
+        sentinel->prev = node;
+        ++count;
     }
 
     void push_front(const T& val) {
-        Node<T>* n = new Node<T>(val);
-        n->prev = fake;
-        n->next = fake->next;
-        fake->next->prev = n;
-        fake->next = n;
-        ++sz;
+        Node<T>* node = new Node<T>(val);
+        node->prev = sentinel;
+        node->next = sentinel->next;
+        sentinel->next->prev = node;
+        sentinel->next = node;
+        ++count;
     }
 
-    void push_front(T&& val) {
-        Node<T>* n = new Node<T>(std::move(val));
-        n->prev = fake;
-        n->next = fake->next;
-        fake->next->prev = n;
-        fake->next = n;
-        ++sz;
-    }
-
-    void pop_front() {
-        if (empty()) throw std::out_of_range("pop_front on empty list");
-        Node<T>* tmp = fake->next;
-        fake->next = tmp->next;
-        tmp->next->prev = fake;
-        delete tmp;
-        --sz;
-    }
-
-    void pop_back() {
-        if (empty()) throw std::out_of_range("pop_back on empty list");
-        Node<T>* tail = fake->prev;
-        fake->prev = tail->prev;
-        tail->prev->next = fake;
-        delete tail;
-        --sz;
-    }
-
-    // Итераторы
-    LIter<T> begin() { return LIter<T>(fake->next, fake); }
-    LIter<T> end() { return LIter<T>(fake, fake); }
-    LCIter<T> begin() const { return LCIter<T>(fake->next, fake); }
-    LCIter<T> end() const { return LCIter<T>(fake, fake); }
-    LCIter<T> cbegin() const { return LCIter<T>(fake->next, fake); }
-    LCIter<T> cend() const { return LCIter<T>(fake, fake); }
+    LIter<T> begin() { return LIter<T>(sentinel->next, sentinel); }
+    LIter<T> end() { return LIter<T>(sentinel, sentinel); }
+    LCIter<T> begin() const { return LCIter<T>(sentinel->next, sentinel); }
+    LCIter<T> end() const { return LCIter<T>(sentinel, sentinel); }
+    LCIter<T> cbegin() const { return LCIter<T>(sentinel->next, sentinel); }
+    LCIter<T> cend() const { return LCIter<T>(sentinel, sentinel); }
 };
 
 template <class T>
 class LCIter {
 private:
-    const Node<T>* node;
-    const Node<T>* fake;
+    const Node<T>* current;
+    const Node<T>* sentinel;
 public:
-    LCIter(const Node<T>* n = nullptr, const Node<T>* f = nullptr) : node(n), fake(f) {}
-    bool valid() const { return node != fake; }
-    void next() { if(node) node = node->next; }
-    const T& value() const { return node->data; }
+    LCIter(const Node<T>* n = nullptr, const Node<T>* s = nullptr) : current(n), sentinel(s) {}
+    bool valid() const { return current != sentinel; }
+    void next() { if(current) current = current->next; }
+    const T& value() const { return current->value; }
 };
 
-// Получение элемента по индексу
 template <typename T>
-LCIter<T> getElementAt(const List<T>& list, size_t index) {
-    LCIter<T> it = list.cbegin();
+LCIter<T> getElementAt(const List<T>& lst, size_t index) {
+    LCIter<T> iter = lst.cbegin();
     size_t i = 0;
-    while(it.valid() && i < index) { it.next(); ++i; }
-    return it;
+    while(iter.valid() && i < index) { iter.next(); ++i; }
+    return iter;
+}
+
+// Проверка переполнения size_t
+size_t safeAdd(size_t x, size_t y) {
+    const size_t max_val = std::numeric_limits<size_t>::max();
+    if (max_val - x >= y) return x + y;
+    throw std::overflow_error("overflow");
 }
 
 // Печать списка чисел
 template <typename T>
-void printList(const List<T>& list) {
-    if(list.empty()) { std::cout << "0\n"; return; }
+void printList(const List<T>& lst) {
+    if(lst.empty()) { std::cout << "0\n"; return; }
     bool first = true;
-    for(LCIter<T> it = list.cbegin(); it.valid(); it.next()) {
+    for(LCIter<T> iter = lst.cbegin(); iter.valid(); iter.next()) {
         if(!first) std::cout << " ";
-        std::cout << it.value();
+        std::cout << iter.value();
         first = false;
     }
     std::cout << "\n";
 }
 
-// Проверка переполнения при сложении
-bool sumWillOverflow(int a, int b) {
-    if (b > 0 && a > INT_MAX - b) return true;
-    if (b < 0 && a < INT_MIN - b) return true;
-    return false;
+// Печать названий последовательностей
+void printSequenceNames(const List<std::pair<std::string, List<size_t>>>& sequences) {
+    bool first = true;
+    for(LCIter<std::pair<std::string, List<size_t>>> iter = sequences.cbegin(); iter.valid(); iter.next()) {
+        if(!first) std::cout << " ";
+        std::cout << iter.value().first;
+        first = false;
+    }
+    std::cout << "\n";
 }
 
-// Обработка последовательностей
-bool processSequences(const List<std::pair<std::string, List<int>>>& seq) {
-    if(seq.empty()) return true;
-
-    size_t maxSize = 0;
-    for(LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid(); it.next())
-        if(it.value().second.size() > maxSize) maxSize = it.value().second.size();
-
-    // Вывод чисел "по строкам"
-    for(size_t row = 0; row < maxSize; ++row) {
-        bool firstInRow = true;
-        for(LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid(); it.next()) {
-            if(row < it.value().second.size()) {
-                LCIter<int> numIt = getElementAt(it.value().second, row);
-                if(!firstInRow) std::cout << " ";
-                std::cout << numIt.value();
-                firstInRow = false;
-            }
+// Вычисление сумм с проверкой переполнения
+void computeSums(const List<List<size_t>>& rows, List<size_t>& sums) {
+    for(LCIter<List<size_t>> rowIt = rows.cbegin(); rowIt.valid(); rowIt.next()) {
+        size_t total = 0;
+        for(LCIter<size_t> colIt = (*rowIt).cbegin(); colIt.valid(); colIt.next()) {
+            total = safeAdd(total, colIt.value());
         }
-        if(!firstInRow) std::cout << "\n";
+        sums.push_back(total);
     }
-
-    // Вычисление суммы с проверкой переполнения
-    List<int> sums;
-    for(size_t row = 0; row < maxSize; ++row) {
-        int sum = 0;
-        for(LCIter<std::pair<std::string, List<int>>> it = seq.cbegin(); it.valid(); it.next()) {
-            if(row < it.value().second.size()) {
-                int val = getElementAt(it.value().second, row).value();
-                if((val > 0 && sum > std::numeric_limits<int>::max() - val) ||
-                   (val < 0 && sum < std::numeric_limits<int>::min() - val)) {
-                    std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-                    return false;
-                }
-                sum += val;
-            }
-        }
-        sums.push_back(sum);
-    }
-    printList(sums);
-    return true;
 }
 
 } // namespace smirnova
@@ -251,43 +140,62 @@ bool processSequences(const List<std::pair<std::string, List<int>>>& seq) {
 int main() {
     using namespace smirnova;
 
-    List<std::pair<std::string, List<int>>> sequences;
-    std::string line;
-    bool overflowOccurred = false;
+    List<std::pair<std::string, List<size_t>>> sequences;
+    std::string inputLine;
 
-    while(std::getline(std::cin, line)) {
-    if(line.empty()) continue;
+    // Считывание данных
+    while(std::getline(std::cin, inputLine)) {
+        if(inputLine.empty()) continue;
 
-    std::istringstream iss(line);
-    std::string name;
-    iss >> name;
+        std::istringstream stream(inputLine);
+        std::string seqName;
+        stream >> seqName;
 
-    List<int> numbers;
-    std::string token;
-    while(iss >> token) {
-        try {
-          long long val = std::stoll(token);
-          if(val > std::numeric_limits<int>::max() || val < std::numeric_limits<int>::min()) {
-              overflowOccurred = true;  // пометка переполнения
-              break;
-          }
-          numbers.push_back(static_cast<int>(val));
-      } catch(...) {
-          overflowOccurred = true;
-          break;
-      }
+        List<size_t> numbers;
+        size_t value;
+        while(stream >> value) {
+            numbers.push_back(value);
+        }
+
+        sequences.push_back({seqName, std::move(numbers)});
     }
 
-    sequences.push_back({name, std::move(numbers)});
-  }
+    if(sequences.empty()) { std::cout << "0\n"; return 0; }
 
-  if(overflowOccurred) {
-    std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-    return 1;
-  }
+    // Вывод названий
+    printSequenceNames(sequences);
 
-  // Обработка чисел по строкам с проверкой переполнения при сумме
-  if(!processSequences(sequences)) return 1;
+    // Транспонирование строк
+    List<List<size_t>> transposed;
+    size_t maxLen = 0;
+    for(LCIter<std::pair<std::string, List<size_t>>> it = sequences.cbegin(); it.valid(); it.next())
+        if(it.value().second.size() > maxLen) maxLen = it.value().second.size();
 
-  return 0;
+    for(size_t row = 0; row < maxLen; ++row) {
+        List<size_t> newRow;
+        for(LCIter<std::pair<std::string, List<size_t>>> it = sequences.cbegin(); it.valid(); it.next()) {
+            if(row < it.value().second.size()) {
+                LCIter<size_t> cell = getElementAt(it.value().second, row);
+                newRow.push_back(cell.value());
+            }
+        }
+        transposed.push_back(newRow);
+    }
+
+    // Вывод транспонированных строк
+    for(LCIter<List<size_t>> rowIt = transposed.cbegin(); rowIt.valid(); rowIt.next()) {
+        printList(*rowIt);
+    }
+
+    // Суммы с проверкой переполнения
+    try {
+        List<size_t> sums;
+        computeSums(transposed, sums);
+        printList(sums);
+    } catch(const std::overflow_error& e) {
+        std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
+        return 1;
+    }
+
+    return 0;
 }
