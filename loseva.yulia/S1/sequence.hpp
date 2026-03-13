@@ -12,9 +12,8 @@ using Seq = List<int>;
 using NamedSeq = std::pair<std::string, Seq>;
 using Storage = List<NamedSeq>;
 
-void readSequences(Storage& data);
-void printNames(const Storage& data);
-void process(const Storage& data);
+void read_sequences(Storage& data);
+void print_names(const Storage& data);
 
 }
 
