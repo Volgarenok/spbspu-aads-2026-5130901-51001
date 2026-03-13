@@ -56,14 +56,23 @@ size_t muraviev::getValueAt(const List< size_t >& numbers, size_t index)
   return 0;
 }
 
-size_t muraviev::sumChecked(size_t left, size_t right)
+bool muraviev::checkRowSum(const List< namedSequence >& sequences, size_t index)
 {
-  if (std::numeric_limits< size_t >::max() - left < right) {
-    throw std::overflow_error("sum overflow");
-  }
-  return left + right;
-}
+  size_t sum = 0;
 
+  for (List< namedSequence >::c_iter it = sequences.begin(); it != sequences.end(); ++it) {
+    if (hasIndex(it->numbers, index)) {
+      size_t value = getValueAt(it->numbers, index);
+      
+      if (std::numeric_limits< size_t >::max() - sum < value) {
+        return false;
+      }
+      sum += value;
+    }
+  }
+
+  return true;
+}
 size_t muraviev::getRowSum(const List< namedSequence >& sequences, size_t index)
 {
   size_t sum = 0;
@@ -71,7 +80,7 @@ size_t muraviev::getRowSum(const List< namedSequence >& sequences, size_t index)
   for (List< namedSequence >::c_iter it = sequences.begin(); it != sequences.end(); ++it) {
     if (hasIndex(it->numbers, index)) {
       size_t value = getValueAt(it->numbers, index);
-      sum = sumChecked(sum, value);
+      sum += value;
     }
   }
 
@@ -125,6 +134,12 @@ void muraviev::printSums(std::ostream& out, const List< namedSequence >& sequenc
   }
 
   bool first = true;
+
+  for (size_t index = 0; index < maxSize; ++index) {
+    if (!checkRowSum(sequences, index)) {
+      throw std::overflow_error("sum overflow");
+    }
+  }
 
   for (size_t index = 0; index < maxSize; ++index) {
     size_t sum = getRowSum(sequences, index);
