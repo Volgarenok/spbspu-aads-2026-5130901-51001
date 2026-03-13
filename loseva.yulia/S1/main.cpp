@@ -6,9 +6,9 @@ int main()
 {
   loseva::List<int> list;
 
-  list.pushBack(10);
-  list.pushBack(20);
-  list.pushFront(5);
+  list.pushBack(1);
+  list.pushBack(2);
+  list.pushFront(0);
 
   std::cout << list.front() << std::endl;
   std::cout << list.back() << std::endl;

@@ -6,7 +6,7 @@
 namespace loseva {
 
 template <typename T>
-List<T>::Node::Node(const T &value):
+typename List<T>::Node::Node(const T &value):
   value(value),
   next(nullptr),
   prev(nullptr)
