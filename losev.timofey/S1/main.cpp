@@ -58,18 +58,18 @@ int main() {
     NamedList seq;
     seq.name = name;
 
-    bool has_overflow = false;
     int num;
     while (std::cin.peek() != '\n' && std::cin.peek() != EOF) {
       if (!(std::cin >> num)) {
+        std::cin.clear();
         std::string token;
         std::cin >> token;
         unsigned long long big_num;
         if (!read_number(token, big_num)) {
-          std::cerr << "overflow" << std::endl;
+          std::cerr << "overflow" << "\n";
           return 1;
         }
-        std::cerr << "overflow" << std::endl;
+        std::cerr << "overflow" << "\n";
         return 1;
       }
       seq.numbers.push_front(num);
@@ -84,7 +84,7 @@ int main() {
   }
   sequences = reverse(sequences);
   if (sequences.empty()) {
-    std::cout << "0" << std::endl;
+    std::cout << "0" << "\n";
     return 0;
   }
   bool first = true;
@@ -93,14 +93,14 @@ int main() {
     std::cout << it->name;
     first = false;
   }
-  std::cout << std::endl;
+  std::cout << "\n";
   size_t max_len = 0;
   for (List< NamedList >::iterator seq_it = sequences.begin(); seq_it != sequences.end(); ++seq_it) {
     size_t len = length(seq_it->numbers);
     if (len > max_len) max_len = len;
   }
   if (max_len == 0) {
-    std::cout << "0" << std::endl;
+    std::cout << "0" << "\n";
     return 0;
   }
   List< int > row_sums;
@@ -122,7 +122,7 @@ int main() {
         *sum_it += value;
       }
     }
-    std::cout << std::endl;
+    std::cout << "\n";
   }
   first = true;
   for (List< int >::iterator sum_it = row_sums.begin(); sum_it != row_sums.end(); ++sum_it) {
@@ -130,7 +130,7 @@ int main() {
     std::cout << *sum_it;
     first = false;
   }
-  std::cout << std::endl;
+  std::cout << "\n";
 
   return 0;
 }
