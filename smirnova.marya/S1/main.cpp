@@ -262,17 +262,16 @@ int main() {
 
       List<int> numbers;
       std::string token;
-      while(iss >> token) {
-          try {
-              long long val = std::stoll(token);
-              if(val > INT_MAX || val < INT_MIN) {
-                  overflowOccurred = true;  // переполнение при чтении
-              } else {
-                  numbers.push_back(static_cast<int>(val));
-              }
-          } catch(...) {
-              overflowOccurred = true;
-          }
+      while (iss >> token) {
+        try {
+          long long val = std::stoll(token);
+          if (val > INT_MAX || val < INT_MIN)
+            throw std::overflow_error("overflow");
+          numbers.push_back(static_cast<int>(val));
+        } catch(...) {
+            std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
+            return 1;
+        }
       }
       sequences.push_back({name, std::move(numbers)});
   }
