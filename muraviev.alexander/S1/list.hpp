@@ -45,7 +45,7 @@ namespace muraviev
     head_(nullptr),
     tail_(nullptr)
   {}
-  
+
   template< class T >
   List< T >::~List()
   {
@@ -205,6 +205,44 @@ namespace muraviev
     delete tail_;
     tail_ = prev;
     tail_->next = head_;
+  }
+
+  template< class T >
+  typename List< T >::iter List< T >::erase(iter pos)
+  {
+    if (empty() || pos.node_ == nullptr) {
+      return end();
+    }
+    if (pos.node_ == head_) {
+      popFront();
+      return begin();
+    }
+
+    Node< T >* prev = head_;
+    while (prev != nullptr && prev->next != pos.node_) {
+      prev = prev->next;
+    }
+    if (prev == nullptr) {
+      return end();
+    }
+
+    Node< T >* nextNode = pos.node_->next;
+    prev->next = nextNode;
+    if (tail_ == pos.node_) {
+      tail_ = prev;
+    }
+    delete pos.node_;
+
+    if (head_ == nullptr) {
+      tail_ = nullptr;
+      return end();
+    }
+
+    if (tail_ != nullptr) {
+      tail_->next = head_;
+    }
+
+    return iter(nextNode, head_);
   }
 }
 
