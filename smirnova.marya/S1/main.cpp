@@ -277,6 +277,12 @@ int main() {
       sequences.push_back({name, std::move(numbers)});
   }
 
+  // Обработка пустого списка
+  if(sequences.empty()) {
+      std::cout << "0\n";
+      return 0;
+  }
+
   // Выводим имена
   bool first = true;
   for(LCIter<std::pair<std::string, List<int>>> it = sequences.cbegin(); it.valid(); it.next()) {
@@ -285,12 +291,6 @@ int main() {
       first = false;
   }
   std::cout << "\n";
-
-  // Обработка пустого списка
-  if(sequences.empty()) {
-      std::cout << "0\n";
-      return 0;
-  }
 
   // Проверка переполнения после чтения чисел
   if(overflowOccurred) {
