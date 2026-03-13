@@ -45,7 +45,6 @@ int main()
       return 2;
     }
   }
-  //std::cout << "\n";
   if (names.get_size() == 0 || !hasNumbers) {
     printList(names);
     std::cout << "0\n";
@@ -63,15 +62,16 @@ int main()
   List< size_t > summes;
   for (size_t i = 0; i < maxSize; i++) {
     size_t sum = 0;
-    size_t s = listOfLists.get_size();
-    for (size_t j = 0; j < s; j++) {
+    bool first = true;
+    for (size_t j = 0; j < listOfLists.get_size(); j++) {
       List< size_t >& curList = *(listOfLists[j]);
       if (curList.get_size() > i) {
         size_t val = *(curList[i]);
-        std::cout << val;
-        if (j + 1 != curList.get_size()) {
+        if (!first) {
           std::cout << " ";
         }
+        std::cout << val;
+        first = false;
         if (sum > std::numeric_limits< size_t >::max() - val) {
           std::cerr << "Overflow sum\n";
           summes.clear();
