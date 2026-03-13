@@ -1,7 +1,4 @@
 #define BOOST_TEST_MODULE S1
-#define BOOST_TEST_NO_MAIN
-#define BOOST_TEST_ALTERNATIVE_INIT_API
-#define BOOST_TEST_NO_LIB
 #include <stdexcept>
 #include <boost/test/included/unit_test.hpp>
 #include "list.hpp"
