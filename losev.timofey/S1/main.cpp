@@ -63,6 +63,10 @@ void skip_line(std::istream& in) {
   }
 }
 
+bool check_overflow(size_t num) {
+  return num == std::numeric_limits<size_t>::max();
+}
+
 }
 
 int main() {
