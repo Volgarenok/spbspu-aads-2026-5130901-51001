@@ -8,6 +8,8 @@
 namespace muraviev
 {
   size_t getListSize(const List< size_t >& numbers);
+  size_t getMaxSize(const List< namedSequence >& sequences);
+  bool hasIndex(const List< size_t >& numbers, size_t index);
   size_t getValueAt(const List< size_t >& numbers, size_t index);
   size_t sumChecked(size_t left, size_t right);
   size_t getRowSum(const List< namedSequence >& sequences, size_t index);

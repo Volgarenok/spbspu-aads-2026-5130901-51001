@@ -14,18 +14,18 @@ size_t muraviev::getListSize(const List< size_t >& numbers)
   return size;
 }
 
-size_t muraviev::getValueAt(const List< size_t >& numbers, size_t index)
+size_t muraviev::getMaxSize(const List< namedSequence >& sequences)
 {
-  size_t currentIndex = 0;
+  size_t maxSize = 0;
 
-  for (List< size_t >::c_iter it = numbers.begin(); it != numbers.end(); ++it) {
-    if (currentIndex == index) {
-      return *it;
+  for (List< namedSequence >::c_iter it = sequences.begin(); it != sequences.end(); ++it) {
+    size_t currentSize = getListSize(it->numbers);
+    if (currentSize > maxSize) {
+      maxSize = currentSize;
     }
-    ++currentIndex;
   }
 
-  return 0;
+  return maxSize;
 }
 
 bool muraviev::hasIndex(const List< size_t >& numbers, size_t index)
@@ -40,6 +40,20 @@ bool muraviev::hasIndex(const List< size_t >& numbers, size_t index)
   }
 
   return false;
+}
+
+size_t muraviev::getValueAt(const List< size_t >& numbers, size_t index)
+{
+  size_t currentIndex = 0;
+
+  for (List< size_t >::c_iter it = numbers.begin(); it != numbers.end(); ++it) {
+    if (currentIndex == index) {
+      return *it;
+    }
+    ++currentIndex;
+  }
+
+  return 0;
 }
 
 size_t muraviev::sumChecked(size_t left, size_t right)
