@@ -1,112 +1,51 @@
-#ifndef LOSEVA_LIST_HPP
-#define LOSEVA_LIST_HPP
+#ifndef LIST_HPP
+#define LIST_HPP
 
 #include <cstddef>
 
-namespace loseva
+#include "sequence.hpp"
+
+namespace loseva {
+
+template <typename T>
+class List: public Sequence<T>
 {
-
-template<class T>
-class List;
-
-template<class T>
-class LIter
-{
-  friend class List<T>;
-
-private:
-  struct Node;
-  Node* node_;
-
-  explicit LIter(Node* n);
-
 public:
-  LIter();
-
-  T& operator*() const;
-  LIter& operator++();
-  LIter& operator--();
-
-  bool operator==(const LIter& other) const;
-  bool operator!=(const LIter& other) const;
-};
-
-template<class T>
-class LCIter
-{
-  friend class List<T>;
-
-private:
-  struct Node;
-  const Node* node_;
-
-  explicit LCIter(const Node* n);
-
-public:
-  LCIter();
-
-  const T& operator*() const;
-  LCIter& operator++();
-  LCIter& operator--();
-
-  bool operator==(const LCIter& other) const;
-  bool operator!=(const LCIter& other) const;
-};
-
-template<class T>
-class List
-{
-private:
-
-  struct Node
-  {
-    T data;
-    Node* next;
-    Node* prev;
-
-    Node(const T& d);
-  };
-
-  Node* head_;
-  Node* tail_;
-
-public:
-
-  using iterator = LIter<T>;
-  using const_iterator = LCIter<T>;
-
   List();
+  List(const List &other);
+  List &operator=(const List &other);
   ~List();
 
-  List(const List& other);
-  List(List&& other) noexcept;
+  void pushBack(const T &value) override;
+  void pushFront(const T &value) override;
 
-  List& operator=(const List& other);
-  List& operator=(List&& other) noexcept;
+  void popBack() override;
+  void popFront() override;
 
-  bool empty() const;
+  std::size_t size() const override;
+  bool empty() const override;
 
-  iterator begin();
-  iterator end();
+  T &front() override;
+  const T &front() const override;
 
-  const_iterator begin() const;
-  const_iterator end() const;
-
-  T& front();
-  T& back();
-
-  const T& front() const;
-  const T& back() const;
-
-  void push_front(const T& value);
-  void push_back(const T& value);
-
-  void pop_front();
-  void pop_back();
-
-  iterator insert_after(iterator pos, const T& value);
+  T &back() override;
+  const T &back() const override;
 
   void clear();
+
+private:
+  struct Node
+  {
+    T value;
+    Node *next;
+    Node *prev;
+
+    explicit Node(const T &value);
+  };
+
+  Node *head_;
+  Node *tail_;
+  std::size_t size_;
 };
 
 }
