@@ -2,12 +2,26 @@
 
 vishnyakov::List< vishnyakov::Sequence > vishnyakov::readInput(std::istream& in)
 {
-  List< Sequence >* seqs;
+  List< Sequence > seqs;
+  LIter< Sequence > curr_seq = seqs.begin();
   std::string name;
   while (in >> name)
   {
     Sequence seq;
+    seq.name = name;
+    LIter< size_t > curr_num = seq.nums->begin();
+
+    getWitoutSkips(in);
+    while(!isEnd(in))
+    {
+      size_t num = 0;
+      in >> num;
+      curr_num = seq.nums->insert_after(curr_num, num);
+    }
+    skipLine(in);
+    curr_seq = seqs.insert_after(curr_seq, seq);
   }
+  return seqs;
 }
 
 void vishnyakov::getWitoutSkips(std::istream& in)

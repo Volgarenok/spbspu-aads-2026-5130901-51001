@@ -114,7 +114,7 @@ namespace vishnyakov
 
     Node* pseudoknot_;
     size_t size_;
-
+  public:
     List():
       pseudoknot_(new Node()),
       size_(0)
