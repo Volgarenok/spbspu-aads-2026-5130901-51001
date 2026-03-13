@@ -78,3 +78,25 @@ void muraviev::printNames(std::ostream& out, const List< namedSequence >& sequen
 
   out << '\n';
 }
+
+void muraviev::printRows(std::ostream& out, const List< namedSequence >& sequences)
+{
+  size_t maxSize = getMaxSize(sequences);
+
+  for (size_t index = 0; index < maxSize; ++index) {
+    bool first = true;
+
+    for (List< namedSequence >::c_iter it = sequences.begin(); it != sequences.end(); ++it) {
+      if (hasIndex(it->numbers, index)) {
+        size_t value = getValueAt(it->numbers, index);
+        if (!first) {
+          out << ' ';
+        }
+        out << value;
+        first = false;
+      }
+    }
+
+    out << '\n';
+  }
+}
