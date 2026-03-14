@@ -184,6 +184,31 @@ namespace smirnova
       delete tmp;
       --count;
     }
+
+    LIter<T> begin()
+    {
+      return LIter<T>(sentinel->next, sentinel);
+    }
+    LIter<T> end()
+    {
+      return LIter<T>(sentinel, sentinel);
+    }
+    LCIter<T> begin() const
+    {
+      return LCIter<T>(sentinel->next, sentinel);
+    }
+    LCIter<T> end() const
+    {
+      return LCIter<T>(sentinel, sentinel);
+    }
+    LCIter<T> cbegin() const
+    {
+      return LCIter<T>(sentinel->next, sentinel);
+    }
+    LCIter<T> cend() const
+    {
+      return LCIter<T>(sentinel, sentinel);
+    }
   };
 
   template < typename T >
