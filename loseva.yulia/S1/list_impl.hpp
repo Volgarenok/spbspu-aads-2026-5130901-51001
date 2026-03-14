@@ -37,7 +37,7 @@ List<T>::List (const List &other):
 }
 
 template <typename T>
-typename List<T> &List<T>::operator=(const List &other)
+List<T> &List<T>::operator=(const List &other)
 {
   if (this != &other) {
     clear();
