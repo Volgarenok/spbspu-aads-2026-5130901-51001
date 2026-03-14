@@ -1,5 +1,6 @@
 #define BOOST_TEST_MODULE S1
 #include <boost/test/included/unit_test.hpp>
+#include "list.hpp"
 
 BOOST_AUTO_TEST_SUITE(list_tests)
 
@@ -76,3 +77,4 @@ BOOST_AUTO_TEST_CASE(pop_back_on_empty_throws)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
