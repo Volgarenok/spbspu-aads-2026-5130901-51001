@@ -106,4 +106,84 @@ namespace smirnova
       return *this;
     }
 
+    void swap(List& other) noexcept
+    {
+      std::swap(sentinel, other.sentinel);
+      std::swap(count, other.count);
+    }
+
+    bool empty() const noexcept
+    {
+      return count == 0;
+    }
+    size_t size() const noexcept
+    {
+      return count;
+    }
+
+    void push_back(const T& val)
+    {
+      Node< T >* n = new Node< T >(val);
+      n->next = sentinel;
+      n->prev = sentinel->prev;
+      sentinel->prev->next = n;
+      sentinel->prev = n;
+      ++count;
+    }
+
+    void push_back(T&& val)
+    {
+      Node< T >* n = new Node< T >(std::move(val));
+      n->next = sentinel;
+      n->prev = sentinel->prev;
+      sentinel->prev->next = n;
+      sentinel->prev = n;
+      ++count;
+    }
+
+    void push_front(const T& val)
+    {
+      Node< T >* n = new Node< T >(val);
+      n->prev = sentinel;
+      n->next = sentinel->next;
+      sentinel->next->prev = n;
+      sentinel->next = n;
+      ++count;
+    }
+
+    void push_front(T&& val)
+    {
+      Node< T >* n = new Node< T >(std::move(val));
+      n->prev = sentinel;
+      n->next = sentinel->next;
+      sentinel->next->prev = n;
+      sentinel->next = n;
+      ++count;
+    }
+
+    void pop_front()
+    {
+      if (empty()) {
+        throw std::out_of_range("pop_front on empty list");
+      }
+      Node< T >* tmp = sentinel->next;
+      sentinel->next = tmp->next;
+      tmp->next->prev = sentinel;
+      delete tmp;
+      --count;
+    }
+
+    void pop_back()
+    {
+      if (empty()) {
+        throw std::out_of_range("pop_back on empty list");
+      }
+      Node< T >* tmp = sentinel->prev;
+      sentinel->prev = tmp->prev;
+      tmp->prev->next = sentinel;
+      delete tmp;
+      --count;
+    }
+  }
+
 }
