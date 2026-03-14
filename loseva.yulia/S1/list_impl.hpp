@@ -2,6 +2,7 @@
 #define LIST_IMPL_HPP
 
 #include <stdexcept>
+#include "list.hpp"
 
 namespace loseva {
 
