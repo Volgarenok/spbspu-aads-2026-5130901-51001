@@ -70,7 +70,19 @@ namespace volkovich
       {
         return;
       }
-      Item<T> *old_tail = tail;
+
+      // single element case
+      if (fake_node.next == tail)
+      {
+        delete tail;
+        head = nullptr;
+        tail = nullptr;
+        fake_node.next = nullptr;
+        list_len = 0;
+        return;
+      }
+
+      // general case: find node before tail
       Item<T> *prev = &fake_node;
       Item<T> *cur = fake_node.next;
       while (cur->next)
@@ -78,6 +90,7 @@ namespace volkovich
         prev = cur;
         cur = prev->next;
       }
+      // cur is old tail
       prev->next = nullptr;
       delete cur;
       tail = prev;

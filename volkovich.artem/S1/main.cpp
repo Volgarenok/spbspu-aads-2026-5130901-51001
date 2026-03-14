@@ -2,6 +2,7 @@
 #include "list.hpp"
 #include <string>
 #include <utility>
+#include <limits>
 
 typedef volkovich::List<std::pair<std::string, volkovich::List<size_t>>> DATA_TYPE;
 typedef volkovich::LIter<std::pair<std::string, volkovich::List<size_t>>> ITER_TYPE;
@@ -67,13 +68,6 @@ int main()
     }
     data.pushBack(std::make_pair(name, numbers));
   }
-
-  if (!hasNumbers)
-  {
-    std::cout << "0\n";
-    return 0;
-  }
-
   bool first = true;
   for (ITER_TYPE it = data.begin();
        it != ITER_TYPE(nullptr); ++it)
@@ -86,6 +80,11 @@ int main()
     first = false;
   }
   std::cout << '\n';
+  if (!hasNumbers)
+  {
+    std::cout << "0\n";
+    return 0;
+  }
 
   size_t maxLen = 0;
   for (ITER_TYPE it = data.begin();
@@ -99,6 +98,7 @@ int main()
   }
 
   volkovich::List<size_t> rowSumsList;
+  bool overflow = false;
 
   for (size_t i = 0; i < maxLen; ++i)
   {
@@ -115,6 +115,10 @@ int main()
         {
           std::cout << ' ';
         }
+        if (rowSum > std::numeric_limits<size_t>::max() - value)
+        {
+          overflow = true;
+        }
         rowSum += value;
         std::cout << value;
         firstCol = false;
@@ -122,6 +126,11 @@ int main()
     }
     rowSumsList.pushBack(rowSum);
     std::cout << '\n';
+  }
+
+  if (overflow)
+  {
+    return 1;
   }
 
   bool firstSum = true;
