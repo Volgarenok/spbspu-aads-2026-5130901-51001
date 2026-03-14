@@ -11,7 +11,7 @@ namespace vishnyakov
     T data_;
     Node* next_;
 
-    explicit Node(const T & value = T(), Node* next = nullptr):
+    explicit Node(const T& value = T(), Node* next = nullptr):
       data_(value),
       next_(next)
     {}

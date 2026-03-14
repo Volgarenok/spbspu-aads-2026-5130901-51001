@@ -1,6 +1,5 @@
 #include <iostream>
 #include "functions.hpp"
-#include "list.hpp"
 
 int main()
 {
@@ -12,7 +11,8 @@ int main()
     return 0;
   }
 
-  vishnyakov::ouputNames(seqs, std::cout);
+  vishnyakov::outputNames(seqs, std::cout);
   return vishnyakov::outputNums(seqs, std::cout);
 }
+
 

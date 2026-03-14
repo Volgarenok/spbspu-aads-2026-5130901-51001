@@ -11,7 +11,7 @@ vishnyakov::List< vishnyakov::Sequence > vishnyakov::readInput(std::istream& in)
     seq.name = name;
     LIter< size_t > curr_num = seq.nums->begin();
 
-    getWitoutSkips(in);
+    getWithoutSkips(in);
     while(!isEnd(in))
     {
       size_t num = 0;
@@ -24,7 +24,7 @@ vishnyakov::List< vishnyakov::Sequence > vishnyakov::readInput(std::istream& in)
   return seqs;
 }
 
-void vishnyakov::getWitoutSkips(std::istream& in)
+void vishnyakov::getWithoutSkips(std::istream& in)
 {
   while (in.peek() == ' ' || in.peek() == '\t')
   {
@@ -64,7 +64,7 @@ bool vishnyakov::checkedSum(size_t a, size_t b, size_t& res)
   return false;
 }
 
-void vishnyakov::ouputNames(const List< Sequence >& seqs, std::ostream& out)
+void vishnyakov::outputNames(const List< Sequence >& seqs, std::ostream& out)
 {
   LCIter< Sequence > it = seqs.cbegin();
   bool first = true;

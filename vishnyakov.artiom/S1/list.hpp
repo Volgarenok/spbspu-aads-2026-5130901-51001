@@ -178,32 +178,32 @@ namespace vishnyakov
       return *this;
     }
 
-    LIter< T > begin()
+    LIter< T > begin() noexcept
     {
       return LIter< T >(pseudoknot_->next_);
     }
 
-    LIter< T > end()
+    LIter< T > end() noexcept
     {
       return LIter< T >(pseudoknot_);
     }
 
-    LCIter< T > begin() const
+    LCIter< T > begin() const noexcept
     {
       return LCIter< T >(pseudoknot_->next_);
     }
 
-    LCIter< T > end() const
+    LCIter< T > end() const noexcept
     {
       return LCIter< T >(pseudoknot_);
     }
 
-    LCIter< T > cbegin() const
+    LCIter< T > cbegin() const noexcept
     {
       return LCIter< T >(pseudoknot_->next_);
     }
 
-    LCIter< T > cend() const
+    LCIter< T > cend() const noexcept
     {
       return LCIter< T >(pseudoknot_);
     }

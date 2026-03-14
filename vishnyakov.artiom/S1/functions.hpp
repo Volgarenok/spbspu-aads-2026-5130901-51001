@@ -16,12 +16,12 @@ namespace vishnyakov
 
   List< Sequence > readInput(std::istream& in);
 
-  void getWitoutSkips(std::istream& in);
+  void getWithoutSkips(std::istream& in);
   bool isEnd(std::istream& in);
   void skipLine(std::istream& in);
   bool checkedSum(size_t a, size_t b, size_t& res);
 
-  void ouputNames(const List< Sequence >& seqs, std::ostream& out);
+  void outputNames(const List< Sequence >& seqs, std::ostream& out);
   bool outputNums(const List< Sequence >& seqs, std::ostream& out);
 }
 
