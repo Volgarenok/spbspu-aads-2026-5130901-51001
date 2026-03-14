@@ -8,12 +8,12 @@ List< Seq > readSequences()
 {
   List< Seq > sequences;
   std::string name;
-  
+
   while (std::cin >> name)
   {
     List< int > numbers;
     int value = 0;
-    
+
     while (std::cin.peek() != EOF && !std::isalpha(std::cin.peek()))
     {
       if (std::cin >> value)
@@ -32,7 +32,7 @@ List< Seq > readSequences()
     }
     sequences.pushBack({ name, numbers });
   }
-  
+
   return sequences;
 }
 
