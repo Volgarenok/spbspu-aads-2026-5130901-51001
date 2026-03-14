@@ -191,14 +191,15 @@ void prsize_tList(const List<T>& lst) {
 }
 
 bool willOverflow(size_t a, size_t b) {
-    if (b > std::numeric_limits<size_t>::max() - a) {
-        return true;
-    }
-    return false;
+    return b > std::numeric_limits<size_t>::max() - a;
 }
 
 bool processSequences(const List<std::pair<std::string, List<size_t>>>& sequences) {
-    if(sequences.empty()) return true;
+    // Проверка на пустой список
+    if(sequences.empty()) {
+        std::cout << "0\n";
+        return true;
+    }
 
     // Вывод названий
     bool firstName = true;
@@ -238,7 +239,7 @@ bool processSequences(const List<std::pair<std::string, List<size_t>>>& sequence
                 size_t val = getElementAt(it.value().second, row).value();
                 if(willOverflow(sum, val)) {
                     std::cerr << "overflow\n";
-                    return 1;
+                    return false;
                 }
                 sum += val;
             }
@@ -247,7 +248,7 @@ bool processSequences(const List<std::pair<std::string, List<size_t>>>& sequence
     }
 
     prsize_tList(sums);
-    return 0;
+    return true;
 }
 
 } // namespace smirnova
