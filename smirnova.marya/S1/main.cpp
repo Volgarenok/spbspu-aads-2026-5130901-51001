@@ -184,6 +184,66 @@ namespace smirnova
       delete tmp;
       --count;
     }
-  }
+  };
+
+  template < typename T >
+  class LIter
+  {
+  private:
+      Node< T >* node;
+      Node< T >* sentinel;
+  public:
+    LIter(Node< T >* n = nullptr, Node< T >* s = nullptr):
+      node(n),
+      sentinel(s)
+    {}
+    bool valid() const
+    {
+      return node != sentinel;
+    }
+    void next()
+    {
+      if(node)
+      {
+        node = node->next;
+      }
+    }
+    T& value()
+    {
+      return node->data;
+    }
+    const T& value() const
+    {
+      return node->data;
+    }
+  };
+
+  template < typename T >
+  class LCIter
+  {
+  private:
+    const Node< T >* node;
+    const Node< T >* sentinel;
+  public:
+    LCIter(const Node< T >* n = nullptr, const Node< T >* s = nullptr):
+      node(n),
+      sentinel(s)
+    {}
+    bool valid() const
+    {
+      return node != sentinel;
+    }
+    void next()
+    {
+      if(node)
+      {
+        node = node->next;
+      }
+    }
+    const T& value() const
+    {
+      return node->data;
+    }
+  };
 
 }
