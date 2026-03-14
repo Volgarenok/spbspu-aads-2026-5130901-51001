@@ -65,7 +65,7 @@ smirnova::Transposed smirnova::buildTransposed(const smirnova::Sequences& seqs)
     LCIter< NamedSeq > seqIt = seqs.cbegin();
     LIter< LCIter< long long > > iterIt = iters.begin();
     bool hasData = false;
-    
+
     while (seqIt != seqs.cend()) {
       if (*iterIt != seqIt->second.cend()) {
         long long val = **iterIt;
@@ -80,7 +80,7 @@ smirnova::Transposed smirnova::buildTransposed(const smirnova::Sequences& seqs)
       ++seqIt;
       ++iterIt;
     }
-    
+
     if (!hasData) {
       break;
     }
