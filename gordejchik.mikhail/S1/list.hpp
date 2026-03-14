@@ -29,6 +29,10 @@ namespace gordejchik {
     void pushBack(const T& value);
     void pushBack(T&& value);
 
+    void popFront();
+    void popBack();
+    iterator erase(iterator pos);
+
     void clear() noexcept;
 
   private:
@@ -133,6 +137,30 @@ namespace gordejchik {
   void List< T >::pushBack(T&& value)
   {
     insertBefore(&fake_, new Node(static_cast< T&& >(value)));
+  }
+
+  template< class T >
+  void List< T >::popFront()
+  {
+    erase(begin());
+  }
+
+  template< class T >
+  void List< T >::popBack()
+  {
+    erase(iterator(fake_.prev_));
+  }
+
+  template< class T >
+  typename List< T >::iterator List< T >::erase(iterator pos)
+  {
+    BaseNode* node = pos.node_;
+    BaseNode* next = node->next_;
+    node->prev_->next_ = next;
+    next->prev_ = node->prev_;
+    delete static_cast< Node* >(node);
+    --size_;
+    return iterator(next);
   }
 
   template< class T >
