@@ -29,6 +29,8 @@ namespace gordejchik {
     void pushBack(const T& value);
     void pushBack(T&& value);
 
+    void clear() noexcept;
+
   private:
     using BaseNode = detail::BaseNode;
     using Node = detail::Node< T >;
@@ -47,7 +49,9 @@ namespace gordejchik {
 
   template< class T >
   List< T >::~List()
-  {}
+  {
+    clear();
+  }
 
   template< class T >
   void List< T >::insertBefore(BaseNode* pos, Node* node) noexcept
@@ -129,6 +133,20 @@ namespace gordejchik {
   void List< T >::pushBack(T&& value)
   {
     insertBefore(&fake_, new Node(static_cast< T&& >(value)));
+  }
+
+  template< class T >
+  void List< T >::clear() noexcept
+  {
+    BaseNode* cur = fake_.next_;
+    while (cur != &fake_) {
+      BaseNode* next = cur->next_;
+      delete static_cast< Node* >(cur);
+      cur = next;
+    }
+    fake_.next_ = &fake_;
+    fake_.prev_ = &fake_;
+    size_ = 0;
   }
 }
 
