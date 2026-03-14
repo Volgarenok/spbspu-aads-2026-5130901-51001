@@ -29,12 +29,12 @@ namespace gordejchik {
     bool first = true;
     for (auto it = namedLists.cbegin(); it != namedLists.cend(); ++it) {
       if (!first) {
-        std::cout << " ";
+        std::cout << ' ';
       }
       std::cout << it->name;
       first = false;
     }
-    std::cout << "\n";
+    std::cout << '\n';
   }
 
   static size_t checkedSum(size_t a, size_t b)
@@ -85,12 +85,30 @@ namespace gordejchik {
       rowSums.pushBack(rowSum);
     }
   }
+
+  static void printSums(const List< size_t >& sums)
+  {
+    bool first = true;
+    for (auto it = sums.cbegin(); it != sums.cend(); ++it) {
+      if (!first) {
+        std::cout << ' ';
+      }
+      std::cout << *it;
+      first = false;
+    }
+    std::cout << '\n';
+  }
 }
 
 int main()
 {
   gordejchik::List< gordejchik::NamedList > namedLists;
-  gordejchik::readInput(namedLists);
+  try {
+    gordejchik::readInput(namedLists);
+  } catch (const std::exception& e) {
+    std::cerr << e.what() << '\n';
+    return 1;
+  }
   if (namedLists.empty()) {
     std::cout << 0 << '\n';
     return 0;
@@ -103,5 +121,6 @@ int main()
     std::cerr << e.what() << '\n';
     return 1;
   }
+  gordejchik::printSums(rowSums);
   return 0;
 }
