@@ -1,0 +1,50 @@
+#define BOOST_TEST_MODULE S1
+#include <boost/test/included/unit_test.hpp>
+#include "list.hpp"
+
+BOOST_AUTO_TEST_CASE(empty_list_test)
+{
+    smirnova::List<int> list;
+    BOOST_TEST(list.empty() == true);
+}
+
+BOOST_AUTO_TEST_CASE(push_front_test)
+{
+    smirnova::List<int> list;
+    list.push_front(42);
+    BOOST_TEST(list.empty() == false);
+    BOOST_TEST(list.begin().value() == 42);
+}
+
+BOOST_AUTO_TEST_CASE(push_back_test)
+{
+    smirnova::List<int> list;
+    list.push_back(7);
+    BOOST_TEST(list.begin().value() == 7);
+    BOOST_TEST(list.end().valid() == false);
+}
+
+BOOST_AUTO_TEST_CASE(pop_front_test)
+{
+    smirnova::List<int> list;
+    list.push_front(1);
+    list.pop_front();
+    BOOST_TEST(list.empty() == true);
+}
+
+BOOST_AUTO_TEST_CASE(pop_back_test)
+{
+  smirnova::List< size_t > list;
+  list.push_back(2);
+  list.pop_back();
+  BOOST_TEST(list.empty() == true);
+}
+
+BOOST_AUTO_TEST_CASE(clear_test)
+{
+  smirnova::List< size_t > list;
+  list.push_back(1);
+  list.push_back(2);
+  list.clear();
+  BOOST_TEST(list.empty() == true);
+}
