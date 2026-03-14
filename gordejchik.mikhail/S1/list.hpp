@@ -34,6 +34,8 @@ namespace gordejchik {
     iterator erase(iterator pos);
     void clear() noexcept;
 
+    void swap(List& other) noexcept;
+
   private:
     using BaseNode = detail::BaseNode;
     using Node = detail::Node< T >;
@@ -189,6 +191,27 @@ namespace gordejchik {
     fake_.next_ = &fake_;
     fake_.prev_ = &fake_;
     size_ = 0;
+  }
+
+  template< class T >
+  void List< T >::swap(List& other) noexcept
+  {
+    BaseNode* tmpNext = fake_.next_;
+    BaseNode* tmpPrev = fake_.prev_;
+    size_t tmpSize = size_;
+
+    fake_.next_ = other.fake_.next_;
+    fake_.prev_ = other.fake_.prev_;
+    size_ = other.size_;
+
+    other.fake_.next_ = tmpNext;
+    other.fake_.prev_ = tmpPrev;
+    other.size_ = tmpSize;
+
+    fake_.next_->prev_ = &fake_;
+    fake_.prev_->next_ = &fake_;
+    other.fake_.next_->prev_ = &other.fake_;
+    other.fake_.prev_->next_ = &other.fake_;
   }
 }
 
