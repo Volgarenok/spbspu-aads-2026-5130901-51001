@@ -34,6 +34,9 @@ struct node_t: node_base_t {
 
 }
 
+// СНАЧАЛА ОБЪЯВЛЯЕМ ШАБЛОН КЛАССА LIST
+template< class T > class List;
+
 template< class T, bool IsConst >
 class ListIter {
 public:
@@ -101,7 +104,7 @@ public:
   }
 
 private:
-  friend class List< T >;
+  friend class List< T >;  // ТЕПЕРЬ ЭТО РАБОТАЕТ, Т.К. List УЖЕ ОБЪЯВЛЕН
   friend class ListIter< T, true >;
 
   using base_ptr = typename std::conditional<
@@ -123,6 +126,7 @@ using LIter = ListIter< T, false >;
 template< class T >
 using LCIter = ListIter< T, true >;
 
+// ТЕПЕРЬ ОПРЕДЕЛЯЕМ КЛАСС LIST
 template< class T >
 class List {
 public:
