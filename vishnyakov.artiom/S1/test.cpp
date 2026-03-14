@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE S1
+#define BOOST_TEST_MODULE testLab
 #include <boost/test/included/unit_test.hpp>
 #include <sstream>
 #include <string>
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(const_iterator_conversion)
   lst.push_back(42);
 
   LIter< int > it = lst.begin();
-  LCIter< int > cit = it;
+  LCIter< int > cit = lst.cbegin();
 
   BOOST_TEST(*cit == 42);
 }
@@ -157,39 +157,40 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(function_tests)
 
-BOOST_AUTO_TEST_CASE(isEnd_newline)
+BOOST_AUTO_TEST_CASE(test_isEnd_newline)
 {
   std::istringstream ss("\n");
   BOOST_TEST(isEnd(ss));
 }
 
-BOOST_AUTO_TEST_CASE(isEnd_eof)
+BOOST_AUTO_TEST_CASE(test_isEnd_eof)
 {
   std::istringstream ss("");
+  ss.setstate(std::ios::eofbit);
   BOOST_TEST(isEnd(ss));
 }
 
-BOOST_AUTO_TEST_CASE(isEnd_not_end)
+BOOST_AUTO_TEST_CASE(test_isEnd_not_end)
 {
   std::istringstream ss("42");
   BOOST_TEST(!isEnd(ss));
 }
 
-BOOST_AUTO_TEST_CASE(getWithoutSkips)
+BOOST_AUTO_TEST_CASE(test_getWithoutSkips)
 {
   std::istringstream ss("  \t42");
   getWithoutSkips(ss);
   BOOST_TEST(ss.peek() == '4');
 }
 
-BOOST_AUTO_TEST_CASE(skipLine)
+BOOST_AUTO_TEST_CASE(test_skipLine)
 {
   std::istringstream ss("line1\nline2");
   skipLine(ss);
   BOOST_TEST(ss.peek() == 'l');
 }
 
-BOOST_AUTO_TEST_CASE(checkedSum_no_overflow)
+BOOST_AUTO_TEST_CASE(test_checkedSum_no_overflow)
 {
   size_t res = 0;
   bool overflow = checkedSum(5, 10, res);
@@ -197,7 +198,7 @@ BOOST_AUTO_TEST_CASE(checkedSum_no_overflow)
   BOOST_TEST(res == 15);
 }
 
-BOOST_AUTO_TEST_CASE(checkedSum_overflow)
+BOOST_AUTO_TEST_CASE(test_checkedSum_overflow)
 {
   size_t max = std::numeric_limits< size_t >::max();
   size_t res = 0;
@@ -209,7 +210,7 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(integration_tests)
 
-BOOST_AUTO_TEST_CASE(readInput_single_sequence)
+BOOST_AUTO_TEST_CASE(test_readInput_single_sequence)
 {
   std::istringstream ss("seq1 1 2 3\n");
   List< Sequence > seqs = readInput(ss);
@@ -227,7 +228,7 @@ BOOST_AUTO_TEST_CASE(readInput_single_sequence)
   BOOST_TEST(*numIt == 3);
 }
 
-BOOST_AUTO_TEST_CASE(readInput_multiple_sequences)
+BOOST_AUTO_TEST_CASE(test_readInput_multiple_sequences)
 {
   std::istringstream ss("seq1 1 2\nseq2 3 4 5\nseq3 6\n");
   List< Sequence > seqs = readInput(ss);
@@ -247,7 +248,7 @@ BOOST_AUTO_TEST_CASE(readInput_multiple_sequences)
   BOOST_TEST(it->nums->front() == 6);
 }
 
-BOOST_AUTO_TEST_CASE(outputNames)
+BOOST_AUTO_TEST_CASE(test_outputNames)
 {
   List< Sequence > seqs;
 
@@ -259,16 +260,50 @@ BOOST_AUTO_TEST_CASE(outputNames)
   seq2.name = "second";
   seq2.nums = new List< size_t >();
 
-  seqs.push_back(seq1);
-  seqs.push_back(seq2);
+  LIter< Sequence > pos = seqs.begin();
+  pos = seqs.insert_after(pos, seq1);
+  seqs.insert_after(pos, seq2);
 
   std::ostringstream out;
   outputNames(seqs, out);
 
   BOOST_TEST(out.str() == "first second\n");
 
-  delete seq1.nums;
-  delete seq2.nums;
+  for (LIter< Sequence > it = seqs.begin(); it != seqs.end(); ++it)
+  {
+    delete it->nums;
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_outputNums)
+{
+  List< Sequence > seqs;
+
+  Sequence seq1;
+  seq1.name = "a";
+  seq1.nums = new List< size_t >();
+  seq1.nums->push_back(1);
+  seq1.nums->push_back(2);
+
+  Sequence seq2;
+  seq2.name = "b";
+  seq2.nums = new List< size_t >();
+  seq2.nums->push_back(3);
+
+  LIter< Sequence > pos = seqs.begin();
+  pos = seqs.insert_after(pos, seq1);
+  seqs.insert_after(pos, seq2);
+
+  std::ostringstream out;
+  int result = outputNums(seqs, out);
+
+  BOOST_TEST(result == 0);
+  BOOST_TEST(!out.str().empty());
+
+  for (LIter< Sequence > it = seqs.begin(); it != seqs.end(); ++it)
+  {
+    delete it->nums;
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
