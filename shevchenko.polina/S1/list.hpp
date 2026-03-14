@@ -7,6 +7,9 @@
 namespace shevchenko
 {
 template< class T >
+class List;
+
+template< class T >
 struct Node
 {
   T data;
