@@ -71,7 +71,6 @@ namespace volkovich
         return;
       }
 
-      // single element case
       if (fake_node.next == tail)
       {
         delete tail;
@@ -82,7 +81,6 @@ namespace volkovich
         return;
       }
 
-      // general case: find node before tail
       Item<T> *prev = &fake_node;
       Item<T> *cur = fake_node.next;
       while (cur->next)
@@ -90,7 +88,6 @@ namespace volkovich
         prev = cur;
         cur = prev->next;
       }
-      // cur is old tail
       prev->next = nullptr;
       delete cur;
       tail = prev;
@@ -162,6 +159,18 @@ namespace volkovich
       Item<T> *newItem = new Item<T>(std::move(v));
       newItem->next = iter.item->next;
       iter.item->next = newItem;
+
+      if (iter.item == &fake_node)
+      {
+        head = newItem;
+      }
+
+      if (newItem->next == nullptr)
+      {
+        tail = newItem;
+      }
+
+      list_len++;
       return LIter<T>(newItem);
     }
 
@@ -170,6 +179,18 @@ namespace volkovich
       Item<T> *newItem = new Item<T>(v);
       newItem->next = iter.item->next;
       iter.item->next = newItem;
+
+      if (iter.item == &fake_node)
+      {
+        head = newItem;
+      }
+
+      if (newItem->next == nullptr)
+      {
+        tail = newItem;
+      }
+
+      list_len++;
       return LIter<T>(newItem);
     }
 

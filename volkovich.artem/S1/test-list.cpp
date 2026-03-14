@@ -91,10 +91,10 @@ BOOST_AUTO_TEST_CASE(test_fake_begin)
 BOOST_AUTO_TEST_CASE(test_begin)
 {
   List<int> a;
-  BOOST_TEST(a.begin() == LIter<int>(nullptr));
+  BOOST_TEST(a.begin().item == nullptr);
 
   a.pushBack(42);
-  BOOST_TEST(a.begin() != LIter<int>(nullptr));
+  BOOST_TEST(a.begin().item != nullptr);
   BOOST_TEST(*a.begin() == 42);
 }
 

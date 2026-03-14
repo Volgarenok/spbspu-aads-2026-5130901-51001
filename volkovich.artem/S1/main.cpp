@@ -29,9 +29,11 @@ int main()
 {
   DATA_TYPE data;
   bool hasNumbers = false;
+  bool hasName = false;
   std::string name;
   while (std::cin >> name)
   {
+    hasName = true;
     volkovich::List<size_t> numbers;
     int ch = std::cin.peek();
     if (ch == '\n')
@@ -67,6 +69,10 @@ int main()
       }
     }
     data.pushBack(std::make_pair(name, numbers));
+  }
+  if(!hasName) {
+    std::cout<<'\n';
+    return 0;
   }
   bool first = true;
   for (ITER_TYPE it = data.begin();
