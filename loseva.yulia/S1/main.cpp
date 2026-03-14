@@ -59,7 +59,7 @@ bool add_checked(size_t a, size_t b, size_t& result)
 bool is_line_end(std::istream& in)
 {
   int c = in.peek();
-  return c == '\n';  c == '\r';  c == EOF;
+  return c == '\n'||  c == '\r' || c == EOF;
 }
 
 void skip_spaces(std::istream& in)
