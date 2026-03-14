@@ -24,9 +24,16 @@ namespace gordejchik {
     bool empty() const noexcept;
     size_t size() const noexcept;
 
+    void pushFront(const T& value);
+    void pushFront(T&& value);
+    void pushBack(const T& value);
+    void pushBack(T&& value);
+
   private:
     using BaseNode = detail::BaseNode;
     using Node = detail::Node< T >;
+
+    void insertBefore(BaseNode* pos, Node* node) noexcept;
 
     BaseNode fake_;
     size_t size_;
@@ -41,6 +48,16 @@ namespace gordejchik {
   template< class T >
   List< T >::~List()
   {}
+
+  template< class T >
+  void List< T >::insertBefore(BaseNode* pos, Node* node) noexcept
+  {
+    node->next_ = pos;
+    node->prev_ = pos->prev_;
+    pos->prev_->next_ = node;
+    pos->prev_ = node;
+    ++size_;
+  }
 
   template< class T >
   typename List< T >::iterator List< T >::begin() noexcept
@@ -88,6 +105,30 @@ namespace gordejchik {
   size_t List< T >::size() const noexcept
   {
     return size_;
+  }
+
+  template< class T >
+  void List< T >::pushFront(const T& value)
+  {
+    insertBefore(fake_.next_, new Node(value));
+  }
+
+  template< class T >
+  void List< T >::pushFront(T&& value)
+  {
+    insertBefore(fake_.next_, new Node(static_cast< T&& >(value)));
+  }
+
+  template< class T >
+  void List< T >::pushBack(const T& value)
+  {
+    insertBefore(&fake_, new Node(value));
+  }
+
+  template< class T >
+  void List< T >::pushBack(T&& value)
+  {
+    insertBefore(&fake_, new Node(static_cast< T&& >(value)));
   }
 }
 
