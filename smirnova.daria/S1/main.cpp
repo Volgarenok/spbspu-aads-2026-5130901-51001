@@ -16,7 +16,7 @@ int main() {
         while (std::cin >> token) {
             bool isNum = true;
             for (char c : token) {
-                if (!isdigit(c)) {
+                if (!isdigit(c) && c != '-') {
                     isNum = false;
                     break;
                 }
@@ -31,9 +31,11 @@ int main() {
             char* endptr;
             errno = 0;
             long long num = std::strtoll(token.c_str(), &endptr, 10);
+
             if (errno == ERANGE || *endptr != '\0') {
                 std::cerr << "error: overflow in sum calculation\n";
-                return 1;
+                std::fflush(stderr);
+                std::exit(1);
             }
             nums.pushBack(num);
         }
@@ -102,11 +104,13 @@ int main() {
         for (auto numIt = rowIt->cbegin(); numIt != rowIt->cend(); ++numIt) {
             if (*numIt > 0 && sum > LLONG_MAX - *numIt) {
                 std::cerr << "error: overflow in sum calculation\n";
-                return 1;
+                std::fflush(stderr);
+                std::exit(1);
             }
             if (*numIt < 0 && sum < LLONG_MIN - *numIt) {
                 std::cerr << "error: overflow in sum calculation\n";
-                return 1;
+                std::fflush(stderr);
+                std::exit(1);
             }
             sum += *numIt;
         }
