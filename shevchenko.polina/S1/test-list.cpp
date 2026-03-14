@@ -67,3 +67,102 @@ BOOST_AUTO_TEST_CASE(test_insert)
   }
   BOOST_TEST(i == 4);
 }
+
+BOOST_AUTO_TEST_CASE(test_remove)
+{
+  List< int > lst;
+  for (int i = 1; i <= 5; ++i) lst.pushBack(i);
+  
+  lst.popFront();
+  BOOST_TEST(lst.front() == 2);
+  
+  lst.popBack();
+  BOOST_TEST(lst.back() == 4);
+  
+  auto it = lst.begin();
+  ++it;
+  lst.erase(it);
+  
+  int expected[] = {2, 4};
+  int i = 0;
+  for (auto cit = lst.cbegin(); cit != lst.cend(); ++cit, ++i)
+  {
+    BOOST_TEST(*cit == expected[i]);
+  }
+  
+  lst.clear();
+  BOOST_TEST(lst.empty());
+}
+
+BOOST_AUTO_TEST_CASE(test_iterators)
+{
+  List< int > lst;
+  for (int i = 1; i <= 3; ++i) lst.pushBack(i);
+  
+  int forward[] = {1, 2, 3};
+  int i = 0;
+  for (auto it = lst.begin(); it != lst.end(); ++it, ++i)
+  {
+    BOOST_TEST(*it == forward[i]);
+  }
+
+  int backward[] = {3, 2, 1};
+  i = 0;
+  auto it = lst.end();
+  while (it != lst.begin())
+  {
+    --it;
+    BOOST_TEST(*it == backward[i]);
+    ++i;
+  }
+  
+  const List< int >& clst = lst;
+  i = 0;
+  for (auto cit = clst.cbegin(); cit != clst.cend(); ++cit, ++i)
+  {
+    BOOST_TEST(*cit == forward[i]);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_assignments)
+{
+  List< int > a;
+  a.pushBack(1);
+  a.pushBack(2);
+  
+  List< int > b;
+  b = a;
+  BOOST_TEST(b.size() == 2);
+  BOOST_TEST(b.front() == 1);
+  
+  List< int > c;
+  c = std::move(b);
+  BOOST_TEST(b.empty());
+  BOOST_TEST(c.size() == 2);
+
+  List< int > d;
+  d.pushBack(3);
+  d.pushBack(4);
+  c.swap(d);
+  BOOST_TEST(c.front() == 3);
+  BOOST_TEST(d.front() == 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_types)
+{
+  List< std::string > strList;
+  strList.pushBack("hello");
+  strList.pushBack("world");
+  BOOST_TEST(strList.front() == "hello");
+  BOOST_TEST(strList.back() == "world");
+  
+  List< std::pair< int, std::string > > pairList;
+  pairList.pushBack({1, "one"});
+  pairList.pushBack({2, "two"});
+  auto it = pairList.begin();
+  BOOST_TEST(it->first == 1);
+  BOOST_TEST(it->second == "one");
+  ++it;
+  BOOST_TEST(it->first == 2);
+  BOOST_TEST(it->second == "two");
+}
