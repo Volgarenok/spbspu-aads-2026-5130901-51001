@@ -1,5 +1,5 @@
 #include "list.hpp"
-
+#ifdef UNIT_TEST
 int main()
 {
   loseva::List<int> list;
