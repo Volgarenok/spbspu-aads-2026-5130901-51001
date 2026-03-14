@@ -3,17 +3,22 @@
 
 int main()
 {
-  vishnyakov::List< vishnyakov::Sequence > seqs = vishnyakov::readInput(std::cin);
-
-  if (seqs.empty())
+  try
   {
-    std::cout << "0\n";
-    return 0;
+    vishnyakov::List< vishnyakov::Sequence > seqs = vishnyakov::readInput(std::cin);
+
+    if (seqs.empty())
+    {
+      std::cout << "0\n";
+      return 0;
+    }
+
+    vishnyakov::outputNames(seqs, std::cout);
+    return vishnyakov::outputNums(seqs, std::cout);
   }
-
-  vishnyakov::outputNames(seqs, std::cout);
-  bool res = vishnyakov::outputNums(seqs, std::cout);
-
-  return res;
+  catch (...)
+  {
+    return 2;
+  }
 }
 

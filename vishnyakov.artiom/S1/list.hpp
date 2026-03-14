@@ -2,6 +2,7 @@
 #define LIST_HPP
 
 #include "node.hpp"
+#include <utility>
 
 namespace vishnyakov
 {
@@ -23,7 +24,7 @@ namespace vishnyakov
 
     T& operator*() const
     {
-        return node_->data_;
+      return node_->data_;
     }
 
     T* operator->() const
@@ -31,32 +32,32 @@ namespace vishnyakov
       return &node_->data_;
     }
 
-    LIter& operator++()
+    LIter< T >& operator++()
     {
       node_ = node_->next_;
       return *this;
     }
 
-    LIter* operator++(int)
+    LIter< T > operator++(int)
     {
-      LIter tmp = *this;
+      LIter< T > tmp = *this;
       ++(*this);
       return tmp;
     }
 
-    bool operator==(const LIter& other) const
+    bool operator==(const LIter< T >& other) const
     {
       return node_ == other.node_;
     }
 
-    bool operator!=(const LIter& other) const
+    bool operator!=(const LIter< T >& other) const
     {
       return !(node_ == other.node_);
     }
 
-    operator LIter<const T>() const
+    operator LIter< const T >() const
     {
-      return LIter<const T>(const_cast<const Node*>(node_));
+      return LIter< const T >(const_cast< const Node* >(node_));
     }
   };
 
@@ -74,7 +75,7 @@ namespace vishnyakov
       node_(node)
     {}
 
-    LCIter(const LIter< T > it):
+    LCIter(const LIter< T >& it):
       node_(it.node_)
     {}
 
@@ -88,30 +89,29 @@ namespace vishnyakov
       return &node_->data_;
     }
 
-    const LCIter& operator++()
+    const LCIter< T >& operator++()
     {
       node_ = node_->next_;
       return *this;
     }
 
-    const LCIter* operator++(int)
+    LCIter< T > operator++(int)
     {
-      LCIter tmp = *this;
+      LCIter< T > tmp = *this;
       ++(*this);
       return tmp;
     }
 
-    bool operator==(const LCIter& other) const
+    bool operator==(const LCIter< T >& other) const
     {
       return node_ == other.node_;
     }
 
-    bool operator!=(const LCIter& other) const
+    bool operator!=(const LCIter< T >& other) const
     {
       return !(node_ == other.node_);
     }
   };
-
 
   template< class T >
   class List
@@ -120,13 +120,16 @@ namespace vishnyakov
 
     Node* pseudoknot_;
     size_t size_;
+
   public:
     List():
-      pseudoknot_(new Node()),
+      pseudoknot_(nullptr),
       size_(0)
     {
+      pseudoknot_ = static_cast< Node* >(::operator new(sizeof(Node)));
       pseudoknot_->next_ = pseudoknot_;
     }
+
     List(const List& other):
       List()
     {
@@ -147,14 +150,17 @@ namespace vishnyakov
     ~List()
     {
       clear();
-      delete pseudoknot_;
+      if (pseudoknot_)
+      {
+        ::operator delete(pseudoknot_);
+      }
     }
 
     List& operator=(const List& other)
     {
       if (this != &other)
       {
-        List tmp(other);
+        List< T > tmp(other);
         swap(tmp);
       }
       return *this;
@@ -165,13 +171,15 @@ namespace vishnyakov
       if (this != &other)
       {
         clear();
-        delete pseudoknot_;
+        if (pseudoknot_)
+        {
+          ::operator delete(pseudoknot_);
+        }
 
         pseudoknot_ = other.pseudoknot_;
         size_ = other.size_;
 
-        other.pseudoknot_ = new Node();
-        other.pseudoknot_->next_ = other.pseudoknot_;
+        other.pseudoknot_ = nullptr;
         other.size_ = 0;
       }
       return *this;
@@ -179,7 +187,7 @@ namespace vishnyakov
 
     LIter< T > begin() noexcept
     {
-      return LIter< T >(pseudoknot_->next_);
+      return pseudoknot_ ? LIter< T >(pseudoknot_->next_) : LIter< T >(nullptr);
     }
 
     LIter< T > end() noexcept
@@ -189,7 +197,7 @@ namespace vishnyakov
 
     LCIter< T > begin() const noexcept
     {
-      return LCIter< T >(pseudoknot_->next_);
+      return pseudoknot_ ? LCIter< T >(pseudoknot_->next_) : LCIter< T >(nullptr);
     }
 
     LCIter< T > end() const noexcept
@@ -199,7 +207,7 @@ namespace vishnyakov
 
     LCIter< T > cbegin() const noexcept
     {
-      return LCIter< T >(pseudoknot_->next_);
+      return pseudoknot_ ? LCIter< T >(pseudoknot_->next_) : LCIter< T >(nullptr);
     }
 
     LCIter< T > cend() const noexcept
@@ -241,7 +249,6 @@ namespace vishnyakov
     {
       insert_after(LIter< T >(pseudoknot_), value);
     }
-
 
     void push_front(T&& value)
     {
@@ -290,15 +297,9 @@ namespace vishnyakov
       {
         return;
       }
-
-      Node* to_delete = pseudoknot_->next_;
-      if (to_delete != pseudoknot_)
-      {
-        pseudoknot_->next_ = to_delete->next_;
-        delete to_delete;
-        --size_;
-      }
+      erase_after(LIter< T >(pseudoknot_));
     }
+
     void pop_back()
     {
       if (empty())
@@ -351,12 +352,11 @@ namespace vishnyakov
       return size_;
     }
 
-    void swap(List& other) noexcept
+    void swap(List< T >& other) noexcept
     {
       std::swap(pseudoknot_, other.pseudoknot_);
       std::swap(size_, other.size_);
     }
-
   };
 }
 

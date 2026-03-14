@@ -2,6 +2,7 @@
 #define NODE_HPP
 
 #include <iostream>
+#include <utility>
 
 namespace vishnyakov
 {
@@ -11,7 +12,7 @@ namespace vishnyakov
     T data_;
     Node* next_;
 
-    explicit Node(const T& value = T(), Node* next = nullptr):
+    explicit Node(const T& value, Node* next = nullptr):
       data_(value),
       next_(next)
     {}
@@ -20,6 +21,8 @@ namespace vishnyakov
       data_(std::move(value)),
       next_(next)
     {}
+
+    Node() = delete;
   };
 }
 
