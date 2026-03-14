@@ -110,6 +110,7 @@ int main()
   {
     bool firstCol = true;
     size_t rowSum = 0;
+    bool printedAny = false;
     for (ITER_TYPE it = data.begin();
          it != ITER_TYPE(nullptr); ++it)
     {
@@ -128,14 +129,19 @@ int main()
         rowSum += value;
         std::cout << value;
         firstCol = false;
+        printedAny = true;
       }
     }
     rowSumsList.pushBack(rowSum);
-    std::cout << '\n';
+    if (printedAny)
+    {
+      std::cout << '\n';
+    }
   }
 
   if (overflow)
   {
+    std::cerr<<"OVERFLOW";
     return 1;
   }
 
