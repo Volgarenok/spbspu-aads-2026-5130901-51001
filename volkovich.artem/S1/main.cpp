@@ -15,7 +15,7 @@ int main() {
       std::cin >> number;
       numbers.pushBack(number);
     }
-    // data.pushBack(std::make_pair(name, numbers));
+    data.pushBack(std::make_pair(name, numbers));
    }
 }
 

@@ -142,8 +142,19 @@ namespace volkovich
       list_len++;
     };
 
-    void insertAfter()
+    LIter<T> insertAfter(LIter<T> iter, T &&v)
     {
+      Item<T> *newItem = new Item<T>(std::move(v));
+      newItem->next = iter.item->next;
+      iter.item->next = newItem;
+      return LIter(newItem);
+    }
+
+    LIter<T> insertAfter(LIter<T> iter, const T& v) {
+      Item<T> *newItem = new Item<T>(v);
+      newItem->next = iter.item->next;
+      iter.item->next = newItem;
+      return LIter(newItem);
     }
 
     void deleteAfter()
@@ -157,11 +168,34 @@ namespace volkovich
         popFront();
       }
     };
-    LIter<T> begin() noexcept;
-    LCIter<T> begin() const noexcept;
-    void swap(List &other) noexcept;
-    void copy(const List &other) {
 
+    LIter<T> fakeBegin() noexcept
+    {
+      return LIter(&fake_node);
+    };
+
+    LIter<T> begin() noexcept
+    {
+      return LIter(fake_node.next);
+    };
+
+    LCIter<T> begin() const noexcept {
+      return LCIter<T>(fake_node.next);
+    };
+    void swap(List &other) noexcept
+    {
+      Item<T> *tmp = fake_node.next;
+      fake_node.next = other.fake_node.next;
+      other.fake_node.next = tmp;
+    };
+
+    void copy(const List &other)
+    {
+      LIter<T> tail = fakeBegin();
+      for (LCIter<T> other_iter = other.begin(); other_iter != LCIter<T>(nullptr); ++other_iter)
+      {
+        tail = insertAfter(tail, *other_iter);
+      }
     };
 
     size_t size() noexcept
