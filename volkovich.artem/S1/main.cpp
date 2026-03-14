@@ -132,9 +132,9 @@ int main()
         printedAny = true;
       }
     }
-    rowSumsList.pushBack(rowSum);
     if (printedAny)
     {
+      rowSumsList.pushBack(rowSum);
       std::cout << '\n';
     }
   }
