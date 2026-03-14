@@ -7,13 +7,13 @@
 
 namespace shevchenko
 {
-using Seq = std::pair< std::string, List< int > >;
+using Seq = std::pair< std::string, List< size_t > >;
 
 List< Seq > readSequences();
 void printNames(const List< Seq >& sequences);
 void printTransposed(const List< Seq >& sequences);
-List< int > calculateSums(const List< Seq >& sequences);
-void printSums(const List< int >& sums);
+List< size_t > calculateSums(const List< Seq >& sequences);
+void printSums(const List< size_t >& sums);
 }
 
 #endif

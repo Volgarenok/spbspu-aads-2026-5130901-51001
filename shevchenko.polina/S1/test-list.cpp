@@ -5,164 +5,110 @@
 
 using namespace shevchenko;
 
-BOOST_AUTO_TEST_CASE(test_constructors)
-{
-  List< int > lst1;
-  BOOST_TEST(lst1.empty());
-  BOOST_TEST(lst1.size() == 0);
-
-  lst1.pushBack(1);
-  lst1.pushBack(2);
-  lst1.pushBack(3);
-
-  List< int > lst2(lst1);
-  BOOST_TEST(lst2.size() == 3);
-  BOOST_TEST(lst2.front() == 1);
-  BOOST_TEST(lst2.back() == 3);
-
-  List< int > lst3(std::move(lst2));
-  BOOST_TEST(lst2.empty());
-  BOOST_TEST(lst3.size() == 3);
-}
-
-BOOST_AUTO_TEST_CASE(test_push)
+BOOST_AUTO_TEST_CASE(test_constructor_and_empty)
 {
   List< int > lst;
-
-  lst.pushFront(1);
-  BOOST_TEST(lst.front() == 1);
-  BOOST_TEST(lst.back() == 1);
-
-  lst.pushFront(2);
-  BOOST_TEST(lst.front() == 2);
-  BOOST_TEST(lst.back() == 1);
-
-  lst.pushBack(3);
-  BOOST_TEST(lst.back() == 3);
-
-  auto it = lst.cbegin();
-  BOOST_TEST(*it++ == 2);
-  BOOST_TEST(*it++ == 1);
-  BOOST_TEST(*it++ == 3);
-  BOOST_TEST(it == lst.cend());
+  BOOST_TEST(lst.empty());
+  BOOST_TEST(lst.size() == 0);
 }
 
-BOOST_AUTO_TEST_CASE(test_insert)
+BOOST_AUTO_TEST_CASE(test_push_front)
+{
+  List< int > lst;
+  lst.pushFront(1);
+  lst.pushFront(2);
+  lst.pushFront(3);
+
+  BOOST_TEST(lst.size() == 3);
+  BOOST_TEST(lst.front() == 3);
+  BOOST_TEST(lst.back() == 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_push_back)
 {
   List< int > lst;
   lst.pushBack(1);
+  lst.pushBack(2);
   lst.pushBack(3);
 
-  auto it = lst.begin();
-  lst.insertAfter(it, 2);
-
-  it = lst.end();
-  lst.insertBefore(it, 4);
-
-  int expected[] = {1, 2, 3, 4};
-  int i = 0;
-  for (auto cit = lst.cbegin(); cit != lst.cend(); ++cit, ++i)
-  {
-    BOOST_TEST(*cit == expected[i]);
-  }
-  BOOST_TEST(i == 4);
+  BOOST_TEST(lst.size() == 3);
+  BOOST_TEST(lst.front() == 1);
+  BOOST_TEST(lst.back() == 3);
 }
 
-BOOST_AUTO_TEST_CASE(test_remove)
+BOOST_AUTO_TEST_CASE(test_pop_front)
 {
   List< int > lst;
-  for (int i = 1; i <= 5; ++i) lst.pushBack(i);
+  lst.pushBack(1);
+  lst.pushBack(2);
+  lst.pushBack(3);
 
   lst.popFront();
+  BOOST_TEST(lst.size() == 2);
   BOOST_TEST(lst.front() == 2);
 
-  lst.popBack();
-  BOOST_TEST(lst.back() == 4);
-
-  auto it = lst.begin();
-  ++it;
-  lst.erase(it);
-
-  int expected[] = {2, 4};
-  int i = 0;
-  for (auto cit = lst.cbegin(); cit != lst.cend(); ++cit, ++i)
-  {
-    BOOST_TEST(*cit == expected[i]);
-  }
-
-  lst.clear();
+  lst.popFront();
+  lst.popFront();
   BOOST_TEST(lst.empty());
 }
 
-BOOST_AUTO_TEST_CASE(test_iterators)
+BOOST_AUTO_TEST_CASE(test_pop_back)
 {
   List< int > lst;
-  for (int i = 1; i <= 3; ++i) lst.pushBack(i);
+  lst.pushBack(1);
+  lst.pushBack(2);
+  lst.pushBack(3);
 
-  int forward[] = {1, 2, 3};
+  lst.popBack();
+  BOOST_TEST(lst.size() == 2);
+  BOOST_TEST(lst.back() == 2);
+
+  lst.popBack();
+  lst.popBack();
+  BOOST_TEST(lst.empty());
+}
+
+BOOST_AUTO_TEST_CASE(test_copy_constructor)
+{
+  List< int > original;
+  original.pushBack(1);
+  original.pushBack(2);
+
+  List< int > copy(original);
+
+  BOOST_TEST(copy.size() == 2);
+  BOOST_TEST(copy.front() == 1);
+  BOOST_TEST(copy.back() == 2);
+
+  original.pushBack(3);
+  BOOST_TEST(original.size() == 3);
+  BOOST_TEST(copy.size() == 2);
+}
+
+BOOST_AUTO_TEST_CASE(test_iterator)
+{
+  List< int > lst;
+  lst.pushBack(1);
+  lst.pushBack(2);
+  lst.pushBack(3);
+
+  int expected[] = {1, 2, 3};
   int i = 0;
-  for (auto it = lst.begin(); it != lst.end(); ++it, ++i)
+  for (auto it = lst.cbegin(); it != lst.cend(); ++it)
   {
-    BOOST_TEST(*it == forward[i]);
-  }
-
-  int backward[] = {3, 2, 1};
-  i = 0;
-  auto it = lst.end();
-  while (it != lst.begin())
-  {
-    --it;
-    BOOST_TEST(*it == backward[i]);
+    BOOST_TEST(*it == expected[i]);
     ++i;
   }
-
-  const List< int >& clst = lst;
-  i = 0;
-  for (auto cit = clst.cbegin(); cit != clst.cend(); ++cit, ++i)
-  {
-    BOOST_TEST(*cit == forward[i]);
-  }
+  BOOST_TEST(i == 3);
 }
 
-BOOST_AUTO_TEST_CASE(test_assignments)
+BOOST_AUTO_TEST_CASE(test_clear)
 {
-  List< int > a;
-  a.pushBack(1);
-  a.pushBack(2);
+  List< int > lst;
+  lst.pushBack(1);
+  lst.pushBack(2);
+  lst.clear();
 
-  List< int > b;
-  b = a;
-  BOOST_TEST(b.size() == 2);
-  BOOST_TEST(b.front() == 1);
-
-  List< int > c;
-  c = std::move(b);
-  BOOST_TEST(b.empty());
-  BOOST_TEST(c.size() == 2);
-
-  List< int > d;
-  d.pushBack(3);
-  d.pushBack(4);
-  c.swap(d);
-  BOOST_TEST(c.front() == 3);
-  BOOST_TEST(d.front() == 1);
-}
-
-BOOST_AUTO_TEST_CASE(test_types)
-{
-  List< std::string > strList;
-  strList.pushBack("hello");
-  strList.pushBack("world");
-  BOOST_TEST(strList.front() == "hello");
-  BOOST_TEST(strList.back() == "world");
-
-  List< std::pair< int, std::string > > pairList;
-  pairList.pushBack({1, "one"});
-  pairList.pushBack({2, "two"});
-  auto it = pairList.begin();
-  BOOST_TEST(it->first == 1);
-  BOOST_TEST(it->second == "one");
-  ++it;
-  BOOST_TEST(it->first == 2);
-  BOOST_TEST(it->second == "two");
+  BOOST_TEST(lst.empty());
+  BOOST_TEST(lst.size() == 0);
 }

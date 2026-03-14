@@ -1,153 +1,229 @@
 #include "io.hpp"
 #include <iostream>
 #include <cctype>
+#include <limits>
+#include <string>
 
 namespace shevchenko
 {
+size_t getElementAt(const List< size_t >& lst, size_t index, bool& exists)
+{
+  auto it = lst.cbegin();
+  size_t i = 0;
+  
+  while (it != lst.cend() && i < index)
+  {
+    ++it;
+    ++i;
+  }
+  
+  if (it == lst.cend())
+  {
+    exists = false;
+    return 0;
+  }
+  
+  exists = true;
+  return *it;
+}
+
 List< Seq > readSequences()
 {
   List< Seq > sequences;
   std::string name;
-
+  bool hasName = false;
+  
   while (std::cin >> name)
   {
-    List< int > numbers;
-    int value = 0;
-
-    while (std::cin.peek() != EOF && !std::isalpha(std::cin.peek()))
+    hasName = true;
+    List< size_t > numbers;
+    
+    int ch = std::cin.peek();
+    if (ch == '\n')
     {
-      if (std::cin >> value)
+      std::cin.get();
+    }
+    else
+    {
+      while (true)
       {
-        numbers.pushBack(value);
-      }
-      else
-      {
-        std::cin.clear();
-        break;
-      }
-      while (std::cin.peek() == ' ')
-      {
-        std::cin.get();
+        size_t number;
+        if (!(std::cin >> number))
+        {
+          if (std::cin.eof())
+          {
+            std::cin.clear();
+          }
+          break;
+        }
+        numbers.pushBack(number);
+        
+        ch = std::cin.peek();
+        if (ch == '\n')
+        {
+          std::cin.get();
+          break;
+        }
+        if (ch == EOF)
+        {
+          break;
+        }
       }
     }
     sequences.pushBack({ name, numbers });
   }
-
+  if (!hasName)
+  {
+    return sequences;
+  }
   return sequences;
 }
 
 void printNames(const List< Seq >& sequences)
 {
+  if (sequences.empty())
+  {
+    return;
+  }
+  
   bool first = true;
-
   for (auto it = sequences.cbegin(); it != sequences.cend(); ++it)
   {
     if (!first)
     {
-      std::cout << " ";
+      std::cout << ' ';
     }
     std::cout << (*it).first;
     first = false;
   }
-  std::cout << "\n";
+  std::cout << '\n';
 }
 
 void printTransposed(const List< Seq >& sequences)
 {
-  size_t max_len = 0;
-
+  if (sequences.empty())
+  {
+    return;
+  }
+  
+  size_t maxLen = 0;
   for (auto it = sequences.cbegin(); it != sequences.cend(); ++it)
   {
-    size_t s = (*it).second.size();
-    if (s > max_len)
+    size_t cur = (*it).second.size();
+    if (cur > maxLen)
     {
-      max_len = s;
+      maxLen = cur;
     }
   }
-
-  for (size_t i = 0; i < max_len; ++i)
+  
+  if (maxLen == 0)
   {
-    bool first = true;
-
+    return;
+  }
+  
+  for (size_t i = 0; i < maxLen; ++i)
+  {
+    bool firstCol = true;
+    bool printAny = false;
+    
     for (auto sit = sequences.cbegin(); sit != sequences.cend(); ++sit)
     {
-      if (!first)
+      bool exists = false;
+      size_t value = getElementAt((*sit).second, i, exists);
+      
+      if (exists)
       {
-        std::cout << " ";
+        if (!firstCol)
+        {
+          std::cout << ' ';
+        }
+        std::cout << value;
+        firstCol = false;
+        printAny = true;
       }
-
-      auto nit = (*sit).second.cbegin();
-      for (size_t j = 0; j < i && nit != (*sit).second.cend(); ++j)
-      {
-        ++nit;
-      }
-
-      if (nit != (*sit).second.cend())
-      {
-        std::cout << *nit;
-      }
-      first = false;
     }
-    std::cout << "\n";
+    
+    if (printAny)
+    {
+      std::cout << '\n';
+    }
   }
 }
 
-List< int > calculateSums(const List< Seq >& sequences)
+List< size_t > calculateSums(const List< Seq >& sequences)
 {
-  List< int > sums;
-  size_t max_len = 0;
+  List< size_t > sums;
+  if (sequences.empty())
+  {
+    return sums;
+  }
 
+  size_t maxLen = 0;
   for (auto it = sequences.cbegin(); it != sequences.cend(); ++it)
   {
-    size_t s = (*it).second.size();
-    if (s > max_len)
+    size_t cur = (*it).second.size();
+    if (cur > maxLen)
     {
-      max_len = s;
+      maxLen = cur;
     }
   }
 
-  for (size_t i = 0; i < max_len; ++i)
+  if (maxLen == 0)
   {
-    int sum = 0;
-    bool has_number = false;
+    return sums;
+  }
+
+  bool overflow = false;
+  for (size_t i = 0; i < maxLen; ++i)
+  {
+    size_t rowSum = 0;
+    bool hasAny = false;
 
     for (auto sit = sequences.cbegin(); sit != sequences.cend(); ++sit)
     {
-      auto nit = (*sit).second.cbegin();
-      for (size_t j = 0; j < i && nit != (*sit).second.cend(); ++j)
-      {
-        ++nit;
-      }
+      bool exists = false;
+      size_t value = getElementAt((*sit).second, i, exists);
 
-      if (nit != (*sit).second.cend())
+      if (exists)
       {
-        sum += *nit;
-        has_number = true;
+        if (rowSum > std::numeric_limits< size_t >::max() - value)
+        {
+          overflow = true;
+        }
+        rowSum += value;
+        hasAny = true;
       }
     }
 
-    if (has_number)
+    if (hasAny)
     {
-      sums.pushBack(sum);
+      sums.pushBack(rowSum);
     }
   }
 
+  if (overflow)
+  {
+    throw std::overflow_error("integer overflow");
+  }
   return sums;
 }
 
-void printSums(const List< int >& sums)
+void printSums(const List< size_t >& sums)
 {
+  if (sums.empty())
+  {
+    return;
+  }
   bool first = true;
-
   for (auto it = sums.cbegin(); it != sums.cend(); ++it)
   {
     if (!first)
     {
-      std::cout << " ";
+      std::cout << ' ';
     }
     std::cout << *it;
     first = false;
   }
-  std::cout << "\n";
+  std::cout << '\n';
 }
 }
