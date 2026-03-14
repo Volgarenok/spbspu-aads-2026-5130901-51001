@@ -107,6 +107,23 @@ namespace nabieva
       head(nullptr)
     {}
 
+    LIter<T> begin()
+    {
+      return LIter<T>(head);
+    }
+
+    LIter<T> end()
+    {
+      return LIter<T>(nullptr);
+    }
+
+    void push_front(const T& value)
+    {
+      Node<T>* node = new Node<T>(value);
+      node->next = head;
+      head = node;
+    }
+
     void push_back(const T& value)
     {
       Node<T>* node = new Node<T>(value);
@@ -123,9 +140,59 @@ namespace nabieva
       current->next = node;
     }
 
+    void pop_front()
+    {
+      if (!head)
+      {
+        return;
+      }
+
+      Node<T>* tmp = head;
+      head = head->next;
+      delete tmp;
+    }
+
     bool empty() const
     {
       return head == nullptr;
+    }
+
+    ~List()
+    {
+      clear();
+    }
+
+    void clear()
+    {
+      while (head)
+      {
+        pop_front();
+      }
+    }
+    List(const List& other)
+    {
+      head = nullptr;
+      Node<T>* current = other.head;
+      while (current)
+      {
+        push_back(current->data);
+        current = current->next;
+      }
+    }
+
+    List& operator=(const List& other)
+    {
+      if (this != &other)
+      {
+        clear();
+        Node<T>* current = other.head;
+        while (current)
+        {
+          push_back(current->data);
+          current = current->next;
+        }
+      }
+      return *this;
     }
   };
 }

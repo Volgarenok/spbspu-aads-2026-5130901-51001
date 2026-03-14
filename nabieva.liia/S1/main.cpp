@@ -38,4 +38,45 @@ int main()
     std::cout << (*it).name << " ";
   }
   std::cout << "\n";
+  
+  nabieva::List<nabieva::LIter<int>> iters;
+  for (nabieva::LIter<NamedList> it = sequences.begin(); it != sequences.end(); ++it)
+  {
+    iters.push_back((*it).numbers.begin());
+  }
+  bool finished = false;
+  nabieva::List<long long> sums;
+  while (!finished)
+  {
+    finished = true;
+    long long sum = 0;
+    nabieva::LIter<NamedList> seqIt = sequences.begin();
+    nabieva::LIter<nabieva::LIter<int>> iterIt = iters.begin();
+    while (seqIt != sequences.end())
+    {
+      nabieva::List<int>& list = (*seqIt).numbers;
+      nabieva::LIter<int>& it = *iterIt;
+      if (it != list.end())
+      {
+        int value = *it;
+        std::cout << value << " ";
+        sum += value;
+        ++it;
+        finished = false;
+      }
+      ++seqIt;
+      ++iterIt;
+    }
+    if (!finished)
+    {
+      sums.push_back(sum);
+      std::cout << "\n";
+    }
+  }
+  for (nabieva::LIter<long long> it = sums.begin(); it != sums.end(); ++it)
+  {
+    std::cout << *it << " ";
+  }
+  std::cout << "\n";
+  return 0;
 }
