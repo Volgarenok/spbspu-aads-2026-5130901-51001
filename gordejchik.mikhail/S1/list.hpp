@@ -196,6 +196,9 @@ namespace gordejchik {
   template< class T >
   void List< T >::swap(List& other) noexcept
   {
+    const bool thisEmpty = empty();
+    const bool otherEmpty = other.empty();
+
     BaseNode* tmpNext = fake_.next_;
     BaseNode* tmpPrev = fake_.prev_;
     size_t tmpSize = size_;
@@ -208,10 +211,21 @@ namespace gordejchik {
     other.fake_.prev_ = tmpPrev;
     other.size_ = tmpSize;
 
-    fake_.next_->prev_ = &fake_;
-    fake_.prev_->next_ = &fake_;
-    other.fake_.next_->prev_ = &other.fake_;
-    other.fake_.prev_->next_ = &other.fake_;
+    if (otherEmpty) {
+      fake_.next_ = &fake_;
+      fake_.prev_ = &fake_;
+    } else {
+      fake_.next_->prev_ = &fake_;
+      fake_.prev_->next_ = &fake_;
+    }
+
+    if (thisEmpty) {
+      other.fake_.next_ = &other.fake_;
+      other.fake_.prev_ = &other.fake_;
+    } else {
+      other.fake_.next_->prev_ = &other.fake_;
+      other.fake_.prev_->next_ = &other.fake_;
+    }
   }
 }
 
