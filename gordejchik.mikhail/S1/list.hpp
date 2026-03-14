@@ -26,6 +26,11 @@ namespace gordejchik {
     const_iterator cbegin() const noexcept;
     const_iterator cend() const noexcept;
 
+    T& front();
+    const T& front() const;
+    T& back();
+    const T& back() const;
+
     bool empty() const noexcept;
     size_t size() const noexcept;
 
@@ -35,6 +40,9 @@ namespace gordejchik {
     void pushBack(T&& value);
     void popFront();
     void popBack();
+
+    iterator insert(const_iterator pos, const T& value);
+
     iterator erase(iterator pos);
     void clear() noexcept;
     void swap(List& other) noexcept;
@@ -151,6 +159,30 @@ namespace gordejchik {
   }
 
   template< class T >
+  T& List< T >::front()
+  {
+    return static_cast< Node* >(fake_.next_)->value_;
+  }
+
+  template< class T >
+  const T& List< T >::front() const
+  {
+    return static_cast< const Node* >(fake_.next_)->value_;
+  }
+
+  template< class T >
+  T& List< T >::back()
+  {
+    return static_cast< Node* >(fake_.prev_)->value_;
+  }
+
+  template< class T >
+  const T& List< T >::back() const
+  {
+    return static_cast< const Node* >(fake_.prev_)->value_;
+  }
+
+  template< class T >
   bool List< T >::empty() const noexcept
   {
     return size_ == 0;
@@ -196,6 +228,14 @@ namespace gordejchik {
   void List< T >::popBack()
   {
     erase(iterator(fake_.prev_));
+  }
+
+  template< class T >
+  typename List< T >::iterator List< T >::insert(const_iterator pos, const T& value)
+  {
+    Node* node = new Node(value);
+    insertBefore(const_cast< BaseNode* >(pos.node_), node);
+    return iterator(node);
   }
 
   template< class T >
