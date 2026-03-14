@@ -9,6 +9,7 @@ vishnyakov::List< vishnyakov::Sequence > vishnyakov::readInput(std::istream& in)
   {
     Sequence seq;
     seq.name = name;
+    seq.nums = new List< size_t >();
     LIter< size_t > curr_num = seq.nums->begin();
 
     getWithoutSkips(in);
@@ -130,7 +131,7 @@ bool vishnyakov::outputNums(const List< Sequence >& seqs, std::ostream& out)
     for (LIter< List< size_t > > it = transposed.begin(); it != transposed.end(); ++it)
     {
       bool first = true;
-      for (LCIter< size_t > cit = it->cbegin(); cit != it->cend(); ++it)
+      for (LCIter< size_t > cit = it->cbegin(); cit != it->cend(); ++cit)
       {
         if (!first)
         {
