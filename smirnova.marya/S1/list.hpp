@@ -1,9 +1,12 @@
 #ifndef LIST_HPP
 #define LIST_HPP
 
-#include <cstddef>
-#include <stdexcept>
+#include <iostream>
+#include <sstream>
+#include <string>
 #include <utility>
+#include <limits>
+#include <stdexcept>
 
 namespace smirnova {
 
@@ -16,8 +19,11 @@ struct Node {
     Node(T&& d) : data(std::move(d)), next(nullptr), prev(nullptr) {}
 };
 
-template <typename T> class LIter;
-template <typename T> class LCIter;
+template <typename T>
+class LIter;
+
+template <typename T>
+class LCIter;
 
 template <typename T>
 class List {
@@ -32,22 +38,84 @@ public:
         sentinel->prev = sentinel;
     }
 
-    ~List() { clear(); delete sentinel; }
-
     void clear() noexcept {
-        Node<T>* cur = sentinel->next;
-        while (cur != sentinel) {
-            Node<T>* tmp = cur->next;
-            delete cur;
-            cur = tmp;
+        Node<T>* current = sentinel->next;
+        while (current != sentinel) {
+            Node<T>* tmp = current->next;
+            delete current;
+            current = tmp;
         }
         sentinel->next = sentinel;
         sentinel->prev = sentinel;
         count = 0;
     }
 
+    ~List() {
+        clear();
+        delete sentinel;
+    }
+
+    // Копирование
+    List(const List& other) : List() {
+        for (LCIter<T> it = other.cbegin(); it.valid(); it.next())
+            push_back(it.value());
+    }
+
+    // Перемещение
+    List(List&& other) noexcept : sentinel(other.sentinel), count(other.count) {
+        other.sentinel = new Node<T>(T());
+        other.sentinel->next = other.sentinel;
+        other.sentinel->prev = other.sentinel;
+        other.count = 0;
+    }
+
+    List& operator=(const List& other) {
+        if (this != &other) {
+            List tmp(other);
+            swap(tmp);
+        }
+        return *this;
+    }
+
+    List& operator=(List&& other) noexcept {
+        if (this != &other) {
+            clear();
+            delete sentinel;
+            sentinel = other.sentinel;
+            count = other.count;
+            other.sentinel = new Node<T>(T());
+            other.sentinel->next = other.sentinel;
+            other.sentinel->prev = other.sentinel;
+            other.count = 0;
+        }
+        return *this;
+    }
+
+    void swap(List& other) noexcept {
+        std::swap(sentinel, other.sentinel);
+        std::swap(count, other.count);
+    }
+
     bool empty() const noexcept { return count == 0; }
     size_t size() const noexcept { return count; }
+
+    void push_back(const T& val) {
+        Node<T>* n = new Node<T>(val);
+        n->next = sentinel;
+        n->prev = sentinel->prev;
+        sentinel->prev->next = n;
+        sentinel->prev = n;
+        ++count;
+    }
+
+    void push_back(T&& val) {
+        Node<T>* n = new Node<T>(std::move(val));
+        n->next = sentinel;
+        n->prev = sentinel->prev;
+        sentinel->prev->next = n;
+        sentinel->prev = n;
+        ++count;
+    }
 
     void push_front(const T& val) {
         Node<T>* n = new Node<T>(val);
@@ -58,12 +126,12 @@ public:
         ++count;
     }
 
-    void push_back(const T& val) {
-        Node<T>* n = new Node<T>(val);
-        n->next = sentinel;
-        n->prev = sentinel->prev;
-        sentinel->prev->next = n;
-        sentinel->prev = n;
+    void push_front(T&& val) {
+        Node<T>* n = new Node<T>(std::move(val));
+        n->prev = sentinel;
+        n->next = sentinel->next;
+        sentinel->next->prev = n;
+        sentinel->next = n;
         ++count;
     }
 
@@ -101,9 +169,9 @@ private:
 public:
     LIter(Node<T>* n = nullptr, Node<T>* s = nullptr) : node(n), sentinel(s) {}
     bool valid() const { return node != sentinel; }
-    void next() { if (node) node = node->next; }
-    void prev() { if (node) node = node->prev; }
+    void next() { if(node) node = node->next; }
     T& value() { return node->data; }
+    const T& value() const { return node->data; }
 };
 
 template <typename T>
@@ -120,5 +188,5 @@ public:
 
 } // namespace smirnova
 
-#endif // LIST_HPP
+#endif
 

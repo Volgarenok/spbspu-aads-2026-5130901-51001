@@ -2,6 +2,8 @@
 #include <boost/test/included/unit_test.hpp>
 #include "list.hpp"
 
+BOOST_AUTO_TEST_SUITE(list_tests)
+
 BOOST_AUTO_TEST_CASE(empty_list_test)
 {
     smirnova::List<size_t> list;
@@ -61,4 +63,18 @@ BOOST_AUTO_TEST_CASE(iterator_test)
     it.next();
     BOOST_TEST(it.valid() == false);
 }
+
+BOOST_AUTO_TEST_CASE(pop_front_on_empty_throws)
+{
+    smirnova::List<size_t> list;
+    BOOST_CHECK_THROW(list.pop_front(), std::out_of_range);
+}
+
+BOOST_AUTO_TEST_CASE(pop_back_on_empty_throws)
+{
+    smirnova::List<size_t> list;
+    BOOST_CHECK_THROW(list.pop_back(), std::out_of_range);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
