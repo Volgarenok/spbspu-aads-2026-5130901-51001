@@ -2,7 +2,6 @@
 #include <iostream>
 #include <string>
 #include <climits>
-#include <cstdlib>
 #include <cerrno>
 #include <cctype>
 
@@ -100,9 +99,6 @@ smirnova::Transposed smirnova::buildTransposed(const smirnova::Sequences& seqs)
     while (seqIt != seqs.cend()) {
       if (*iterIt != seqIt->second.cend()) {
         long long val = **iterIt;
-        if (val > LLONG_MAX || val < LLONG_MIN) {
-          throw std::overflow_error("overflow in number reading");
-        }
         row.pushBack(val);
         ++(*iterIt);
         hasData = true;
