@@ -8,7 +8,7 @@
 
 namespace smirnova {
 
-using Numbers = List< long long >;
+using Numbers = List< unsigned long long >;
 using NamedSeq = std::pair< std::string, Numbers >;
 using Sequences = List< NamedSeq >;
 using Transposed = List< Numbers >;

@@ -12,11 +12,8 @@ smirnova::Sequences readSequences()
   std::string name;
   while (std::cin >> name) {
     smirnova::Numbers nums;
-    unsigned long long raw = 0;
-    while (std::cin >> raw) {
-      const long long num = (raw > static_cast< unsigned long long >(LLONG_MAX))
-        ? LLONG_MAX
-        : static_cast< long long >(raw);
+    unsigned long long num = 0;
+    while (std::cin >> num) {
       nums.pushBack(num);
     }
     if (!std::cin.eof()) {
@@ -43,7 +40,7 @@ void printNames(const smirnova::Sequences& seqs)
 void printNumbers(const smirnova::Numbers& nums)
 {
   bool first = true;
-  for (smirnova::LCIter< long long > it = nums.cbegin(); it != nums.cend(); ++it) {
+  for (smirnova::LCIter< unsigned long long > it = nums.cbegin(); it != nums.cend(); ++it) {
     if (!first) {
       std::cout << ' ';
     }
@@ -55,7 +52,7 @@ void printNumbers(const smirnova::Numbers& nums)
 
 smirnova::Transposed buildTransposed(const smirnova::Sequences& seqs)
 {
-  smirnova::List< smirnova::LCIter< long long > > iters;
+  smirnova::List< smirnova::LCIter< unsigned long long > > iters;
   for (smirnova::LCIter< smirnova::NamedSeq > it = seqs.cbegin(); it != seqs.cend(); ++it) {
     iters.pushBack(it->second.cbegin());
   }
@@ -63,7 +60,7 @@ smirnova::Transposed buildTransposed(const smirnova::Sequences& seqs)
   while (true) {
     smirnova::Numbers row;
     smirnova::LCIter< smirnova::NamedSeq > seqIt = seqs.cbegin();
-    smirnova::LIter< smirnova::LCIter< long long > > iterIt = iters.begin();
+    smirnova::LIter< smirnova::LCIter< unsigned long long > > iterIt = iters.begin();
     while (seqIt != seqs.cend()) {
       if (*iterIt != seqIt->second.cend()) {
         row.pushBack(**iterIt);
@@ -85,12 +82,11 @@ bool computeSums(const smirnova::Transposed& transposed, smirnova::Numbers& sums
   for (smirnova::LCIter< smirnova::Numbers > rowIt = transposed.cbegin();
        rowIt != transposed.cend();
        ++rowIt) {
-    long long sum = 0;
-    for (smirnova::LCIter< long long > it = rowIt->cbegin(); it != rowIt->cend(); ++it) {
-      if (*it > 0 && sum > LLONG_MAX - *it) {
-        return false;
-      }
-      if (*it < 0 && sum < LLONG_MIN - *it) {
+    unsigned long long sum = 0;
+    for (smirnova::LCIter< unsigned long long > it = rowIt->cbegin();
+         it != rowIt->cend();
+         ++it) {
+      if (sum > ULLONG_MAX - *it) {
         return false;
       }
       sum += *it;
@@ -103,7 +99,7 @@ bool computeSums(const smirnova::Transposed& transposed, smirnova::Numbers& sums
 void printSums(const smirnova::Numbers& sums)
 {
   bool first = true;
-  for (smirnova::LCIter< long long > it = sums.cbegin(); it != sums.cend(); ++it) {
+  for (smirnova::LCIter< unsigned long long > it = sums.cbegin(); it != sums.cend(); ++it) {
     if (!first) {
       std::cout << ' ';
     }
@@ -129,8 +125,8 @@ int main()
   const smirnova::Transposed transposed = buildTransposed(seqs);
 
   if (transposed.empty()) {
-    std::cerr << "error: sum calculation is impossible\n";
-    return 1;
+    std::cout << 0 << '\n';
+    return 0;
   }
 
   for (smirnova::LCIter< smirnova::Numbers > it = transposed.cbegin();
