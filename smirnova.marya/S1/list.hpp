@@ -176,7 +176,8 @@ namespace smirnova
       --count;
     }
 
-    void pop_back() {
+    void pop_back()
+    {
       if (empty()) {
         throw std::out_of_range("pop_back on empty list");
       }
