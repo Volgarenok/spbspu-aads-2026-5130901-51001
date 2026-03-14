@@ -1,342 +1,296 @@
 #include <iostream>
-#include <iomanip>
-#include <string>
 #include <sstream>
+#include <string>
 #include <utility>
+#include <limits>
 #include <stdexcept>
 
-namespace smirnova
-{
-  template < class T >
-  struct Node {
+namespace smirnova {
+
+template <typename T>
+struct Node {
     T data;
     Node* next;
     Node* prev;
+    Node(const T& d) : data(d), next(nullptr), prev(nullptr) {}
+    Node(T&& d) : data(std::move(d)), next(nullptr), prev(nullptr) {}
+};
 
-    Node(const T& d) :
-      data(d),
-      next(nullptr),
-      prev(nullptr)
-    {}
-  };
+template <typename T>
+class LIter;
 
-  template < class T >
-  class LIter;
+template <typename T>
+class LCIter;
 
-  template < class T >
-  class LCIter;
+template <typename T>
+class List {
+private:
+    Node<T>* sentinel;
+    size_t count;
 
-  template< class T >
-  class List
-  {
-  private:
-    Node<T>* fake;
-    size_t sz;
-
-  public:
-    List() :
-      sz(0)
-    {
-      fake = new Node< T >(T());
-      fake->next = nullptr;
-      fake->prev = nullptr;
+public:
+    List() : count(0) {
+        sentinel = new Node<T>(T());
+        sentinel->next = sentinel;
+        sentinel->prev = sentinel;
     }
 
-    ~List()
-    {
-      clear();
-      delete fake;
+    void clear() noexcept {
+        Node<T>* current = sentinel->next;
+        while (current != sentinel) {
+            Node<T>* tmp = current->next;
+            delete current;
+            current = tmp;
+        }
+        sentinel->next = sentinel;
+        sentinel->prev = sentinel;
+        count = 0;
     }
 
-    List(const List& other) :
-      List()
-    {
-      for (LCIter< T > it = other.begin(); it.valid(); it.next())
-      {
-        push_back(it.value());
-      }
-    }
-    List& operator=(const List& other)
-    {
-      if (this != &other) {
+    ~List() {
         clear();
-        for (LCIter< T > it = other.begin(); it.valid(); it.next())
-        {
-          push_back(it.value());
+        delete sentinel;
+    }
+
+    // Копирование
+    List(const List& other) : List() {
+        for (LCIter<T> it = other.cbegin(); it.valid(); it.next())
+            push_back(it.value());
+    }
+
+    // Перемещение
+    List(List&& other) noexcept : sentinel(other.sentinel), count(other.count) {
+        other.sentinel = new Node<T>(T());
+        other.sentinel->next = other.sentinel;
+        other.sentinel->prev = other.sentinel;
+        other.count = 0;
+    }
+
+    List& operator=(const List& other) {
+        if (this != &other) {
+            List tmp(other);
+            swap(tmp);
         }
-      }
-      return *this;
-    }
-    bool empty() const noexcept
-    {
-      return sz == 0;
-    }
-    size_t size() const noexcept
-    {
-      return sz;
+        return *this;
     }
 
-    void push_back(const T& val)
-    {
-      Node< T >* n = new Node< T >(val);
-      n->next = nullptr;
-      if (empty()) {
-        fake->next = n;
-        fake->prev = n;
-        n->prev = fake;
-      } else {
-        Node< T >* tail = fake->prev;
-        tail->next = n;
-        n->prev = tail;
-        fake->prev = n;
-      }
-      ++sz;
-    }
-
-    void push_front(const T& val)
-    {
-      Node< T >* n = new Node< T >(val);
-      n->next = fake->next;
-      n->prev = fake;
-      if (fake->next) {
-        fake->next->prev = n;
-      }
-      fake->next = n;
-      if (sz == 0) {
-        fake->prev = n;
-      }
-      ++sz;
-    }
-
-    void pop_front()
-    {
-      if (empty() || !fake->next) {
-        throw std::out_of_range("pop_front on empty list");
-      }
-      Node< T >* tmp = fake->next;
-      fake->next = tmp->next;
-      if (tmp->next) {
-        tmp->next->prev = fake;
-      } else {
-        fake->prev = nullptr;
-      }
-      delete tmp;
-      --sz;
-    }
-
-    void pop_back()
-    {
-      if (empty()) {
-        throw std::out_of_range("pop_back on empty list");
-      }
-      Node< T >* tail = fake->prev;
-      if (tail == fake->next) {
-        fake->next = nullptr;
-        fake->prev = nullptr;
-      } else {
-        fake->prev = tail->prev;
-        tail->prev->next = nullptr;
-      }
-      delete tail;
-      --sz;
-    }
-
-    void clear() noexcept
-    {
-      Node< T >* curr = fake->next;
-      while (curr) {
-        Node< T >* tmp = curr->next;
-        delete curr;
-        curr = tmp;
-      }
-      fake->next = nullptr;
-      fake->prev = nullptr;
-      sz = 0;
-    }
-
-    LIter< T > begin()
-    {
-      return LIter< T >(fake->next);
-    }
-    LIter< T > tail()
-    {
-      return LIter< T >(fake->prev);
-    }
-    LCIter< T > begin() const
-    {
-      return LCIter< T >(fake->next);
-    }
-    LCIter< T > tail() const
-    {
-      return LCIter< T >(fake->prev);
-    }
-  };
-
-  template < class T >
-  class LIter
-  {
-    friend class List< T >;
-  private:
-    Node< T >* node;
-  public:
-    LIter(Node< T >* n = nullptr) :
-      node(n)
-    {}
-    bool valid() const
-    {
-      return node != nullptr;
-    }
-    void next()
-    {
-      if (node){
-        node = node->next;
-      }
-    }
-    void prev()
-    {
-      if (node) {
-        node = node->prev;
-      }
-    }
-    T& value()
-    {
-      if (!node) {
-        throw std::out_of_range("Invalid iterator");
-      }
-      return node->data;
-    }
-  };
-
-  template < class T >
-  class LCIter
-  {
-    friend class List< T >;
-  private:
-    const Node< T >* node;
-  public:
-    LCIter(const Node< T >* n = nullptr) :
-      node(n)
-    {}
-    bool valid() const
-    {
-      return node;
-    }
-    void next()
-    {
-      if (node) {
-        node = node->next;
-      }
-    }
-    void prev()
-    {
-      if (node) {
-        node = node->prev;
-      }
-    }
-    const T& value()
-    {
-      if (!node) {
-        throw std::out_of_range("Invalid iterator");
-      }
-      return node->data;
-    }
-  };
-
-  void formColSeq(List< std::pair< std::string, List< int > > >& seq) {
-    size_t maxSize = 0;
-
-    for (LIter< std::pair< std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
-    {
-      if (it.value().second.size() > maxSize) {
-        maxSize = it.value().second.size();
-      }
-    }
-
-    List< LIter< int > > iterators;
-    for (LIter< std::pair< std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
-    {
-      iterators.push_back(it.value().second.begin());
-    }
-
-    for (size_t row = 0; row < maxSize; ++row)
-    {
-      for (LIter< LIter< int > > it_it = iterators.begin(); it_it.valid(); it_it.next())
-      {
-        LIter< int >& it_list = it_it.value();
-        if (it_list.valid()) {
-          std::cout << std::setw(5) << it_list.value() << " ";
-          it_list.next();
-        } else {
-          std::cout << "     ";
+    List& operator=(List&& other) noexcept {
+        if (this != &other) {
+            clear();
+            delete sentinel;
+            sentinel = other.sentinel;
+            count = other.count;
+            other.sentinel = new Node<T>(T());
+            other.sentinel->next = other.sentinel;
+            other.sentinel->prev = other.sentinel;
+            other.count = 0;
         }
-      }
-      std::cout << std::endl;
+        return *this;
     }
 
-    for (LIter< std::pair< std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
-    {
-      int sum = 0;
-      const List< int >& lst = it.value().second;
-      for (LCIter< int > jt = lst.begin(); jt.valid(); jt.next())
-      {
-        sum += jt.value();
-      }
-      std::cout << std::setw(5) << sum << " ";
+    void swap(List& other) noexcept {
+        std::swap(sentinel, other.sentinel);
+        std::swap(count, other.count);
     }
-    std::cout << std::endl;
-  }
+
+    bool empty() const noexcept { return count == 0; }
+    size_t size() const noexcept { return count; }
+
+    void push_back(const T& val) {
+        Node<T>* n = new Node<T>(val);
+        n->next = sentinel;
+        n->prev = sentinel->prev;
+        sentinel->prev->next = n;
+        sentinel->prev = n;
+        ++count;
+    }
+
+    void push_back(T&& val) {
+        Node<T>* n = new Node<T>(std::move(val));
+        n->next = sentinel;
+        n->prev = sentinel->prev;
+        sentinel->prev->next = n;
+        sentinel->prev = n;
+        ++count;
+    }
+
+    void push_front(const T& val) {
+        Node<T>* n = new Node<T>(val);
+        n->prev = sentinel;
+        n->next = sentinel->next;
+        sentinel->next->prev = n;
+        sentinel->next = n;
+        ++count;
+    }
+
+    void push_front(T&& val) {
+        Node<T>* n = new Node<T>(std::move(val));
+        n->prev = sentinel;
+        n->next = sentinel->next;
+        sentinel->next->prev = n;
+        sentinel->next = n;
+        ++count;
+    }
+
+    void pop_front() {
+        if (empty()) throw std::out_of_range("pop_front on empty list");
+        Node<T>* tmp = sentinel->next;
+        sentinel->next = tmp->next;
+        tmp->next->prev = sentinel;
+        delete tmp;
+        --count;
+    }
+
+    void pop_back() {
+        if (empty()) throw std::out_of_range("pop_back on empty list");
+        Node<T>* tmp = sentinel->prev;
+        sentinel->prev = tmp->prev;
+        tmp->prev->next = sentinel;
+        delete tmp;
+        --count;
+    }
+
+    LIter<T> begin() { return LIter<T>(sentinel->next, sentinel); }
+    LIter<T> end() { return LIter<T>(sentinel, sentinel); }
+    LCIter<T> begin() const { return LCIter<T>(sentinel->next, sentinel); }
+    LCIter<T> end() const { return LCIter<T>(sentinel, sentinel); }
+    LCIter<T> cbegin() const { return LCIter<T>(sentinel->next, sentinel); }
+    LCIter<T> cend() const { return LCIter<T>(sentinel, sentinel); }
+};
+
+template <typename T>
+class LCIter {
+private:
+    const Node<T>* node;
+    const Node<T>* sentinel;
+public:
+    LCIter(const Node<T>* n = nullptr, const Node<T>* s = nullptr) : node(n), sentinel(s) {}
+    bool valid() const { return node != sentinel; }
+    void next() { if(node) node = node->next; }
+    const T& value() const { return node->data; }
+};
+
+template <typename T>
+LCIter<T> getElementAt(const List<T>& lst, size_t idx) {
+    LCIter<T> it = lst.cbegin();
+    size_t i = 0;
+    while(it.valid() && i < idx) { it.next(); ++i; }
+    return it;
 }
+
+template <typename T>
+void prsize_tList(const List<T>& lst) {
+    if(lst.empty()) { std::cout << "0\n"; return; }
+    bool first = true;
+    for(LCIter<T> it = lst.cbegin(); it.valid(); it.next()) {
+        if(!first) std::cout << " ";
+        std::cout << it.value();
+        first = false;
+    }
+    std::cout << "\n";
+}
+
+bool willOverflow(size_t a, size_t b) {
+    if (b > std::numeric_limits<size_t>::max() - a) {
+        return true;
+    }
+    return false;
+}
+
+bool processSequences(const List<std::pair<std::string, List<size_t>>>& sequences) {
+    if(sequences.empty()) return true;
+
+    // Вывод названий
+    bool firstName = true;
+    for(LCIter<std::pair<std::string, List<size_t>>> it = sequences.cbegin(); it.valid(); it.next()) {
+        if(!firstName) std::cout << " ";
+        std::cout << it.value().first;
+        firstName = false;
+    }
+    std::cout << "\n";
+
+    // Определяем максимальную длину
+    size_t maxLen = 0;
+    for(LCIter<std::pair<std::string, List<size_t>>> it = sequences.cbegin(); it.valid(); it.next()) {
+        if(it.value().second.size() > maxLen) maxLen = it.value().second.size();
+    }
+
+    // Печать строк с числами
+    for(size_t row = 0; row < maxLen; ++row) {
+        bool firstNum = true;
+        for(LCIter<std::pair<std::string, List<size_t>>> it = sequences.cbegin(); it.valid(); it.next()) {
+            if(row < it.value().second.size()) {
+                LCIter<size_t> numIt = getElementAt(it.value().second, row);
+                if(!firstNum) std::cout << " ";
+                std::cout << numIt.value();
+                firstNum = false;
+            }
+        }
+        if(!firstNum) std::cout << "\n";
+    }
+
+    // Вычисляем суммы
+    List<size_t> sums;
+    for(size_t row = 0; row < maxLen; ++row) {
+        size_t sum = 0;
+        for(LCIter<std::pair<std::string, List<size_t>>> it = sequences.cbegin(); it.valid(); it.next()) {
+            if(row < it.value().second.size()) {
+                size_t val = getElementAt(it.value().second, row).value();
+                if(willOverflow(sum, val)) {
+                    std::cerr << "overflow\n";
+                    return 1;
+                }
+                sum += val;
+            }
+        }
+        sums.push_back(sum);
+    }
+
+    prsize_tList(sums);
+    return 0;
+}
+
+} // namespace smirnova
 
 int main() {
-  using namespace smirnova;
+    using namespace smirnova;
 
-  List< std::pair< std::string, List< int > > > seq;
-  std::string line;
+    List<std::pair<std::string, List<size_t>>> sequences;
+    bool overflowDetected = false;
 
-  try {
-    while (std::getline(std::cin, line)) {
-      if (line.empty()) {
-        continue;
-      }
-      std::istringstream iss(line);
-      std::string name;
-      iss >> name;
+    std::string name;
 
-      List< int > numbers;
-      int x;
-      while (iss >> x) {
-        numbers.push_back(x);
-      }
-      seq.push_back({ name, numbers });
-      if (std::cin.peek() == '\n') {
-        std::cin.get();
-      }
+    while (std::cin >> name) {
+        List<size_t> numbers;
+
+        while (true) {
+            int c = std::cin.peek();
+            if (c == '\n' || c == '\r' || c == EOF)
+                break;
+
+            size_t num = 0;
+
+            if (!(std::cin >> num)) {
+                overflowDetected = true;
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                break;
+            }
+
+            numbers.push_back(num);
+        }
+
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        sequences.push_back({name, std::move(numbers)});
     }
 
-    if (seq.empty()) {
-      std::cout << 0 << std::endl;
-      return 0;
+    if (overflowDetected) {
+        std::cerr << "overflow\n";
+        return 1;
     }
 
-    std::cout << std::endl;
-    for (LIter< std::pair<std::string, List< int > > > it = seq.begin(); it.valid(); it.next())
-    {
-      std::cout << it.value().first << " ";
-    }
-    std::cout << std::endl;
+    if (!processSequences(sequences))
+        return 1;
 
-    formColSeq(seq);
-
-    seq.clear();
-
-  } catch(const std::exception& e) {
-    std::cerr << "Exception: " << e.what() << std::endl;
-    return 1;
-  } catch(...) {
-    std::cerr << "Unknown exception" << std::endl;
-    return 1;
-  }
-
-  return 0;
+    return 0;
 }
-
