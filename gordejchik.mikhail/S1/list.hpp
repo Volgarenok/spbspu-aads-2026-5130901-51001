@@ -12,6 +12,7 @@ namespace gordejchik {
     using const_iterator = LCIter< T >;
 
     List() noexcept;
+    List(const List& other);
     ~List();
 
     iterator begin() noexcept;
@@ -28,11 +29,9 @@ namespace gordejchik {
     void pushFront(T&& value);
     void pushBack(const T& value);
     void pushBack(T&& value);
-
     void popFront();
     void popBack();
     iterator erase(iterator pos);
-
     void clear() noexcept;
 
   private:
@@ -50,6 +49,21 @@ namespace gordejchik {
     fake_(),
     size_(0)
   {}
+
+  template< class T >
+  List< T >::List(const List& other):
+    fake_(),
+    size_(0)
+  {
+    try {
+      for (auto it = other.cbegin(); it != other.cend(); ++it) {
+        pushBack(*it);
+      }
+    } catch (...) {
+      clear();
+      throw;
+    }
+  }
 
   template< class T >
   List< T >::~List()
