@@ -1,6 +1,30 @@
 #include <iostream>
 
 namespace petrenko {
+  template< class T > class List;
+
+  template< class T >
+  class LIter {
+  friend class List< T >;
+  private:
+    typename List<T>::Node<T>* current;
+  public:
+    LIter() : current(nullptr) {}
+    LIter(const LIter<T>& other) : current(other.current) {} // Копирующий конструктор
+    LIter<T>& operator=(const LIter<T>& other) { // Оператор присваивания
+      if (this != &other) {
+        current = other.current;
+      }
+      return *this;
+    }
+  };
+
+  template< class T >
+  class LCIter {
+  friend class List< T >;
+  //
+  };
+
   template< class T >
   class List {
   public:
@@ -10,6 +34,22 @@ namespace petrenko {
     void insert(T data, int index); // добавление элемента по индексу
     void removeAt(int index); // удаление элемента по индексу
     void clear(); // очищение списка
+    LIter<T> begin() {
+      return LIter<T>(head);
+    }
+
+    LIter<T> end() {
+      return LIter<T>(nullptr);
+    }
+
+    LCIter<T> cbegin() const {
+      return LIter<T>(head);
+    }
+
+    LСIter<T> сend() const {
+      return LСIter<T>(nullptr);
+    }
+
   private:
     size_t Size;
 
@@ -25,17 +65,6 @@ namespace petrenko {
     };
 
     Node *head;
-  };
-
-  template< class T >
-  class LIter {
-  friend class List< T >;
-  //
-  };
-  template< class T >
-  class LCIter {
-  friend class List< T >;
-  //
   };
 
   template< class T >
@@ -99,8 +128,7 @@ namespace petrenko {
   }
 }
 
-int main()
-{
+int main() {
   // список списков
   // список названий
   while (!std::cin.eof()) {
