@@ -160,4 +160,74 @@ void testClearAndSwap()
   lst.clear();
   assert(lst.empty());
   lst.pushBack(3);
-  assert(lst.front() == 3
+  assert(lst.front() == 3);
+
+  List< int > other;
+  other.pushBack(10);
+  lst.swap(other);
+  assert(lst.front() == 10);
+  assert(other.front() == 3);
+}
+
+void testMutateAndArrow()
+{
+  List< int > lst;
+  lst.pushBack(1);
+  lst.pushBack(2);
+  for (LIter< int > it = lst.begin(); it != lst.end(); ++it) {
+    *it *= 10;
+  }
+  assert(lst.front() == 10);
+  assert(lst.back() == 20);
+
+  List< std::string > slst;
+  slst.pushBack(std::string("hello"));
+  assert(slst.begin()->size() == 5);
+  assert(slst.cbegin()->size() == 5);
+}
+
+void testExceptions()
+{
+  List< int > empty;
+  assertThrows([&]()
+  {
+    empty.front();
+  });
+  assertThrows([&]()
+  {
+    empty.back();
+  });
+  assertThrows([&]()
+  {
+    empty.popFront();
+  });
+  assertThrows([&]()
+  {
+    empty.popBack();
+  });
+
+  List< int > lst;
+  lst.pushBack(1);
+  assertThrows([&]()
+  {
+    lst.erase(lst.end());
+  });
+}
+
+}
+
+int main()
+{
+  testEmpty();
+  testPushAndIterate();
+  testPopFrontBack();
+  testIterators();
+  testInsertErase();
+  testCopyMove();
+  testClearAndSwap();
+  testMutateAndArrow();
+  testExceptions();
+
+  std::cout << "All tests passed\n";
+  return 0;
+}
