@@ -104,7 +104,7 @@ namespace smirnova
           sum += val;
         }
       }
-      sums.push_back(sum);
+      sums.pushBack(sum);
     }
 
     printList(sums);
@@ -124,25 +124,25 @@ int main() {
       List< size_t > numbers;
 
       while (true) {
-          int c = std::cin.peek();
-          if (c == '\n' || c == '\r' || c == EOF) {
-              break;
+        int c = std::cin.peek();
+        if (c == '\n' || c == '\r' || c == EOF) {
+            break;
           }
 
           size_t num = 0;
 
           if (!(std::cin >> num)) {
-              overflowDetected = true;
-              std::cin.clear();
-              std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
-              break;
+            overflowDetected = true;
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+            break;
           }
 
-          numbers.push_back(num);
+          numbers.pushBack(num);
       }
 
       std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
-      sequences.push_back({name, std::move(numbers)});
+      sequences.pushBack({name, std::move(numbers)});
   }
 
   if (overflowDetected) {

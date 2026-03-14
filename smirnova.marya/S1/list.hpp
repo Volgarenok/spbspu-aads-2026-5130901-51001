@@ -49,7 +49,8 @@ namespace smirnova
       sentinel->prev = sentinel;
     }
 
-    void clear() noexcept {
+    void clear() noexcept
+    {
       Node< T >* current = sentinel->next;
       while (current != sentinel) {
         Node< T >* tmp = current->next;
@@ -124,7 +125,7 @@ namespace smirnova
       return count;
     }
 
-    void push_back(const T& val)
+    void pushBack(const T& val)
     {
       Node< T >* n = new Node< T >(val);
       n->next = sentinel;
@@ -134,7 +135,7 @@ namespace smirnova
       ++count;
     }
 
-    void push_back(T&& val)
+    void pushBack(T&& val)
     {
       Node< T >* n = new Node< T >(std::move(val));
       n->next = sentinel;
@@ -144,7 +145,7 @@ namespace smirnova
       ++count;
     }
 
-    void push_front(const T& val)
+    void pushFront(const T& val)
     {
       Node< T >* n = new Node< T >(val);
       n->prev = sentinel;
@@ -154,7 +155,7 @@ namespace smirnova
       ++count;
     }
 
-    void push_front(T&& val)
+    void pushFront(T&& val)
     {
       Node< T >* n = new Node< T >(std::move(val));
       n->prev = sentinel;
@@ -164,7 +165,7 @@ namespace smirnova
       ++count;
     }
 
-    void pop_front()
+    void popFront()
     {
       if (empty()) {
         throw std::out_of_range("pop_front on empty list");
@@ -176,7 +177,7 @@ namespace smirnova
       --count;
     }
 
-    void pop_back()
+    void popBack()
     {
       if (empty()) {
         throw std::out_of_range("pop_back on empty list");
