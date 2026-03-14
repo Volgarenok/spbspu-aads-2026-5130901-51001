@@ -285,3 +285,192 @@ public:
   {
     return tail_->data;
   }
+  
+  void pushFront(const T& value)
+  {
+    Node< T >* new_node = new Node< T >(value);
+    new_node->next = head_;
+    
+    if (head_ != nullptr)
+    {
+      head_->prev = new_node;
+    }
+    else
+    {
+      tail_ = new_node;
+    }
+    head_ = new_node;
+    ++size_;
+  }
+  
+  void pushBack(const T& value)
+  {
+    Node< T >* new_node = new Node< T >(value);
+    new_node->prev = tail_;
+    
+    if (tail_ != nullptr)
+    {
+      tail_->next = new_node;
+    }
+    else
+    {
+      head_ = new_node;
+    }
+    tail_ = new_node;
+    ++size_;
+  }
+  
+  void popFront()
+  {
+    if (this->empty())
+    {
+      return;
+    }
+    
+    Node< T >* old_head = head_;
+    head_ = head_->next;
+    
+    if (head_ != nullptr)
+    {
+      head_->prev = nullptr;
+    }
+    else
+    {
+      tail_ = nullptr;
+    }
+    
+    delete old_head;
+    --size_;
+  }
+  
+  void popBack()
+  {
+    if (this->empty())
+    {
+      return;
+    }
+    
+    Node< T >* old_tail = tail_;
+    tail_ = tail_->prev;
+    
+    if (tail_ != nullptr)
+    {
+      tail_->next = nullptr;
+    }
+    else
+    {
+      head_ = nullptr;
+    }
+    
+    delete old_tail;
+    --size_;
+  }
+  
+  iterator insertAfter(iterator pos, const T& value)
+  {
+    if (pos == this->end())
+    {
+      this->pushBack(value);
+      return iterator(tail_);
+    }
+    
+    Node< T >* current = pos.ptr_;
+    Node< T >* new_node = new Node< T >(value);
+    
+    new_node->next = current->next;
+    new_node->prev = current;
+    
+    if (current->next != nullptr)
+    {
+      current->next->prev = new_node;
+    }
+    else
+    {
+      tail_ = new_node;
+    }
+    
+    current->next = new_node;
+    ++size_;
+    
+    return iterator(new_node);
+  }
+  
+  iterator erase(iterator pos)
+  {
+    if (pos == this->end())
+    {
+      return this->end();
+    }
+    
+    Node< T >* to_delete = pos.ptr_;
+    iterator next_it(to_delete->next);
+    
+    if (to_delete->prev != nullptr)
+    {
+      to_delete->prev->next = to_delete->next;
+    }
+    else
+    {
+      head_ = to_delete->next;
+    }
+    
+    if (to_delete->next != nullptr)
+    {
+      to_delete->next->prev = to_delete->prev;
+    }
+    else
+    {
+      tail_ = to_delete->prev;
+    }
+    
+    delete to_delete;
+    --size_;
+    
+    return next_it;
+  }
+  
+  void clear()
+  {
+    while (head_ != nullptr)
+    {
+      Node< T >* next = head_->next;
+      delete head_;
+      head_ = next;
+    }
+    tail_ = nullptr;
+    size_ = 0;
+  }
+  
+  size_t size() const
+  {
+    return size_;
+  }
+  
+  bool empty() const
+  {
+    return size_ == 0;
+  }
+  
+  void swap(List& other) noexcept
+  {
+    Node< T >* tmp_head = other.head_;
+    Node< T >* tmp_tail = other.tail_;
+    size_t tmp_size = other.size_;
+    
+    other.head_ = head_;
+    other.tail_ = tail_;
+    other.size_ = size_;
+    
+    head_ = tmp_head;
+    tail_ = tmp_tail;
+    size_ = tmp_size;
+  }
+  
+private:
+  Node< T >* head_;
+  Node< T >* tail_;
+  size_t size_;
+};
+}
+
+#endif
