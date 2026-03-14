@@ -10,19 +10,19 @@ size_t getElementAt(const List< size_t >& lst, size_t index, bool& exists)
 {
   auto it = lst.cbegin();
   size_t i = 0;
-  
+
   while (it != lst.cend() && i < index)
   {
     ++it;
     ++i;
   }
-  
+
   if (it == lst.cend())
   {
     exists = false;
     return 0;
   }
-  
+
   exists = true;
   return *it;
 }
@@ -32,12 +32,12 @@ List< Seq > readSequences()
   List< Seq > sequences;
   std::string name;
   bool hasName = false;
-  
+
   while (std::cin >> name)
   {
     hasName = true;
     List< size_t > numbers;
-    
+
     int ch = std::cin.peek();
     if (ch == '\n')
     {
@@ -57,7 +57,7 @@ List< Seq > readSequences()
           break;
         }
         numbers.pushBack(number);
-        
+
         ch = std::cin.peek();
         if (ch == '\n')
         {
@@ -85,7 +85,7 @@ void printNames(const List< Seq >& sequences)
   {
     return;
   }
-  
+
   bool first = true;
   for (auto it = sequences.cbegin(); it != sequences.cend(); ++it)
   {
@@ -105,7 +105,7 @@ void printTransposed(const List< Seq >& sequences)
   {
     return;
   }
-  
+
   size_t maxLen = 0;
   for (auto it = sequences.cbegin(); it != sequences.cend(); ++it)
   {
@@ -115,22 +115,22 @@ void printTransposed(const List< Seq >& sequences)
       maxLen = cur;
     }
   }
-  
+
   if (maxLen == 0)
   {
     return;
   }
-  
+
   for (size_t i = 0; i < maxLen; ++i)
   {
     bool firstCol = true;
     bool printAny = false;
-    
+
     for (auto sit = sequences.cbegin(); sit != sequences.cend(); ++sit)
     {
       bool exists = false;
       size_t value = getElementAt((*sit).second, i, exists);
-      
+
       if (exists)
       {
         if (!firstCol)
@@ -142,7 +142,7 @@ void printTransposed(const List< Seq >& sequences)
         printAny = true;
       }
     }
-    
+
     if (printAny)
     {
       std::cout << '\n';
