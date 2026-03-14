@@ -14,11 +14,6 @@ int main()
   vishnyakov::outputNames(seqs, std::cout);
   bool res = vishnyakov::outputNums(seqs, std::cout);
 
-  while (!seqs.empty())
-  {
-    seqs.pop_front();
-  }
-
   return res;
 }
 

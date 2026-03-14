@@ -140,8 +140,7 @@ namespace vishnyakov
       pseudoknot_(other.pseudoknot_),
       size_(other.size_)
     {
-      other.pseudoknot_ = new Node();
-      other.pseudoknot_->next_ = other.pseudoknot_;
+      other.pseudoknot_ = nullptr;
       other.size_ = 0;
     }
 

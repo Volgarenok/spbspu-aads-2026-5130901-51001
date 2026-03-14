@@ -16,10 +16,23 @@ namespace vishnyakov
     Sequence(): name(""), nums(nullptr) {}
     explicit Sequence(const std::string& name_): name(name_), nums(new List< size_t >()) {}
 
-    Sequence(const Sequence&) = delete;
-    Sequence& operator=(const Sequence&) = delete;
+    // Разрешаем копирование для работы с Node
+    Sequence(const Sequence& other): name(other.name), nums(new List< size_t >(*other.nums)) {}
 
-    Sequence(Sequence&& other) noexcept: name(std::move(other.name)), nums(other.nums)
+    Sequence& operator=(const Sequence& other)
+    {
+      if (this != &other)
+      {
+        delete nums;
+        name = other.name;
+        nums = new List< size_t >(*other.nums);
+      }
+      return *this;
+    }
+
+    Sequence(Sequence&& other) noexcept:
+      name(std::move(other.name)),
+      nums(other.nums)
     {
       other.nums = nullptr;
     }
