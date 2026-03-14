@@ -116,8 +116,6 @@ namespace gordejchik {
     return node_ != rhs.node_;
   }
 
-  // ADDED: определения методов LCIter
-
   template< class T >
   LCIter< T >::LCIter():
     node_(nullptr)
