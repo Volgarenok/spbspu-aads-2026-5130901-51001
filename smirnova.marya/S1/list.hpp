@@ -244,7 +244,7 @@ namespace smirnova
   };
 
   template < typename T >
-  class LCIter 
+  class LCIter
   {
   private:
     const Node< T >* node;
@@ -264,10 +264,9 @@ namespace smirnova
     }
     const T& value() const
     {
-      return node->data; 
+      return node->data;
     }
   };
 }
 
 #endif
-
