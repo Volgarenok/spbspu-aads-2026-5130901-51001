@@ -8,24 +8,14 @@ List< Seq > readSequences()
 {
   List< Seq > sequences;
   std::string name;
-
+  
   while (std::cin >> name)
   {
     List< int > numbers;
     int value = 0;
-
-    while (std::cin.peek() != EOF)
+    
+    while (std::cin.peek() != EOF && !std::isalpha(std::cin.peek()))
     {
-      while (std::cin.peek() == ' ')
-      {
-        std::cin.get();
-      }
-
-      if (std::cin.peek() == EOF || std::isalpha(std::cin.peek()))
-      {
-        break;
-      }
-
       if (std::cin >> value)
       {
         numbers.pushBack(value);
@@ -33,18 +23,20 @@ List< Seq > readSequences()
       else
       {
         std::cin.clear();
-        std::cin.ignore();
-        return sequences;
+        break;
+      }
+      while (std::cin.peek() == ' ')
+      {
+        std::cin.get();
       }
     }
-
     sequences.pushBack({ name, numbers });
   }
-
+  
   return sequences;
 }
 
-void printNames(const List< Sequence >& sequences)
+void printNames(const List< Seq >& sequences)
 {
   bool first = true;
 
