@@ -15,6 +15,7 @@ namespace nabieva
   };
 
   template< class T > class List;
+
   template < class T >
   class LIter {
     friend class List< T >;
@@ -24,6 +25,22 @@ namespace nabieva
     LIter(Node<T>* n = nullptr):
       node(n)
     {}
+
+    T& operator*()
+    {
+      return node->data;
+    }
+
+    LIter& operator++()
+    {
+      node = node->next;
+      return *this;
+    }
+
+    bool operator!=(const LIter& other) const
+    {
+      return node != other.node;
+    }
   };
 
   template < class T >
@@ -35,6 +52,22 @@ namespace nabieva
     LCIter(const Node<T>* n = nullptr):
       node(n)
     {}
+
+    const T& operator*() const
+    {
+      return node->data;
+    }
+
+    LCIter& operator++()
+    {
+      node = node->next;
+      return *this;
+    }
+
+    bool operator!=(const LCIter& other) const
+    {
+      return node != other.node;
+    }
   };
 
   template < class T >
