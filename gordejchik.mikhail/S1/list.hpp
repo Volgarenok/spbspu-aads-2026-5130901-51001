@@ -13,7 +13,11 @@ namespace gordejchik {
 
     List() noexcept;
     List(const List& other);
+    List(List&& other) noexcept;
     ~List();
+
+    List& operator=(const List& other);
+    List& operator=(List&& other) noexcept;
 
     iterator begin() noexcept;
     iterator end() noexcept;
@@ -33,7 +37,6 @@ namespace gordejchik {
     void popBack();
     iterator erase(iterator pos);
     void clear() noexcept;
-
     void swap(List& other) noexcept;
 
   private:
@@ -68,9 +71,37 @@ namespace gordejchik {
   }
 
   template< class T >
+  List< T >::List(List&& other) noexcept:
+    fake_(),
+    size_(0)
+  {
+    swap(other);
+  }
+
+  template< class T >
   List< T >::~List()
   {
     clear();
+  }
+
+  template< class T >
+  List< T >& List< T >::operator=(const List& other)
+  {
+    if (this != &other) {
+      List tmp(other);
+      swap(tmp);
+    }
+    return *this;
+  }
+
+  template< class T >
+  List< T >& List< T >::operator=(List&& other) noexcept
+  {
+    if (this != &other) {
+      clear();
+      swap(other);
+    }
+    return *this;
   }
 
   template< class T >
