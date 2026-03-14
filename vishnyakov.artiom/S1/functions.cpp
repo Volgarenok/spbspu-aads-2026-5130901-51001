@@ -151,6 +151,7 @@ bool vishnyakov::outputNums(const List< Sequence >& seqs, std::ostream& out)
     {
       if (checkedSum(sum, *cit, sum))
       {
+        std::cerr << "overflow";
         return 1;
       }
     }
@@ -170,4 +171,3 @@ bool vishnyakov::outputNums(const List< Sequence >& seqs, std::ostream& out)
   out << '\n';
   return 0;
 }
-

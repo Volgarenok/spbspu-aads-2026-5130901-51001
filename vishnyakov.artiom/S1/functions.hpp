@@ -26,4 +26,3 @@ namespace vishnyakov
 }
 
 #endif
-

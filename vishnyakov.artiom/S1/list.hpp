@@ -12,7 +12,7 @@ namespace vishnyakov
   {
     friend class List< T >;
 
-    using Node = vishnaykov::Node< T >;
+    using Node = vishnyakov::Node< T >;
 
     Node* node_;
 
@@ -65,7 +65,7 @@ namespace vishnyakov
   {
     friend class List< T >;
 
-    using Node = vishnaykov::Node< T >;
+    using Node = vishnyakov::Node< T >;
 
     const Node* node_;
 
@@ -116,7 +116,7 @@ namespace vishnyakov
   template< class T >
   class List
   {
-    using Node = vishnaykov::Node< T >;
+    using Node = vishnyakov::Node< T >;
 
     Node* pseudoknot_;
     size_t size_;
@@ -356,4 +356,3 @@ namespace vishnyakov
 }
 
 #endif
-

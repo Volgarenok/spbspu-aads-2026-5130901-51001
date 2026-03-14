@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-namespace vishnaykov
+namespace vishnyakov
 {
   template< class T >
   struct Node
@@ -24,4 +24,3 @@ namespace vishnaykov
 }
 
 #endif
-
