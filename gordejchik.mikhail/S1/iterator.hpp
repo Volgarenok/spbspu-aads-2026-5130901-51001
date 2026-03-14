@@ -51,6 +51,70 @@ namespace gordejchik {
     explicit LCIter(const BaseNode* node);
     const BaseNode* node_;
   };
+
+  template< class T >
+  LIter< T >::LIter():
+    node_(nullptr)
+  {}
+
+  template< class T >
+  LIter< T >::LIter(BaseNode* node):
+    node_(node)
+  {}
+
+  template< class T >
+  T& LIter< T >::operator*() const
+  {
+    return static_cast< Node* >(node_)->value_;
+  }
+
+  template< class T >
+  T* LIter< T >::operator->() const
+  {
+    return &(static_cast< Node* >(node_)->value_);
+  }
+
+  template< class T >
+  LIter< T >& LIter< T >::operator++()
+  {
+    node_ = node_->next_;
+    return *this;
+  }
+
+  template< class T >
+  LIter< T > LIter< T >::operator++(int)
+  {
+    LIter tmp(*this);
+    node_ = node_->next_;
+    return tmp;
+  }
+
+  template< class T >
+  LIter< T >& LIter< T >::operator--()
+  {
+    node_ = node_->prev_;
+    return *this;
+  }
+
+  template< class T >
+  LIter< T > LIter< T >::operator--(int)
+  {
+    LIter tmp(*this);
+    node_ = node_->prev_;
+    return tmp;
+  }
+
+  template< class T >
+  bool LIter< T >::operator==(const LIter& rhs) const
+  {
+    return node_ == rhs.node_;
+  }
+
+  template< class T >
+  bool LIter< T >::operator!=(const LIter& rhs) const
+  {
+    return node_ != rhs.node_;
+  }
 }
 
 #endif
