@@ -123,22 +123,14 @@ int main() {
   while (std::cin >> name) {
       List< size_t > numbers;
 
-      while (true) {
+      size_t num = 0;
+      while (std::cin >> num) {
+        numbers.pushBack(num);
+
         int c = std::cin.peek();
         if (c == '\n' || c == '\r' || c == EOF) {
-            break;
-          }
-
-          size_t num = 0;
-
-          if (!(std::cin >> num)) {
-            overflowDetected = true;
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
-            break;
-          }
-
-          numbers.pushBack(num);
+          break;
+        }
       }
 
       std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
