@@ -1,5 +1,6 @@
-#define LIST_HPP
 #ifndef LIST_HPP
+#define LIST_HPP
+
 #include <stdexcept>
 #include <utility>
 
@@ -8,10 +9,25 @@ namespace yarmolinskaya
   template< class T >
   class List
   {
+  private:
+    struct Node
+    {
+      T data;
+      Node* next;
+      Node* prev;
+    };
+
   public:
     class Iterator
     {
       friend class List< T >;
+
+    private:
+      Node* node_;
+
+      explicit Iterator(Node* node):
+        node_(node)
+      {}
 
     public:
       Iterator():
@@ -45,17 +61,18 @@ namespace yarmolinskaya
       {
         return node_ != other.node_;
       }
-
-    private:
-      Node* node_;
-      explicit Iterator(Node* node):
-        node_(node)
-      {}
     };
 
     class ConstIterator
     {
       friend class List< T >;
+
+    private:
+      Node* node_;
+
+      explicit ConstIterator(Node* node):
+        node_(node)
+      {}
 
     public:
       ConstIterator():
@@ -89,60 +106,17 @@ namespace yarmolinskaya
       {
         return node_ != other.node_;
       }
-
-    private:
-      Node* node_;
-      explicit ConstIterator(Node* node):
-        node_(node)
-      {}
     };
 
+  private:
+    Node* head_;
+    Node* tail_;
+
+  public:
     List():
       head_(nullptr),
       tail_(nullptr)
     {}
-
-    List(const List& other):
-      head_(nullptr),
-      tail_(nullptr)
-    {
-      for (auto it = other.begin(); it != other.end(); ++it)
-      {
-        push_back(*it);
-      }
-    }
-
-    List(List&& other) noexcept:
-      head_(other.head_),
-      tail_(other.tail_)
-    {
-      other.head_ = nullptr;
-      other.tail_ = nullptr;
-    }
-
-    List& operator=(const List& other)
-    {
-      if (this != &other)
-      {
-        List tmp(other);
-        std::swap(head_, tmp.head_);
-        std::swap(tail_, tmp.tail_);
-      }
-      return *this;
-    }
-
-    List& operator=(List&& other) noexcept
-    {
-      if (this != &other)
-      {
-        clear();
-        head_ = other.head_;
-        tail_ = other.tail_;
-        other.head_ = nullptr;
-        other.tail_ = nullptr;
-      }
-      return *this;
-    }
 
     ~List()
     {
@@ -152,102 +126,6 @@ namespace yarmolinskaya
     bool empty() const
     {
       return head_ == nullptr;
-    }
-
-    T& front()
-    {
-      return head_->data;
-    }
-
-    const T& front() const
-    {
-      return head_->data;
-    }
-
-    T& back()
-    {
-      return tail_->data;
-    }
-
-    const T& back() const
-    {
-      return tail_->data;
-    }
-
-    void push_back(const T& value)
-    {
-      Node* node = new Node{value, nullptr, tail_};
-
-      if (tail_)
-      {
-        tail_->next = node;
-      }
-      else
-      {
-        head_ = node;
-      }
-
-      tail_ = node;
-    }
-
-    void push_front(const T& value)
-    {
-      Node* node = new Node{value, head_, nullptr};
-
-      if (head_)
-      {
-        head_->prev = node;
-      }
-      else
-      {
-        tail_ = node;
-      }
-
-      head_ = node;
-    }
-
-    void pop_front()
-    {
-      if (empty())
-      {
-        throw std::runtime_error("pop_front on empty list");
-      }
-
-      Node* tmp = head_;
-      head_ = head_->next;
-
-      if (head_)
-      {
-        head_->prev = nullptr;
-      }
-      else
-      {
-        tail_ = nullptr;
-      }
-
-      delete tmp;
-    }
-
-    void pop_back()
-    {
-      if (empty())
-      {
-        throw std::runtime_error("pop_back on empty list");
-      }
-
-      Node* tmp = tail_;
-      tail_ = tail_->prev;
-
-      if (tail_)
-      {
-        tail_->next = nullptr;
-      }
-      else
-      {
-        head_ = nullptr;
-      }
-
-      delete tmp;
     }
 
     void clear()
@@ -277,27 +155,6 @@ namespace yarmolinskaya
     {
       return ConstIterator(nullptr);
     }
-
-    ConstIterator cbegin() const
-    {
-      return ConstIterator(head_);
-    }
-
-    ConstIterator cend() const
-    {
-      return ConstIterator(nullptr);
-    }
-
-  private:
-    struct Node
-    {
-      T data;
-      Node* next;
-      Node* prev;
-    };
-
-    Node* head_;
-    Node* tail_;
   };
 }
 
