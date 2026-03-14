@@ -6,7 +6,6 @@
 typedef volkovich::List<std::pair<std::string, volkovich::List<size_t>>> DATA_TYPE;
 typedef volkovich::LIter<std::pair<std::string, volkovich::List<size_t>>> ITER_TYPE;
 
-
 size_t getAt(volkovich::List<size_t> &lst, size_t colNum, bool &isLast)
 {
   volkovich::LIter<size_t> it = lst.begin();
@@ -106,4 +105,3 @@ int main()
 
   return 0;
 }
-

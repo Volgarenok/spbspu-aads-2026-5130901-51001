@@ -51,7 +51,8 @@ namespace volkovich
 
     void popFront()
     {
-      if(!head) return;
+      if (!head)
+        return;
       Item<T> *old_head = head;
       fake_node.next = old_head->next;
       head = fake_node.next;
@@ -151,7 +152,8 @@ namespace volkovich
       return LIter<T>(newItem);
     }
 
-    LIter<T> insertAfter(LIter<T> iter, const T& v) {
+    LIter<T> insertAfter(LIter<T> iter, const T &v)
+    {
       Item<T> *newItem = new Item<T>(v);
       newItem->next = iter.item->next;
       iter.item->next = newItem;
@@ -172,15 +174,16 @@ namespace volkovich
 
     LIter<T> fakeBegin() noexcept
     {
-      return LIter(&fake_node);
+      return LIter<T>(&fake_node);
     };
 
     LIter<T> begin() noexcept
     {
-      return LIter(fake_node.next);
+      return LIter<T>(fake_node.next);
     };
 
-    LCIter<T> begin() const noexcept {
+    LCIter<T> begin() const noexcept
+    {
       return LCIter<T>(fake_node.next);
     };
     void swap(List &other) noexcept
@@ -205,8 +208,10 @@ namespace volkovich
       }
       head = fake_node.next;
       tail = head;
-      if(tail) {
-        while(tail->next) {
+      if (tail)
+      {
+        while (tail->next)
+        {
           tail = tail->next;
         }
       }

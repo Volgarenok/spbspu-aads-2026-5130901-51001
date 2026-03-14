@@ -11,60 +11,74 @@ namespace volkovich
   public:
     Item<T> *item;
     explicit LIter(Item<T> *v) : item(v) {}
-    LIter &operator++() noexcept {
+    LIter &operator++() noexcept
+    {
       item = item->next;
       return *this;
     };
-    LIter &operator++(int) noexcept {
+    LIter &operator++(int) noexcept
+    {
       LIter tmp = *this;
       item = item->next;
       return tmp;
     };
 
-    bool operator==(const LIter &other) const noexcept {
+    bool operator==(const LIter &other) const noexcept
+    {
       return item == other.item;
     };
 
-    bool operator!=(const LIter &other) const noexcept {
+    bool operator!=(const LIter &other) const noexcept
+    {
       return item != other.item;
     };
-    T& operator*() {
+    T &operator*()
+    {
       return item->data;
     }
-    T* operator->() {
+    T *operator->()
+    {
       return &item->data;
     }
   };
 
   template <class T>
-  class LCIter {
+  class LCIter
+  {
   private:
     const Item<T> *item;
+
   public:
     explicit LCIter(Item<T> *v) : item(v) {}
-    LCIter &operator++() noexcept {
+    LCIter &operator++() noexcept
+    {
       item = item->next;
       return *this;
     };
-    LCIter &operator++(int) noexcept {
+    LCIter &operator++(int) noexcept
+    {
       LCIter tmp = *this;
       item = item->next;
       return tmp;
     };
 
-    bool operator==(const LCIter &other) const noexcept {
+    bool operator==(const LCIter &other) const noexcept
+    {
       return item == other.item;
     };
 
-    bool operator!=(const LCIter &other) const noexcept {
+    bool operator!=(const LCIter &other) const noexcept
+    {
       return item != other.item;
     };
 
-    const T& operator*() {
+    const T &operator*()
+    {
       return item->data;
     }
 
-    const T* operator->() const {
+    const T *operator->() const
+    {
       return &item->data;
     }
   };
