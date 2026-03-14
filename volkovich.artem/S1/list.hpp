@@ -14,11 +14,10 @@ namespace volkovich
     Item<T> fake_node;
     Item<T> *tail = nullptr;
     Item<T> *head = nullptr;
-    size_t list_len;
+    size_t list_len = 0;
 
   public:
-    List() : fake_node(),
-             list_len(0)
+    List() : fake_node()
     {
       fake_node.next = nullptr;
     };
@@ -51,6 +50,7 @@ namespace volkovich
 
     void popFront()
     {
+      if(!head) return;
       Item<T> *old_head = head;
       fake_node.next = old_head->next;
       head = fake_node.next;
@@ -111,10 +111,10 @@ namespace volkovich
     void pushBack(T &&v)
     {
       Item<T> *newItem = new Item<T>(std::move(v));
+      newItem->next = nullptr;
       if (list_len == 0)
       {
-        tail = newItem;
-        head = newItem;
+        tail = head = newItem;
         fake_node.next = head;
       }
       else
@@ -128,10 +128,10 @@ namespace volkovich
     void pushBack(const T &v)
     {
       Item<T> *newItem = new Item<T>(v);
+      newItem->next = nullptr;
       if (list_len == 0)
       {
-        tail = newItem;
-        head = newItem;
+        tail = head = newItem;
         fake_node.next = head;
       }
       else
@@ -147,14 +147,14 @@ namespace volkovich
       Item<T> *newItem = new Item<T>(std::move(v));
       newItem->next = iter.item->next;
       iter.item->next = newItem;
-      return LIter(newItem);
+      return LIter<T>(newItem);
     }
 
     LIter<T> insertAfter(LIter<T> iter, const T& v) {
       Item<T> *newItem = new Item<T>(v);
       newItem->next = iter.item->next;
       iter.item->next = newItem;
-      return LIter(newItem);
+      return LIter<T>(newItem);
     }
 
     void deleteAfter()
@@ -184,17 +184,30 @@ namespace volkovich
     };
     void swap(List &other) noexcept
     {
-      Item<T> *tmp = fake_node.next;
-      fake_node.next = other.fake_node.next;
-      other.fake_node.next = tmp;
+      using std::swap;
+      swap(head, other.head);
+      swap(tail, other.tail);
+      swap(list_len, other.list_len);
+      fake_node.next = head;
+      other.fake_node.next = other.head;
     };
 
     void copy(const List &other)
     {
-      LIter<T> tail = fakeBegin();
+      clear();
+      LIter<T> elem = fakeBegin();
+      list_len = 0;
       for (LCIter<T> other_iter = other.begin(); other_iter != LCIter<T>(nullptr); ++other_iter)
       {
-        tail = insertAfter(tail, *other_iter);
+        elem = insertAfter(elem, *other_iter);
+        list_len++;
+      }
+      head = fake_node.next;
+      tail = head;
+      if(tail) {
+        while(tail->next) {
+          tail = tail->next;
+        }
       }
     };
 
