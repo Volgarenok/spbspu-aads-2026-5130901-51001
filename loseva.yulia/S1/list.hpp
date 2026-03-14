@@ -2,6 +2,7 @@
 #define LIST_HPP
 
 #include <cstddef>
+#include <iterator>
 
 #include "sequence.hpp"
 
