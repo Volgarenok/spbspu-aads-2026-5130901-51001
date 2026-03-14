@@ -3,7 +3,6 @@
 vishnyakov::List< vishnyakov::Sequence > vishnyakov::readInput(std::istream& in)
 {
   List< Sequence > seqs;
-  LIter< Sequence > curr_seq = seqs.begin();
   std::string name;
   while (in >> name)
   {
