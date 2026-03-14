@@ -27,32 +27,48 @@ size_t getAt(volkovich::List<size_t> &lst, size_t colNum, bool &isLast)
 int main()
 {
   DATA_TYPE data;
+  bool hasNumbers = false;
   std::string name;
   while (std::cin >> name)
   {
     volkovich::List<size_t> numbers;
-    size_t number;
-    while (true)
+    int ch = std::cin.peek();
+    if (ch == '\n')
     {
-      std::cin >> number;
-      if (std::cin.fail())
+      std::cin.get();
+    }
+    else
+    {
+      while (true)
       {
-        std::cin.clear();
-        char c;
-        if (std::cin.get(c) && c == '\n')
+        size_t number;
+        if (!(std::cin >> number))
+        {
+          if (std::cin.eof())
+          {
+            std::cin.clear();
+          }
           break;
-      }
-      numbers.pushBack(number);
-      if (std::cin.peek() == '\n')
-      {
-        std::cin.get();
-        break;
+        }
+        numbers.pushBack(number);
+        hasNumbers = true;
+
+        ch = std::cin.peek();
+        if (ch == '\n')
+        {
+          std::cin.get();
+          break;
+        }
+        if (ch == EOF)
+        {
+          break;
+        }
       }
     }
     data.pushBack(std::make_pair(name, numbers));
   }
 
-  if (data.isEmpty())
+  if (!hasNumbers)
   {
     std::cout << "0\n";
     return 0;
@@ -82,26 +98,44 @@ int main()
     }
   }
 
+  volkovich::List<size_t> rowSumsList;
+
   for (size_t i = 0; i < maxLen; ++i)
   {
     bool firstCol = true;
+    size_t rowSum = 0;
     for (ITER_TYPE it = data.begin();
          it != ITER_TYPE(nullptr); ++it)
     {
-      if (!firstCol)
-      {
-        std::cout << ' ';
-      }
       bool isLast = true;
       size_t value = getAt((*it).second, i, isLast);
       if (!isLast)
       {
+        if (!firstCol)
+        {
+          std::cout << ' ';
+        }
+        rowSum += value;
         std::cout << value;
+        firstCol = false;
       }
-      firstCol = false;
     }
+    rowSumsList.pushBack(rowSum);
     std::cout << '\n';
   }
+
+  bool firstSum = true;
+  for (volkovich::LIter<size_t> it = rowSumsList.begin();
+       it != volkovich::LIter<size_t>(nullptr); ++it)
+  {
+    if (!firstSum)
+    {
+      std::cout << ' ';
+    }
+    std::cout << *it;
+    firstSum = false;
+  }
+  std::cout << '\n';
 
   return 0;
 }
