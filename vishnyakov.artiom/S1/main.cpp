@@ -15,3 +15,5 @@ int main()
   vishnyakov::ouputNames(seqs, std::cout);
   return vishnyakov::outputNums(seqs, std::cout);
 }
+
+
