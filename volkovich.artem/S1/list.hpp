@@ -2,46 +2,18 @@
 #define LIST_HPP
 #include <list>
 #include <utility>
+#include "iter.hpp"
+#include "item.hpp"
 
 namespace volkovich
 {
-
-  template <class T>
-  class Item
-  {
-  public:
-    T data;
-    Item<T> *next = nullptr;
-    explicit Item(const T &v) : data(v) {};
-    explicit Item(T &&v) : data(std::move(v)) {};
-    explicit Item() {};
-  };
-  template <class T>
-  class LCIter
-  {
-  };
-
-  template <class T>
-  class LIter
-  {
-  private:
-    Item<T> *item;
-
-  public:
-    explicit LIter(Item<T> *v);
-    LIter &operator++() noexcept;
-    LIter &operator++(int) noexcept;
-    bool operator==(const LIter &other) const noexcept;
-    bool operator!=(const LIter &other) const noexcept;
-  };
-
   template <class T>
   class List
   {
   private:
     Item<T> fake_node;
-    Item<T> *tail=nullptr;
-    Item<T> *head=nullptr;
+    Item<T> *tail = nullptr;
+    Item<T> *head = nullptr;
     size_t list_len;
 
   public:
@@ -51,7 +23,8 @@ namespace volkovich
       fake_node.next = nullptr;
     };
 
-    ~List() {
+    ~List()
+    {
       clear();
     };
 
@@ -76,15 +49,38 @@ namespace volkovich
       return fake_node.next == nullptr;
     };
 
-    void popFront() {
-      Item< T >* old_head = head;
+    void popFront()
+    {
+      Item<T> *old_head = head;
       fake_node.next = old_head->next;
       head = fake_node.next;
+      if (head == nullptr)
+      {
+        tail = nullptr;
+      }
       delete old_head;
       list_len--;
     };
 
-    void popBack();
+    void popBack()
+    {
+      if (fake_node.next == nullptr)
+      {
+        return;
+      }
+      Item<T> *old_tail = tail;
+      Item<T> *prev = &fake_node;
+      Item<T> *cur = fake_node.next;
+      while (cur->next)
+      {
+        prev = cur;
+        cur = prev->next;
+      }
+      prev->next = nullptr;
+      delete cur;
+      tail = prev;
+      list_len--;
+    };
 
     void pushFront(T &&v)
     {
@@ -146,8 +142,18 @@ namespace volkovich
       list_len++;
     };
 
-    void clear() noexcept {
-      while (!isEmpty()) {
+    void insertAfter()
+    {
+    }
+
+    void deleteAfter()
+    {
+    }
+
+    void clear() noexcept
+    {
+      while (!isEmpty())
+      {
         popFront();
       }
     };
