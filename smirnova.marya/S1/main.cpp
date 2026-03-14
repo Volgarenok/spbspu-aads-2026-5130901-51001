@@ -1,38 +1,78 @@
-#include "list.hpp"
 #include <iostream>
-#include <limits>
+#include <sstream>
 #include <string>
+#include <limits>
+#include "list.hpp"
+
+using namespace smirnova;
 
 int main() {
-    using namespace smirnova;
-
     List<std::pair<std::string, List<size_t>>> sequences;
+    std::string line;
     bool overflowDetected = false;
 
-    std::string name;
+    while (std::getline(std::cin, line)) {
+        if (line.empty()) continue;
 
-    while (std::cin >> name) {
+        std::istringstream iss(line);
+        std::string name;
+        iss >> name;
+
         List<size_t> numbers;
-
-        while (true) {
-            int c = std::cin.peek();
-            if (c == '\n' || c == '\r' || c == EOF)
-                break;
-
-            size_t num = 0;
-
-            if (!(std::cin >> num)) {
+        size_t x;
+        while (iss >> x) {
+            if (x > std::numeric_limits<size_t>::max() - 0) { // простая проверка для примера
                 overflowDetected = true;
-                std::cin.clear();
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 break;
             }
-
-            numbers.push_back(num);
+            numbers.push_back(x);
         }
 
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         sequences.push_back({name, std::move(numbers)});
+    }
+
+    if (sequences.empty()) {
+        std::cout << "0\n";
+        return 0;
+    }
+
+    // Вывод названий
+    bool first = true;
+    for (LCIter<std::pair<std::string, List<size_t>>> it = sequences.cbegin(); it.valid(); it.next()) {
+        if (!first) std::cout << " ";
+        std::cout << it.value().first;
+        first = false;
+    }
+    std::cout << "\n";
+
+    // Определяем максимальную длину последовательностей
+    size_t maxSize = 0;
+    for (LCIter<std::pair<std::string, List<size_t>>> it = sequences.cbegin(); it.valid(); it.next()) {
+        if (it.value().second.size() > maxSize)
+            maxSize = it.value().second.size();
+    }
+
+    // Вывод чисел "по строкам" с проверкой overflow
+    for (size_t row = 0; row < maxSize; ++row) {
+        bool firstInRow = true;
+        size_t sumRow = 0;
+        for (LCIter<std::pair<std::string, List<size_t>>> it = sequences.cbegin(); it.valid(); it.next()) {
+            if (row < it.value().second.size()) {
+                LCIter<size_t> numIt = getElementAt(it.value().second, row);
+
+                // Проверка на переполнение суммы
+                if (sumRow > std::numeric_limits<size_t>::max() - numIt.value()) {
+                    overflowDetected = true;
+                }
+
+                sumRow += numIt.value();
+
+                if (!firstInRow) std::cout << " ";
+                std::cout << numIt.value();
+                firstInRow = false;
+            }
+        }
+        if (!firstInRow) std::cout << "\n";
     }
 
     if (overflowDetected) {
@@ -40,8 +80,6 @@ int main() {
         return 1;
     }
 
-    if (!processSequences(sequences))
-        return 1;
-
     return 0;
 }
+
