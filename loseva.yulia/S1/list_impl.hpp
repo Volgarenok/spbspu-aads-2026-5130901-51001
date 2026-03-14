@@ -1,6 +1,6 @@
 #ifndef LOSEVA_LIST_IMPL_HPP
 #define LOSEVA_LIST_IMPL_HPP
-
+#include <iostream>
 #include "list.hpp"
 
 namespace loseva
