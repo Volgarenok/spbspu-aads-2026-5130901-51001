@@ -117,24 +117,26 @@ int main() {
 
   List< std::pair< std::string, List< size_t > > > sequences;
   bool overflowDetected = false;
-
   std::string name;
 
-  while (std::cin >> name) {
-      List< size_t > numbers;
+  std::string line;
 
-      size_t num = 0;
-      while (std::cin >> num) {
-        numbers.pushBack(num);
+  while (std::getline(std::cin, line)) {
+    if (line.empty()) {
+      continue;
+    }
 
-        int c = std::cin.peek();
-        if (c == '\n' || c == '\r' || c == EOF) {
-          break;
-        }
-      }
+    std::istringstream iss(line);
+    iss >> name;
 
-      std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
-      sequences.pushBack({name, std::move(numbers)});
+    List< size_t > numbers;
+    size_t num = 0;
+
+    while (iss >> num) {
+      numbers.pushBack(num);
+    }
+
+    sequences.pushBack({name, std::move(numbers)});
   }
 
   if (overflowDetected) {
