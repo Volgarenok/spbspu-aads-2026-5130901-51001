@@ -115,6 +115,77 @@ namespace gordejchik {
   {
     return node_ != rhs.node_;
   }
+
+  // ADDED: определения методов LCIter
+
+  template< class T >
+  LCIter< T >::LCIter():
+    node_(nullptr)
+  {}
+
+  template< class T >
+  LCIter< T >::LCIter(const LIter< T >& other):
+    node_(other.node_)
+  {}
+
+  template< class T >
+  LCIter< T >::LCIter(const BaseNode* node):
+    node_(node)
+  {}
+
+  template< class T >
+  const T& LCIter< T >::operator*() const
+  {
+    return static_cast< const Node* >(node_)->value_;
+  }
+
+  template< class T >
+  const T* LCIter< T >::operator->() const
+  {
+    return &(static_cast< const Node* >(node_)->value_);
+  }
+
+  template< class T >
+  LCIter< T >& LCIter< T >::operator++()
+  {
+    node_ = node_->next_;
+    return *this;
+  }
+
+  template< class T >
+  LCIter< T > LCIter< T >::operator++(int)
+  {
+    LCIter tmp(*this);
+    node_ = node_->next_;
+    return tmp;
+  }
+
+  template< class T >
+  LCIter< T >& LCIter< T >::operator--()
+  {
+    node_ = node_->prev_;
+    return *this;
+  }
+
+  template< class T >
+  LCIter< T > LCIter< T >::operator--(int)
+  {
+    LCIter tmp(*this);
+    node_ = node_->prev_;
+    return tmp;
+  }
+
+  template< class T >
+  bool LCIter< T >::operator==(const LCIter& rhs) const
+  {
+    return node_ == rhs.node_;
+  }
+
+  template< class T >
+  bool LCIter< T >::operator!=(const LCIter& rhs) const
+  {
+    return node_ != rhs.node_;
+  }
 }
 
 #endif
