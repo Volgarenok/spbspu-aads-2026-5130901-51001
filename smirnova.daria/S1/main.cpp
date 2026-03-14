@@ -31,7 +31,7 @@ int main()
     smirnova::printSums(transposed);
 
     return 0;
-  } catch (const std::overflow_error& e) {
+  } catch (const std::overflow_error&) {
     std::cerr << "error: overflow in sum calculation\n";
     return 1;
   } catch (const std::exception& e) {
