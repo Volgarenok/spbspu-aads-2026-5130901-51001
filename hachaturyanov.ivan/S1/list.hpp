@@ -7,8 +7,7 @@
 namespace hachaturyanov
 {
   template< class T > class List {
-  private:
-    nodebase fakehead;
+    node head;
     size_t size;
   };
 }
