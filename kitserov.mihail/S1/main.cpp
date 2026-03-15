@@ -52,7 +52,7 @@ int main()
     std::cout << "0\n";
     names.clear();
     return 0;
-  }
+  } 
   printList(names);
   size_t maxSize = 0;
   for (LIter< List< size_t > > it = listOfLists.begin(); it != listOfLists.end(); ++it) {
