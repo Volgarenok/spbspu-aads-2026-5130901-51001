@@ -7,7 +7,7 @@
 namespace hachaturyanov
 {
   template< class T > class List {
-    node head;
+    node< T > head;
     size_t size;
   };
 }
