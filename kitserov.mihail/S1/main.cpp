@@ -83,6 +83,7 @@ int main()
         std::cout << val;
         first = false;
         if (sum > std::numeric_limits< size_t >::max() - val) {
+          std::cout << "\n";
           std::cerr << "Overflow sum\n";
           summes.clear();
           names.clear();
