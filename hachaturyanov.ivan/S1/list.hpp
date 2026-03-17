@@ -48,47 +48,55 @@ namespace hachaturyanov
   size_(0)
   {}
 
-  template< class T > List< T >::~List() {
+  template< class T > List< T >::~List()
+  {
     clear();
   }
 
-  template< class T > size_t List< T >::size() const noexcept {
+  template< class T > size_t List< T >::size() const noexcept
+  {
     return size_;
   }
 
-  template< class T > bool List< T >::isEmpty() const noexcept {
+  template< class T > bool List< T >::isEmpty() const noexcept
+  {
     return size_ == 0;
   }
 
-  template< class T > typename List< T >::iter List< T >::begin() {
+  template< class T > typename List< T >::iter List< T >::begin()
+  {
     if (size_) {
       return iter(head_);
     }
     throw std::logic_error("empty list");
   }
 
-  template< class T > typename List< T >::iter List< T >::end() {
+  template< class T > typename List< T >::iter List< T >::end()
+  {
     if (size_) {
       return iter(head_->prev_);
     }
     throw std::logic_error("empty list");
   }
 
-  template< class T > typename List< T >::citer List< T >::begin() const {
+  template< class T > typename List< T >::citer List< T >::begin() const
+  {
     if (size_) {
       return citer(head_);
     }
     throw std::logic_error("empty list");
   }
 
-  template< class T > typename List< T >::citer List< T >::end() const {
+  template< class T > typename List< T >::citer List< T >::end() const
+  {
     if (size_) {
       return citer(head_->prev_);
     }
     throw std::logic_error("empty list");
   }
 
-  template< class T > typename List< T >::iter List< T >::add(const T &val) {
+  template< class T > typename List< T >::iter List< T >::add(const T &val)
+  {
     node< T >* newNode = new node< T >(val);
     if (isEmpty()) {
       newNode->next_ = newNode;
@@ -105,7 +113,8 @@ namespace hachaturyanov
     return iter(newNode);
   }
 
-  template< class T > typename List< T >::iter List< T >::insertBefore(iter pos, const T &val) {
+  template< class T > typename List< T >::iter List< T >::insertBefore(iter pos, const T &val)
+  {
     node< T >* newNode = new node< T >(val);
     newNode->next_ = pos.node_;
     newNode->prev_ = pos.node_->prev_;
@@ -115,7 +124,8 @@ namespace hachaturyanov
     return iter(newNode);
   }
 
-  template< class T > typename List< T >::iter List< T >::insertAfter(iter pos, const T &val) {
+  template< class T > typename List< T >::iter List< T >::insertAfter(iter pos, const T &val)
+  {
     node< T >* newNode = new node< T >(val);
     newNode->prev_ = pos.node_;
     newNode->next_ = pos.node_->next_;
@@ -125,7 +135,8 @@ namespace hachaturyanov
     return iter(newNode);
   }
 
-  template< class T > void List< T >::popFront() noexcept {
+  template< class T > void List< T >::popFront() noexcept
+  {
     if (!isEmpty()) {
       node< T >* newHead = head_->next_;
       head_->next_->prev_ = head_->prev_;
@@ -140,7 +151,8 @@ namespace hachaturyanov
     }
   }
 
-  template< class T > void List< T >::popEnd() noexcept {
+  template< class T > void List< T >::popEnd() noexcept
+  {
     if (!isEmpty()) {
       node< T >* toDel = head_->prev_;
       head_->prev_->prev_->next_ = head_;
@@ -153,7 +165,8 @@ namespace hachaturyanov
     }
   }
 
-  template< class T > void List< T >::erase(iter pos) noexcept {
+  template< class T > void List< T >::erase(iter pos) noexcept
+  {
     pos.node_->next_->prev_ = pos.node_->prev_;
     pos.node_->prev_->next_ = pos.node_->next_;
     if (pos.node_ == head_) {
@@ -166,13 +179,15 @@ namespace hachaturyanov
     size_--;
   }
 
-  template< class T > void List< T >::clear() noexcept {
+  template< class T > void List< T >::clear() noexcept
+  {
     while (!isEmpty()) {
       popFront();
     }
   }
 
-  template< class T > void List< T >::clear(iter from, iter to_included) noexcept {
+  template< class T > void List< T >::clear(iter from, iter to_included) noexcept
+  {
     while(from != to_included) {
       iter next = iter(from.node_->next_);
       erase(from);
@@ -181,7 +196,8 @@ namespace hachaturyanov
     erase(from);
   }
 
-  template< class T > List< T >& List< T >::operator=(List &other) {
+  template< class T > List< T >& List< T >::operator=(List &other)
+  {
     clear();
     if (other.isEmpty()) {
       return *this;
@@ -197,7 +213,8 @@ namespace hachaturyanov
     return *this;
   }
 
-  template< class T > List< T >& List< T >::operator=(List &&other) {
+  template< class T > List< T >& List< T >::operator=(List &&other)
+  {
     clear();
     head_ = other.head_;
     other.head_ = nullptr;
