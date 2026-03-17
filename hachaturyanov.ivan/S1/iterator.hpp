@@ -6,6 +6,7 @@
 namespace hachaturyanov
 {
   template< class T > class List;
+
   template< class T > class LCIter {
     friend class List< T >;
     explicit LCIter(const node< T >* n):
@@ -21,13 +22,14 @@ namespace hachaturyanov
     bool operator!=(const LCIter& other) const noexcept;
 
   };
+
   template< class T > class LIter {
     friend class List< T >;
     explicit LIter(node< T >* n):
      node_(n)
     {}
-  public:
     node< T >* node_;
+  public:
     T& operator*() const;
     T* operator->() const;
     LIter& operator++() noexcept;
