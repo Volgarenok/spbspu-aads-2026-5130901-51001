@@ -1,14 +1,14 @@
 #ifndef ALEKSEEV_S2_PARSER_HPP
-#endif
-
-}
-  Queue< Token > infixToPostfix(const std::string& line);
-{
-namespace alekseev
-
-#include "token.hpp"
-#include "queue.hpp"
+#define ALEKSEEV_S2_PARSER_HPP
 
 #include <string>
 
-#define ALEKSEEV_S2_PARSER_HPP
+#include "queue.hpp"
+#include "token.hpp"
+
+namespace alekseev
+{
+  Queue< Token > infixToPostfix(const std::string& line);
+}
+
+#endif
