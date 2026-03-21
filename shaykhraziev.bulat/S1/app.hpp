@@ -1,7 +1,7 @@
 #ifndef APP_HPP
 #define APP_HPP
 
-#include "list.hpp"
+#include "../common/list.hpp"
 #include <string>
 #include <iostream>
 #include <cstddef>
