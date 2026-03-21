@@ -166,6 +166,47 @@ namespace alekseev
         throw std::runtime_error("not enough operands");
       }
     }
+
+    void tokenizeAndFlush(const std::string& line, Stack< char >& ops, Queue< Token >& out)
+    {
+      std::string current;
+      current.reserve(32);
+
+      bool hadToken = false;
+      for (std::size_t i = 0; i < line.size(); ++i)
+      {
+        const char c = line[i];
+        if (c == ' ')
+        {
+          if (current.empty())
+          {
+            if (!hadToken && i + 1 == line.size())
+            {
+              return;
+            }
+            throw std::runtime_error("empty token");
+          }
+          flushToken(current, ops, out);
+          current.clear();
+          hadToken = true;
+        }
+        else
+        {
+          current.push_back(c);
+        }
+      }
+
+      if (!current.empty())
+      {
+        flushToken(current, ops, out);
+        hadToken = true;
+      }
+
+      if (!hadToken)
+      {
+        throw std::runtime_error("empty expression");
+      }
+    }
   }
 
   Queue< Token > infixToPostfix(const std::string& line)
@@ -173,35 +214,7 @@ namespace alekseev
     Queue< Token > output;
     Stack< char > ops;
 
-    std::string current;
-    current.reserve(32);
-
-    bool hadAny = false;
-    for (std::size_t i = 0; i < line.size(); ++i)
-    {
-      const char c = line[i];
-      if (c == ' ')
-      {
-        flushToken(current, ops, output);
-        current.clear();
-        hadAny = true;
-      }
-      else
-      {
-        current.push_back(c);
-      }
-    }
-
-    if (!current.empty())
-    {
-      flushToken(current, ops, output);
-      hadAny = true;
-    }
-
-    if (!hadAny)
-    {
-      throw std::runtime_error("empty expression");
-    }
+    tokenizeAndFlush(line, ops, output);
 
     while (!ops.empty())
     {
