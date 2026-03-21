@@ -2,45 +2,47 @@
 #define LIST_HPP
 
 #include "node.hpp"
+#include <utility>
 
 namespace shaykhraziev
 {
   template< class T >
-  class LCIter;
+  class List;
 
   template< class T >
   class LIter
   {
   public:
-    using value_type = T;
-    using pointer = T*;
-    using reference = T&;
-
-    explicit LIter(NodeBase* node) :
-      node_(node)
+    LIter(NodeBase* node = nullptr, const NodeBase* first = nullptr):
+      node_(node),
+      first_(first)
     {}
 
-    reference operator*() const
+    T& operator*() const
     {
       return static_cast< Node< T >* >(node_)->data_;
     }
 
-    pointer operator->() const
+    T* operator->() const
     {
       return &(static_cast< Node< T >* >(node_)->data_);
     }
 
     LIter& operator++()
     {
-      node_ = node_->next_;
+      if (!node_)
+      {
+        return *this;
+      }
+      if (node_->next_ == first_)
+      {
+        node_ = nullptr;
+      }
+      else
+      {
+        node_ = node_->next_;
+      }
       return *this;
-    }
-
-    LIter operator++(int)
-    {
-      LIter tmp = *this;
-      ++(*this);
-      return tmp;
     }
 
     bool operator==(const LIter& other) const
@@ -53,44 +55,48 @@ namespace shaykhraziev
       return node_ != other.node_;
     }
 
-    operator LCIter< T >() const;
-
+  private:
     NodeBase* node_;
+    const NodeBase* first_;
+
+    template< class U >
+    friend class List;
   };
 
   template< class T >
   class LCIter
   {
   public:
-    using value_type = T;
-    using pointer = const T*;
-    using reference = const T&;
-
-    explicit LCIter(const NodeBase* node) :
-      node_(node)
+    LCIter(const NodeBase* node = nullptr, const NodeBase* first = nullptr):
+      node_(node),
+      first_(first)
     {}
 
-    reference operator*() const
+    const T& operator*() const
     {
       return static_cast< const Node< T >* >(node_)->data_;
     }
 
-    pointer operator->() const
+    const T* operator->() const
     {
       return &(static_cast< const Node< T >* >(node_)->data_);
     }
 
     LCIter& operator++()
     {
-      node_ = node_->next_;
+      if (!node_)
+      {
+        return *this;
+      }
+      if (node_->next_ == first_)
+      {
+        node_ = nullptr;
+      }
+      else
+      {
+        node_ = node_->next_;
+      }
       return *this;
-    }
-
-    LCIter operator++(int)
-    {
-      LCIter tmp = *this;
-      ++(*this);
-      return tmp;
     }
 
     bool operator==(const LCIter& other) const
@@ -103,14 +109,13 @@ namespace shaykhraziev
       return node_ != other.node_;
     }
 
+  private:
     const NodeBase* node_;
-  };
+    const NodeBase* first_;
 
-  template< class T >
-  LIter< T >::operator LCIter< T >() const
-  {
-    return LCIter< T >(node_);
-  }
+    template< class U >
+    friend class List;
+  };
 
   template< class T >
   class List
@@ -119,8 +124,8 @@ namespace shaykhraziev
     using iterator = LIter< T >;
     using const_iterator = LCIter< T >;
 
-    List() :
-      fake_()
+    List():
+      tail_(nullptr)
     {}
 
     ~List()
@@ -128,162 +133,148 @@ namespace shaykhraziev
       clear();
     }
 
-    List(const List& other) :
-      fake_()
+    List(const List& other):
+      tail_(nullptr)
     {
       copyFrom(other);
     }
 
-    List(List&& other) noexcept :
-      fake_()
+    List(List&& other) noexcept:
+      tail_(other.tail_)
     {
-      swapWith(other);
+      other.tail_ = nullptr;
     }
 
-    List& operator=(List other)
+    List& operator=(const List& other)
     {
-      swapWith(other);
+      if (this != &other)
+      {
+        List tmp(other);
+        swap(tmp);
+      }
       return *this;
     }
 
-    void swap(List& other) noexcept
+    List& operator=(List&& other) noexcept
     {
-      swapWith(other);
-    }
-
-    iterator before_begin() noexcept
-    {
-      return iterator(&fake_);
-    }
-
-    const_iterator before_begin() const noexcept
-    {
-      return const_iterator(&fake_);
-    }
-
-    const_iterator cbefore_begin() const noexcept
-    {
-      return const_iterator(&fake_);
+      if (this != &other)
+      {
+        clear();
+        tail_ = other.tail_;
+        other.tail_ = nullptr;
+      }
+      return *this;
     }
 
     iterator begin() noexcept
     {
-      return iterator(fake_.next_);
-    }
-
-    const_iterator begin() const noexcept
-    {
-      return const_iterator(fake_.next_);
-    }
-
-    const_iterator cbegin() const noexcept
-    {
-      return const_iterator(fake_.next_);
+      NodeBase* first = head();
+      return iterator(first, first);
     }
 
     iterator end() noexcept
     {
-      return iterator(nullptr);
+      return iterator(nullptr, head());
+    }
+
+    const_iterator begin() const noexcept
+    {
+      const NodeBase* first = head();
+      return const_iterator(first, first);
     }
 
     const_iterator end() const noexcept
     {
-      return const_iterator(nullptr);
-    }
-
-    const_iterator cend() const noexcept
-    {
-      return const_iterator(nullptr);
+      return const_iterator(nullptr, head());
     }
 
     bool empty() const noexcept
     {
-      return fake_.next_ == nullptr;
+      return tail_ == nullptr;
     }
 
-    T& front()
+    void push_back(const T& value)
     {
-      return static_cast< Node< T >* >(fake_.next_)->data_;
+      Node< T >* node = new Node< T >(value);
+      pushBackNode(node);
     }
 
-    const T& front() const
+    void push_back(T&& value)
     {
-      return static_cast< const Node< T >* >(fake_.next_)->data_;
-    }
-
-    void push_front(const T& val)
-    {
-      Node< T >* newNode = new Node< T >(val);
-      newNode->next_ = fake_.next_;
-      fake_.next_ = newNode;
-    }
-
-    void push_front(T&& val)
-    {
-      Node< T >* newNode = new Node< T >(std::move(val));
-      newNode->next_ = fake_.next_;
-      fake_.next_ = newNode;
-    }
-
-    void pop_front()
-    {
-      NodeBase* toDelete = fake_.next_;
-      fake_.next_ = toDelete->next_;
-      delete static_cast< Node< T >* >(toDelete);
+      Node< T >* node = new Node< T >(std::move(value));
+      pushBackNode(node);
     }
 
     void clear() noexcept
     {
-      while (!empty())
+      if (!tail_)
       {
-        pop_front();
+        return;
       }
-    }
 
-    iterator insert_after(iterator pos, const T& val)
-    {
-      Node< T >* newNode = new Node< T >(val);
-      newNode->next_ = pos.node_->next_;
-      pos.node_->next_ = newNode;
-      return iterator(newNode);
-    }
+      NodeBase* first = tail_->next_;
+      tail_->next_ = nullptr;
 
-    iterator insert_after(iterator pos, T&& val)
-    {
-      Node< T >* newNode = new Node< T >(std::move(val));
-      newNode->next_ = pos.node_->next_;
-      pos.node_->next_ = newNode;
-      return iterator(newNode);
-    }
+      while (first)
+      {
+        NodeBase* next = first->next_;
+        delete static_cast< Node< T >* >(first);
+        first = next;
+      }
 
-    iterator erase_after(iterator pos)
-    {
-      NodeBase* toDelete = pos.node_->next_;
-      pos.node_->next_ = toDelete->next_;
-      delete static_cast< Node< T >* >(toDelete);
-      return iterator(pos.node_->next_);
+      tail_ = nullptr;
     }
 
   private:
-    NodeBase fake_;
+    NodeBase* tail_;
 
-    void swapWith(List& other) noexcept
+    NodeBase* head() noexcept
     {
-      NodeBase* tmp = fake_.next_;
-      fake_.next_ = other.fake_.next_;
-      other.fake_.next_ = tmp;
+      if (!tail_)
+      {
+        return nullptr;
+      }
+      return tail_->next_;
+    }
+
+    const NodeBase* head() const noexcept
+    {
+      if (!tail_)
+      {
+        return nullptr;
+      }
+      return tail_->next_;
+    }
+
+    void pushBackNode(NodeBase* node)
+    {
+      if (!tail_)
+      {
+        node->next_ = node;
+        tail_ = node;
+        return;
+      }
+
+      node->next_ = tail_->next_;
+      tail_->next_ = node;
+      tail_ = node;
+    }
+
+    void swap(List& other) noexcept
+    {
+      NodeBase* tmp = tail_;
+      tail_ = other.tail_;
+      other.tail_ = tmp;
     }
 
     void copyFrom(const List& other)
     {
-      iterator tail = before_begin();
-      for (const_iterator it = other.cbegin(); it != other.cend(); ++it)
+      for (auto it = other.begin(); it != other.end(); ++it)
       {
-        tail = insert_after(tail, *it);
+        push_back(*it);
       }
     }
   };
 }
 
 #endif
-

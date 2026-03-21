@@ -1,373 +1,196 @@
-#define BOOST_TEST_MODULE S1
+#define BOOST_TEST_MODULE list_tests
 #include <boost/test/included/unit_test.hpp>
+
 #include "list.hpp"
+
 #include <string>
+#include <utility>
+#include <vector>
 
-using namespace shaykhraziev;
-
-// --- empty / front ---
-
-BOOST_AUTO_TEST_CASE(test_default_constructor_empty)
+namespace
 {
-  List< int > lst;
-  BOOST_TEST(lst.empty());
-}
-
-
-BOOST_AUTO_TEST_CASE(test_push_front_not_empty)
-{
-  List< int > lst;
-  lst.push_front(42);
-  BOOST_TEST(!lst.empty());
-}
-
-BOOST_AUTO_TEST_CASE(test_front_after_push_front)
-{
-  List< int > lst;
-  lst.push_front(7);
-  BOOST_TEST(lst.front() == 7);
-}
-
-BOOST_AUTO_TEST_CASE(test_push_front_order)
-{
-  List< int > lst;
-  lst.push_front(1);
-  lst.push_front(2);
-  lst.push_front(3);
-  BOOST_TEST(lst.front() == 3);
-}
-
-BOOST_AUTO_TEST_CASE(test_push_front_rvalue)
-{
-  List< std::string > lst;
-  std::string s = "hello";
-  lst.push_front(std::move(s));
-  BOOST_TEST(lst.front() == "hello");
-}
-
-// --- pop_front ---
-
-BOOST_AUTO_TEST_CASE(test_pop_front_single)
-{
-  List< int > lst;
-  lst.push_front(5);
-  lst.pop_front();
-  BOOST_TEST(lst.empty());
-}
-
-BOOST_AUTO_TEST_CASE(test_pop_front_multiple)
-{
-  List< int > lst;
-  lst.push_front(1);
-  lst.push_front(2);
-  lst.push_front(3);
-  lst.pop_front();
-  BOOST_TEST(lst.front() == 2);
-  lst.pop_front();
-  BOOST_TEST(lst.front() == 1);
-  lst.pop_front();
-  BOOST_TEST(lst.empty());
-}
-
-// --- clear ---
-
-BOOST_AUTO_TEST_CASE(test_clear_empty_list)
-{
-  List< int > lst;
-  lst.clear();
-  BOOST_TEST(lst.empty());
-}
-
-BOOST_AUTO_TEST_CASE(test_clear_non_empty)
-{
-  List< int > lst;
-  lst.push_front(1);
-  lst.push_front(2);
-  lst.push_front(3);
-  lst.clear();
-  BOOST_TEST(lst.empty());
-}
-
-// --- copy constructor ---
-
-BOOST_AUTO_TEST_CASE(test_copy_constructor)
-{
-  List< int > original;
-  original.push_front(3);
-  original.push_front(2);
-  original.push_front(1);
-
-  List< int > copy(original);
-
-  List< int >::iterator it_orig = original.begin();
-  List< int >::iterator it_copy = copy.begin();
-  while (it_orig != original.end() && it_copy != copy.end())
+  template< class T >
+  std::vector< T > toVector(const shaykhraziev::List< T >& list)
   {
-    BOOST_TEST(*it_orig == *it_copy);
-    ++it_orig;
-    ++it_copy;
+    std::vector< T > result;
+    for (auto it = list.begin(); it != list.end(); ++it)
+    {
+      result.push_back(*it);
+    }
+    return result;
   }
-  BOOST_CHECK(it_orig == original.end());
-  BOOST_CHECK(it_copy == copy.end());
-}
 
-BOOST_AUTO_TEST_CASE(test_copy_constructor_independence)
-{
-  List< int > original;
-  original.push_front(10);
-
-  List< int > copy(original);
-  copy.push_front(20);
-
-  BOOST_TEST(original.front() == 10);
-  BOOST_TEST(copy.front() == 20);
-}
-
-// --- move constructor ---
-
-BOOST_AUTO_TEST_CASE(test_move_constructor)
-{
-  List< int > lst;
-  lst.push_front(3);
-  lst.push_front(2);
-  lst.push_front(1);
-
-  List< int > moved(std::move(lst));
-
-  BOOST_TEST(lst.empty());
-  BOOST_TEST(moved.front() == 1);
-}
-
-// --- assignment operator ---
-
-BOOST_AUTO_TEST_CASE(test_copy_assignment)
-{
-  List< int > a;
-  a.push_front(3);
-  a.push_front(2);
-  a.push_front(1);
-
-  List< int > b;
-  b = a;
-
-  List< int >::iterator it_a = a.begin();
-  List< int >::iterator it_b = b.begin();
-  while (it_a != a.end() && it_b != b.end())
+  struct TestData
   {
-    BOOST_TEST(*it_a == *it_b);
-    ++it_a;
-    ++it_b;
-  }
-  BOOST_CHECK(it_a == a.end());
-  BOOST_CHECK(it_b == b.end());
+    int id;
+    std::string name;
+
+    bool operator==(const TestData& other) const
+    {
+      return id == other.id && name == other.name;
+    }
+  };
 }
 
-BOOST_AUTO_TEST_CASE(test_self_assignment)
+BOOST_AUTO_TEST_CASE(default_constructor_creates_empty_list)
 {
-  List< int > lst;
-  lst.push_front(1);
-  lst.push_front(2);
-  List< int >& ref = lst;
-  lst = ref;
-  BOOST_TEST(lst.front() == 2);
+  shaykhraziev::List< int > list;
+
+  BOOST_CHECK(list.empty());
+  BOOST_CHECK(list.begin() == list.end());
 }
 
-// --- swap ---
-
-BOOST_AUTO_TEST_CASE(test_swap)
+BOOST_AUTO_TEST_CASE(push_back_one_element)
 {
-  List< int > a;
-  a.push_front(1);
+  shaykhraziev::List< int > list;
+  list.push_back(42);
 
-  List< int > b;
-  b.push_front(2);
-  b.push_front(3);
-
-  a.swap(b);
-
-  BOOST_TEST(a.front() == 3);
-  BOOST_TEST(b.front() == 1);
+  BOOST_CHECK(!list.empty());
+  BOOST_CHECK(list.begin() != list.end());
+  BOOST_TEST(*list.begin() == 42);
 }
 
-// --- iterators ---
-
-BOOST_AUTO_TEST_CASE(test_begin_end_empty)
+BOOST_AUTO_TEST_CASE(push_back_keeps_order)
 {
-  List< int > lst;
-  BOOST_CHECK(lst.begin() == lst.end());
+  shaykhraziev::List< int > list;
+  list.push_back(10);
+  list.push_back(20);
+  list.push_back(30);
+
+  std::vector< int > values = toVector(list);
+  std::vector< int > expected{10, 20, 30};
+
+  BOOST_TEST(values == expected, boost::test_tools::per_element());
 }
 
-BOOST_AUTO_TEST_CASE(test_iterator_traverse)
+BOOST_AUTO_TEST_CASE(iterator_arrow_operator_works)
 {
-  List< int > lst;
-  lst.push_front(3);
-  lst.push_front(2);
-  lst.push_front(1);
+  shaykhraziev::List< TestData > list;
+  list.push_back(TestData{7, "alpha"});
 
-  int expected[] = {1, 2, 3};
-  int i = 0;
-  for (List< int >::iterator it = lst.begin(); it != lst.end(); ++it, ++i)
+  auto it = list.begin();
+  BOOST_TEST(it->id == 7);
+  BOOST_TEST(it->name == "alpha");
+}
+
+BOOST_AUTO_TEST_CASE(iterator_reaches_end_and_does_not_loop_forever)
+{
+  shaykhraziev::List< int > list;
+  list.push_back(1);
+  list.push_back(2);
+  list.push_back(3);
+
+  auto it = list.begin();
+  int count = 0;
+
+  while (it != list.end())
   {
-    BOOST_TEST(*it == expected[i]);
+    ++count;
+    ++it;
+    BOOST_CHECK(count <= 3);
   }
-  BOOST_TEST(i == 3);
+
+  BOOST_TEST(count == 3);
 }
 
-BOOST_AUTO_TEST_CASE(test_const_iterator_traverse)
+BOOST_AUTO_TEST_CASE(clear_makes_list_empty)
 {
-  List< int > lst;
-  lst.push_front(3);
-  lst.push_front(2);
-  lst.push_front(1);
+  shaykhraziev::List< int > list;
+  list.push_back(1);
+  list.push_back(2);
+  list.push_back(3);
 
-  const List< int >& clst = lst;
-  int expected[] = {1, 2, 3};
-  int i = 0;
-  for (List< int >::const_iterator it = clst.cbegin(); it != clst.cend(); ++it, ++i)
+  list.clear();
+
+  BOOST_CHECK(list.empty());
+  BOOST_CHECK(list.begin() == list.end());
+}
+
+BOOST_AUTO_TEST_CASE(copy_constructor_copies_all_elements)
+{
+  shaykhraziev::List< int > source;
+  source.push_back(5);
+  source.push_back(6);
+  source.push_back(7);
+
+  shaykhraziev::List< int > copy(source);
+
+  std::vector< int > sourceValues = toVector(source);
+  std::vector< int > copyValues = toVector(copy);
+  std::vector< int > expected{5, 6, 7};
+
+  BOOST_TEST(sourceValues == expected, boost::test_tools::per_element());
+  BOOST_TEST(copyValues == expected, boost::test_tools::per_element());
+}
+
+BOOST_AUTO_TEST_CASE(copy_assignment_copies_all_elements)
+{
+  shaykhraziev::List< int > source;
+  source.push_back(11);
+  source.push_back(22);
+  source.push_back(33);
+
+  shaykhraziev::List< int > target;
+  target.push_back(100);
+  target.push_back(200);
+
+  target = source;
+
+  std::vector< int > values = toVector(target);
+  std::vector< int > expected{11, 22, 33};
+
+  BOOST_TEST(values == expected, boost::test_tools::per_element());
+}
+
+BOOST_AUTO_TEST_CASE(move_constructor_transfers_elements)
+{
+  shaykhraziev::List< int > source;
+  source.push_back(3);
+  source.push_back(4);
+  source.push_back(5);
+
+  shaykhraziev::List< int > moved(std::move(source));
+
+  std::vector< int > values = toVector(moved);
+  std::vector< int > expected{3, 4, 5};
+
+  BOOST_TEST(values == expected, boost::test_tools::per_element());
+  BOOST_CHECK(source.empty());
+}
+
+BOOST_AUTO_TEST_CASE(move_assignment_transfers_elements)
+{
+  shaykhraziev::List< int > source;
+  source.push_back(8);
+  source.push_back(9);
+
+  shaykhraziev::List< int > target;
+  target.push_back(1000);
+
+  target = std::move(source);
+
+  std::vector< int > values = toVector(target);
+  std::vector< int > expected{8, 9};
+
+  BOOST_TEST(values == expected, boost::test_tools::per_element());
+  BOOST_CHECK(source.empty());
+}
+
+BOOST_AUTO_TEST_CASE(const_iteration_works)
+{
+  shaykhraziev::List< int > temp;
+  temp.push_back(1);
+  temp.push_back(2);
+  temp.push_back(3);
+
+  const shaykhraziev::List< int >& list = temp;
+
+  std::vector< int > values;
+  for (auto it = list.begin(); it != list.end(); ++it)
   {
-    BOOST_TEST(*it == expected[i]);
+    values.push_back(*it);
   }
-  BOOST_TEST(i == 3);
+
+  std::vector< int > expected{1, 2, 3};
+  BOOST_TEST(values == expected, boost::test_tools::per_element());
 }
-
-BOOST_AUTO_TEST_CASE(test_iterator_postincrement)
-{
-  List< int > lst;
-  lst.push_front(2);
-  lst.push_front(1);
-
-  List< int >::iterator it = lst.begin();
-  List< int >::iterator old = it++;
-  BOOST_TEST(*old == 1);
-  BOOST_TEST(*it == 2);
-}
-
-BOOST_AUTO_TEST_CASE(test_iterator_arrow_operator)
-{
-  List< std::string > lst;
-  lst.push_front("world");
-  lst.push_front("hello");
-
-  List< std::string >::iterator it = lst.begin();
-  BOOST_TEST(it->size() == 5u);
-}
-
-BOOST_AUTO_TEST_CASE(test_iterator_to_const_iterator_conversion)
-{
-  List< int > lst;
-  lst.push_front(42);
-
-  List< int >::iterator it = lst.begin();
-  List< int >::const_iterator cit = it;
-  BOOST_CHECK(*cit == 42);
-}
-
-BOOST_AUTO_TEST_CASE(test_before_begin)
-{
-  List< int > lst;
-  lst.push_front(1);
-  List< int >::iterator bb = lst.before_begin();
-  List< int >::iterator it = bb;
-  ++it;
-  BOOST_CHECK(it == lst.begin());
-}
-
-// --- insert_after ---
-
-BOOST_AUTO_TEST_CASE(test_insert_after_before_begin)
-{
-  List< int > lst;
-  lst.insert_after(lst.before_begin(), 10);
-  BOOST_TEST(lst.front() == 10);
-}
-
-BOOST_AUTO_TEST_CASE(test_insert_after_middle)
-{
-  List< int > lst;
-  lst.push_front(3);
-  lst.push_front(1);
-
-  List< int >::iterator it = lst.begin(); // points to 1
-  lst.insert_after(it, 2);
-
-  int expected[] = {1, 2, 3};
-  int i = 0;
-  for (List< int >::iterator jt = lst.begin(); jt != lst.end(); ++jt, ++i)
-  {
-    BOOST_TEST(*jt == expected[i]);
-  }
-}
-
-BOOST_AUTO_TEST_CASE(test_insert_after_rvalue)
-{
-  List< std::string > lst;
-  lst.insert_after(lst.before_begin(), std::string("rval"));
-  BOOST_TEST(lst.front() == "rval");
-}
-
-BOOST_AUTO_TEST_CASE(test_insert_after_returns_iterator)
-{
-  List< int > lst;
-  List< int >::iterator it = lst.insert_after(lst.before_begin(), 99);
-  BOOST_TEST(*it == 99);
-}
-
-// --- erase_after ---
-
-BOOST_AUTO_TEST_CASE(test_erase_after_first)
-{
-  List< int > lst;
-  lst.push_front(2);
-  lst.push_front(1);
-
-  lst.erase_after(lst.before_begin());
-  BOOST_TEST(lst.front() == 2);
-}
-
-BOOST_AUTO_TEST_CASE(test_erase_after_middle)
-{
-  List< int > lst;
-  lst.push_front(3);
-  lst.push_front(2);
-  lst.push_front(1);
-
-  List< int >::iterator it = lst.begin(); // points to 1
-  lst.erase_after(it);   // erases 2
-
-  int expected[] = {1, 3};
-  int i = 0;
-  for (List< int >::iterator jt = lst.begin(); jt != lst.end(); ++jt, ++i)
-  {
-    BOOST_TEST(*jt == expected[i]);
-  }
-}
-
-BOOST_AUTO_TEST_CASE(test_erase_after_returns_iterator)
-{
-  List< int > lst;
-  lst.push_front(2);
-  lst.push_front(1);
-
-  List< int >::iterator it = lst.erase_after(lst.before_begin());
-  BOOST_TEST(*it == 2);
-}
-
-BOOST_AUTO_TEST_CASE(test_erase_after_last_element)
-{
-  List< int > lst;
-  lst.push_front(1);
-  lst.erase_after(lst.before_begin());
-  BOOST_TEST(lst.empty());
-}
-
-// --- front const ---
-
-BOOST_AUTO_TEST_CASE(test_const_front)
-{
-  List< int > lst;
-  lst.push_front(55);
-  const List< int >& clst = lst;
-  BOOST_TEST(clst.front() == 55);
-}
-
-

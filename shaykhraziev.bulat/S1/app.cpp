@@ -1,28 +1,31 @@
 #include "app.hpp"
 #include "io.hpp"
 #include <limits>
+#include <utility>
 
 shaykhraziev::List< shaykhraziev::NamedSeq > shaykhraziev::readInput(std::istream& in)
 {
   List< NamedSeq > seqs;
-  List< NamedSeq >::iterator tail = seqs.before_begin();
   std::string name;
+
   while (in >> name)
   {
     NamedSeq seq;
     seq.name = name;
-    List< size_t >::iterator numTail = seq.nums.before_begin();
+
     skipSpaces(in);
     while (!isLineEnd(in))
     {
-      size_t x = 0;
-      in >> x;
-      numTail = seq.nums.insert_after(numTail, x);
+      size_t value = 0;
+      in >> value;
+      seq.nums.push_back(value);
       skipSpaces(in);
     }
     skipLine(in);
-    tail = seqs.insert_after(tail, std::move(seq));
+
+    seqs.push_back(std::move(seq));
   }
+
   return seqs;
 }
 
@@ -39,7 +42,7 @@ bool shaykhraziev::addChecked(size_t a, size_t b, size_t& result)
 void shaykhraziev::printNames(std::ostream& out, const List< NamedSeq >& seqs)
 {
   bool first = true;
-  for (LCIter< NamedSeq > it = seqs.cbegin(); it != seqs.cend(); ++it)
+  for (auto it = seqs.begin(); it != seqs.end(); ++it)
   {
     if (!first)
     {
@@ -54,79 +57,76 @@ void shaykhraziev::printNames(std::ostream& out, const List< NamedSeq >& seqs)
 int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const List< NamedSeq >& seqs)
 {
   List< List< size_t >::const_iterator > iters;
+  for (auto s = seqs.begin(); s != seqs.end(); ++s)
   {
-    List< List< size_t >::const_iterator >::iterator itTail = iters.before_begin();
-    for (LCIter< NamedSeq > s = seqs.cbegin(); s != seqs.cend(); ++s)
-    {
-      itTail = iters.insert_after(itTail, s->nums.cbegin());
-    }
+    iters.push_back(s->nums.begin());
   }
 
   List< List< size_t > > rows;
-  List< List< size_t > >::iterator rowTail = rows.before_begin();
   List< size_t > sums;
-  List< size_t >::iterator sumTail = sums.before_begin();
 
-  bool anyRow = true;
+  bool hasRow = true;
   bool overflow = false;
-  while (anyRow)
+
+  while (hasRow)
   {
-    anyRow = false;
-    List< size_t > rowVals;
-    List< size_t >::iterator rvTail = rowVals.before_begin();
-    size_t rowSum = 0;
+    hasRow = false;
+    List< size_t > row;
+    size_t sum = 0;
     bool rowOverflow = false;
 
-    LIter< List< size_t >::const_iterator > it = iters.begin();
-    LCIter< NamedSeq > s = seqs.cbegin();
+    auto it = iters.begin();
+    auto s = seqs.begin();
 
     while (it != iters.end())
     {
-      if (*it != s->nums.cend())
+      if (*it != s->nums.end())
       {
-        anyRow = true;
-        size_t val = **it;
-        rvTail = rowVals.insert_after(rvTail, val);
+        hasRow = true;
+        size_t value = **it;
+        row.push_back(value);
+
         if (!rowOverflow)
         {
-          size_t newSum = 0;
-          if (!addChecked(rowSum, val, newSum))
+          size_t nextSum = 0;
+          if (!addChecked(sum, value, nextSum))
           {
             rowOverflow = true;
             overflow = true;
           }
           else
           {
-            rowSum = newSum;
+            sum = nextSum;
           }
         }
         ++(*it);
       }
+
       ++it;
       ++s;
     }
 
-    if (anyRow)
+    if (hasRow)
     {
-      rowTail = rows.insert_after(rowTail, std::move(rowVals));
+      rows.push_back(std::move(row));
       if (!rowOverflow)
       {
-        sumTail = sums.insert_after(sumTail, rowSum);
+        sums.push_back(sum);
       }
     }
   }
 
-  for (LCIter< List< size_t > > r = rows.cbegin(); r != rows.cend(); ++r)
+  for (auto r = rows.begin(); r != rows.end(); ++r)
   {
-    bool firstVal = true;
-    for (LCIter< size_t > v = r->cbegin(); v != r->cend(); ++v)
+    bool first = true;
+    for (auto v = r->begin(); v != r->end(); ++v)
     {
-      if (!firstVal)
+      if (!first)
       {
         out << ' ';
       }
       out << *v;
-      firstVal = false;
+      first = false;
     }
     out << '\n';
   }
@@ -140,22 +140,20 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
   if (sums.empty())
   {
     out << 0 << '\n';
+    return 0;
   }
-  else
+
+  bool first = true;
+  for (auto it = sums.begin(); it != sums.end(); ++it)
   {
-    bool firstSum = true;
-    for (LCIter< size_t > si = sums.cbegin(); si != sums.cend(); ++si)
+    if (!first)
     {
-      if (!firstSum)
-      {
-        out << ' ';
-      }
-      out << *si;
-      firstSum = false;
+      out << ' ';
     }
-    out << '\n';
+    out << *it;
+    first = false;
   }
+  out << '\n';
 
   return 0;
 }
-
