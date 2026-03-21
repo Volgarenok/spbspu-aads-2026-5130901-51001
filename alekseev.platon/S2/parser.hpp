@@ -9,6 +9,7 @@
 namespace alekseev
 {
   Queue< Token > infixToPostfix(const std::string& line);
+  long long evalPostfix(Queue< Token > postfix);
 }
 
 #endif

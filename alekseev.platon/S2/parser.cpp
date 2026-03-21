@@ -158,6 +158,14 @@ namespace alekseev
 
       throw std::runtime_error("unknown token type");
     }
+
+    void requireStackSize(const Stack< long long >& st, std::size_t n)
+    {
+      if (st.size() < n)
+      {
+        throw std::runtime_error("not enough operands");
+      }
+    }
   }
 
   Queue< Token > infixToPostfix(const std::string& line)
@@ -206,5 +214,45 @@ namespace alekseev
     }
 
     return output;
+  }
+
+  long long evalPostfix(Queue< Token > postfix)
+  {
+    Stack< long long > values;
+
+    while (!postfix.empty())
+    {
+      const Token t = postfix.drop();
+      if (t.type == TokenType::number)
+      {
+        values.push(t.value);
+        continue;
+      }
+      if (t.type != TokenType::op)
+      {
+        throw std::runtime_error("unexpected token in postfix");
+      }
+
+      if (isUnary(t.op))
+      {
+        requireStackSize(values, 1);
+        const long long a = values.drop();
+        values.push(applyUnary(t.op, a));
+      }
+      else
+      {
+        requireStackSize(values, 2);
+        const long long b = values.drop();
+        const long long a = values.drop();
+        values.push(applyBinary(t.op, a, b));
+      }
+    }
+
+    if (values.size() != 1)
+    {
+      throw std::runtime_error("invalid expression");
+    }
+
+    return values.drop();
   }
 }
