@@ -85,7 +85,7 @@ namespace alekseev
 
   inline long long reverseNumber(long long x)
   {
-    bool negative = x < 0;
+    const bool negative = x < 0;
     unsigned long long mag = 0;
     if (negative)
     {
@@ -103,32 +103,32 @@ namespace alekseev
       mag = static_cast< unsigned long long >(x);
     }
 
+    const unsigned long long limit = negative ?
+      (static_cast< unsigned long long >(LLONG_MAX) + 1ULL) :
+      static_cast< unsigned long long >(LLONG_MAX);
+
     unsigned long long rev = 0;
     while (mag > 0)
     {
-      unsigned digit = static_cast< unsigned >(mag % 10ULL);
-      unsigned long long next = rev * 10ULL + static_cast< unsigned long long >(digit);
-      if (next < rev)
+      const unsigned digit = static_cast< unsigned >(mag % 10ULL);
+      if (rev > limit / 10ULL)
       {
         throw std::overflow_error("reverse overflow");
       }
-      rev = next;
+      rev *= 10ULL;
+      if (rev > limit - static_cast< unsigned long long >(digit))
+      {
+        throw std::overflow_error("reverse overflow");
+      }
+      rev += static_cast< unsigned long long >(digit);
       mag /= 10ULL;
     }
 
     if (!negative)
     {
-      if (rev > static_cast< unsigned long long >(LLONG_MAX))
-      {
-        throw std::overflow_error("reverse overflow");
-      }
       return static_cast< long long >(rev);
     }
 
-    if (rev > static_cast< unsigned long long >(LLONG_MAX) + 1ULL)
-    {
-      throw std::overflow_error("reverse overflow");
-    }
 
     if (rev == static_cast< unsigned long long >(LLONG_MAX) + 1ULL)
     {

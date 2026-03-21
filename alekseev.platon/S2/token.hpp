@@ -1,7 +1,6 @@
 #ifndef ALEKSEEV_S2_TOKEN_HPP
 #define ALEKSEEV_S2_TOKEN_HPP
 
-#include <string>
 
 namespace alekseev
 {
