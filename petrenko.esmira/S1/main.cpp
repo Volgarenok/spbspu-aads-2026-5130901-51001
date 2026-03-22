@@ -126,10 +126,6 @@ namespace petrenko {
     }
 
     void insert(T data, int index) {
-      if (index < 0) {
-        return;
-      }
-
       if (index == 0) {
         head = new Node(data, head);
         ++Size;
@@ -145,10 +141,6 @@ namespace petrenko {
     }
 
     void removeAt(int index) {
-      if (index < 0) {
-        return;
-      }
-
       if (index == 0) {
         Node* temp = head;
         head = head->pNext;
@@ -231,14 +223,18 @@ int main() {
     while (count < line.size()) {
       if (line[count] >= '0' && line[count] <= '9') {
         int num = 0;
+        bool overflow = false;
 
         while (count < line.size() && line[count] >= '0' && line[count] <= '9') {
           num = num * 10 + (line[count] - '0');
           if (num < 0) {
-            std::cerr << "Overflow" << '\n';
-            return 1;
+            overflow = true;
           }
           ++count;
+        }
+        if (overflow) {
+          std::cerr << "Overflow" << std::endl;
+          return 1;
         }
         numbers.insert(num, numbers.getSize());
       } else {
@@ -250,6 +246,10 @@ int main() {
     }
     numNum.insert(numbers, numNum.getSize());
   }
+  if (titles.getSize() == 0) {
+    std::cout << 0;
+    return 0;
+  }
 
   for (petrenko::LIter<std::string> tit = titles.begin(); tit != titles.end(); ++tit) {
     std::cout << *tit << ' ';
@@ -257,7 +257,7 @@ int main() {
   std::cout << '\n';
 
   petrenko::List<int> lastLine;
-  size_t maxi = 0;
+  size_t maxi = 1;
   for (petrenko::LIter<petrenko::List<int>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
     if ((*numbers).getSize() > maxi) {
       maxi = (*numbers).getSize();
@@ -267,7 +267,10 @@ int main() {
     int summa = 0;
     for (petrenko::LIter<petrenko::List<int>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
       if (counter < (*numbers).getSize()) {
-        std::cout << (*numbers)[counter] << ' ';
+        std::cout << (*numbers)[counter];
+        if (counter != ((*numbers).getSize() - 1)) {
+          std::cout << ' ';
+        }
         summa += (*numbers)[counter];
         continue;
       } else {
@@ -275,10 +278,17 @@ int main() {
       }
     }
     lastLine.insert(summa, lastLine.getSize());
-    std::cout << '\n';
+    if (summa) {
+      std::cout << '\n';
+    }
   }
+  size_t count = 0;
   for (petrenko::LIter<int> sums = lastLine.begin(); sums != lastLine.end(); ++sums) {
-    std::cout << (*sums) << ' ';
+    ++count;
+    std::cout << (*sums);
+    if (count != lastLine.getSize()) {
+      std::cout << ' ';
+    }
   }
   return 0;
 }
