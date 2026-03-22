@@ -231,7 +231,7 @@ int main() {
     while (count < line.size()) {
       if (line[count] >= '0' && line[count] <= '9') {
         int num = 0;
-        long long numa = 0;
+
         while (count < line.size() && line[count] >= '0' && line[count] <= '9') {
           num = num * 10 + (line[count] - '0');
           if (num < 0) {
