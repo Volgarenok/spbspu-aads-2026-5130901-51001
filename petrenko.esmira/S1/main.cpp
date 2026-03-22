@@ -269,7 +269,7 @@ int main() {
     for (petrenko::LIter<petrenko::List<int>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
       if (counter < (*numbers).getSize()) {
         std::cout << (*numbers)[counter];
-        if (counter != ((*numbers).getSize())) {
+        if (counter != ((*numbers).getSize() - 1)) {
           std::cout << ' ';
         }
         summa += (*numbers)[counter];
