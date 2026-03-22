@@ -252,7 +252,7 @@ int main() {
   std::cout << '\n';
 
   petrenko::List<int> lastLine;
-  int maxi = 0;
+  size_t maxi = 0;
   for (petrenko::LIter<petrenko::List<int>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
     if ((*numbers).getSize() > maxi) {
       maxi = (*numbers).getSize();
