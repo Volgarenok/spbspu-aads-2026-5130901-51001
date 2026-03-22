@@ -106,18 +106,19 @@ namespace petrenko {
       return *this;
     }
 
-    T& operator[](const int index)
-    {
+    T& operator[](const int index) {
       int counter = 0;
       Node* current = this->head;
 
       while (current != nullptr) {
-	if (counter == index) {
+        if (counter == index) {
           return current->data;
-	}
+        }
         current = current->pNext;
         counter++;
       }
+
+      return current->data;
     }
 
     size_t getSize() {
@@ -248,12 +249,13 @@ int main() {
   for (petrenko::LIter<std::string> tit = titles.begin(); tit != titles.end(); ++tit) {
     std::cout << *tit << ' ';
   }
+  std::cout << '\n';
 
   petrenko::List<int> lastLine;
-  int maxi = 0
+  int maxi = 0;
   for (petrenko::LIter<petrenko::List<int>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
-    if (numbers.getSize() > maxi) {
-      maxi = numbers.getSize();
+    if ((*numbers).getSize() > maxi) {
+      maxi = (*numbers).getSize();
     }
   }
   for (size_t counter = 0; counter < maxi; ++counter) {
@@ -267,6 +269,11 @@ int main() {
         continue;
       }
     }
+    lastLine.insert(summa, lastLine.getSize());
+    std::cout << '\n';
+  }
+  for (petrenko::LIter<int> sums = lastLine.begin(); sums != lastLine.end(); ++sums) {
+    std::cout << (*sums) << ' ';
   }
   return 0;
 }
