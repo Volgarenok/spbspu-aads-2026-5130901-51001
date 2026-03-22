@@ -5,27 +5,21 @@
 
 namespace hachaturyanov
 {
-  struct nodebase {
-    nodebase* next_;
-    nodebase* prev_;
-
-    nodebase():
-     next_(this),
-     prev_(this)
-    {}
-  };
-
-  template< class T > struct node: nodebase {
+  template< class T > struct node {
     T val_;
+    node* next_;
+    node* prev_;
 
     explicit node(const T &val):
-     nodebase(),
-     val_(val)
+     val_(val),
+     next_(nullptr),
+     prev_(nullptr)
     {}
 
     explicit node(T &&val):
-     nodebase(),
-     val_(std::move(val))
+     val_(std::move(val)),
+     next_(nullptr),
+     prev_(nullptr)
     {}
   };
 }

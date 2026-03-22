@@ -16,6 +16,7 @@ namespace hachaturyanov
 
     List() noexcept;
     ~List();
+    List(const List &other);
 
     size_t size() const noexcept;
     bool isEmpty() const noexcept;
@@ -25,7 +26,8 @@ namespace hachaturyanov
     citer begin() const;
     citer end() const;
 
-    iter add(const T &val);
+    iter addFront(const T &val);
+    iter addEnd(const T &val);
 
     iter insertBefore(iter pos, const T &val);
     iter insertAfter(iter pos, const T &val);
@@ -51,6 +53,20 @@ namespace hachaturyanov
   template< class T > List< T >::~List()
   {
     clear();
+  }
+
+  template< class T > List< T >::List(const List &other):
+   head_(nullptr),
+   size_(0)
+  {
+    if (!other.size_) {
+      citer it = other.begin();
+      addEnd(*it);
+      ++it;
+      for (; it != other.begin(); ++it) {
+        addEnd(*it);
+      }
+    }
   }
 
   template< class T > size_t List< T >::size() const noexcept
@@ -95,7 +111,7 @@ namespace hachaturyanov
     throw std::logic_error("empty list");
   }
 
-  template< class T > typename List< T >::iter List< T >::add(const T &val)
+  template< class T > typename List< T >::iter List< T >::addFront(const T &val)
   {
     node< T >* newNode = new node< T >(val);
     if (isEmpty()) {
@@ -109,6 +125,24 @@ namespace hachaturyanov
       head_->prev_ = newNode;
     }
     head_ = newNode;
+    size_++;
+    return iter(newNode);
+  }
+
+  template< class T > typename List< T >::iter List< T >::addEnd(const T &val)
+  {
+    node< T >* newNode = new node< T >(val);
+    if (isEmpty()) {
+      newNode->next_ = newNode;
+      newNode->prev_ = newNode;
+      head_ = newNode;
+    } else {
+      node< T >* tail_ = head_->prev_;
+      newNode->next_ = head_;
+      newNode->prev_ = tail_;
+      tail_->next_ = newNode;
+      head_->prev_ = newNode;
+    }
     size_++;
     return iter(newNode);
   }
@@ -202,7 +236,7 @@ namespace hachaturyanov
     if (other.isEmpty()) {
       return *this;
     }
-    add(other.head_->val_);
+    addFront(other.head_->val_);
     node< T >* toAdd = other.head_->next_;
     iter cur = iter(head_);
     while(toAdd != other.head_) {
