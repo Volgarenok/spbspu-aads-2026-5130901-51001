@@ -246,10 +246,6 @@ int main() {
     }
     numNum.insert(numbers, numNum.getSize());
   }
-  if (titles.getSize() == 0) {
-    std::cout << 0;
-    return 0;
-  }
 
   size_t countL = 0;
   for (petrenko::LIter<std::string> tit = titles.begin(); tit != titles.end(); ++tit) {
@@ -273,7 +269,7 @@ int main() {
     for (petrenko::LIter<petrenko::List<int>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
       if (counter < (*numbers).getSize()) {
         std::cout << (*numbers)[counter];
-        if (counter != ((*numbers).getSize() - 1)) {
+        if (counter != ((*numbers).getSize())) {
           std::cout << ' ';
         }
         summa += (*numbers)[counter];
@@ -282,6 +278,7 @@ int main() {
         continue;
       }
     }
+
     lastLine.insert(summa, lastLine.getSize());
     if (summa) {
       std::cout << '\n';
