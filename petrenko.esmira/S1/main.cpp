@@ -81,15 +81,85 @@ namespace petrenko {
     friend class LIter<T>;
     friend class LCIter<T>;
 
-    List();
-    ~List();
-    List(const List& other);
-    List& operator=(const List& other);
+    List() : Size(0), head(nullptr) {}
 
-    size_t getSize() { return Size; }
-    void insert(T data, int index);
-    void removeAt(int index);
-    void clear();
+    List(const List<T>& other) : Size(0), head(nullptr) {
+      Node* current = other.head;
+      while (current != nullptr) {
+        insert(current->data, Size);
+        current = current->pNext;
+      }
+    }
+
+    ~List() {
+      clear();
+    }
+
+    List& operator=(const List<T>& other) {
+      if (this != &other) {
+        clear();
+        Node* current = other.head;
+        while (current != nullptr) {
+          insert(current->data, Size);
+          current = current->pNext;
+        }
+      }
+      return *this;
+    }
+
+    size_t getSize() {
+      return Size;
+    }
+
+    void insert(T data, int index) {
+      if (index < 0) {
+        return;
+      }
+
+      if (index == 0) {
+        head = new Node(data, head);
+        ++Size;
+      } else {
+        Node* previous = head;
+        for (int i = 0; i < index - 1; ++i) {
+          previous = previous->pNext;
+        }
+        Node* newNode = new Node(data, previous->pNext);
+        previous->pNext = newNode;
+        ++Size;
+      }
+    }
+
+    void removeAt(int index) {
+      if (index < 0) {
+        return;
+      }
+
+      if (index == 0) {
+        Node* temp = head;
+        head = head->pNext;
+        delete temp;
+        --Size;
+      } else {
+        Node* previous = head;
+        for (int i = 0; i < index - 1; ++i) {
+          previous = previous->pNext;
+        }
+        Node* toDelete = previous->pNext;
+        previous->pNext = toDelete->pNext;
+        delete toDelete;
+        --Size;
+      }
+    }
+
+    void clear() {
+      while (head != nullptr) {
+        Node* temp = head;
+        head = head->pNext;
+        delete temp;
+      }
+      Size = 0;
+    }
 
     LIter<T> begin() {
       return LIter<T>(head);
@@ -118,102 +188,46 @@ namespace petrenko {
     };
     Node* head;
   };
-
-  template<class T>
-  List<T>::~List() {
-    clear();
-  }
-
-  template<class T>
-  List<T>::List(const List<T>& other) : Size(0), head(nullptr) {
-    Node* current = other.head;
-    while (current != nullptr) {
-      insert(current->data, Size);
-      current = current->pNext;
-    }
-  }
-
-  template<class T>
-  List<T>& List<T>::operator=(const List<T>& other) {
-    if (this != &other) {
-      clear();
-      Node* current = other.head;
-      while (current != nullptr) {
-        insert(current->data, Size);
-        current = current->pNext;
-      }
-    }
-    return *this;
-  }
-
-  template<class T>
-  void List<T>::insert(T data, int index) {
-    if (index < 0) {
-      return;
-    }
-
-    if (index == 0) {
-      head = new Node(data, head);
-      ++Size;
-    } else {
-      Node* previous = head;
-      for (int i = 0; i < index - 1; ++i) {
-        previous = previous->pNext;
-      }
-      Node* newNode = new Node(data, previous->pNext);
-      previous->pNext = newNode;
-      ++Size;
-    }
-  }
-
-  template<class T>
-  void List<T>::removeAt(int index) {
-    if (index < 0) {
-      return;
-    }
-
-    if (index == 0) {
-      Node* temp = head;
-      head = head->pNext;
-      delete temp;
-      --Size;
-    } else {
-      Node* previous = head;
-      for (int i = 0; i < index - 1; ++i) {
-        previous = previous->pNext;
-      }
-      Node* toDelete = previous->pNext;
-      previous->pNext = toDelete->pNext;
-      delete toDelete;
-      --Size;
-    }
-  }
-
-  template<class T>
-  void List<T>::clear() {
-    while (head != nullptr) {
-      Node* temp = head;
-      head = head->pNext;
-      delete temp;
-    }
-    Size = 0;
-  }
 }
 
 int main() {
-  // список списков
-  // список названий
-  while (!std::cin.eof()) {
-    std::string title;
-    std::cin >> title;
-    std::cout << title << "название";
-    //вставить титле в список титлов
-    // список чисел
-    int num;
-    while (std::cin >> num) {
-      //вставить число в список
-      std::cout << num << "число";
-    }
-  }
-}
+  petrenko::List<std::string> titles;
+  petrenko::List<petrenko::List<int>> numNum;
+  std::string line;
 
+  while (std::getline(std::cin, line)) {
+    if (line.empty()) continue;
+
+    std::string title;
+    size_t count = 0;
+
+    while (count < line.size() && line[count] != ' ') {
+      title += line[count];
+      ++count;
+    }
+    titles.insert(title, titles.getSize());
+
+    while (count < line.size() && line[count] == ' ') {
+      ++count;
+    }
+
+    petrenko::List<int> numbers;
+    while (count < line.size()) {
+      if (line[count] >= '0' && line[count] <= '9') {
+        int num = 0;
+        while (count < line.size() && line[count] >= '0' && line[count] <= '9') {
+          num = num * 10 + (line[count] - '0');
+          ++count;
+        }
+        numbers.insert(num, numbers.getSize());
+      } else {
+        ++count;
+      }
+      while (count < line.size() && line[count] == ' ') {
+        ++count;
+      }
+    }
+    numNum.insert(numbers, numNum.getSize());
+  }
+  return 0;
+}
