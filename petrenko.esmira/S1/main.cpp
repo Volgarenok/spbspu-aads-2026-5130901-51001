@@ -106,6 +106,20 @@ namespace petrenko {
       return *this;
     }
 
+    T& operator[](const int index)
+    {
+      int counter = 0;
+      Node* current = this->head;
+
+      while (current != nullptr) {
+	if (counter == index) {
+          return current->data;
+	}
+        current = current->pNext;
+        counter++;
+      }
+    }
+
     size_t getSize() {
       return Size;
     }
@@ -195,7 +209,9 @@ int main() {
   std::string line;
 
   while (std::getline(std::cin, line)) {
-    if (line.empty()) continue;
+    if (line.empty()) {
+      continue;
+    }
 
     std::string title;
     size_t count = 0;
@@ -222,11 +238,35 @@ int main() {
       } else {
         ++count;
       }
-      while (count < line.size() && line[count] == ' ') {
+      while (count < line.size() && (line[count] == ' ' || line[count] == '\n')) {
         ++count;
       }
     }
     numNum.insert(numbers, numNum.getSize());
+  }
+
+  for (petrenko::LIter<std::string> tit = titles.begin(); tit != titles.end(); ++tit) {
+    std::cout << *tit << ' ';
+  }
+
+  petrenko::List<int> lastLine;
+  int maxi = 0
+  for (petrenko::LIter<petrenko::List<int>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
+    if (numbers.getSize() > maxi) {
+      maxi = numbers.getSize();
+    }
+  }
+  for (size_t counter = 0; counter < maxi; ++counter) {
+    int summa = 0;
+    for (petrenko::LIter<petrenko::List<int>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
+      if (counter < (*numbers).getSize()) {
+        std::cout << (*numbers)[counter] << ' ';
+        summa += (*numbers)[counter];
+        continue;
+      } else {
+        continue;
+      }
+    }
   }
   return 0;
 }
