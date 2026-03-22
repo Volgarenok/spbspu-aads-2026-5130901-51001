@@ -251,8 +251,13 @@ int main() {
     return 0;
   }
 
+  size_t countL = 0;
   for (petrenko::LIter<std::string> tit = titles.begin(); tit != titles.end(); ++tit) {
-    std::cout << *tit << ' ';
+    ++countL;
+    std::cout << *tit;
+    if (countL != titles.getSize()) {
+      std::cout << ' ';
+    }
   }
   std::cout << '\n';
 
