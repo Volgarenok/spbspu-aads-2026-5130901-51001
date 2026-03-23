@@ -40,7 +40,7 @@ namespace hachaturyanov
     void clear() noexcept;
     void clear(iter from, iter to) noexcept;
 
-    List& operator=(List &other);
+    List& operator=(const List &other);
     List& operator=(List &&other);
   };
 
@@ -218,7 +218,7 @@ namespace hachaturyanov
     erase(from);
   }
 
-  template< class T > List< T >& List< T >::operator=(List &other)
+  template< class T > List< T >& List< T >::operator=(const List &other)
   {
     if (this = &other) {
       return *this;
