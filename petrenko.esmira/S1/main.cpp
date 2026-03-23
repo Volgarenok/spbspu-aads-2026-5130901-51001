@@ -258,7 +258,7 @@ int main() {
   std::cout << '\n';
 
   petrenko::List<int> lastLine;
-  size_t maxi = 1;
+  size_t maxi = 0;
   for (petrenko::LIter<petrenko::List<int>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
     if ((*numbers).getSize() > maxi) {
       maxi = (*numbers).getSize();
@@ -266,16 +266,15 @@ int main() {
   }
   for (size_t counter = 0; counter < maxi; ++counter) {
     int summa = 0;
+    size_t space = 1;
     for (petrenko::LIter<petrenko::List<int>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
       if (counter < (*numbers).getSize()) {
         std::cout << (*numbers)[counter];
-        if (counter != ((*numbers).getSize() - 1)) {
+        if (space != ((*numbers).getSize())) {
           std::cout << ' ';
         }
         summa += (*numbers)[counter];
-        continue;
-      } else {
-        continue;
+        ++space;
       }
     }
 
