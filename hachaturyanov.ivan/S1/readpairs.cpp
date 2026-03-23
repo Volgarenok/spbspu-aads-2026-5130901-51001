@@ -37,10 +37,6 @@ hachaturyanov::List< hachaturyanov::Pair > hachaturyanov::readPairs(std::istream
       skipSpaces(in);
     }
 
-    if (p.second.isEmpty()) {
-
-    }
-
     nextLine(in);
 
     pairs.addEnd(p);

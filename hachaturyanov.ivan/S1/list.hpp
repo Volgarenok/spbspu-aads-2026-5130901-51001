@@ -21,10 +21,10 @@ namespace hachaturyanov
     size_t size() const noexcept;
     bool isEmpty() const noexcept;
 
-    iter begin();
-    iter end();
-    citer begin() const;
-    citer end() const;
+    iter begin() noexcept;
+    iter end() noexcept;
+    citer begin() const noexcept;
+    citer end() const noexcept;
 
     iter addFront(const T &val);
     iter addEnd(const T &val);
@@ -59,13 +59,13 @@ namespace hachaturyanov
    head_(nullptr),
    size_(0)
   {
-    if (!other.size_) {
-      citer it = other.begin();
-      addEnd(*it);
-      ++it;
-      for (; it != other.begin(); ++it) {
+    if (!other.isEmpty()) {
+      citer first = other.begin();
+      citer it = first;
+      do {
         addEnd(*it);
-      }
+        ++it;
+      } while (it != first);
     }
   }
 
@@ -79,36 +79,24 @@ namespace hachaturyanov
     return size_ == 0;
   }
 
-  template< class T > typename List< T >::iter List< T >::begin()
+  template< class T > typename List< T >::iter List< T >::begin() noexcept
   {
-    if (size_) {
-      return iter(head_);
-    }
-    throw std::logic_error("empty list");
+    return iter(head_);
   }
 
-  template< class T > typename List< T >::iter List< T >::end()
+  template< class T > typename List< T >::iter List< T >::end() noexcept
   {
-    if (size_) {
-      return iter(head_->prev_);
-    }
-    throw std::logic_error("empty list");
+    return iter(head_);
   }
 
-  template< class T > typename List< T >::citer List< T >::begin() const
+  template< class T > typename List< T >::citer List< T >::begin() const noexcept
   {
-    if (size_) {
-      return citer(head_);
-    }
-    throw std::logic_error("empty list");
+    return citer(head_);
   }
 
-  template< class T > typename List< T >::citer List< T >::end() const
+  template< class T > typename List< T >::citer List< T >::end() const noexcept
   {
-    if (size_) {
-      return citer(head_->prev_);
-    }
-    throw std::logic_error("empty list");
+    return citer(head_);
   }
 
   template< class T > typename List< T >::iter List< T >::addFront(const T &val)
@@ -232,6 +220,10 @@ namespace hachaturyanov
 
   template< class T > List< T >& List< T >::operator=(List &other)
   {
+    if (this = &other) {
+      return *this;
+    }
+
     clear();
     if (other.isEmpty()) {
       return *this;
