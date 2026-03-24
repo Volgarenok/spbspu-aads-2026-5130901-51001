@@ -233,7 +233,8 @@ int main() {
           ++count;
         }
         if (overflow) {
-          std::cerr << "Overflow" << std::endl;
+          throw std::overflow_error("Overflow");
+          //std::cerr << "Overflow" << std::endl;
           return 1;
         }
         numbers.insert(num, numbers.getSize());
@@ -271,30 +272,34 @@ int main() {
 
   for (size_t counter = 0; counter < maxi; ++counter) {
     int summa = 0;
+    bool firstInRow = true;
     for (petrenko::LIter<petrenko::List<int>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
-      size_t space = 1;
       if (counter < (*numbers).getSize()) {
-        std::cout << (*numbers)[counter];
-        if (space != ((*numbers).getSize())) {
+        if (!firstInRow) {
           std::cout << ' ';
         }
+        std::cout << (*numbers)[counter];
         summa += (*numbers)[counter];
-        ++space;
+        firstInRow = false;
       }
     }
-
     lastLine.insert(summa, lastLine.getSize());
-    if (summa) {
+    if (summa || counter < maxi - 1) {
       std::cout << '\n';
     }
   }
-  size_t count = 0;
-  for (petrenko::LIter<int> sums = lastLine.begin(); sums != lastLine.end(); ++sums) {
-    ++count;
-    std::cout << (*sums);
-    if (count != lastLine.getSize()) {
-      std::cout << ' ';
+
+  if (lastLine.getSize() > 0) {
+    size_t count = 0;
+    for (petrenko::LIter<int> sums = lastLine.begin(); sums != lastLine.end(); ++sums) {
+      ++count;
+      std::cout << (*sums);
+      if (count != lastLine.getSize()) {
+        std::cout << ' ';
+      }
     }
+  } else if (titles.getSize() == 0) {
+    std::cout << 0;
   }
   return 0;
 }
