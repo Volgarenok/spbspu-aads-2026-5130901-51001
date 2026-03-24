@@ -17,6 +17,11 @@ public:
   Stack& operator=(const Stack& other);
   Stack& operator=(Stack&& other) noexcept;
   
+  void push(const T& value);
+  void push(T&& value);
+  T pop();
+  const T& top() const;
+  T& top();
   bool empty() const noexcept;
   void clear() noexcept;
   
@@ -28,7 +33,20 @@ template<typename T>
 class Queue {
 public:
   Queue() = default;
-  bool empty() const noexcept { return true; }
+  Queue(const Queue& other);
+  Queue(Queue&& other) noexcept;
+  ~Queue() = default;
+  
+  Queue& operator=(const Queue& other);
+  Queue& operator=(Queue&& other) noexcept;
+  
+  bool empty() const noexcept;
+  void clear() noexcept;
+  
+private:
+  List<T> data_;
+  void push_back(const T& value);
+  void push_back(T&& value);
 };
 
 }
