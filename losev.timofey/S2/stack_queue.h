@@ -37,12 +37,17 @@ public:
   Queue(Queue&& other) noexcept;
   ~Queue() = default;
   
+  
   Queue& operator=(const Queue& other);
   Queue& operator=(Queue&& other) noexcept;
   
   bool empty() const noexcept;
   void clear() noexcept;
-  
+  void push(const T& value);
+  void push(T&& value);
+  const T& front() const;
+  T& front();
+
 private:
   List<T> data_;
   void push_back(const T& value);

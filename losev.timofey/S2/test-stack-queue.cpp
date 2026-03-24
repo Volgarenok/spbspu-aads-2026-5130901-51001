@@ -72,4 +72,11 @@ BOOST_AUTO_TEST_CASE(empty_test) {
   BOOST_CHECK(q.empty() == true);
 }
 
+BOOST_AUTO_TEST_CASE(push_test) {
+  losev::Queue<int> q;
+  q.push(5);
+  BOOST_CHECK(q.empty() == false);
+  BOOST_CHECK(q.front() == 5);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

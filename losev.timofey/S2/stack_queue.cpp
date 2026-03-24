@@ -106,6 +106,66 @@ void Queue<T>::clear() noexcept {
 }
 
 template<typename T>
+void Queue<T>::push_back(const T& value) {
+  if (data_.empty()) {
+    data_.push_front(value);
+    return;
+  }
+  List<T> temp;
+  for (typename List<T>::iterator it = data_.begin(); it != data_.end(); ++it) {
+    temp.push_front(*it);
+  }
+  temp.push_front(value);
+  data_.clear();
+  for (typename List<T>::iterator it = temp.begin(); it != temp.end(); ++it) {
+    data_.push_front(*it);
+  }
+}
+
+template<typename T>
+void Queue<T>::push_back(T&& value) {
+  if (data_.empty()) {
+    data_.push_front(std::move(value));
+    return;
+  }
+  List<T> temp;
+  for (typename List<T>::iterator it = data_.begin(); it != data_.end(); ++it) {
+    temp.push_front(*it);
+  }
+  temp.push_front(std::move(value));
+  data_.clear();
+  for (typename List<T>::iterator it = temp.begin(); it != temp.end(); ++it) {
+    data_.push_front(*it);
+  }
+}
+
+template<typename T>
+void Queue<T>::push(const T& value) {
+  push_back(value);
+}
+
+template<typename T>
+void Queue<T>::push(T&& value) {
+  push_back(std::move(value));
+}
+
+template<typename T>
+const T& Queue<T>::front() const {
+  if (empty()) {
+    throw std::runtime_error("Queue is empty");
+  }
+  return *data_.begin();
+}
+
+template<typename T>
+T& Queue<T>::front() {
+  if (empty()) {
+    throw std::runtime_error("Queue is empty");
+  }
+  return *data_.begin();
+}
+
+template<typename T>
 void Queue<T>::push_back(const T&) {}
 
 template<typename T>
