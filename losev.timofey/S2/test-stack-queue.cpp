@@ -5,7 +5,8 @@
 BOOST_AUTO_TEST_SUITE(stack_tests)
 
 BOOST_AUTO_TEST_CASE(empty_test) {
-  BOOST_CHECK(true);
+  losev::Stack<int> s;
+  BOOST_CHECK(s.empty() == true);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

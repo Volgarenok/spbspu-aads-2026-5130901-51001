@@ -10,7 +10,18 @@ template<typename T>
 class Stack {
 public:
   Stack() = default;
-  bool empty() const noexcept { return true; }
+  Stack(const Stack& other);
+  Stack(Stack&& other) noexcept;
+  ~Stack() = default;
+  
+  Stack& operator=(const Stack& other);
+  Stack& operator=(Stack&& other) noexcept;
+  
+  bool empty() const noexcept;
+  void clear() noexcept;
+  
+private:
+  List<T> data_;
 };
 
 template<typename T>
