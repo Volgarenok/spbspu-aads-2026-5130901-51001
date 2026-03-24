@@ -289,7 +289,7 @@ int main() {
     }
   }
 
-  if (lastLine.getSize() > 0) {
+  if (titles.getSize() > 0) {
     size_t count = 0;
     for (petrenko::LIter<int> sums = lastLine.begin(); sums != lastLine.end(); ++sums) {
       ++count;
@@ -298,8 +298,6 @@ int main() {
         std::cout << ' ';
       }
     }
-  } else if (titles.getSize() == 0) {
-    std::cout << 0;
   }
   return 0;
 }
