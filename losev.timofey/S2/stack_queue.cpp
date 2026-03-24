@@ -175,12 +175,6 @@ T Queue<T>::pop() {
   return value;
 }
 
-template<typename T>
-void Queue<T>::push_back(const T&) {}
-
-template<typename T>
-void Queue<T>::push_back(T&&) {}
-
 template class Stack<int>;
 template class Queue<int>;
 

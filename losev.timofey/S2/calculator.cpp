@@ -14,17 +14,17 @@ namespace {
       default: return -1;
     }
   }
-  
+
   bool isOperator(char c) {
     return c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '&';
   }
-  
+
   int applyOperation(int a, int b, char op) {
     switch (op) {
       case '+': return a + b;
       case '-': return a - b;
       case '*': return a * b;
-      case '/': 
+      case '/':
         if (b == 0) throw std::runtime_error("Division by zero");
         return a / b;
       case '%':
@@ -34,13 +34,13 @@ namespace {
       default: throw std::runtime_error("Unknown operator");
     }
   }
-  
+
   std::string infixToPostfix(const std::string& expr) {
     Stack<char> ops;
     std::string result;
     std::istringstream iss(expr);
     std::string token;
-    
+
     while (iss >> token) {
       if (token.length() == 1 && isOperator(token[0])) {
         char c = token[0];
@@ -72,7 +72,7 @@ namespace {
         result += token + ' ';
       }
     }
-    
+
     while (!ops.empty()) {
       if (ops.top() == '(' || ops.top() == ')') {
         throw std::runtime_error("Mismatched parentheses");
@@ -82,12 +82,12 @@ namespace {
     }
     return result;
   }
-  
+
   int evaluatePostfix(const std::string& postfix) {
     Stack<int> vals;
     std::istringstream iss(postfix);
     std::string token;
-    
+
     while (iss >> token) {
       if (token.length() == 1 && isOperator(token[0])) {
         int b = vals.pop();
@@ -105,7 +105,7 @@ namespace {
         vals.push((token[0] == '-') ? -num : num);
       }
     }
-    
+
     int result = vals.pop();
     if (!vals.empty()) {
       throw std::runtime_error("Invalid expression");
