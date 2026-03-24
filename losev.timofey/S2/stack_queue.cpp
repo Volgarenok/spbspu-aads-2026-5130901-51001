@@ -1,6 +1,8 @@
 #include "stack_queue.h"
+#include <utility>
 
 namespace losev {
+
 
 template<typename T>
 Stack<T>::Stack(const Stack& other) : data_(other.data_) {}
@@ -67,7 +69,50 @@ T Stack<T>::pop() {
   }
   T value = std::move(*data_.begin());
   data_.pop_front();
-  return val
+  return value;
+}
+
+
+template<typename T>
+Queue<T>::Queue(const Queue& other) : data_(other.data_) {}
+
+template<typename T>
+Queue<T>::Queue(Queue&& other) noexcept : data_(std::move(other.data_)) {}
+
+template<typename T>
+Queue<T>& Queue<T>::operator=(const Queue& other) {
+  if (this != &other) {
+    data_ = other.data_;
+  }
+  return *this;
+}
+
+template<typename T>
+Queue<T>& Queue<T>::operator=(Queue&& other) noexcept {
+  if (this != &other) {
+    data_ = std::move(other.data_);
+  }
+  return *this;
+}
+
+template<typename T>
+bool Queue<T>::empty() const noexcept {
+  return data_.empty();
+}
+
+template<typename T>
+void Queue<T>::clear() noexcept {
+  data_.clear();
+}
+
+template<typename T>
+void Queue<T>::push_back(const T& value) {
+  (void)value;
+}
+
+template<typename T>
+void Queue<T>::push_back(T&& value) {
+  (void)value;
 }
 
 template class Stack<int>;
