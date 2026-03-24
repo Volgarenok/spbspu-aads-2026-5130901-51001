@@ -256,7 +256,7 @@ int main() {
       std::cout << ' ';
     }
   }
-  std::cout << '\n';
+  std::cout << "\n";
 
   petrenko::List<int> lastLine;
   size_t maxi = 1;
@@ -285,7 +285,7 @@ int main() {
     }
     lastLine.insert(summa, lastLine.getSize());
     if (summa || counter < maxi - 1) {
-      std::cout << '\n';
+      std::cout << "\n";
     }
   }
 
@@ -299,5 +299,6 @@ int main() {
       }
     }
   }
+  std::cout << "\n";
   return 0;
 }
