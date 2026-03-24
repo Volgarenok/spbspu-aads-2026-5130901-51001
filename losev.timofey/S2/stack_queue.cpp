@@ -106,14 +106,10 @@ void Queue<T>::clear() noexcept {
 }
 
 template<typename T>
-void Queue<T>::push_back(const T& value) {
-  (void)value;
-}
+void Queue<T>::push_back(const T&) {}
 
 template<typename T>
-void Queue<T>::push_back(T&& value) {
-  (void)value;
-}
+void Queue<T>::push_back(T&&) {}
 
 template class Stack<int>;
 template class Queue<int>;
