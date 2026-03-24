@@ -47,6 +47,7 @@ public:
   void push(T&& value);
   const T& front() const;
   T& front();
+  T pop();
 
 private:
   List<T> data_;

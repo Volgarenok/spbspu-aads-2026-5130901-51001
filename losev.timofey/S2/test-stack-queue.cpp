@@ -79,4 +79,27 @@ BOOST_AUTO_TEST_CASE(push_test) {
   BOOST_CHECK(q.front() == 5);
 }
 
+BOOST_AUTO_TEST_CASE(pop_test) {
+  losev::Queue<int> q;
+  q.push(5);
+  q.push(10);
+  q.push(15);
+  BOOST_CHECK(q.pop() == 5);
+  BOOST_CHECK(q.front() == 10);
+  BOOST_CHECK(q.pop() == 10);
+  BOOST_CHECK(q.front() == 15);
+  BOOST_CHECK(q.pop() == 15);
+  BOOST_CHECK(q.empty());
+}
+
+BOOST_AUTO_TEST_CASE(pop_empty_test) {
+  losev::Queue<int> q;
+  BOOST_CHECK_THROW(q.pop(), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(front_empty_test) {
+  losev::Queue<int> q;
+  BOOST_CHECK_THROW(q.front(), std::runtime_error);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

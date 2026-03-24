@@ -166,6 +166,16 @@ T& Queue<T>::front() {
 }
 
 template<typename T>
+T Queue<T>::pop() {
+  if (empty()) {
+    throw std::runtime_error("Queue is empty");
+  }
+  T value = std::move(*data_.begin());
+  data_.pop_front();
+  return value;
+}
+
+template<typename T>
 void Queue<T>::push_back(const T&) {}
 
 template<typename T>
