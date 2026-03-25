@@ -233,8 +233,7 @@ int main() {
           ++count;
         }
         if (overflow) {
-          std::cerr << "Overflow" << std::endl;
-          return 1;
+          throw std::overflow_error("overflow");
         }
         numbers.insert(num, numbers.getSize());
       } else {
@@ -293,11 +292,6 @@ int main() {
     if (summa || counter < maxi - 1) {
       std::cout << "\n";
     }
-  }
-
-  if (overflow) {
-    std::cerr << "Overflow";
-    return 1;
   }
 
   if (titles.getSize() > 0) {
