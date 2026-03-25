@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <climits>
 #include <limits>
 namespace petrenko {
   template<class T> class List;
@@ -230,6 +231,9 @@ int main() {
           }
           num = num * 10 + (line[count] - '0');
           ++count;
+        }
+        if (num > INT_MAX) {
+          overflow = true;
         }
         numbers.insert(num, numbers.getSize());
       } else {
