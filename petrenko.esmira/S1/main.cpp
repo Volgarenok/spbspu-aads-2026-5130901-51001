@@ -223,17 +223,18 @@ int main() {
     petrenko::List<int> numbers;
     while (count < line.size()) {
       if (line[count] >= '0' && line[count] <= '9') {
-        size_t num = 0;
+        long long num = 0;
 
         while (count < line.size() && line[count] >= '0' && line[count] <= '9') {
-          if (num > (std::numeric_limits<size_t>::max() - (line[count] - '0')) / 10) {
+          num = num * 10 + (line[count] - '0');
+          if (num > 2147483647) {
             overflow = true;
           }
-          num = num * 10 + (line[count] - '0');
           ++count;
         }
-        if (num > INT_MAX) {
-          overflow = true;
+        if (overflow) {
+          std::cerr << "Overflow" << std::endl;
+          return 1;
         }
         numbers.insert(num, numbers.getSize());
       } else {
@@ -246,6 +247,11 @@ int main() {
     numNum.insert(numbers, numNum.getSize());
   }
 
+  if (titles.getSize() == 0) {
+     std::cout << "0\n";
+     return 0;
+  }
+
   size_t countL = 0;
   for (petrenko::LIter<std::string> tit = titles.begin(); tit != titles.end(); ++tit) {
     ++countL;
@@ -253,9 +259,6 @@ int main() {
     if (countL != titles.getSize()) {
       std::cout << ' ';
     }
-  }
-  if (titles.getSize() == 0) {
-    return 0;
   }
   if (countL > 0) {
     std::cout << "\n";
@@ -292,6 +295,11 @@ int main() {
     }
   }
 
+  if (overflow) {
+    std::cerr << "Overflow";
+    return 1;
+  }
+
   if (titles.getSize() > 0) {
     size_t count = 0;
     for (petrenko::LIter<int> sums = lastLine.begin(); sums != lastLine.end(); ++sums) {
@@ -303,10 +311,6 @@ int main() {
     }
   }
 
-  if (overflow) {
-    std::cerr << "Overflow";
-    return 1;
-  }
   std::cout << "\n";
   return 0;
 }
