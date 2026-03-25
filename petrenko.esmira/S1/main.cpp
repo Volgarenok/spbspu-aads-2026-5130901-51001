@@ -256,7 +256,9 @@ int main() {
       std::cout << ' ';
     }
   }
-  std::cout << "\n";
+  if (countL > 0) {
+    std::cout << "\n";
+  }
 
   petrenko::List<int> lastLine;
   size_t maxi = 1;
