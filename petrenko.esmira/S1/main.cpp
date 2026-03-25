@@ -256,6 +256,9 @@ int main() {
       std::cout << ' ';
     }
   }
+  if (titles.getSize() == 0) {
+    return 0;
+  }
   if (countL > 0) {
     std::cout << "\n";
   }
