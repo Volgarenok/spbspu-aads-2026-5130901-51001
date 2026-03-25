@@ -4,7 +4,7 @@
 namespace petrenko {
   template<class T> class List;
 
-  template<class T>
+template<class T>
   class LIter {
     friend class List<T>;
   private:
@@ -300,7 +300,7 @@ int main() {
         std::cout << ' ';
       }
     }
-    std::cout << "\n";
   }
+  std::cout << "\n";
   return 0;
 }
