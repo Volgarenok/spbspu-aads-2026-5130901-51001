@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-
+#include <limits>
 namespace petrenko {
   template<class T> class List;
 
@@ -222,13 +222,13 @@ int main() {
     petrenko::List<int> numbers;
     while (count < line.size()) {
       if (line[count] >= '0' && line[count] <= '9') {
-        int num = 0;
+        size_t num = 0;
 
         while (count < line.size() && line[count] >= '0' && line[count] <= '9') {
-          num = num * 10 + (line[count] - '0');
-          if (num < 0) {
+          if (num > (std::numeric_limits<size_t>::max() - (line[count] - '0')) / 10) {
             overflow = true;
           }
+          num = num * 10 + (line[count] - '0');
           ++count;
         }
         numbers.insert(num, numbers.getSize());
@@ -300,7 +300,6 @@ int main() {
   }
 
   if (overflow) {
-    //throw std::overflow_error("Overflow");
     std::cerr << "Overflow";
     return 1;
   }
