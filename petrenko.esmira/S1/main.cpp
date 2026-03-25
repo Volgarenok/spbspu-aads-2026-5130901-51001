@@ -234,6 +234,7 @@ int main() {
         }
         if (overflow) {
           throw std::overflow_error("overflow");
+          return 1;
         }
         numbers.insert(num, numbers.getSize());
       } else {
@@ -303,6 +304,11 @@ int main() {
         std::cout << ' ';
       }
     }
+  }
+
+  if (overflow) {
+    throw std::overflow_error("overflow");
+    return 1;
   }
 
   std::cout << "\n";
