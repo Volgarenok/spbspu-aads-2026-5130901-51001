@@ -200,7 +200,7 @@ int main() {
   petrenko::List<std::string> titles;
   petrenko::List<petrenko::List<int>> numNum;
   std::string line;
-
+  bool overflow = false;
   while (std::getline(std::cin, line)) {
     if (line.empty()) {
       continue;
@@ -223,7 +223,6 @@ int main() {
     while (count < line.size()) {
       if (line[count] >= '0' && line[count] <= '9') {
         int num = 0;
-        bool overflow = false;
 
         while (count < line.size() && line[count] >= '0' && line[count] <= '9') {
           num = num * 10 + (line[count] - '0');
@@ -231,11 +230,6 @@ int main() {
             overflow = true;
           }
           ++count;
-        }
-        if (overflow) {
-          throw std::overflow_error("Overflow");
-          //std::cerr << "Overflow" << std::endl;
-          return 1;
         }
         numbers.insert(num, numbers.getSize());
       } else {
@@ -303,6 +297,12 @@ int main() {
         std::cout << ' ';
       }
     }
+  }
+
+  if (overflow) {
+    //throw std::overflow_error("Overflow");
+    std::cerr << "Overflow";
+    return 1;
   }
   std::cout << "\n";
   return 0;
