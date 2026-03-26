@@ -2,6 +2,8 @@
 #define LIST_HPP
 
 #include "node.hpp"
+#include <cstddef>
+#include <iterator>
 #include <utility>
 
 namespace shaykhraziev
@@ -72,6 +74,11 @@ namespace shaykhraziev
       first_(first)
     {}
 
+    LCIter(const LIter< T >& other):
+      node_(other.node_),
+      first_(other.first_)
+    {}
+
     const T& operator*() const
     {
       return static_cast< const Node< T >* >(node_)->data_;
@@ -97,6 +104,13 @@ namespace shaykhraziev
         node_ = node_->next_;
       }
       return *this;
+    }
+
+    LCIter operator++(int)
+    {
+      LCIter tmp(*this);
+      ++(*this);
+      return tmp;
     }
 
     bool operator==(const LCIter& other) const
@@ -125,7 +139,8 @@ namespace shaykhraziev
     using const_iterator = LCIter< T >;
 
     List():
-      tail_(nullptr)
+      tail_(nullptr),
+      size_(0)
     {}
 
     ~List()
@@ -134,15 +149,18 @@ namespace shaykhraziev
     }
 
     List(const List& other):
-      tail_(nullptr)
+      tail_(nullptr),
+      size_(0)
     {
       copyFrom(other);
     }
 
     List(List&& other) noexcept:
-      tail_(other.tail_)
+      tail_(other.tail_),
+      size_(other.size_)
     {
       other.tail_ = nullptr;
+      other.size_ = 0;
     }
 
     List& operator=(const List& other)
@@ -161,7 +179,9 @@ namespace shaykhraziev
       {
         clear();
         tail_ = other.tail_;
+        size_ = other.size_;
         other.tail_ = nullptr;
+        other.size_ = 0;
       }
       return *this;
     }
@@ -188,21 +208,84 @@ namespace shaykhraziev
       return const_iterator(nullptr, head());
     }
 
+    const_iterator cbegin() const noexcept
+    {
+      return begin();
+    }
+
+    const_iterator cend() const noexcept
+    {
+      return end();
+    }
+
     bool empty() const noexcept
     {
-      return tail_ == nullptr;
+      return size_ == 0;
     }
 
-    void push_back(const T& value)
+    std::size_t size() const noexcept
+    {
+      return size_;
+    }
+
+    T& front() noexcept
+    {
+      return static_cast< Node< T >* >(tail_->next_)->data_;
+    }
+
+    const T& front() const noexcept
+    {
+      return static_cast< const Node< T >* >(tail_->next_)->data_;
+    }
+
+    T& back() noexcept
+    {
+      return static_cast< Node< T >* >(tail_)->data_;
+    }
+
+    const T& back() const noexcept
+    {
+      return static_cast< const Node< T >* >(tail_)->data_;
+    }
+
+    void pushFront(const T& value)
     {
       Node< T >* node = new Node< T >(value);
-      pushBackNode(node);
+      linkFront(node);
     }
 
-    void push_back(T&& value)
+    void pushFront(T&& value)
     {
       Node< T >* node = new Node< T >(std::move(value));
-      pushBackNode(node);
+      linkFront(node);
+    }
+
+    void pushBack(const T& value)
+    {
+      Node< T >* node = new Node< T >(value);
+      linkBack(node);
+    }
+
+    void pushBack(T&& value)
+    {
+      Node< T >* node = new Node< T >(std::move(value));
+      linkBack(node);
+    }
+
+    void popFront() noexcept
+    {
+      NodeBase* first = tail_->next_;
+      if (first == tail_)
+      {
+        delete static_cast< Node< T >* >(first);
+        tail_ = nullptr;
+        size_ = 0;
+        return;
+      }
+
+      tail_->next_ = first->next_;
+      delete static_cast< Node< T >* >(first);
+      --size_;
     }
 
     void clear() noexcept
@@ -214,7 +297,6 @@ namespace shaykhraziev
 
       NodeBase* first = tail_->next_;
       tail_->next_ = nullptr;
-
       while (first)
       {
         NodeBase* next = first->next_;
@@ -223,55 +305,70 @@ namespace shaykhraziev
       }
 
       tail_ = nullptr;
+      size_ = 0;
+    }
+
+    void swap(List& other) noexcept
+    {
+      NodeBase* tmpTail = tail_;
+      tail_ = other.tail_;
+      other.tail_ = tmpTail;
+
+      std::size_t tmpSize = size_;
+      size_ = other.size_;
+      other.size_ = tmpSize;
     }
 
   private:
     NodeBase* tail_;
+    std::size_t size_;
 
     NodeBase* head() noexcept
     {
-      if (!tail_)
-      {
-        return nullptr;
-      }
-      return tail_->next_;
+      return tail_ ? tail_->next_ : nullptr;
     }
 
     const NodeBase* head() const noexcept
     {
-      if (!tail_)
-      {
-        return nullptr;
-      }
-      return tail_->next_;
+      return tail_ ? tail_->next_ : nullptr;
     }
 
-    void pushBackNode(NodeBase* node)
+    void linkFront(NodeBase* node) noexcept
     {
       if (!tail_)
       {
         node->next_ = node;
         tail_ = node;
-        return;
       }
-
-      node->next_ = tail_->next_;
-      tail_->next_ = node;
-      tail_ = node;
+      else
+      {
+        node->next_ = tail_->next_;
+        tail_->next_ = node;
+      }
+      ++size_;
     }
 
-    void swap(List& other) noexcept
+    void linkBack(NodeBase* node) noexcept
     {
-      NodeBase* tmp = tail_;
-      tail_ = other.tail_;
-      other.tail_ = tmp;
+      if (!tail_)
+      {
+        node->next_ = node;
+        tail_ = node;
+      }
+      else
+      {
+        node->next_ = tail_->next_;
+        tail_->next_ = node;
+        tail_ = node;
+      }
+      ++size_;
     }
 
     void copyFrom(const List& other)
     {
-      for (auto it = other.begin(); it != other.end(); ++it)
+      for (const_iterator it = other.begin(); it != other.end(); ++it)
       {
-        push_back(*it);
+        pushBack(*it);
       }
     }
   };
