@@ -223,18 +223,11 @@ int main() {
     petrenko::List<int> numbers;
     while (count < line.size()) {
       if (line[count] >= '0' && line[count] <= '9') {
-        long long num = 0;
+        int num = 0;
 
         while (count < line.size() && line[count] >= '0' && line[count] <= '9') {
           num = num * 10 + (line[count] - '0');
-          if (num > 2147483647) {
-            overflow = true;
-          }
           ++count;
-        }
-        if (overflow) {
-          throw std::overflow_error("overflow");
-          return 1;
         }
         numbers.insert(num, numbers.getSize());
       } else {
@@ -277,18 +270,34 @@ int main() {
   }
 
   for (size_t counter = 0; counter < maxi; ++counter) {
-    int summa = 0;
+    long long summa = 0;
     bool firstInRow = true;
+    bool rowOverflow = false;
+
     for (petrenko::LIter<petrenko::List<int>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
       if (counter < (*numbers).getSize()) {
         if (!firstInRow) {
           std::cout << ' ';
         }
         std::cout << (*numbers)[counter];
-        summa += (*numbers)[counter];
+
+        if (!rowOverflow) {
+          if ((*numbers)[counter] > 0 && summa > LLONG_MAX - (*numbers)[counter]) {
+            rowOverflow = true;
+          } else if ((*numbers)[counter] < 0 && summa < LLONG_MIN - (*numbers)[counter]) {
+            rowOverflow = true;
+          } else {
+            summa += (*numbers)[counter];
+          }
+        }
         firstInRow = false;
       }
     }
+    if (rowOverflow || summa > INT_MAX || summa < INT_MIN) {
+      std::cerr << "overflow" << '\n';
+      return 1;
+    }
+
     lastLine.insert(summa, lastLine.getSize());
     if (summa || counter < maxi - 1) {
       std::cout << "\n";
@@ -307,7 +316,7 @@ int main() {
   }
 
   if (overflow) {
-    throw std::overflow_error("overflow");
+    std::cerr << "overflow" << '\n';
     return 1;
   }
 
