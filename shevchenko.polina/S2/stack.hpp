@@ -1,0 +1,25 @@
+#ifndef STACK_HPP
+#define STACK_HPP
+
+#include <stdexcept>
+#include "../common/list.hpp"
+
+namespace shevchenko
+{
+template< class T >
+class Stack
+{
+public:
+  void push(const T& value)
+  void push(T&& value)
+  T pop()
+  T& top()
+  const T& top() const
+  bool empty() const
+  size_t size() const
+  
+private:
+};
+}
+
+#endif
