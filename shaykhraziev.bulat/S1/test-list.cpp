@@ -1,5 +1,4 @@
-#define BOOST_TEST_MODULE S1
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include "../common/list.hpp"
 
@@ -37,160 +36,184 @@ BOOST_AUTO_TEST_CASE(default_constructor_creates_empty_list)
   shaykhraziev::List< int > list;
 
   BOOST_CHECK(list.empty());
+  BOOST_TEST(list.size() == 0);
   BOOST_CHECK(list.begin() == list.end());
+  BOOST_CHECK(list.cbegin() == list.cend());
 }
 
-BOOST_AUTO_TEST_CASE(push_back_one_element)
+BOOST_AUTO_TEST_CASE(push_front_and_push_back_keep_expected_order)
 {
   shaykhraziev::List< int > list;
-  list.push_back(42);
+  list.pushBack(2);
+  list.pushFront(1);
+  list.pushBack(3);
 
-  BOOST_CHECK(!list.empty());
-  BOOST_CHECK(list.begin() != list.end());
-  BOOST_TEST(*list.begin() == 42);
+  std::vector< int > expected{1, 2, 3};
+  BOOST_TEST(toVector(list) == expected, boost::test_tools::per_element());
+  BOOST_TEST(list.front() == 1);
+  BOOST_TEST(list.back() == 3);
+  BOOST_TEST(list.size() == 3);
 }
 
-BOOST_AUTO_TEST_CASE(push_back_keeps_order)
+BOOST_AUTO_TEST_CASE(front_and_back_return_mutable_references)
 {
-  shaykhraziev::List< int > list;
-  list.push_back(10);
-  list.push_back(20);
-  list.push_back(30);
+  shaykhraziev::List< std::string > list;
+  list.pushBack("first");
+  list.pushBack("last");
 
-  std::vector< int > values = toVector(list);
-  std::vector< int > expected{10, 20, 30};
+  list.front() = "updated-first";
+  list.back() = "updated-last";
 
-  BOOST_TEST(values == expected, boost::test_tools::per_element());
+  BOOST_TEST(list.front() == "updated-first");
+  BOOST_TEST(list.back() == "updated-last");
 }
 
 BOOST_AUTO_TEST_CASE(iterator_arrow_operator_works)
 {
   shaykhraziev::List< TestData > list;
-  list.push_back(TestData{7, "alpha"});
+  list.pushBack(TestData{7, "alpha"});
 
   auto it = list.begin();
   BOOST_TEST(it->id == 7);
   BOOST_TEST(it->name == "alpha");
 }
 
-BOOST_AUTO_TEST_CASE(iterator_reaches_end_and_does_not_loop_forever)
+BOOST_AUTO_TEST_CASE(const_iterator_postfix_increment_visits_all_elements)
+{
+  shaykhraziev::List< int > temp;
+  temp.pushBack(4);
+  temp.pushBack(5);
+  temp.pushBack(6);
+
+  const shaykhraziev::List< int >& list = temp;
+  auto it = list.cbegin();
+
+  BOOST_TEST(*it++ == 4);
+  BOOST_TEST(*it++ == 5);
+  BOOST_TEST(*it == 6);
+  ++it;
+  BOOST_CHECK(it == list.cend());
+}
+
+BOOST_AUTO_TEST_CASE(pop_front_removes_elements_from_head)
 {
   shaykhraziev::List< int > list;
-  list.push_back(1);
-  list.push_back(2);
-  list.push_back(3);
+  list.pushBack(10);
+  list.pushBack(20);
+  list.pushBack(30);
 
-  auto it = list.begin();
-  int count = 0;
+  list.popFront();
+  BOOST_TEST(list.front() == 20);
+  BOOST_TEST(list.size() == 2);
 
-  while (it != list.end())
-  {
-    ++count;
-    ++it;
-    BOOST_CHECK(count <= 3);
-  }
+  list.popFront();
+  BOOST_TEST(list.front() == 30);
+  BOOST_TEST(list.back() == 30);
+  BOOST_TEST(list.size() == 1);
 
-  BOOST_TEST(count == 3);
+  list.popFront();
+  BOOST_CHECK(list.empty());
+  BOOST_TEST(list.size() == 0);
+  BOOST_CHECK(list.begin() == list.end());
 }
 
 BOOST_AUTO_TEST_CASE(clear_makes_list_empty)
 {
   shaykhraziev::List< int > list;
-  list.push_back(1);
-  list.push_back(2);
-  list.push_back(3);
+  list.pushBack(1);
+  list.pushBack(2);
+  list.pushBack(3);
 
   list.clear();
 
   BOOST_CHECK(list.empty());
+  BOOST_TEST(list.size() == 0);
   BOOST_CHECK(list.begin() == list.end());
 }
 
-BOOST_AUTO_TEST_CASE(copy_constructor_copies_all_elements)
+BOOST_AUTO_TEST_CASE(copy_constructor_creates_independent_copy)
 {
   shaykhraziev::List< int > source;
-  source.push_back(5);
-  source.push_back(6);
-  source.push_back(7);
+  source.pushBack(5);
+  source.pushBack(6);
+  source.pushBack(7);
 
   shaykhraziev::List< int > copy(source);
+  copy.popFront();
 
-  std::vector< int > sourceValues = toVector(source);
-  std::vector< int > copyValues = toVector(copy);
-  std::vector< int > expected{5, 6, 7};
-
-  BOOST_TEST(sourceValues == expected, boost::test_tools::per_element());
-  BOOST_TEST(copyValues == expected, boost::test_tools::per_element());
+  std::vector< int > sourceExpected{5, 6, 7};
+  std::vector< int > copyExpected{6, 7};
+  BOOST_TEST(toVector(source) == sourceExpected, boost::test_tools::per_element());
+  BOOST_TEST(toVector(copy) == copyExpected, boost::test_tools::per_element());
 }
 
-BOOST_AUTO_TEST_CASE(copy_assignment_copies_all_elements)
+BOOST_AUTO_TEST_CASE(copy_assignment_replaces_old_contents)
 {
   shaykhraziev::List< int > source;
-  source.push_back(11);
-  source.push_back(22);
-  source.push_back(33);
+  source.pushBack(11);
+  source.pushBack(22);
+  source.pushBack(33);
 
   shaykhraziev::List< int > target;
-  target.push_back(100);
-  target.push_back(200);
+  target.pushBack(100);
+  target.pushBack(200);
 
   target = source;
 
-  std::vector< int > values = toVector(target);
   std::vector< int > expected{11, 22, 33};
-
-  BOOST_TEST(values == expected, boost::test_tools::per_element());
+  BOOST_TEST(toVector(target) == expected, boost::test_tools::per_element());
+  BOOST_TEST(target.size() == 3);
 }
 
 BOOST_AUTO_TEST_CASE(move_constructor_transfers_elements)
 {
   shaykhraziev::List< int > source;
-  source.push_back(3);
-  source.push_back(4);
-  source.push_back(5);
+  source.pushBack(3);
+  source.pushBack(4);
+  source.pushBack(5);
 
   shaykhraziev::List< int > moved(std::move(source));
 
-  std::vector< int > values = toVector(moved);
   std::vector< int > expected{3, 4, 5};
-
-  BOOST_TEST(values == expected, boost::test_tools::per_element());
+  BOOST_TEST(toVector(moved) == expected, boost::test_tools::per_element());
   BOOST_CHECK(source.empty());
+  BOOST_TEST(source.size() == 0);
 }
 
 BOOST_AUTO_TEST_CASE(move_assignment_transfers_elements)
 {
   shaykhraziev::List< int > source;
-  source.push_back(8);
-  source.push_back(9);
+  source.pushBack(8);
+  source.pushBack(9);
 
   shaykhraziev::List< int > target;
-  target.push_back(1000);
+  target.pushBack(1000);
 
   target = std::move(source);
 
-  std::vector< int > values = toVector(target);
   std::vector< int > expected{8, 9};
-
-  BOOST_TEST(values == expected, boost::test_tools::per_element());
+  BOOST_TEST(toVector(target) == expected, boost::test_tools::per_element());
   BOOST_CHECK(source.empty());
+  BOOST_TEST(source.size() == 0);
 }
 
-BOOST_AUTO_TEST_CASE(const_iteration_works)
+BOOST_AUTO_TEST_CASE(swap_exchanges_contents_and_sizes)
 {
-  shaykhraziev::List< int > temp;
-  temp.push_back(1);
-  temp.push_back(2);
-  temp.push_back(3);
+  shaykhraziev::List< int > left;
+  left.pushBack(1);
+  left.pushBack(2);
 
-  const shaykhraziev::List< int >& list = temp;
+  shaykhraziev::List< int > right;
+  right.pushBack(10);
+  right.pushBack(20);
+  right.pushBack(30);
 
-  std::vector< int > values;
-  for (auto it = list.begin(); it != list.end(); ++it)
-  {
-    values.push_back(*it);
-  }
+  left.swap(right);
 
-  std::vector< int > expected{1, 2, 3};
-  BOOST_TEST(values == expected, boost::test_tools::per_element());
+  std::vector< int > leftExpected{10, 20, 30};
+  std::vector< int > rightExpected{1, 2};
+  BOOST_TEST(toVector(left) == leftExpected, boost::test_tools::per_element());
+  BOOST_TEST(toVector(right) == rightExpected, boost::test_tools::per_element());
+  BOOST_TEST(left.size() == 3);
+  BOOST_TEST(right.size() == 2);
 }
