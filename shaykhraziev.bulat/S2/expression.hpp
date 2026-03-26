@@ -153,7 +153,16 @@ namespace shaykhraziev
       {
         return 0;
       }
-      return lhs % rhs;
+
+      long long remainder = lhs % rhs;
+      if (remainder >= 0)
+      {
+        return remainder;
+      }
+
+      size_t divisorMagnitude = getMagnitude(rhs);
+      size_t remainderMagnitude = getMagnitude(remainder);
+      return static_cast< long long >(divisorMagnitude - remainderMagnitude);
     }
 
     inline long long safeLcm(long long lhs, long long rhs)
