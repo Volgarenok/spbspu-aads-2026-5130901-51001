@@ -78,7 +78,12 @@ namespace alekseev
       {
         throw std::domain_error("modulo by zero");
       }
-      return a % b;
+      res = a % b;
+      if (res < 0)
+      {
+        res += std::abs(b);
+      }
+      return res;
     }
     throw std::logic_error("unknown binary operator");
   }
