@@ -224,27 +224,27 @@ int main() {
     while (count < line.size()) {
       if (line[count] >= '0' && line[count] <= '9') {
         long long num = 0;
-        bool num_overflow = false;
+        bool numOverflow = false;
 
         while (count < line.size() && line[count] >= '0' && line[count] <= '9') {
           int digit = line[count] - '0';
           if (num > LLONG_MAX / 10) {
-            num_overflow = true;
+            numOverflow = true;
             overflow = true;
-          } else if (num * 10 > LLONG_MAX - digit) {
-            num_overflow = true;
-            overflow = true;
+          } else if (num == LLONG_MAX / 10) {
+            if (digit > LLONG_MAX % 10) {
+              numOverflow = true;
+              overflow = true;
+            } else {
+              num = num * 10 + digit;
+            }
+          } else {
+            num = num * 10 + digit;
           }
-          num = num * 10 + digit;
           ++count;
         }
 
-        if (num_overflow) {
-          while (count < line.size() && line[count] >= '0' && line[count] <= '9') {
-            ++count;
-          }
-          numbers.insert(0, numbers.getSize());
-        } else {
+        if (!numOverflow) {
           numbers.insert(static_cast<int>(num), numbers.getSize());
         }
 
@@ -275,7 +275,7 @@ int main() {
     std::cout << "\n";
   }
 
-  petrenko::List<int> lastLine;
+  petrenko::List<long long> lastLine;
   size_t maxi = 1;
   for (petrenko::LIter<petrenko::List<int>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
     if ((*numbers).getSize() > maxi) {
@@ -318,16 +318,11 @@ int main() {
     if (summa || counter < maxi - 1) {
       std::cout << "\n";
     }
-
-    if (summa > INT_MAX || summa < INT_MIN) {
-      std::cerr << "overflow" << '\n';
-      return 1;
-    }
   }
 
   if (titles.getSize() > 0) {
     size_t count = 0;
-    for (petrenko::LIter<int> sums = lastLine.begin(); sums != lastLine.end(); ++sums) {
+    for (petrenko::LIter<long long> sums = lastLine.begin(); sums != lastLine.end(); ++sums) {
       ++count;
       std::cout << (*sums);
       if (count != lastLine.getSize()) {
