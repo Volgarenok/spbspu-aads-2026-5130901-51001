@@ -18,12 +18,12 @@ shaykhraziev::List< shaykhraziev::NamedSeq > shaykhraziev::readInput(std::istrea
     {
       size_t value = 0;
       in >> value;
-      seq.nums.push_back(value);
+      seq.nums.pushBack(value);
       skipSpaces(in);
     }
     skipLine(in);
 
-    seqs.push_back(std::move(seq));
+    seqs.pushBack(std::move(seq));
   }
 
   return seqs;
@@ -59,7 +59,7 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
   List< List< size_t >::const_iterator > iters;
   for (auto s = seqs.begin(); s != seqs.end(); ++s)
   {
-    iters.push_back(s->nums.begin());
+    iters.pushBack(s->nums.begin());
   }
 
   List< List< size_t > > rows;
@@ -84,7 +84,7 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
       {
         hasRow = true;
         size_t value = **it;
-        row.push_back(value);
+        row.pushBack(value);
 
         if (!rowOverflow)
         {
@@ -108,10 +108,10 @@ int shaykhraziev::printSequences(std::ostream& out, std::ostream& err, const Lis
 
     if (hasRow)
     {
-      rows.push_back(std::move(row));
+      rows.pushBack(std::move(row));
       if (!rowOverflow)
       {
-        sums.push_back(sum);
+        sums.pushBack(sum);
       }
     }
   }
