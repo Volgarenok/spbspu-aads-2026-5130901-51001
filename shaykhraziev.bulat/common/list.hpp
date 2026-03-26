@@ -3,6 +3,7 @@
 
 #include "node.hpp"
 #include <cstddef>
+#include <iterator>
 #include <utility>
 
 namespace shaykhraziev
@@ -105,6 +106,13 @@ namespace shaykhraziev
       return *this;
     }
 
+    LCIter operator++(int)
+    {
+      LCIter tmp(*this);
+      ++(*this);
+      return tmp;
+    }
+
     bool operator==(const LCIter& other) const
     {
       return node_ == other.node_;
@@ -198,6 +206,16 @@ namespace shaykhraziev
     const_iterator end() const noexcept
     {
       return const_iterator(nullptr, head());
+    }
+
+    const_iterator cbegin() const noexcept
+    {
+      return begin();
+    }
+
+    const_iterator cend() const noexcept
+    {
+      return end();
     }
 
     bool empty() const noexcept
