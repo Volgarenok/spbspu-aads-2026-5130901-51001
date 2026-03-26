@@ -224,16 +224,30 @@ int main() {
     while (count < line.size()) {
       if (line[count] >= '0' && line[count] <= '9') {
         long long num = 0;
+        bool num_overflow = false;
 
         while (count < line.size() && line[count] >= '0' && line[count] <= '9') {
-          if (num > (LLONG_MAX - (line[count] - '0')) / 10) {
+          int digit = line[count] - '0';
+          if (num > LLONG_MAX / 10) {
+            num_overflow = true;
+            overflow = true;
+          } else if (num * 10 > LLONG_MAX - digit) {
+            num_overflow = true;
             overflow = true;
           }
-          num = num * 10 + (line[count] - '0');
+          num = num * 10 + digit;
           ++count;
         }
 
-        numbers.insert(static_cast<int>(num), numbers.getSize());
+        if (num_overflow) {
+          while (count < line.size() && line[count] >= '0' && line[count] <= '9') {
+            ++count;
+          }
+          numbers.insert(0, numbers.getSize());
+        } else {
+          numbers.insert(static_cast<int>(num), numbers.getSize());
+        }
+
       } else {
         ++count;
       }
@@ -288,8 +302,10 @@ int main() {
         if (!rowOverflow) {
           if ((*numbers)[counter] > 0 && summa > LLONG_MAX - (*numbers)[counter]) {
             rowOverflow = true;
+            overflow = true;
           } else if ((*numbers)[counter] < 0 && summa < LLONG_MIN - (*numbers)[counter]) {
             rowOverflow = true;
+            overflow = true;
           } else {
             summa += (*numbers)[counter];
           }
@@ -303,7 +319,7 @@ int main() {
       std::cout << "\n";
     }
 
-    if (rowOverflow || summa > INT_MAX || summa < INT_MIN) {
+    if (summa > INT_MAX || summa < INT_MIN) {
       std::cerr << "overflow" << '\n';
       return 1;
     }
