@@ -1,5 +1,4 @@
-#define BOOST_TEST_MODULE alekseev_s2_stack
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <stdexcept>
 #include <utility>
@@ -29,7 +28,7 @@ BOOST_AUTO_TEST_CASE(top_does_not_remove)
   BOOST_TEST(st.drop() == 10);
 }
 
-BOOST_AUTO_TEST_CASE(empty_exceptions)
+BOOST_AUTO_TEST_CASE(stack_empty_exceptions)
 {
   alekseev::Stack< int > st;
   BOOST_CHECK_THROW(st.drop(), std::logic_error);
@@ -62,7 +61,7 @@ BOOST_AUTO_TEST_CASE(copy_semantics_preserve_order)
   BOOST_TEST(st.drop() == 1);
 }
 
-BOOST_AUTO_TEST_CASE(move_semantics_source_valid)
+BOOST_AUTO_TEST_CASE(stack_move_semantics_source_valid)
 {
   alekseev::Stack< int > st;
   st.push(1);

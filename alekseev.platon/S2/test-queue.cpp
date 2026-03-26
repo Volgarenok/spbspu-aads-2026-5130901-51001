@@ -1,5 +1,4 @@
-#define BOOST_TEST_MODULE alekseev_s2_queue
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <stdexcept>
 
@@ -28,7 +27,7 @@ BOOST_AUTO_TEST_CASE(front_does_not_remove)
   BOOST_TEST(q.drop() == 20);
 }
 
-BOOST_AUTO_TEST_CASE(empty_exceptions)
+BOOST_AUTO_TEST_CASE(queue_empty_exceptions)
 {
   alekseev::Queue< int > q;
   BOOST_CHECK_THROW(q.drop(), std::logic_error);
@@ -71,7 +70,7 @@ BOOST_AUTO_TEST_CASE(copy_semantics)
   BOOST_TEST(q.drop() == 2);
 }
 
-BOOST_AUTO_TEST_CASE(move_semantics_source_valid)
+BOOST_AUTO_TEST_CASE(queue_move_semantics_source_valid)
 {
   alekseev::Queue< int > q;
   q.push(5);

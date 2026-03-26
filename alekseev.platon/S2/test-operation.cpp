@@ -1,6 +1,6 @@
-#define BOOST_TEST_MODULE alekseev_s2_operation
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
+#include <climits>
 #include <stdexcept>
 
 #include "operation.hpp"
