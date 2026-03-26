@@ -223,13 +223,17 @@ int main() {
     petrenko::List<int> numbers;
     while (count < line.size()) {
       if (line[count] >= '0' && line[count] <= '9') {
-        int num = 0;
+        long long num = 0;
 
         while (count < line.size() && line[count] >= '0' && line[count] <= '9') {
+          if (num > (LLONG_MAX - (line[count] - '0')) / 10) {
+            overflow = true;
+          }
           num = num * 10 + (line[count] - '0');
           ++count;
         }
-        numbers.insert(num, numbers.getSize());
+
+        numbers.insert(static_cast<int>(num), numbers.getSize());
       } else {
         ++count;
       }
@@ -293,14 +297,15 @@ int main() {
         firstInRow = false;
       }
     }
-    if (rowOverflow || summa > INT_MAX || summa < INT_MIN) {
-      std::cerr << "overflow" << '\n';
-      return 1;
-    }
 
     lastLine.insert(summa, lastLine.getSize());
     if (summa || counter < maxi - 1) {
       std::cout << "\n";
+    }
+
+    if (rowOverflow || summa > INT_MAX || summa < INT_MIN) {
+      std::cerr << "overflow" << '\n';
+      return 1;
     }
   }
 
@@ -316,7 +321,7 @@ int main() {
   }
 
   if (overflow) {
-    std::cerr << "overflow" << '\n';
+    std::cerr << "\noverflow" << '\n';
     return 1;
   }
 
