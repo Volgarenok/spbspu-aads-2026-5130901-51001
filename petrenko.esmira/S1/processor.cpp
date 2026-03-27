@@ -52,14 +52,8 @@ namespace petrenko {
           }
 
           if (!numOverflow) {
-            if (num > std::numeric_limits<size_t>::max()) {
-              result.overflow = true;
-              numbers.insert(static_cast<size_t>(num), numbers.getSize());
-            } else {
-              numbers.insert(static_cast<size_t>(num), numbers.getSize());
-            }
+            numbers.insert(static_cast<int>(num), numbers.getSize());
           }
-
         } else {
           ++count;
         }
@@ -121,6 +115,7 @@ namespace petrenko {
           if (!rowOverflow) {
             if (summa > std::numeric_limits<size_t>::max() - (*numbers)[counter]) {
               rowOverflow = true;
+              result.overflow = true;
             } else {
               summa += (*numbers)[counter];
             }
