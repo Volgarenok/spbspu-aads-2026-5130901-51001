@@ -1,6 +1,10 @@
 #include "calculator.hpp"
 #include <stdexcept>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+#include <cstdlib>
+>>>>>>> d78839d (last)
 #include <limits>
 
 namespace shevchenko
