@@ -70,6 +70,7 @@ namespace petrenko {
   }
 
   void printResults(std::ostream& out, std::ostream& err, const ProcessResult& result) {
+    bool rowOverflow = false;
     if (result.titles.getSize() == 0) {
       out << "0\n";
       return;
@@ -102,7 +103,6 @@ namespace petrenko {
     for (size_t counter = 0; counter < maxi; ++counter) {
       unsigned long long summa = 0;
       bool firstInRow = true;
-      bool rowOverflow = false;
 
       for (petrenko::LCIter<petrenko::List<size_t>> numbers = result.numbers.cbegin();
            numbers != result.numbers.cend(); ++numbers) {
