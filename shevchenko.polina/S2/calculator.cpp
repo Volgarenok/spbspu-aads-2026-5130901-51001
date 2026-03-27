@@ -76,20 +76,22 @@ void Calculator::tokenize(const std::string& line, Queue<Token>& tokens)
   
 ll_t Calculator::apply(char op, ll_t a, ll_t b)
 {
-  switch (op)
+  if (op == '+') return a + b;
+  if (op == '-') return a - b;
+  if (op == '*') return a * b;
+  if (op == '/')
   {
-    case '+': return a + b;
-    case '-': return a - b;
-    case '*': return a * b;
-    case '/':
-      if (b == 0) throw std::logic_error("division by zero");
-      return a / b;
-    case '%':
-      if (b == 0) throw std::logic_error("modulo by zero");
-      return a % b;
-    case '|': return a | b;
-    default: throw std::logic_error("unknown operator");
+    if (b == 0) throw std::logic_error("division by zero");
+    return a / b;
   }
+  if (op == '%')
+  {
+    if (b == 0) throw std::logic_error("modulo by zero");
+    return a % b;
+  }
+  if (op == '|') return a | b;
+
+  throw std::logic_error("unknown operator");
 }
 
 ll_t Calculator::evaluate(const std::string& line)
