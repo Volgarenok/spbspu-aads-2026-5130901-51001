@@ -52,8 +52,14 @@ namespace petrenko {
           }
 
           if (!numOverflow) {
-            numbers.insert(static_cast<size_t>(num), numbers.getSize());
+            if (num > std::numeric_limits<size_t>::max()) {
+              result.overflow = true;
+              numbers.insert(static_cast<size_t>(num), numbers.getSize());
+            } else {
+              numbers.insert(static_cast<size_t>(num), numbers.getSize());
+            }
           }
+
         } else {
           ++count;
         }
