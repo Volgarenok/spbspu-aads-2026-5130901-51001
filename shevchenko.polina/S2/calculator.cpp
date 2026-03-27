@@ -72,88 +72,88 @@ void Calculator::tokenize(const std::string& line, Queue<Token>& tokens)
       throw std::logic_error("unknown character");
     }
   }
+}
   
-  ll_t Calculator::apply(char op, ll_t a, ll_t b)
+ll_t Calculator::apply(char op, ll_t a, ll_t b)
+{
+  switch (op)
   {
-    switch (op)
+    case '+': return a + b;
+    case '-': return a - b;
+    case '*': return a * b;
+    case '/':
+      if (b == 0) throw std::logic_error("division by zero");
+      return a / b;
+    case '%':
+      if (b == 0) throw std::logic_error("modulo by zero");
+      return a % b;
+    case '|': return a | b;
+    default: throw std::logic_error("unknown operator");
+  }
+}
+
+ll_t Calculator::evaluate(const std::string& line)
+{
+  Queue<Token> tokens;
+  tokenize(line, tokens);
+
+  Stack<ll_t> values;
+  Stack<char> operators;
+
+  while (!tokens.empty())
+  {
+    Token t = tokens.pop();
+
+    if (t.isNumber)
     {
-      case '+': return a + b;
-      case '-': return a - b;
-      case '*': return a * b;
-      case '/':
-        if (b == 0) throw std::logic_error("division by zero");
-        return a / b;
-      case '%':
-        if (b == 0) throw std::logic_error("modulo by zero");
-        return a % b;
-      case '|': return a | b;
-      default: throw std::logic_error("unknown operator");
+      values.push(t.number);
+    }
+    else if (t.op == "(")
+    {
+      operators.push('(');
+    }
+    else if (t.op == ")")
+    {
+      while (!operators.empty() && operators.top() != '(')
+      {
+        char op = operators.pop();
+        ll_t b = values.pop();
+        ll_t a = values.pop();
+        values.push(apply(op, a, b));
+      }
+      if (operators.empty())
+      {
+        throw std::logic_error("mismatched parentheses");
+      }
+      operators.pop(); // удаляем '('
+    }
+    else if (isOperator(t.op[0]))
+    {
+      char op = t.op[0];
+      while (!operators.empty() && operators.top() != '(' &&
+             priority(operators.top()) >= priority(op))
+      {
+        char topOp = operators.pop();
+        ll_t b = values.pop();
+        ll_t a = values.pop();
+        values.push(apply(topOp, a, b));
+      }
+      operators.push(op);
     }
   }
-  
-  ll_t Calculator::evaluate(const std::string& line)
+
+  while (!operators.empty())
   {
-    Queue<Token> tokens;
-    tokenize(line, tokens);
-    
-    Stack<ll_t> values;
-    Stack<char> operators;
-    
-    while (!tokens.empty())
-    {
-      Token t = tokens.pop();
-      
-      if (t.isNumber)
-      {
-        values.push(t.number);
-      }
-      else if (t.op == "(")
-      {
-        operators.push('(');
-      }
-      else if (t.op == ")")
-      {
-        while (!operators.empty() && operators.top() != '(')
-        {
-          char op = operators.pop();
-          ll_t b = values.pop();
-          ll_t a = values.pop();
-          values.push(apply(op, a, b));
-        }
-        if (operators.empty())
-        {
-          throw std::logic_error("mismatched parentheses");
-        }
-        operators.pop();
-      }
-      else if (isOperator(t.op[0]))
-      {
-        char op = t.op[0];
-        while (!operators.empty() && operators.top() != '(' &&
-               priority(operators.top()) >= priority(op))
-        {
-          char topOp = operators.pop();
-          ll_t b = values.pop();
-          ll_t a = values.pop();
-          values.push(apply(topOp, a, b));
-        }
-        operators.push(op);
-      }
-    }
-    
-    while (!operators.empty())
-    {
-      char op = operators.pop();
-      ll_t b = values.pop();
-      ll_t a = values.pop();
-      values.push(apply(op, a, b));
-    }
-    
-    if (values.size() != 1)
-    {
-      throw std::logic_error("invalid expression");
-    }
-    
-    return values.pop();
+    char op = operators.pop();
+    ll_t b = values.pop();
+    ll_t a = values.pop();
+    values.push(apply(op, a, b));
   }
+
+  if (values.size() != 1)
+  {
+    throw std::logic_error("invalid expression");
+  }
+  return values.pop();
+}
 }
