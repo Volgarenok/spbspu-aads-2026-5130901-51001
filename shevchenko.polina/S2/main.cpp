@@ -17,13 +17,13 @@ int main(int argc, char* argv[])
     file.open(argv[1]);
     if (!file)
     {
-      std::cerr << "error: cannot open file\n";
+      cerr << "error: cannot open file\n";
       return 1;
     }
     input = &file;
   }
 
-  Stack< ll_t > results;
+  List<ll_t> results;
   string line;
 
   try
@@ -34,28 +34,54 @@ int main(int argc, char* argv[])
       if (line.empty()) continue;
 
       ll_t result = calc.evaluate(line);
-      results.push(result);
+      results.pushBack(result);
     }
 
-    Stack< ll_t > reversed;
-    while (!results.empty())
+    if (results.empty())
     {
-      reversed.push(results.pop());
+      cout << endl;
+      return 0;
     }
 
     bool first = true;
-    while (!reversed.empty())
+    auto it = results.last();
+    while (true)
     {
-      if (!first) cout << ' ';
-      cout << reversed.pop();
+      if (!first)
+      {
+        cout << " ";
+      }
+      cout << *it;
       first = false;
+
+      if (it == results.begin())
+      {
+        break;
+      }
+      --it;
     }
-    cout << '\n';
+    cout << "\n";
+  }
+  catch (const overflow_error& e)
+  {
+    cerr << e.what() << "\n";
+    return 1;
+  }
+  catch (const logic_error& e)
+  {
+    cerr << e.what() << "\n";
+    return 1;
   }
   catch (const exception& e)
   {
-    cerr << e.what() << '\n';
+    cerr << e.what() << "\n";
     return 1;
   }
+  catch (...)
+  {
+    cerr << "unknown error\n";
+    return 1;
+  }
+
   return 0;
 }
