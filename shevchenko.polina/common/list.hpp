@@ -269,6 +269,21 @@ public:
     return const_iterator(nullptr);
   }
 
+  iterator last() noexcept
+  {
+    return iterator(tail_);
+  }
+
+  const_iterator last() const noexcept
+  {
+    return const_iterator(tail_);
+  }
+
+  const_iterator clast() const noexcept
+  {
+    return const_iterator(tail_);
+  }
+
   T& front()
   {
     return head_->data;
