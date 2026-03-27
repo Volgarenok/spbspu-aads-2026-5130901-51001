@@ -143,7 +143,7 @@ namespace petrenko {
         out << *sums;
         first = false;
       }
-      out << "\n";
     }
+    out << "\n";
   }
 }
