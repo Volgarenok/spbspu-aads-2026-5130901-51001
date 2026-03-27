@@ -111,7 +111,7 @@ namespace petrenko {
       return *this;
     }
 
-    T& operator[](const int index) {
+    const T& operator[](const int index) const {
       int counter = 0;
       Node* current = this->head;
 
@@ -126,7 +126,7 @@ namespace petrenko {
       return current->data;
     }
 
-    size_t getSize() {
+    size_t getSize() const {
       return Size;
     }
 

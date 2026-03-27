@@ -77,7 +77,7 @@ namespace petrenko {
     }
 
     bool first = true;
-    for (petrenko::LIter<std::string> tit = result.titles.begin(); tit != result.titles.end(); ++tit) {
+    for (petrenko::LCIter<std::string> tit = result.titles.begin(); tit != result.titles.end(); ++tit) {
       if (!first) {
         out << ' ';
       }
@@ -89,7 +89,7 @@ namespace petrenko {
     petrenko::List<size_t> lastLine;
     size_t maxi = 1;
 
-    for (petrenko::LIter<petrenko::List<size_t>> numbers = result.numbers.begin();
+    for (petrenko::LCIter<petrenko::List<size_t>> numbers = result.numbers.begin();
          numbers != result.numbers.end(); ++numbers) {
       if ((*numbers).getSize() > maxi) {
         maxi = (*numbers).getSize();
@@ -105,7 +105,7 @@ namespace petrenko {
       bool firstInRow = true;
       bool rowOverflow = false;
 
-      for (petrenko::LIter<petrenko::List<size_t>> numbers = result.numbers.begin();
+      for (petrenko::LCIter<petrenko::List<size_t>> numbers = result.numbers.begin();
            numbers != result.numbers.end(); ++numbers) {
         if (counter < (*numbers).getSize()) {
           if (!firstInRow) {
@@ -135,7 +135,7 @@ namespace petrenko {
     }
 
     first = true;
-    for (petrenko::LIter<size_t> sums = lastLine.begin(); sums != lastLine.end(); ++sums) {
+    for (petrenko::LCIter<size_t> sums = lastLine.begin(); sums != lastLine.end(); ++sums) {
       if (!first) {
         out << ' ';
       }
