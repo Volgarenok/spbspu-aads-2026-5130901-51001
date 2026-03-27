@@ -76,7 +76,7 @@ namespace petrenko {
     }
 
     bool first = true;
-    for (petrenko::LCIter<std::string> tit = result.titles.begin(); tit != result.titles.end(); ++tit) {
+    for (petrenko::LCIter<std::string> tit = result.titles.cbegin(); tit != result.titles.cend(); ++tit) {
       if (!first) {
         out << ' ';
       }
