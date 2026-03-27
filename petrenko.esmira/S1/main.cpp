@@ -321,7 +321,7 @@ int main() {
   }
 
    if (overflow) {
-     std::cerr << "\noverflow" << '\n';
+     std::cerr << "overflow" << '\n';
      return 1;
    }
 
