@@ -115,7 +115,6 @@ namespace petrenko {
           if (!rowOverflow) {
             if (summa > std::numeric_limits<size_t>::max() - (*numbers)[counter]) {
               rowOverflow = true;
-              result.overflow = true;
             } else {
               summa += (*numbers)[counter];
             }
@@ -130,7 +129,7 @@ namespace petrenko {
       }
     }
 
-    if (result.overflow) {
+    if (result.overflow || rowOverflow) {
       err << "overflow" << '\n';
     }
 
