@@ -251,6 +251,7 @@ ll_t Calculator::evaluate(const std::string& line)
   Stack<ll_t> values;
   Stack<char> operators;
   bool needOperand = true;
+<<<<<<< HEAD
 
   while (!tokens.empty())
   {
@@ -293,6 +294,8 @@ ll_t Calculator::evaluate(const std::string& line)
 >>>>>>> dc1dfea (content)
   Stack<ll_t> values;
   Stack<char> operators;
+=======
+>>>>>>> a074866 (fix calculator.cpp (errors))
 
   while (!tokens.empty())
   {
@@ -300,17 +303,38 @@ ll_t Calculator::evaluate(const std::string& line)
 
     if (t.isNumber)
     {
+      if (!needOperand)
+      {
+        throw std::logic_error("invalid expression");
+      }
       values.push(t.number);
+      needOperand = false;
     }
     else if (t.op == "(")
     {
+      if (!needOperand)
+      {
+        throw std::logic_error("invalid expression");
+      }
       operators.push('(');
+      needOperand = true;
     }
     else if (t.op == ")")
     {
+      if (needOperand)
+      {
+        throw std::logic_error("invalid expression");
+      }
       while (!operators.empty() && operators.top() != '(')
       {
+<<<<<<< HEAD
 >>>>>>> 4ca3688 (test)
+=======
+        if (values.size() < 2)
+        {
+          throw std::logic_error("invalid expression");
+        }
+>>>>>>> a074866 (fix calculator.cpp (errors))
         char op = operators.pop();
         ll_t b = values.pop();
         ll_t a = values.pop();
@@ -320,6 +344,7 @@ ll_t Calculator::evaluate(const std::string& line)
       {
         throw std::logic_error("mismatched parentheses");
       }
+<<<<<<< HEAD
 <<<<<<< HEAD
       operators.pop();
       needOperand = false;
@@ -336,23 +361,41 @@ ll_t Calculator::evaluate(const std::string& line)
     else if (isOperator(t.op[0]))
     {
 >>>>>>> 4ca3688 (test)
+=======
+      operators.pop();
+      needOperand = false;
+    }
+    else if (isOperator(t.op[0]))
+    {
+      if (needOperand)
+      {
+        throw std::logic_error("invalid expression");
+      }
+>>>>>>> a074866 (fix calculator.cpp (errors))
       char op = t.op[0];
       while (!operators.empty() && operators.top() != '(' &&
              priority(operators.top()) >= priority(op))
       {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> a074866 (fix calculator.cpp (errors))
         if (values.size() < 2)
         {
           throw std::logic_error("invalid expression");
         }
+<<<<<<< HEAD
 =======
 >>>>>>> 4ca3688 (test)
+=======
+>>>>>>> a074866 (fix calculator.cpp (errors))
         char topOp = operators.pop();
         ll_t b = values.pop();
         ll_t a = values.pop();
         values.push(apply(topOp, a, b));
       }
       operators.push(op);
+<<<<<<< HEAD
 <<<<<<< HEAD
       needOperand = true;
     }
@@ -370,12 +413,27 @@ ll_t Calculator::evaluate(const std::string& line)
       throw std::logic_error("invalid expression");
     }
 =======
+=======
+      needOperand = true;
+>>>>>>> a074866 (fix calculator.cpp (errors))
     }
   }
-
+  
+  if (needOperand)
+  {
+    throw std::logic_error("invalid expression");
+  }
+  
   while (!operators.empty())
   {
+<<<<<<< HEAD
 >>>>>>> 4ca3688 (test)
+=======
+    if (values.size() < 2)
+    {
+      throw std::logic_error("invalid expression");
+    }
+>>>>>>> a074866 (fix calculator.cpp (errors))
     char op = operators.pop();
     ll_t b = values.pop();
     ll_t a = values.pop();
