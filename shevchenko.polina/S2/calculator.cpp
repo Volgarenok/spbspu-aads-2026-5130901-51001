@@ -1,5 +1,6 @@
 #include "calculator.hpp"
 #include <stdexcept>
+<<<<<<< HEAD
 #include <limits>
 
 namespace shevchenko
@@ -13,6 +14,12 @@ constexpr ll_t LL_MIN()
   return std::numeric_limits<ll_t>::min();
 }
 
+=======
+#include <cstdlib>
+
+namespace shevchenko
+{
+>>>>>>> 4ca3688 (test)
 void Calculator::skipSpaces(const std::string& line, size_t& pos)
 {
   while (pos < line.size() && line[pos] == ' ')
@@ -44,10 +51,13 @@ ll_t Calculator::parseNumber(const std::string& line, size_t& pos)
   ll_t result = 0;
   while (pos < line.size() && isNumber(line[pos]))
   {
+<<<<<<< HEAD
     if (result > LL_MAX() / 10)
     {
       throw std::overflow_error("overflow");
     }
+=======
+>>>>>>> 4ca3688 (test)
     result = result * 10 + (line[pos] - '0');
     ++pos;
   }
@@ -58,12 +68,20 @@ void Calculator::tokenize(const std::string& line, Queue<Token>& tokens)
 {
   size_t pos = 0;
   size_t len = line.size();
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 4ca3688 (test)
   while (pos < len)
   {
     skipSpaces(line, pos);
     if (pos >= len) break;
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 4ca3688 (test)
     if (isNumber(line[pos]))
     {
       ll_t num = parseNumber(line, pos);
@@ -89,6 +107,7 @@ void Calculator::tokenize(const std::string& line, Queue<Token>& tokens)
 
 ll_t Calculator::apply(char op, ll_t a, ll_t b)
 {
+<<<<<<< HEAD
   switch (op)
   {
     case '+':
@@ -138,12 +157,31 @@ ll_t Calculator::apply(char op, ll_t a, ll_t b)
     default:
       throw std::logic_error("unknown operator");
   }
+=======
+  if (op == '+') return a + b;
+  if (op == '-') return a - b;
+  if (op == '*') return a * b;
+  if (op == '/')
+  {
+    if (b == 0) throw std::logic_error("division by zero");
+    return a / b;
+  }
+  if (op == '%')
+  {
+    if (b == 0) throw std::logic_error("modulo by zero");
+    return a % b;
+  }
+  if (op == '|') return a | b;
+  
+  throw std::logic_error("unknown operator");
+>>>>>>> 4ca3688 (test)
 }
 
 ll_t Calculator::evaluate(const std::string& line)
 {
   Queue<Token> tokens;
   tokenize(line, tokens);
+<<<<<<< HEAD
 
   Stack<ll_t> values;
   Stack<char> operators;
@@ -183,6 +221,28 @@ ll_t Calculator::evaluate(const std::string& line)
         {
           throw std::logic_error("invalid expression");
         }
+=======
+  
+  Stack<ll_t> values;
+  Stack<char> operators;
+  
+  while (!tokens.empty())
+  {
+    Token t = tokens.pop();
+    
+    if (t.isNumber)
+    {
+      values.push(t.number);
+    }
+    else if (t.op == "(")
+    {
+      operators.push('(');
+    }
+    else if (t.op == ")")
+    {
+      while (!operators.empty() && operators.top() != '(')
+      {
+>>>>>>> 4ca3688 (test)
         char op = operators.pop();
         ll_t b = values.pop();
         ll_t a = values.pop();
@@ -192,6 +252,7 @@ ll_t Calculator::evaluate(const std::string& line)
       {
         throw std::logic_error("mismatched parentheses");
       }
+<<<<<<< HEAD
       operators.pop();
       needOperand = false;
     }
@@ -201,20 +262,30 @@ ll_t Calculator::evaluate(const std::string& line)
       {
         throw std::logic_error("invalid expression");
       }
+=======
+      operators.pop(); // удаляем '('
+    }
+    else if (isOperator(t.op[0]))
+    {
+>>>>>>> 4ca3688 (test)
       char op = t.op[0];
       while (!operators.empty() && operators.top() != '(' &&
              priority(operators.top()) >= priority(op))
       {
+<<<<<<< HEAD
         if (values.size() < 2)
         {
           throw std::logic_error("invalid expression");
         }
+=======
+>>>>>>> 4ca3688 (test)
         char topOp = operators.pop();
         ll_t b = values.pop();
         ll_t a = values.pop();
         values.push(apply(topOp, a, b));
       }
       operators.push(op);
+<<<<<<< HEAD
       needOperand = true;
     }
   }
@@ -230,12 +301,23 @@ ll_t Calculator::evaluate(const std::string& line)
     {
       throw std::logic_error("invalid expression");
     }
+=======
+    }
+  }
+  
+  while (!operators.empty())
+  {
+>>>>>>> 4ca3688 (test)
     char op = operators.pop();
     ll_t b = values.pop();
     ll_t a = values.pop();
     values.push(apply(op, a, b));
   }
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 4ca3688 (test)
   if (values.size() != 1)
   {
     throw std::logic_error("invalid expression");

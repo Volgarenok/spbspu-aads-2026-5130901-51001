@@ -14,12 +14,20 @@ public:
   {
     data_.pushBack(value);
   }
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 4ca3688 (test)
   void push(T&& value)
   {
     data_.pushBack(std::move(value));
   }
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 4ca3688 (test)
   T pop()
   {
     if (empty())
@@ -30,7 +38,11 @@ public:
     data_.popFront();
     return value;
   }
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 4ca3688 (test)
   T& front()
   {
     if (empty())
@@ -39,7 +51,11 @@ public:
     }
     return data_.front();
   }
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 4ca3688 (test)
   const T& front() const
   {
     if (empty())
@@ -48,17 +64,29 @@ public:
     }
     return data_.front();
   }
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 4ca3688 (test)
   bool empty() const
   {
     return data_.empty();
   }
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 4ca3688 (test)
   size_t size() const
   {
     return data_.size();
   }
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 4ca3688 (test)
 private:
   List< T > data_;
 };
