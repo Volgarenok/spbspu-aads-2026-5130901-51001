@@ -8,10 +8,10 @@ using namespace std;
 int main(int argc, char* argv[])
 {
   using namespace shevchenko;
-  
+
   istream* input = &cin;
   ifstream file;
-  
+
   if (argc >= 2)
   {
     file.open(argv[1]);

@@ -70,3 +70,38 @@ BOOST_AUTO_TEST_CASE(calc_bitwise_or_precedence)
   BOOST_TEST(calc.evaluate("2 | 3 * 4") == 14);
   BOOST_TEST(calc.evaluate("( 1 | 2 ) + 3") == 6);
 }
+
+BOOST_AUTO_TEST_CASE(calc_division_by_zero)
+{
+  Calculator calc;
+  BOOST_CHECK_THROW(calc.evaluate("5 / 0"), std::logic_error);
+}
+
+BOOST_AUTO_TEST_CASE(calc_modulo_by_zero)
+{
+  Calculator calc;
+  BOOST_CHECK_THROW(calc.evaluate("5 % 0"), std::logic_error);
+}
+
+BOOST_AUTO_TEST_CASE(calc_mismatched_parentheses)
+{
+  Calculator calc;
+  BOOST_CHECK_THROW(calc.evaluate("( 1 + 2"), std::logic_error);
+  BOOST_CHECK_THROW(calc.evaluate("1 + 2 )"), std::logic_error);
+  BOOST_CHECK_THROW(calc.evaluate("( 1 + 2 ) )"), std::logic_error);
+}
+
+BOOST_AUTO_TEST_CASE(calc_invalid_exp)
+{
+  Calculator calc;
+  BOOST_CHECK_THROW(calc.evaluate("1 2 +"), std::logic_error);
+  BOOST_CHECK_THROW(calc.evaluate("+ 1 2"), std::logic_error);
+  BOOST_CHECK_THROW(calc.evaluate("1 +"), std::logic_error);
+}
+
+BOOST_AUTO_TEST_CASE(calc_unknown_token)
+{
+  Calculator calc;
+  BOOST_CHECK_THROW(calc.evaluate("2 & 3"), std::logic_error);
+  BOOST_CHECK_THROW(calc.evaluate("1 ^ 2"), std::logic_error);
+}

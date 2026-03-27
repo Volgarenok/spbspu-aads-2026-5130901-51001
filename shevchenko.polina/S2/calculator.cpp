@@ -45,12 +45,12 @@ void Calculator::tokenize(const std::string& line, Queue<Token>& tokens)
 {
   size_t pos = 0;
   size_t len = line.size();
-  
+
   while (pos < len)
   {
     skipSpaces(line, pos);
     if (pos >= len) break;
-    
+
     if (isNumber(line[pos]))
     {
       ll_t num = parseNumber(line, pos);
@@ -73,7 +73,7 @@ void Calculator::tokenize(const std::string& line, Queue<Token>& tokens)
     }
   }
 }
-  
+
 ll_t Calculator::apply(char op, ll_t a, ll_t b)
 {
   if (op == '+') return a + b;
