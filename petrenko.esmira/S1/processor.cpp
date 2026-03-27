@@ -131,9 +131,10 @@ namespace petrenko {
 
     if (result.overflow || rowOverflow) {
       err << "overflow" << '\n';
+      rowOverflow = true;
     }
 
-    if (!result.overflow) {
+    if (!rowOverflow) {
       first = true;
       for (petrenko::LCIter<size_t> sums = lastLine.cbegin(); sums != lastLine.cend(); ++sums) {
         if (!first) {
