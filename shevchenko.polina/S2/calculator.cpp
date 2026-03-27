@@ -210,8 +210,12 @@ ll_t Calculator::apply(char op, ll_t a, ll_t b)
     }
     return a * b;
   }
+<<<<<<< HEAD
   
 >>>>>>> a3c873f (fix)
+=======
+
+>>>>>>> be21926 (fixx)
   if (op == '+') return a + b;
   if (op == '-') return a - b;
   if (op == '*') return a * b;
