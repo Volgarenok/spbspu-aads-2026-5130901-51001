@@ -228,7 +228,7 @@ int main() {
         bool numOverflow = false;
 
         while (count < line.size() && line[count] >= '0' && line[count] <= '9') {
-          int digit = line[count] - '0';
+          unsigned long long digit = line[count] - '0';
           if (num > std::numeric_limits<unsigned long long>::max() / 10) {
             numOverflow = true;
             overflow = true;
