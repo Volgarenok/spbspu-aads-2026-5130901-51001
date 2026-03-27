@@ -32,10 +32,14 @@ int main(int argc, char* argv[])
     if (!file)
     {
 <<<<<<< HEAD
+<<<<<<< HEAD
       cerr << "error: cannot open file\n";
 =======
       std::cerr << "error: cannot open file\n";
 >>>>>>> 4ca3688 (test)
+=======
+      cerr << "error: cannot open file\n";
+>>>>>>> a3c873f (fix)
       return 1;
     }
     input = &file;
@@ -63,9 +67,16 @@ int main(int argc, char* argv[])
     Calculator calc;
     while (getline(*input, line))
     {
+<<<<<<< HEAD
       if (line.empty()) continue;
 <<<<<<< HEAD
 <<<<<<< HEAD
+=======
+      if (line.empty())
+      {
+        continue;
+      }
+>>>>>>> a3c873f (fix)
 
       ll_t result = calc.evaluate(line);
       results.pushBack(result);
@@ -126,7 +137,13 @@ int main(int argc, char* argv[])
       results.push(result);
     }
 
-    Stack< ll_t > reversed;
+    if (results.empty())
+    {
+      cout << endl;
+      return 0;
+    }
+
+    Stack<ll_t> reversed;
     while (!results.empty())
     {
       reversed.push(results.pop());
@@ -135,17 +152,39 @@ int main(int argc, char* argv[])
     bool first = true;
     while (!reversed.empty())
     {
-      if (!first) cout << ' ';
+      if (!first)
+      {
+        cout << " ";
+      }
       cout << reversed.pop();
       first = false;
     }
-    cout << '\n';
+    cout << endl;
+  }
+  catch (const overflow_error& e)
+  {
+    cerr << e.what() << "\n";
+    return 1;
+  }
+  catch (const logic_error& e)
+  {
+    cerr << e.what() << "\n";
+    return 1;
   }
   catch (const exception& e)
   {
-    cerr << e.what() << '\n';
+    cerr << e.what() << "\n";
     return 1;
   }
+<<<<<<< HEAD
 >>>>>>> 4ca3688 (test)
+=======
+  catch (...)
+  {
+    cerr << "unknown error" << endl;
+    return 1;
+  }
+
+>>>>>>> a3c873f (fix)
   return 0;
 }

@@ -1,9 +1,13 @@
 #include <boost/test/unit_test.hpp>
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include "calculator.hpp"
 =======
 #include "../calculator.hpp"
 >>>>>>> 4ca3688 (test)
+=======
+#include "calculator.hpp"
+>>>>>>> a3c873f (fix)
 
 using namespace shevchenko;
 

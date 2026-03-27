@@ -1,9 +1,13 @@
 #include <boost/test/unit_test.hpp>
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include "queue.hpp"
 =======
 #include "../queue.hpp"
 >>>>>>> 4ca3688 (test)
+=======
+#include "queue.hpp"
+>>>>>>> a3c873f (fix)
 
 using namespace shevchenko;
 

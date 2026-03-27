@@ -1,9 +1,13 @@
 #include <boost/test/unit_test.hpp>
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include "stack.hpp"
 =======
 #include "../stack.hpp"
 >>>>>>> 4ca3688 (test)
+=======
+#include "stack.hpp"
+>>>>>>> a3c873f (fix)
 
 using namespace shevchenko;
 
