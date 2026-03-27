@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 >>>>>>> 4ca3688 (test)
 =======
 
-  Stack< ll_t > results;
+  List<ll_t> results;
   string line;
 
 >>>>>>> dc1dfea (content)
@@ -67,6 +67,7 @@ int main(int argc, char* argv[])
     Calculator calc;
     while (getline(*input, line))
     {
+<<<<<<< HEAD
 <<<<<<< HEAD
       if (line.empty()) continue;
 <<<<<<< HEAD
@@ -135,6 +136,12 @@ int main(int argc, char* argv[])
 >>>>>>> dc1dfea (content)
       ll_t result = calc.evaluate(line);
       results.push(result);
+=======
+      if (line.empty()) continue;
+
+      ll_t result = calc.evaluate(line);
+      results.pushBack(result);
+>>>>>>> 8a25341 (add iters)
     }
 
     if (results.empty())
@@ -143,23 +150,24 @@ int main(int argc, char* argv[])
       return 0;
     }
 
-    Stack<ll_t> reversed;
-    while (!results.empty())
-    {
-      reversed.push(results.pop());
-    }
-
     bool first = true;
-    while (!reversed.empty())
+    auto it = results.last();
+    while (true)
     {
       if (!first)
       {
         cout << " ";
       }
-      cout << reversed.pop();
+      cout << *it;
       first = false;
+
+      if (it == results.begin())
+      {
+        break;
+      }
+      --it;
     }
-    cout << endl;
+    cout << "\n";
   }
   catch (const overflow_error& e)
   {
@@ -181,7 +189,7 @@ int main(int argc, char* argv[])
 =======
   catch (...)
   {
-    cerr << "unknown error" << endl;
+    cerr << "unknown error\n";
     return 1;
   }
 
