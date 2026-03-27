@@ -401,6 +401,7 @@ ll_t Calculator::evaluate(const std::string& line)
     }
   }
 
+<<<<<<< HEAD
   if (needOperand)
   {
     throw std::logic_error("invalid expression");
@@ -419,11 +420,13 @@ ll_t Calculator::evaluate(const std::string& line)
     }
   }
   
+=======
+>>>>>>> 6e7b36e (content..)
   if (needOperand)
   {
     throw std::logic_error("invalid expression");
   }
-  
+
   while (!operators.empty())
   {
 <<<<<<< HEAD
