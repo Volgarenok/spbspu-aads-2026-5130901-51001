@@ -134,14 +134,16 @@ namespace petrenko {
       return 1;
     }
 
-    first = true;
-    for (petrenko::LCIter<size_t> sums = lastLine.cbegin(); sums != lastLine.cend(); ++sums) {
-      if (!first) {
-        out << ' ';
+    if (!result.overflow) {
+      first = true;
+      for (petrenko::LCIter<size_t> sums = lastLine.cbegin(); sums != lastLine.cend(); ++sums) {
+        if (!first) {
+          out << ' ';
+        }
+        out << *sums;
+        first = false;
       }
-      out << *sums;
-      first = false;
+      out << "\n";
     }
-    out << "\n";
   }
 }
