@@ -131,6 +131,7 @@ namespace petrenko {
 
     if (result.overflow || rowOverflow) {
       err << "overflow" << '\n';
+      return 1;
     }
 
     first = true;
