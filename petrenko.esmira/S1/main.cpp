@@ -320,6 +320,11 @@ int main() {
     }
   }
 
+   if (overflow) {
+     std::cerr << "\noverflow" << '\n';
+     return 1;
+   }
+
   if (titles.getSize() > 0) {
     size_t count = 0;
     for (petrenko::LIter<long long> sums = lastLine.begin(); sums != lastLine.end(); ++sums) {
@@ -329,11 +334,6 @@ int main() {
         std::cout << ' ';
       }
     }
-  }
-
-  if (overflow) {
-    std::cerr << "\noverflow" << '\n';
-    return 1;
   }
 
   std::cout << "\n";
