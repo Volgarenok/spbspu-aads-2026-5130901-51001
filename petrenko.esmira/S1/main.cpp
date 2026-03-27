@@ -199,9 +199,10 @@ template<class T>
 
 int main() {
   petrenko::List<std::string> titles;
-  petrenko::List<petrenko::List<int>> numNum;
+  petrenko::List<petrenko::List<size_t>> numNum;
   std::string line;
   bool overflow = false;
+
   while (std::getline(std::cin, line)) {
     if (line.empty()) {
       continue;
@@ -220,19 +221,19 @@ int main() {
       ++count;
     }
 
-    petrenko::List<int> numbers;
+    petrenko::List<size_t> numbers;
     while (count < line.size()) {
       if (line[count] >= '0' && line[count] <= '9') {
-        long long num = 0;
+        unsigned long long num = 0;
         bool numOverflow = false;
 
         while (count < line.size() && line[count] >= '0' && line[count] <= '9') {
           int digit = line[count] - '0';
-          if (num > LLONG_MAX / 10) {
+          if (num > std::numeric_limits<unsigned long long>::max() / 10) {
             numOverflow = true;
             overflow = true;
-          } else if (num == LLONG_MAX / 10) {
-            if (digit > LLONG_MAX % 10) {
+          } else if (num == std::numeric_limits<unsigned long long>::max() / 10) {
+            if (digit > std::numeric_limits<unsigned long long>::max() % 10) {
               numOverflow = true;
               overflow = true;
             } else {
@@ -263,21 +264,19 @@ int main() {
      return 0;
   }
 
-  size_t countL = 0;
+  bool first = true;
   for (petrenko::LIter<std::string> tit = titles.begin(); tit != titles.end(); ++tit) {
-    ++countL;
-    std::cout << *tit;
-    if (countL != titles.getSize()) {
+    if (!first) {
       std::cout << ' ';
     }
+    std::cout << *tit;
+    first = false;
   }
-  if (countL > 0) {
-    std::cout << "\n";
-  }
+  std::cout << "\n";
 
-  petrenko::List<long long> lastLine;
+  petrenko::List<size_t> lastLine;
   size_t maxi = 1;
-  for (petrenko::LIter<petrenko::List<int>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
+  for (petrenko::LIter<petrenko::List<size_t>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
     if ((*numbers).getSize() > maxi) {
       maxi = (*numbers).getSize();
     }
@@ -288,11 +287,11 @@ int main() {
   }
 
   for (size_t counter = 0; counter < maxi; ++counter) {
-    long long summa = 0;
+    unsigned long long summa = 0;
     bool firstInRow = true;
     bool rowOverflow = false;
 
-    for (petrenko::LIter<petrenko::List<int>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
+    for (petrenko::LIter<petrenko::List<size_t>> numbers = numNum.begin(); numbers != numNum.end(); ++numbers) {
       if (counter < (*numbers).getSize()) {
         if (!firstInRow) {
           std::cout << ' ';
@@ -300,10 +299,7 @@ int main() {
         std::cout << (*numbers)[counter];
 
         if (!rowOverflow) {
-          if ((*numbers)[counter] > 0 && summa > LLONG_MAX - (*numbers)[counter]) {
-            rowOverflow = true;
-            overflow = true;
-          } else if ((*numbers)[counter] < 0 && summa < LLONG_MIN - (*numbers)[counter]) {
+          if (summa > std::numeric_limits<size_t>::max() - (*numbers)[counter]) {
             rowOverflow = true;
             overflow = true;
           } else {
@@ -325,17 +321,14 @@ int main() {
      return 1;
    }
 
-  if (titles.getSize() > 0) {
-    size_t count = 0;
-    for (petrenko::LIter<long long> sums = lastLine.begin(); sums != lastLine.end(); ++sums) {
-      ++count;
-      std::cout << (*sums);
-      if (count != lastLine.getSize()) {
-        std::cout << ' ';
-      }
+  first = true;
+  for (petrenko::LIter<size_t> sums = lastLine.begin(); sums != lastLine.end(); ++sums) {
+    if (!first) {
+      std::cout << ' ';
     }
+    std::cout << *sums;
+    first = false;
   }
-
   std::cout << "\n";
   return 0;
 }
