@@ -13,7 +13,6 @@ namespace petrenko {
       if (line.empty()) {
         continue;
       }
-
       std::string title;
       size_t count = 0;
       while (count < line.size() && line[count] != ' ') {
