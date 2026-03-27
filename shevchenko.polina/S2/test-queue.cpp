@@ -21,10 +21,14 @@ BOOST_AUTO_TEST_CASE(queue_push_front)
   q.push(2);
   q.push(3);
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
   
 >>>>>>> 4ca3688 (test)
+=======
+
+>>>>>>> dc1dfea (content)
   BOOST_TEST(!q.empty());
   BOOST_TEST(q.size() == 3);
   BOOST_TEST(q.front() == 1);
@@ -37,10 +41,14 @@ BOOST_AUTO_TEST_CASE(queue_pop)
   q.push(2);
   q.push(3);
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
   
 >>>>>>> 4ca3688 (test)
+=======
+
+>>>>>>> dc1dfea (content)
   BOOST_TEST(q.pop() == 1);
   BOOST_TEST(q.pop() == 2);
   BOOST_TEST(q.pop() == 3);

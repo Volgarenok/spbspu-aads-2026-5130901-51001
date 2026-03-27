@@ -9,6 +9,7 @@ int main(int argc, char* argv[])
 {
   using namespace shevchenko;
 <<<<<<< HEAD
+<<<<<<< HEAD
 
   istream* input = &cin;
   ifstream file;
@@ -19,6 +20,12 @@ int main(int argc, char* argv[])
   ifstream file;
   
 >>>>>>> 4ca3688 (test)
+=======
+
+  istream* input = &cin;
+  ifstream file;
+
+>>>>>>> dc1dfea (content)
   if (argc >= 2)
   {
     file.open(argv[1]);
@@ -34,6 +41,7 @@ int main(int argc, char* argv[])
     input = &file;
   }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
   List<ll_t> results;
   string line;
@@ -44,12 +52,19 @@ int main(int argc, char* argv[])
   string line;
   
 >>>>>>> 4ca3688 (test)
+=======
+
+  Stack< ll_t > results;
+  string line;
+
+>>>>>>> dc1dfea (content)
   try
   {
     Calculator calc;
     while (getline(*input, line))
     {
       if (line.empty()) continue;
+<<<<<<< HEAD
 <<<<<<< HEAD
 
       ll_t result = calc.evaluate(line);
@@ -104,16 +119,19 @@ int main(int argc, char* argv[])
 
 =======
       
+=======
+
+>>>>>>> dc1dfea (content)
       ll_t result = calc.evaluate(line);
       results.push(result);
     }
-    
+
     Stack< ll_t > reversed;
     while (!results.empty())
     {
       reversed.push(results.pop());
     }
-    
+
     bool first = true;
     while (!reversed.empty())
     {

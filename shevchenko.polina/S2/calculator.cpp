@@ -69,19 +69,27 @@ void Calculator::tokenize(const std::string& line, Queue<Token>& tokens)
   size_t pos = 0;
   size_t len = line.size();
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
   
 >>>>>>> 4ca3688 (test)
+=======
+
+>>>>>>> dc1dfea (content)
   while (pos < len)
   {
     skipSpaces(line, pos);
     if (pos >= len) break;
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
     
 >>>>>>> 4ca3688 (test)
+=======
+
+>>>>>>> dc1dfea (content)
     if (isNumber(line[pos]))
     {
       ll_t num = parseNumber(line, pos);
@@ -172,7 +180,7 @@ ll_t Calculator::apply(char op, ll_t a, ll_t b)
     return a % b;
   }
   if (op == '|') return a | b;
-  
+
   throw std::logic_error("unknown operator");
 >>>>>>> 4ca3688 (test)
 }
@@ -181,6 +189,7 @@ ll_t Calculator::evaluate(const std::string& line)
 {
   Queue<Token> tokens;
   tokenize(line, tokens);
+<<<<<<< HEAD
 <<<<<<< HEAD
 
   Stack<ll_t> values;
@@ -223,13 +232,16 @@ ll_t Calculator::evaluate(const std::string& line)
         }
 =======
   
+=======
+
+>>>>>>> dc1dfea (content)
   Stack<ll_t> values;
   Stack<char> operators;
-  
+
   while (!tokens.empty())
   {
     Token t = tokens.pop();
-    
+
     if (t.isNumber)
     {
       values.push(t.number);
@@ -304,7 +316,7 @@ ll_t Calculator::evaluate(const std::string& line)
 =======
     }
   }
-  
+
   while (!operators.empty())
   {
 >>>>>>> 4ca3688 (test)
@@ -314,10 +326,14 @@ ll_t Calculator::evaluate(const std::string& line)
     values.push(apply(op, a, b));
   }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
   
 >>>>>>> 4ca3688 (test)
+=======
+
+>>>>>>> dc1dfea (content)
   if (values.size() != 1)
   {
     throw std::logic_error("invalid expression");
