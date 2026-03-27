@@ -75,10 +75,14 @@ BOOST_AUTO_TEST_CASE(calc_bitwise_or_precedence)
 {
   Calculator calc;
 <<<<<<< HEAD
+<<<<<<< HEAD
   BOOST_TEST(calc.evaluate("1 + 2 | 3") == 3);
 =======
   BOOST_TEST(calc.evaluate("1 + 2 | 3") == 4);
 >>>>>>> 4ca3688 (test)
+=======
+  BOOST_TEST(calc.evaluate("1 + 2 | 3") == 3);
+>>>>>>> 8bd864b (.)
   BOOST_TEST(calc.evaluate("2 | 3 * 4") == 14);
   BOOST_TEST(calc.evaluate("( 1 | 2 ) + 3") == 6);
 }
