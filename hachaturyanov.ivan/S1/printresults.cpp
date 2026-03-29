@@ -10,7 +10,7 @@ void hachaturyanov::printNames(std::ostream &out, const List< Pair > &pairs)
       out << ' ';
     }
 
-    out << *it;
+    out << (*it).first;
 
     start = false;
     ++it;
