@@ -65,6 +65,7 @@ void hachaturyanov::printSums(std::ostream &out, const List< Pair > &pairs)
   size_t* sums = new size_t[pairs.size()]();
 
   while(anyLeft) {
+    first = true;
     anyLeft = false;
 
     LCIter< Pair > pairIt = pairs.begin();
@@ -89,7 +90,7 @@ void hachaturyanov::printSums(std::ostream &out, const List< Pair > &pairs)
       }
       ++pairIt;
     } while (pairIt != pairs.begin());
-    first = false;
+    sums[cur] = count;
     cur++;
   }
   for (size_t i = 0; i < pairs.size(); i++) {
