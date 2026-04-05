@@ -8,7 +8,7 @@
 
 #include "queue.hpp"
 #include "stack.hpp"
-#include "operator.hpp"  
+#include "operator.hpp"
 
 namespace smirnova
 {
