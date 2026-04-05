@@ -57,6 +57,10 @@ void hachaturyanov::printSums(std::ostream &out, const List< Pair > &pairs)
   size_t cur = 0;
   bool anyLeft = true;
   bool first = true;
+  if (pairs.size() == 1 && pairs.begin()->second.isEmpty()) {
+    out << "0\n";
+    return;
+  }
   while(anyLeft) {
     anyLeft = false;
 
@@ -82,10 +86,10 @@ void hachaturyanov::printSums(std::ostream &out, const List< Pair > &pairs)
       ++pairIt;
     } while (pairIt != pairs.begin());
 
-    if (!first) {
-        out << ' ';
-    }
     if (anyLeft) {
+      if (!first) {
+        out << ' ';
+      }
       out << count;
     }
     first = false;
