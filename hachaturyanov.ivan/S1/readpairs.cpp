@@ -1,3 +1,4 @@
+#include <limits>
 #include "readpairs.hpp"
 
 void hachaturyanov::skipSpaces(std::istream &in)
@@ -31,8 +32,11 @@ hachaturyanov::List< hachaturyanov::Pair > hachaturyanov::readPairs(std::istream
     skipSpaces(in);
 
     while(!isLineEnded(in)) {
-      int val = 0;
+      size_t val = 0;
       in >> val;
+      if (in.fail()) {
+        throw std::overflow_error("Overflow");
+      }
       p.second.addEnd(val);
       skipSpaces(in);
     }
