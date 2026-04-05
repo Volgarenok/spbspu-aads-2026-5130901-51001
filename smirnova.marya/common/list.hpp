@@ -69,7 +69,7 @@ namespace smirnova
 
     List(const List& other):
       List() {
-        for (LCIter<T> it = other.cbegin(); it.valid(); it.next())
+        for (LCIter< T > it = other.cbegin(); it.valid(); it.next())
         {
           pushBack(it.value());
         }
@@ -79,7 +79,7 @@ namespace smirnova
       sentinel(other.sentinel),
       count(other.count)
     {
-      other.sentinel = new Node<T>(T());
+      other.sentinel = new Node< T >(T());
       other.sentinel->next = other.sentinel;
       other.sentinel->prev = other.sentinel;
       other.count = 0;
@@ -103,7 +103,7 @@ namespace smirnova
         sentinel = other.sentinel;
         count = other.count;
 
-        other.sentinel = new Node<T>(T());
+        other.sentinel = new Node< T >(T());
         other.sentinel->next = other.sentinel;
         other.sentinel->prev = other.sentinel;
         other.count = 0;
@@ -117,12 +117,12 @@ namespace smirnova
       std::swap(count, other.count);
     }
 
-    Node<T>* frontNode()
+    Node< T >* frontNode()
     {
       return sentinel->next;
     }
 
-    Node<T>* backNode()
+    Node< T >* backNode()
     {
       return sentinel->prev;
     }
@@ -131,7 +131,6 @@ namespace smirnova
     {
       return count == 0;
     }
-
     size_t size() const noexcept
     {
       return count;
@@ -225,34 +224,29 @@ namespace smirnova
       --count;
     }
 
-    LIter<T> begin()
+    LIter< T > begin()
     {
-      return LIter<T>(sentinel->next, sentinel);
+      return LIter< T >(sentinel->next, sentinel);
     }
-
-    LIter<T> end()
+    LIter< T > end()
     {
-      return LIter<T>(sentinel, sentinel);
+      return LIter< T >(sentinel, sentinel);
     }
-
-    LCIter<T> begin() const
+    LCIter< T > begin() const
     {
-      return LCIter<T>(sentinel->next, sentinel);
+      return LCIter< T >(sentinel->next, sentinel);
     }
-
-    LCIter<T> end() const
+    LCIter< T > end() const
     {
-      return LCIter<T>(sentinel, sentinel);
+      return LCIter< T >(sentinel, sentinel);
     }
-
-    LCIter<T> cbegin() const
+    LCIter< T > cbegin() const
     {
-      return LCIter<T>(sentinel->next, sentinel);
+      return LCIter< T >(sentinel->next, sentinel);
     }
-
-    LCIter<T> cend() const
+    LCIter< T > cend() const
     {
-      return LCIter<T>(sentinel, sentinel);
+      return LCIter< T >(sentinel, sentinel);
     }
   };
 
