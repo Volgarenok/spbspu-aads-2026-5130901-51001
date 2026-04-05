@@ -1,5 +1,6 @@
 #include <iostream>
 #include "readpairs.hpp"
+#include "printresults.hpp"
 
 int main()
 {
@@ -10,5 +11,7 @@ int main()
     return 0;
   }
 
+  hachaturyanov::printNames(std::cout, pairs);
+  hachaturyanov::printNumbers(std::cout, pairs);
 
 }
