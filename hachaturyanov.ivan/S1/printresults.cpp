@@ -58,9 +58,12 @@ void hachaturyanov::printSums(std::ostream &out, const List< Pair > &pairs)
   bool anyLeft = true;
   bool first = true;
   if (pairs.size() == 1 && pairs.begin()->second.isEmpty()) {
-    out << "0\n";
+    out << "0" << "\n";
     return;
   }
+
+  size_t* sums = new size_t[pairs.size()]();
+
   while(anyLeft) {
     anyLeft = false;
 
@@ -74,6 +77,7 @@ void hachaturyanov::printSums(std::ostream &out, const List< Pair > &pairs)
           ++it;
         }
         if (count > std::numeric_limits< size_t >::max() - *it) {
+          delete[] sums;
           throw std::overflow_error("overflow");
         }
         count += *it;
@@ -85,15 +89,16 @@ void hachaturyanov::printSums(std::ostream &out, const List< Pair > &pairs)
       }
       ++pairIt;
     } while (pairIt != pairs.begin());
-
-    if (anyLeft) {
-      if (!first) {
-        out << ' ';
-      }
-      out << count;
-    }
     first = false;
     cur++;
   }
+  for (size_t i = 0; i < pairs.size(); i++) {
+    if (!first) {
+      out << ' ';
+    }
+    out << sums[i];
+    first = false;
+  }
   out << '\n';
+  delete[] sums;
 }

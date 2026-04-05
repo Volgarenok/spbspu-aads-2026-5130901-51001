@@ -34,9 +34,6 @@ hachaturyanov::List< hachaturyanov::Pair > hachaturyanov::readPairs(std::istream
     while(!isLineEnded(in)) {
       size_t val = 0;
       in >> val;
-      if (in.fail()) {
-        throw std::overflow_error("Overflow");
-      }
       p.second.addEnd(val);
       skipSpaces(in);
     }
