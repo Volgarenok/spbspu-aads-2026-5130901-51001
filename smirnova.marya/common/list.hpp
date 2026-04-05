@@ -16,15 +16,14 @@ namespace smirnova
     T data;
     Node* next;
     Node* prev;
-    Node(const T& d):
-      data(d),
-      next(nullptr),
-      prev(nullptr) {}
-    Node(T&& d):
-      data(std::move(d)),
-      next(nullptr),
-      prev(nullptr)
-    {}
+
+    Node() : next(nullptr), prev(nullptr) {}  // sentinel
+
+    Node(const T& d)
+      : data(d), next(nullptr), prev(nullptr) {}
+
+    Node(T&& d)
+      : data(std::move(d)), next(nullptr), prev(nullptr) {}
   };
 
   template < typename T >
@@ -44,7 +43,7 @@ namespace smirnova
     List():
       count(0)
     {
-      sentinel = new Node< T >(T());
+      sentinel = new Node< T >();
       sentinel->next = sentinel;
       sentinel->prev = sentinel;
     }
@@ -80,7 +79,7 @@ namespace smirnova
       sentinel(other.sentinel),
       count(other.count)
     {
-      other.sentinel = new Node< T >(T());
+      other.sentinel = new Node<T>(T());
       other.sentinel->next = other.sentinel;
       other.sentinel->prev = other.sentinel;
       other.count = 0;
@@ -100,9 +99,11 @@ namespace smirnova
       if (this != &other) {
         clear();
         delete sentinel;
+
         sentinel = other.sentinel;
         count = other.count;
-        other.sentinel = new Node< T >(T());
+
+        other.sentinel = new Node<T>(T());
         other.sentinel->next = other.sentinel;
         other.sentinel->prev = other.sentinel;
         other.count = 0;
@@ -261,10 +262,10 @@ namespace smirnova
   private:
     Node< T >* node;
     Node< T >* sentinel;
+
   public:
-    LIter(Node< T >* n = nullptr, Node< T >* s = nullptr):
-      node(n),
-      sentinel(s)
+    LIter(Node< T >* n = nullptr, Node< T >* s = nullptr)
+      : node(n), sentinel(s)
     {}
 
     bool valid() const
@@ -274,16 +275,25 @@ namespace smirnova
 
     void next()
     {
-      if(node) node = node->next;
+      if (!valid()) {
+        throw std::out_of_range("iterator cannot advance past end()");
+      }
+      node = node->next;
     }
 
     T& value()
     {
+      if (!valid()) {
+        throw std::out_of_range("iterator is end()");
+      }
       return node->data;
     }
 
     const T& value() const
     {
+      if (!valid()) {
+        throw std::out_of_range("iterator is end()");
+      }
       return node->data;
     }
   };
@@ -294,10 +304,10 @@ namespace smirnova
   private:
     const Node< T >* node;
     const Node< T >* sentinel;
+
   public:
-    LCIter(const Node< T >* n = nullptr, const Node< T >* s = nullptr):
-      node(n),
-      sentinel(s)
+    LCIter(const Node< T >* n = nullptr, const Node< T >* s = nullptr)
+      : node(n), sentinel(s)
     {}
 
     bool valid() const
@@ -307,14 +317,20 @@ namespace smirnova
 
     void next()
     {
-      if(node) node = node->next;
+      if (node) {
+        node = node->next;
+      }
     }
 
     const T& value() const
     {
+      if (!valid()) {
+        throw std::out_of_range("iterator is end()");
+      }
       return node->data;
     }
   };
 }
 
 #endif
+
