@@ -26,6 +26,18 @@ BOOST_AUTO_TEST_CASE(push_back_test)
   BOOST_TEST(list.end().valid() == false);
 }
 
+BOOST_AUTO_TEST_CASE(front_back_test)
+{
+  smirnova::List< size_t > list;
+
+  list.pushBack(10);
+  list.pushBack(20);
+  list.pushBack(30);
+
+  BOOST_TEST(list.front() == 10);
+  BOOST_TEST(list.back() == 30);
+}
+
 BOOST_AUTO_TEST_CASE(pop_front_test)
 {
   smirnova::List< size_t > list;
@@ -62,6 +74,22 @@ BOOST_AUTO_TEST_CASE(iterator_test)
   BOOST_TEST(it.value() == 10);
   it.next();
   BOOST_TEST(it.valid() == false);
+}
+
+BOOST_AUTO_TEST_CASE(iterator_end_value_throws)
+{
+  smirnova::List< size_t > list;
+
+  smirnova::LIter< size_t > it = list.end();
+  BOOST_CHECK_THROW(it.value(), std::out_of_range);
+}
+
+BOOST_AUTO_TEST_CASE(front_back_on_empty_throws)
+{
+  smirnova::List< size_t > list;
+
+  BOOST_CHECK_THROW(list.front(), std::out_of_range);
+  BOOST_CHECK_THROW(list.back(), std::out_of_range);
 }
 
 BOOST_AUTO_TEST_CASE(pop_front_on_empty_throws)
