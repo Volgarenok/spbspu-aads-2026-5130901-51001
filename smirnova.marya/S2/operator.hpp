@@ -38,7 +38,6 @@ namespace smirnova
     if (op == OpType::Add || op == OpType::Sub) return 1;
     return 0;
   }
-
 }
 
 #endif
