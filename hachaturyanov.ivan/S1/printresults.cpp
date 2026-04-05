@@ -54,8 +54,6 @@ void hachaturyanov::printNumbers(std::ostream &out, const List< Pair > &pairs)
 
 void hachaturyanov::printSums(std::ostream &out, const List< Pair > &pairs)
 {
-  size_t cur = 0;
-  bool anyLeft = true;
   bool first = true;
   if (pairs.size() == 1 && pairs.begin()->second.isEmpty()) {
     out << "0" << "\n";
@@ -64,17 +62,14 @@ void hachaturyanov::printSums(std::ostream &out, const List< Pair > &pairs)
 
   size_t* sums = new size_t[pairs.size()]();
 
-  while(anyLeft) {
-    first = true;
-    anyLeft = false;
-
+  for (size_t i = 0; i < pairs.size(); i++) {
     LCIter< Pair > pairIt = pairs.begin();
     size_t count = 0;
     do {
       const List< size_t > &nums = (*pairIt).second;
-      if (nums.size() > cur) {
+      if (nums.size() > i) {
         LCIter< size_t > it = nums.begin();
-        for (size_t i = 0; i < cur; i++) {
+        for (size_t j = 0; j < i; j++) {
           ++it;
         }
         if (count > std::numeric_limits< size_t >::max() - *it) {
@@ -82,16 +77,13 @@ void hachaturyanov::printSums(std::ostream &out, const List< Pair > &pairs)
           throw std::overflow_error("overflow");
         }
         count += *it;
-        if (count == 0 && nums.size() == cur + 1) {
-          anyLeft = false;
+        if (count == 0 && nums.size() == i + 1) {
           break;
         }
-        anyLeft = true;
       }
       ++pairIt;
     } while (pairIt != pairs.begin());
-    sums[cur] = count;
-    cur++;
+    sums[i] = count;
   }
   for (size_t i = 0; i < pairs.size(); i++) {
     if (!first) {
