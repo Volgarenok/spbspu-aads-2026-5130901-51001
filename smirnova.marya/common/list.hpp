@@ -324,6 +324,7 @@ namespace smirnova
       return node->data;
     }
   };
+
 }
 
 #endif
