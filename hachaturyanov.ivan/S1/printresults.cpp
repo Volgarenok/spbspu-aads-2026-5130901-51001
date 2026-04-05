@@ -1,3 +1,4 @@
+#include <limits>
 #include "printresults.hpp"
 
 void hachaturyanov::printNames(std::ostream &out, const List< Pair > &pairs)
@@ -49,4 +50,46 @@ void hachaturyanov::printNumbers(std::ostream &out, const List< Pair > &pairs)
     }
     cur++;
   }
+}
+
+void hachaturyanov::printSums(std::ostream &out, const List< Pair > &pairs)
+{
+  size_t cur = 0;
+  bool anyLeft = true;
+  bool first = true;
+  while(anyLeft) {
+    anyLeft = false;
+
+    LCIter< Pair > pairIt = pairs.begin();
+    size_t count = 0;
+    do {
+      const List< size_t > &nums = (*pairIt).second;
+      if (nums.size() > cur) {
+        LCIter< size_t > it = nums.begin();
+        for (size_t i = 0; i < cur; i++) {
+          ++it;
+        }
+        if (count > std::numeric_limits< size_t >::max() - *it) {
+          throw std::overflow_error("overflow");
+        }
+        count += *it;
+        if (count == 0 && nums.size() == cur + 1) {
+          anyLeft = false;
+          break;
+        }
+        anyLeft = true;
+      }
+      ++pairIt;
+    } while (pairIt != pairs.begin());
+
+    if (!first) {
+        out << ' ';
+    }
+    if (anyLeft) {
+      out << count;
+    }
+    first = false;
+    cur++;
+  }
+  out << '\n';
 }

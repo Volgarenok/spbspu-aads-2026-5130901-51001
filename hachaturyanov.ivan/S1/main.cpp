@@ -13,5 +13,11 @@ int main()
 
   hachaturyanov::printNames(std::cout, pairs);
   hachaturyanov::printNumbers(std::cout, pairs);
-
+  try {
+    hachaturyanov::printSums(std::cout, pairs);
+  } catch (const std::exception &e) {
+    std::cout << e.what() << "\n";
+    return 1;
+  }
+  return 0;
 }

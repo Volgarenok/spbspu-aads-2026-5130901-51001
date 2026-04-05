@@ -9,6 +9,7 @@ namespace hachaturyanov {
 
   void printNames(std::ostream &out, const List< Pair > &pairs);
   void printNumbers(std::ostream &out, const List< Pair > &pairs);
+  void printSums(std::ostream &out, const List< Pair > &pairs);
 }
 
 #endif
