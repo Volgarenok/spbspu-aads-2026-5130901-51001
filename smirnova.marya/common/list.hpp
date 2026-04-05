@@ -16,6 +16,7 @@ namespace smirnova
     T data;
     Node* next;
     Node* prev;
+<<<<<<< HEAD
     Node(const T& d):
       data(d),
       next(nullptr),
@@ -25,6 +26,16 @@ namespace smirnova
       next(nullptr),
       prev(nullptr)
     {}
+=======
+
+    Node() : next(nullptr), prev(nullptr) {}  // sentinel
+
+    Node(const T& d)
+      : data(d), next(nullptr), prev(nullptr) {}
+
+    Node(T&& d)
+      : data(std::move(d)), next(nullptr), prev(nullptr) {}
+>>>>>>> smirnova.marya/S1
   };
 
   template < typename T >
@@ -44,7 +55,11 @@ namespace smirnova
     List():
       count(0)
     {
+<<<<<<< HEAD
       sentinel = new Node< T >(T());
+=======
+      sentinel = new Node< T >();
+>>>>>>> smirnova.marya/S1
       sentinel->next = sentinel;
       sentinel->prev = sentinel;
     }
@@ -72,7 +87,11 @@ namespace smirnova
       List() {
         for (LCIter<T> it = other.cbegin(); it.valid(); it.next())
         {
+<<<<<<< HEAD
           push_back(it.value());
+=======
+          pushBack(it.value());
+>>>>>>> smirnova.marya/S1
         }
     }
 
@@ -80,7 +99,11 @@ namespace smirnova
       sentinel(other.sentinel),
       count(other.count)
     {
+<<<<<<< HEAD
       other.sentinel = new Node< T >(T());
+=======
+      other.sentinel = new Node<T>(T());
+>>>>>>> smirnova.marya/S1
       other.sentinel->next = other.sentinel;
       other.sentinel->prev = other.sentinel;
       other.count = 0;
@@ -100,9 +123,17 @@ namespace smirnova
       if (this != &other) {
         clear();
         delete sentinel;
+<<<<<<< HEAD
         sentinel = other.sentinel;
         count = other.count;
         other.sentinel = new Node< T >(T());
+=======
+
+        sentinel = other.sentinel;
+        count = other.count;
+
+        other.sentinel = new Node<T>(T());
+>>>>>>> smirnova.marya/S1
         other.sentinel->next = other.sentinel;
         other.sentinel->prev = other.sentinel;
         other.count = 0;
@@ -116,15 +147,59 @@ namespace smirnova
       std::swap(count, other.count);
     }
 
+<<<<<<< HEAD
+=======
+    Node<T>* frontNode()
+    {
+      return sentinel->next;
+    }
+
+    Node<T>* backNode()
+    {
+      return sentinel->prev;
+    }
+
+>>>>>>> smirnova.marya/S1
     bool empty() const noexcept
     {
       return count == 0;
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> smirnova.marya/S1
     size_t size() const noexcept
     {
       return count;
     }
 
+<<<<<<< HEAD
+=======
+    T& front()
+    {
+      if (empty()) throw std::out_of_range("empty");
+      return sentinel->next->data;
+    }
+
+    const T& front() const
+    {
+      if (empty()) throw std::out_of_range("empty");
+      return sentinel->next->data;
+    }
+
+    T& back()
+    {
+      if (empty()) throw std::out_of_range("empty");
+      return sentinel->prev->data;
+    }
+
+    const T& back() const
+    {
+      if (empty()) throw std::out_of_range("empty");
+      return sentinel->prev->data;
+    }
+
+>>>>>>> smirnova.marya/S1
     void pushBack(const T& val)
     {
       Node< T >* n = new Node< T >(val);
@@ -193,22 +268,42 @@ namespace smirnova
     {
       return LIter<T>(sentinel->next, sentinel);
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> smirnova.marya/S1
     LIter<T> end()
     {
       return LIter<T>(sentinel, sentinel);
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> smirnova.marya/S1
     LCIter<T> begin() const
     {
       return LCIter<T>(sentinel->next, sentinel);
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> smirnova.marya/S1
     LCIter<T> end() const
     {
       return LCIter<T>(sentinel, sentinel);
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> smirnova.marya/S1
     LCIter<T> cbegin() const
     {
       return LCIter<T>(sentinel->next, sentinel);
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> smirnova.marya/S1
     LCIter<T> cend() const
     {
       return LCIter<T>(sentinel, sentinel);
@@ -219,6 +314,7 @@ namespace smirnova
   class LIter
   {
   private:
+<<<<<<< HEAD
       Node< T >* node;
       Node< T >* sentinel;
   public:
@@ -226,10 +322,21 @@ namespace smirnova
       node(n),
       sentinel(s)
     {}
+=======
+    Node< T >* node;
+    Node< T >* sentinel;
+
+  public:
+    LIter(Node< T >* n = nullptr, Node< T >* s = nullptr)
+      : node(n), sentinel(s)
+    {}
+
+>>>>>>> smirnova.marya/S1
     bool valid() const
     {
       return node != sentinel;
     }
+<<<<<<< HEAD
     void next()
     {
       if(node) node = node->next;
@@ -240,6 +347,30 @@ namespace smirnova
     }
     const T& value() const
     {
+=======
+
+    void next()
+    {
+      if (!valid()) {
+        throw std::out_of_range("iterator cannot advance past end()");
+      }
+      node = node->next;
+    }
+
+    T& value()
+    {
+      if (!valid()) {
+        throw std::out_of_range("iterator is end()");
+      }
+      return node->data;
+    }
+
+    const T& value() const
+    {
+      if (!valid()) {
+        throw std::out_of_range("iterator is end()");
+      }
+>>>>>>> smirnova.marya/S1
       return node->data;
     }
   };
@@ -250,21 +381,46 @@ namespace smirnova
   private:
     const Node< T >* node;
     const Node< T >* sentinel;
+<<<<<<< HEAD
   public:
     LCIter(const Node< T >* n = nullptr, const Node< T >* s = nullptr):
       node(n),
       sentinel(s)
     {}
+=======
+
+  public:
+    LCIter(const Node< T >* n = nullptr, const Node< T >* s = nullptr)
+      : node(n), sentinel(s)
+    {}
+
+>>>>>>> smirnova.marya/S1
     bool valid() const
     {
       return node != sentinel;
     }
+<<<<<<< HEAD
     void next()
     {
       if(node) node = node->next;
     }
     const T& value() const
     {
+=======
+
+    void next()
+    {
+      if (node) {
+        node = node->next;
+      }
+    }
+
+    const T& value() const
+    {
+      if (!valid()) {
+        throw std::out_of_range("iterator is end()");
+      }
+>>>>>>> smirnova.marya/S1
       return node->data;
     }
   };
