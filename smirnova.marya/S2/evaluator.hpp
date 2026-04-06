@@ -45,7 +45,7 @@ namespace smirnova
     return a < max / b;
   }
 
-  ll applyBinary(ll a, ll b, const std::string& op)
+  inline ll applyBinary(ll a, ll b, const std::string& op)
   {
     if (op == "+")
     {
@@ -72,6 +72,8 @@ namespace smirnova
     {
       if (b == 0)
         throw std::logic_error("division by zero");
+      if (a == std::numeric_limits< ll >::min() && b == -1)
+        throw std::logic_error("division overflow");
       return a / b;
     }
 
@@ -79,6 +81,7 @@ namespace smirnova
     {
       if (b == 0)
         throw std::logic_error("modulo by zero");
+
       ll r = a % b;
       if (r < 0)
         r += (b < 0 ? -b : b);
@@ -88,7 +91,7 @@ namespace smirnova
     throw std::logic_error("unknown operator");
   }
 
-  ll parseNumber(const std::string& s)
+  inline ll parseNumber(const std::string& s)
   {
     if (s.empty())
       throw std::logic_error("invalid number");
@@ -132,5 +135,47 @@ namespace smirnova
     return value;
   }
 
+  inline ll evaluatePostfix(Queue< std::string > postfix)
+  {
+    Stack< ll > st;
+
+    while (!postfix.empty())
+    {
+      std::string token = postfix.popFront();
+
+      if (isNumber(token))
+      {
+        st.push(parseNumber(token));
+      }
+      else if (token == "~")
+      {
+        if (st.empty())
+          throw std::logic_error("invalid expression");
+        ll v = st.drop();
+        if (v == std::numeric_limits< ll >::min())
+          throw std::logic_error("unary minus overflow");
+        st.push(-v);
+      }
+      else if (isOperator(token))
+      {
+        if (st.size() < 2)
+          throw std::logic_error("invalid expression");
+        ll b = st.drop();
+        ll a = st.drop();
+        st.push(applyBinary(a, b, token));
+      }
+      else
+      {
+        throw std::logic_error("invalid token");
+      }
+    }
+
+    if (st.size() != 1)
+      throw std::logic_error("invalid expression");
+
+    return st.drop();
+  }
 }
+
+#endif
 
