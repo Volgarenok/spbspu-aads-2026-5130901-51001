@@ -12,44 +12,86 @@ namespace smirnova
 {
   typedef long long ll;
 
-  ll applyBinary(ll a, ll b, const std::string& op)
+  inline bool addOverflow(ll a, ll b)
   {
-      if (op == "+") return a + b;
-      if (op == "-") return a - b;
-      if (op == "*") return a * b;
-      if (op == "/")
-      {
-        if (b == 0)
-          throw std::logic_error("division by zero");
-        return a / b;
-      }
-      if (op == "%")
-      {
-        if (b == 0)
-          throw std::logic_error("modulo by zero");
-        return a % b;
-      }
-
-      throw std::logic_error("unknown operator");
+    const ll max = std::numeric_limits< ll >::max();
+    const ll min = std::numeric_limits< ll >::min();
+    return (b > 0 && a > max - b) || (b < 0 && a < min - b);
   }
 
-  ll reverseNumber(ll x)
+  inline bool subOverflow(ll a, ll b)
   {
-    if (x == 0) return 0;
-    bool neg = x < 0;
-    ll abs_x = neg ? -x : x;
-    ll rev = 0;
-    while (abs_x > 0) {
-        rev = rev * 10 + abs_x % 10;
-        abs_x /= 10;
+    const ll max = std::numeric_limits< ll >::max();
+    const ll min = std::numeric_limits< ll >::min();
+    return (b > 0 && a < min + b) || (b < 0 && a > max + b);
+  }
+
+  inline bool mulOverflow(ll a, ll b)
+  {
+    const ll max = std::numeric_limits< ll >::max();
+    const ll min = std::numeric_limits< ll >::min();
+
+    if (a == 0 || b == 0) return false;
+    if (a == -1) return b == min;
+    if (b == -1) return a == min;
+
+    if (a > 0)
+    {
+      if (b > 0) return a > max / b;
+      return b < min / a;
     }
-    return neg ? -rev : rev;
+
+    if (b > 0) return a < min / b;
+    return a < max / b;
+  }
+
+  ll applyBinary(ll a, ll b, const std::string& op)
+  {
+    if (op == "+")
+    {
+      if (addOverflow(a, b))
+        throw std::logic_error("addition overflow");
+      return a + b;
+    }
+
+    if (op == "-")
+    {
+      if (subOverflow(a, b))
+        throw std::logic_error("subtraction overflow");
+      return a - b;
+    }
+
+    if (op == "*")
+    {
+      if (mulOverflow(a, b))
+        throw std::logic_error("multiplication overflow");
+      return a * b;
+    }
+
+    if (op == "/")
+    {
+      if (b == 0)
+        throw std::logic_error("division by zero");
+      return a / b;
+    }
+
+    if (op == "%")
+    {
+      if (b == 0)
+        throw std::logic_error("modulo by zero");
+      ll r = a % b;
+      if (r < 0)
+        r += (b < 0 ? -b : b);
+      return r;
+    }
+
+    throw std::logic_error("unknown operator");
   }
 
   ll parseNumber(const std::string& s)
   {
     if (s.empty())
-      throw std::logic_error("empty number");
+      throw std::logic_error("invalid number");
 
     bool neg = false;
     size_t i = 0;
@@ -58,69 +100,37 @@ namespace smirnova
     {
       neg = true;
       i = 1;
+      if (i == s.size())
+        throw std::logic_error("invalid number");
     }
 
-    ll result = 0;
+    const ll max = std::numeric_limits< ll >::max();
+    const ll min = std::numeric_limits< ll >::min();
+    ll value = 0;
 
     for (; i < s.size(); ++i)
     {
-      if (!std::isdigit(s[i]))
+      if (!std::isdigit(static_cast< unsigned char >(s[i])))
         throw std::logic_error("invalid number");
 
       int digit = s[i] - '0';
-      result = result * 10 + digit;
-    }
 
-    return neg ? -result : result;
-  }
-
-  ll evaluatePostfix(Queue< std::string > q)
-  {
-    Stack<ll> st;
-
-    while (!q.empty())
-    {
-      std::string t = q.drop();
-
-      if (!t.empty() && t.back() == '\r')
-        t.pop_back();
-
-      if (t.empty())
-        continue;
-
-      if (isNumber(t))
+      if (!neg)
       {
-        st.push(parseNumber(t));
+        if (value > (max - digit) / 10)
+          throw std::logic_error("number overflow");
+        value = value * 10 + digit;
       }
-
-      else if (t == "~")
-      {
-        if (st.empty())
-          throw std::logic_error("not enough operands");
-
-        ll a = st.drop();
-        st.push(reverseNumber(a));
-      }
-
       else
       {
-        if (st.size() < 2)
-          throw std::logic_error("not enough operands");
-
-        ll b = st.drop();
-        ll a = st.drop();
-
-        st.push(applyBinary(a, b, t));
+        if (value < (min + digit) / 10)
+          throw std::logic_error("number overflow");
+        value = value * 10 - digit;
       }
-  }
+    }
 
-    if (st.size() != 1)
-      throw std::logic_error("invalid expression");
-
-    return st.drop();
+    return value;
   }
 
 }
-
-#endif
 
