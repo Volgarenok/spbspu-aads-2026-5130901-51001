@@ -7,6 +7,7 @@
 namespace petrenko {
   struct ProcessResult {
     bool overflow;
+    bool sumOverflow;
     petrenko::List<std::string> titles;
     petrenko::List<petrenko::List<size_t>> numbers;
   };
