@@ -67,12 +67,16 @@ namespace petrenko {
       result.numbers.insert(numbers, result.numbers.getSize());
     }
 
-    size_t maxi = 0;
+    size_t maxi = 1;
     for (petrenko::LCIter<petrenko::List<size_t>> numbers = result.numbers.cbegin();
         numbers != result.numbers.cend(); ++numbers) {
       if ((*numbers).getSize() > maxi) {
         maxi = (*numbers).getSize();
       }
+    }
+
+    if (result.titles.getSize() == 0) {
+      maxi = 0;
     }
 
     for (size_t counter = 0; counter < maxi; ++counter) {
@@ -112,12 +116,16 @@ namespace petrenko {
     }
     std::cout << "\n";
 
-    size_t maxi = 0;
+    size_t maxi = 1;
     for (petrenko::LCIter<petrenko::List<size_t>> numbers = result.numbers.cbegin();
          numbers != result.numbers.cend(); ++numbers) {
       if ((*numbers).getSize() > maxi) {
         maxi = (*numbers).getSize();
       }
+    }
+
+    if (result.titles.getSize() < 2) {
+      maxi = 0;
     }
 
     for (size_t counter = 0; counter < maxi; ++counter) {

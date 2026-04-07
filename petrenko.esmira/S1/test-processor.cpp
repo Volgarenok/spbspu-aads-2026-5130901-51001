@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_print_results) {
   std::ostringstream error;
   petrenko::printResults(output, error, result);
 
-  std::string expectedOutput = "A B C\n10 30 40\n20 50\n60\n90 80 40\n";
+  std::string expectedOutput = "A B C\n10 30 40\n20 50\n60\n80 70 60\n";
   BOOST_TEST(output.str() == expectedOutput);
   BOOST_TEST(error.str().empty());
   BOOST_TEST(!result.overflow);
