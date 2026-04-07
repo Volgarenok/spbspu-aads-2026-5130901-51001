@@ -6,6 +6,7 @@ namespace petrenko {
   ProcessResult processInput(std::istream& in) {
     ProcessResult result;
     result.overflow = false;
+    result.sumOverflow = false;
 
     std::string line;
 
@@ -64,7 +65,7 @@ namespace petrenko {
     return result;
   }
 
-  void printResults(std::ostream& out, std::ostream& err, const ProcessResult& result) {
+  void printResults(std::ostream& out, std::ostream& err, ProcessResult& result) {
     if (result.titles.getSize() == 0) {
       out << "0\n";
       return;
@@ -109,7 +110,7 @@ namespace petrenko {
           if (!rowOverflow) {
             if (summa > std::numeric_limits<size_t>::max() - (*numbers)[counter]) {
               rowOverflow = true;
-              result.overflow = true;
+              result.sumOverflow = true;
             } else {
               summa += (*numbers)[counter];
             }
@@ -124,7 +125,7 @@ namespace petrenko {
       }
     }
 
-    if (result.overflow) {
+    if (result.overflow || result.sumOverflow) {
       err << "overflow\n";
       return;
     }
