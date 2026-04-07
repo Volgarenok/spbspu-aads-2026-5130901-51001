@@ -101,7 +101,7 @@ namespace petrenko {
     }
 
     bool first = true;
-    for (petrenko::LIter<std::string> tit = titles.begin(); tit != titles.end(); ++tit) {
+    for (petrenko::LIter<std::string> tit = result.titles.begin(); tit != result.titles.end(); ++tit) {
       if (!first) {
         std::cout << ' ';
       }
@@ -142,7 +142,7 @@ namespace petrenko {
       return;
     }
 
-    bool first = true;
+    first = true;
     for (petrenko::LCIter<size_t> sums = result.lastLine.cbegin(); sums != result.lastLine.cend(); ++sums) {
       if (!first) {
         out << ' ';
