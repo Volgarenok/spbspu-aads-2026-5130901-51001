@@ -138,6 +138,7 @@ namespace petrenko {
     }
 
     if (result.overflow || result.sumOverflow) {
+      result.overflow = true;
       err << "overflow\n";
       return;
     }
