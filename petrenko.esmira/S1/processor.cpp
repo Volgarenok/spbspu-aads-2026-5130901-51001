@@ -118,7 +118,7 @@ namespace petrenko {
       }
     }
 
-    if (result.titles.getSize() == 0) {
+    if (result.titles.getSize() < 2) {
       maxi = 0;
     }
 
