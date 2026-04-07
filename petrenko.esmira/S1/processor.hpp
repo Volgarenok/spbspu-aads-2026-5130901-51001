@@ -13,7 +13,7 @@ namespace petrenko {
   };
 
   ProcessResult processInput(std::istream& in);
-  void printResults(std::ostream& out, std::ostream& err, const ProcessResult& result);
+  void printResults(std::ostream& out, std::ostream& err, ProcessResult& result);
 }
 
 #endif
