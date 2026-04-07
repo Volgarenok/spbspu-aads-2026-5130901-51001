@@ -109,12 +109,12 @@ namespace petrenko {
     bool first = true;
     for (petrenko::LIter<std::string> tit = result.titles.begin(); tit != result.titles.end(); ++tit) {
       if (!first) {
-        std::cout << ' ';
+        out << ' ';
       }
-      std::cout << *tit;
+      out << *tit;
       first = false;
     }
-    std::cout << "\n";
+    out << "\n";
 
     size_t maxi = 1;
     for (petrenko::LCIter<petrenko::List<size_t>> numbers = result.numbers.cbegin();
