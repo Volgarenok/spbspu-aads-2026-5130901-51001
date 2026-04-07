@@ -114,8 +114,6 @@ namespace petrenko {
 
     for (size_t counter = 0; counter < maxi; ++counter) {
       bool firstInRow = true;
-      bool rowOverflow = false;
-
       for (petrenko::LCIter<petrenko::List<size_t>> numbers = result.numbers.cbegin();
            numbers != result.numbers.cend(); ++numbers) {
         if (counter < (*numbers).getSize()) {
