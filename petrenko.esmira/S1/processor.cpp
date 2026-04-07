@@ -68,7 +68,6 @@ namespace petrenko {
   }
 
   void printResults(std::ostream& out, std::ostream& err, const ProcessResult& result) {
-    bool rowOverflow = false;
     if (result.titles.getSize() == 0) {
       out << "0\n";
       return;
@@ -84,9 +83,7 @@ namespace petrenko {
     }
     out << "\n";
 
-    petrenko::List<size_t> lastLine;
     size_t maxi = 1;
-
     for (petrenko::LCIter<petrenko::List<size_t>> numbers = result.numbers.cbegin();
          numbers != result.numbers.cend(); ++numbers) {
       if ((*numbers).getSize() > maxi) {
@@ -98,9 +95,12 @@ namespace petrenko {
       maxi = 0;
     }
 
+    bool sumOverflow = false;
+    petrenko::List<size_t> lastLine;
     for (size_t counter = 0; counter < maxi; ++counter) {
       unsigned long long summa = 0;
       bool firstInRow = true;
+      bool rowOverflow = false;
 
       for (petrenko::LCIter<petrenko::List<size_t>> numbers = result.numbers.cbegin();
            numbers != result.numbers.cend(); ++numbers) {
@@ -113,6 +113,7 @@ namespace petrenko {
           if (!rowOverflow) {
             if (summa > std::numeric_limits<size_t>::max() - (*numbers)[counter]) {
               rowOverflow = true;
+              sumOverflow = true;
             } else {
               summa += (*numbers)[counter];
             }
@@ -127,20 +128,18 @@ namespace petrenko {
       }
     }
 
-    if (result.overflow || rowOverflow) {
-      err << "overflow";
-      rowOverflow = true;
+    if (result.overflow || sumOverflow) {
+      err << "overflow\n";
+      return;
     }
 
-    if (!rowOverflow) {
-      first = true;
-      for (petrenko::LCIter<size_t> sums = lastLine.cbegin(); sums != lastLine.cend(); ++sums) {
-        if (!first) {
-          out << ' ';
-        }
-        out << *sums;
-        first = false;
+    first = true;
+    for (petrenko::LCIter<size_t> sums = lastLine.cbegin(); sums != lastLine.cend(); ++sums) {
+      if (!first) {
+        out << ' ';
       }
+      out << *sums;
+      first = false;
     }
     out << "\n";
   }
