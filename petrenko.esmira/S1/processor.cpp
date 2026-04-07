@@ -27,7 +27,6 @@ namespace petrenko {
       }
 
       petrenko::List<size_t> numbers;
-
       while (count < line.size()) {
         if (line[count] >= '0' && line[count] <= '9') {
           unsigned long long num = 0;
@@ -65,7 +64,6 @@ namespace petrenko {
 
       result.numbers.insert(numbers, result.numbers.getSize());
     }
-
     return result;
   }
 
@@ -130,7 +128,7 @@ namespace petrenko {
     }
 
     if (result.overflow || rowOverflow) {
-      err << "overflow" << '\n';
+      err << "overflow";
       rowOverflow = true;
     }
 
