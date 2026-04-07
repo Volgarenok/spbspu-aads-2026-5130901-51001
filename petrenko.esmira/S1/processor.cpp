@@ -9,7 +9,6 @@ namespace petrenko {
     result.sumOverflow = false;
 
     std::string line;
-
     while (std::getline(in, line)) {
       if (line.empty()) {
         continue;
@@ -49,7 +48,6 @@ namespace petrenko {
             }
             ++count;
           }
-
           if (!numOverflow) {
             numbers.insert(static_cast<int>(num), numbers.getSize());
           }
@@ -62,6 +60,37 @@ namespace petrenko {
       }
       result.numbers.insert(numbers, result.numbers.getSize());
     }
+
+    size_t maxi = 1;
+    for (petrenko::LCIter<petrenko::List<size_t>> numbers = result.numbers.cbegin();
+        numbers != result.numbers.cend(); ++numbers) {
+      if ((*numbers).getSize() > maxi) {
+        maxi = (*numbers).getSize();
+      }
+    }
+
+    if (result.titles.getSize() == 0) {
+      maxi = 0;
+    }
+
+    for (size_t counter = 0; counter < maxi; ++counter) {
+      unsigned long long summa = 0;
+      bool rowOverflow = false;
+      for (petrenko::LCIter<petrenko::List<size_t>> numbers = result.numbers.cbegin();
+           numbers != result.numbers.cend(); ++numbers) {
+        if (counter < (*numbers).getSize()) {
+          if (!rowOverflow) {
+            if (summa > std::numeric_limits<size_t>::max() - (*numbers)[counter]) {
+              rowOverflow = true;
+              result.sumOverflow = true;
+            } else {
+              summa += (*numbers)[counter];
+            }
+          }
+        }
+      }
+      result.lastLine.insert(static_cast<size_t>(summa), result.lastLine.getSize());
+    }
     return result;
   }
 
@@ -70,16 +99,6 @@ namespace petrenko {
       out << "0\n";
       return;
     }
-
-    bool first = true;
-    for (petrenko::LCIter<std::string> tit = result.titles.cbegin(); tit != result.titles.cend(); ++tit) {
-      if (!first) {
-        out << ' ';
-      }
-      out << *tit;
-      first = false;
-    }
-    out << "\n";
 
     size_t maxi = 1;
     for (petrenko::LCIter<petrenko::List<size_t>> numbers = result.numbers.cbegin();
@@ -93,9 +112,7 @@ namespace petrenko {
       maxi = 0;
     }
 
-    petrenko::List<size_t> lastLine;
     for (size_t counter = 0; counter < maxi; ++counter) {
-      unsigned long long summa = 0;
       bool firstInRow = true;
       bool rowOverflow = false;
 
@@ -106,23 +123,10 @@ namespace petrenko {
             out << ' ';
           }
           out << (*numbers)[counter];
-
-          if (!rowOverflow) {
-            if (summa > std::numeric_limits<size_t>::max() - (*numbers)[counter]) {
-              rowOverflow = true;
-              result.sumOverflow = true;
-            } else {
-              summa += (*numbers)[counter];
-            }
-          }
           firstInRow = false;
         }
       }
-
-      lastLine.insert(static_cast<size_t>(summa), lastLine.getSize());
-      if (summa || counter < maxi - 1) {
-        out << "\n";
-      }
+      out << "\n";
     }
 
     if (result.overflow || result.sumOverflow) {
@@ -130,8 +134,8 @@ namespace petrenko {
       return;
     }
 
-    first = true;
-    for (petrenko::LCIter<size_t> sums = lastLine.cbegin(); sums != lastLine.cend(); ++sums) {
+    bool first = true;
+    for (petrenko::LCIter<size_t> sums = result.lastLine.cbegin(); sums != result.lastLine.cend(); ++sums) {
       if (!first) {
         out << ' ';
       }

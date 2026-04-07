@@ -10,6 +10,7 @@ namespace petrenko {
     bool sumOverflow;
     petrenko::List<std::string> titles;
     petrenko::List<petrenko::List<size_t>> numbers;
+    petrenko::List<size_t> lastLine;
   };
 
   ProcessResult processInput(std::istream& in);
