@@ -122,7 +122,6 @@ namespace petrenko {
         current = current->pNext;
         counter++;
       }
-
       return current->data;
     }
 

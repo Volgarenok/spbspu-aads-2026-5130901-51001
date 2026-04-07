@@ -1,3 +1,4 @@
+
 #include "processor.hpp"
 #include <limits>
 #include <string>
@@ -15,6 +16,11 @@ namespace petrenko {
       }
       std::string title;
       size_t count = 0;
+
+      while (count < line.size() && line[count] == ' ') {
+        ++count;
+      }
+
       while (count < line.size() && line[count] != ' ') {
         title += line[count];
         ++count;
@@ -110,16 +116,12 @@ namespace petrenko {
     }
     std::cout << "\n";
 
-    size_t maxi = 1;
+    size_t maxi = 0;
     for (petrenko::LCIter<petrenko::List<size_t>> numbers = result.numbers.cbegin();
          numbers != result.numbers.cend(); ++numbers) {
       if ((*numbers).getSize() > maxi) {
         maxi = (*numbers).getSize();
       }
-    }
-
-    if (result.titles.getSize() < 2) {
-      maxi = 0;
     }
 
     for (size_t counter = 0; counter < maxi; ++counter) {
