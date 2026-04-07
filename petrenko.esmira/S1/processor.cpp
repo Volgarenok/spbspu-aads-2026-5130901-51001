@@ -100,6 +100,16 @@ namespace petrenko {
       return;
     }
 
+    bool first = true;
+    for (petrenko::LIter<std::string> tit = titles.begin(); tit != titles.end(); ++tit) {
+      if (!first) {
+        std::cout << ' ';
+      }
+      std::cout << *tit;
+      first = false;
+    }
+    std::cout << "\n";
+
     size_t maxi = 1;
     for (petrenko::LCIter<petrenko::List<size_t>> numbers = result.numbers.cbegin();
          numbers != result.numbers.cend(); ++numbers) {
