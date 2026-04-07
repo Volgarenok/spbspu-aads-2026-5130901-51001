@@ -19,7 +19,6 @@ namespace petrenko {
         title += line[count];
         ++count;
       }
-
       result.titles.insert(title, result.titles.getSize());
 
       while (count < line.size() && line[count] == ' ') {
@@ -56,12 +55,10 @@ namespace petrenko {
         } else {
           ++count;
         }
-
         while (count < line.size() && (line[count] == ' ' || line[count] == '\n')) {
           ++count;
         }
       }
-
       result.numbers.insert(numbers, result.numbers.getSize());
     }
     return result;
@@ -95,7 +92,6 @@ namespace petrenko {
       maxi = 0;
     }
 
-    bool sumOverflow = false;
     petrenko::List<size_t> lastLine;
     for (size_t counter = 0; counter < maxi; ++counter) {
       unsigned long long summa = 0;
@@ -113,7 +109,7 @@ namespace petrenko {
           if (!rowOverflow) {
             if (summa > std::numeric_limits<size_t>::max() - (*numbers)[counter]) {
               rowOverflow = true;
-              sumOverflow = true;
+              result.overflow = true;
             } else {
               summa += (*numbers)[counter];
             }
@@ -128,7 +124,7 @@ namespace petrenko {
       }
     }
 
-    if (result.overflow || sumOverflow) {
+    if (result.overflow) {
       err << "overflow\n";
       return;
     }
