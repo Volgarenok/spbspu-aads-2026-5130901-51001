@@ -3,12 +3,16 @@
 
 #include "../common/list.hpp"
 
-template< class T > class Queue {
-  List< T > data_;
- public:
-  void push(const T &value);
-  T drop();
-};
+namespace hachaturyanov
+{
+
+  template< class T > class Queue {
+    List< T > data_;
+  public:
+    void push(const T &value);
+    T drop();
+  };
+
 
 template< class T > void Queue< T >::push(const T &value)
 {
@@ -23,6 +27,8 @@ template< class T > T Queue< T >::drop()
   T res = *(data_.begin());
   data_.popFront();
   return res;
+}
+
 }
 
 #endif
