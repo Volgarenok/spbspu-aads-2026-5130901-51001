@@ -28,9 +28,13 @@ namespace hachaturyanov
 
     iter addFront(const T &val);
     iter addEnd(const T &val);
+    iter addFront(T &&val);
+    iter addEnd(T &&val);
 
     iter insertBefore(iter pos, const T &val);
     iter insertAfter(iter pos, const T &val);
+    iter insertBefore(iter pos, T &&val);
+    iter insertAfter(iter pos, T &&val);
 
     void popFront() noexcept;
     void popEnd() noexcept;
@@ -43,6 +47,76 @@ namespace hachaturyanov
     List& operator=(const List &other);
     List& operator=(List &&other);
   };
+
+  template< class T > typename List< T >::iter List< T >::insertAfter(iter pos, T &&val)
+  {
+    node< T >* newNode = new node< T >(std::move(val));
+    newNode->prev_ = pos.node_;
+    newNode->next_ = pos.node_->next_;
+    pos.node_->next_->prev_ = newNode;
+    pos.node_->next_ = newNode;
+    if (pos.node_ == head_->prev_) {
+      head_->prev_ = newNode;
+    } else if (isEmpty()) {
+      head_ = newNode;
+    }
+    size_++;
+    return iter(newNode);
+  }
+
+  template< class T > typename List< T >::iter List< T >::insertBefore(iter pos, T &&val)
+  {
+    node< T >* newNode = new node< T >(std::move(val));
+    newNode->next_ = pos.node_;
+    newNode->prev_ = pos.node_->prev_;
+    pos.node_->prev_->next_ = newNode;
+    pos.node_->prev_ = newNode;
+    if (pos.node_ == head_) {
+      head_ = newNode;
+    } else if (pos.node_ == head_->prev_) {
+      head_->prev_ = newNode;
+    } else if (isEmpty()) {
+      head_ = newNode;
+    }
+    size_++;
+    return iter(newNode);
+  }
+
+  template< class T > typename List< T >::iter List< T >::addEnd(T &&val)
+  {
+    node< T >* newNode = new node< T >(std::move(val));
+    newNode->next_ = pos.node_;
+    newNode->prev_ = pos.node_->prev_;
+    pos.node_->prev_->next_ = newNode;
+    pos.node_->prev_ = newNode;
+    if (pos.node_ == head_) {
+      head_ = newNode;
+    } else if (pos.node_ == head_->prev_) {
+      head_->prev_ = newNode;
+    } else if (isEmpty()) {
+      head_ = newNode;
+    }
+    size_++;
+    return iter(newNode);
+  }
+
+  template< class T > typename List< T >::iter List< T >::addFront(T &&val)
+  {
+    node< T >* newNode = new node< T >(std::move(val));
+    if (isEmpty()) {
+      newNode->next_ = newNode;
+      newNode->prev_ = newNode;
+    } else {
+      node< T >* tail_ = head_->prev_;
+      newNode->next_ = head_;
+      newNode->prev_ = tail_;
+      tail_->next_ = newNode;
+      head_->prev_ = newNode;
+    }
+    head_ = newNode;
+    size_++;
+    return iter(newNode);
+  }
 
 
   template< class T > List< T >::List() noexcept:
