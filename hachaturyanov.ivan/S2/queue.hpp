@@ -13,9 +13,38 @@ namespace hachaturyanov
     void push(T &&value);
     T drop();
 
+    T& begin();
+    const T& begin() const;
+    T& end();
+    const T& end() const;
+
     size_t size() const noexcept;
     bool isEmpty() const noexcept;
   };
+
+template< class T > T& Queue< T >::begin()
+{
+  return *(data_.begin());
+}
+
+template< class T > const T& Queue< T >::begin() const
+{
+  return *(data_.begin());
+}
+
+template< class T > T& Queue< T >::end()
+{
+  auto it = data_.end();
+  --it;
+  return *it;
+}
+
+template< class T > const T& Queue< T >::end() const
+{
+  auto it = data_.end();
+  --it;
+  return *it;
+}
 
 template< class T > void Queue< T >::push(T &&value)
 {

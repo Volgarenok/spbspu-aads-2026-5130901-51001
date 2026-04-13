@@ -52,3 +52,13 @@ BOOST_AUTO_TEST_CASE(test_queue_move)
   BOOST_TEST(s.empty());
   BOOST_TEST(q.drop() == "test");
 }
+
+BOOST_AUTO_TEST_CASE(test_queue_begin_end)
+{
+  Queue< int > q;
+  q.push(1);
+  q.push(2);
+  q.push(3);
+  BOOST_TEST(q.begin() == 1);
+  BOOST_TEST(q.end() == 3);
+}
