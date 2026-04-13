@@ -85,16 +85,16 @@ namespace hachaturyanov
   template< class T > typename List< T >::iter List< T >::addEnd(T &&val)
   {
     node< T >* newNode = new node< T >(std::move(val));
-    newNode->next_ = pos.node_;
-    newNode->prev_ = pos.node_->prev_;
-    pos.node_->prev_->next_ = newNode;
-    pos.node_->prev_ = newNode;
-    if (pos.node_ == head_) {
+    if (isEmpty()) {
+      newNode->next_ = newNode;
+      newNode->prev_ = newNode;
       head_ = newNode;
-    } else if (pos.node_ == head_->prev_) {
+    } else {
+      node< T >* tail_ = head_->prev_;
+      newNode->next_ = head_;
+      newNode->prev_ = tail_;
+      tail_->next_ = newNode;
       head_->prev_ = newNode;
-    } else if (isEmpty()) {
-      head_ = newNode;
     }
     size_++;
     return iter(newNode);
