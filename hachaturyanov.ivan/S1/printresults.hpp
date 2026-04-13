@@ -2,7 +2,7 @@
 #define PRINTRESULTS_HPP
 
 #include <iostream>
-#include "list.hpp"
+#include "../common/list.hpp"
 
 namespace hachaturyanov {
   using Pair = std::pair< std::string, hachaturyanov::List< size_t > >;
