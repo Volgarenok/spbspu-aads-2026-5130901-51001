@@ -96,24 +96,27 @@ namespace losev {
     while (iss >> token) {
       if (token == "(") {
         ops.push('(');
-      } else if (token == ")") {
+      } 
+      else if (token == ")") {
         while (!ops.empty() && ops.top() != '(') {
           result += ops.pop();
           result += ' ';
         }
-       if (ops.empty()) {
+        if (ops.empty()) {
           throw std::runtime_error("Mismatched parentheses");
         }
-        ops.pop(); // удаляем '('
-      } else if (token.length() == 1 && isOperator(token[0])) {
+        ops.pop();
+      } 
+      else if (token.length() == 1 && isOperator(token[0])) {
         char c = token[0];
         while (!ops.empty() && ops.top() != '(' &&
                precedence(ops.top()) >= precedence(c)) {
           result += ops.pop();
           result += ' ';
         }
-      ops.push(c);
-      } else {
+        ops.push(c);
+      } 
+      else {
         bool valid = true;
         for (size_t i = 0; i < token.length(); ++i) {
           if (i == 0 && token[i] == '-') continue;
@@ -128,7 +131,7 @@ namespace losev {
         result += token;
         result += ' ';
       }
-    }
+  }
     while (!ops.empty()) {
       if (ops.top() == '(' || ops.top() == ')') {
         throw std::runtime_error("Mismatched parentheses");
