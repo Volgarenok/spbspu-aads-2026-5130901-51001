@@ -6,7 +6,6 @@
 #include <cstdlib>
 #include <cerrno>
 
-#include <iostream>
 
 namespace losev {
   long long precedence(char op) {
@@ -115,8 +114,6 @@ namespace losev {
         }
       ops.push(c);
       } else {
-        // Это число
-        // Проверяем, что это действительно число
         bool valid = true;
         for (size_t i = 0; i < token.length(); ++i) {
           if (i == 0 && token[i] == '-') continue;
@@ -182,7 +179,6 @@ namespace losev {
     if (!vals.empty()) {
       throw std::runtime_error("Invalid expression");
     }
-    std::cout << "Postfix: [" << result << "]" << std::endl;
     return result;
   }
 
