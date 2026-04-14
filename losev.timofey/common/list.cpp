@@ -90,6 +90,7 @@ bool LCIter<T>::operator!=(const LCIter& other) const {
   return ptr_ != other.ptr_;
 }
 
+
 template<class T>
 LCIter<T>::LCIter(const LIter<T>& iter) : ptr_(iter.ptr_) {}
 
@@ -97,6 +98,11 @@ LCIter<T>::LCIter(const LIter<T>& iter) : ptr_(iter.ptr_) {}
 template<class T>
 List<T>::List(const List& other) : head_(nullptr) {
   copy_from(other);
+}
+
+template<class T>
+List<T>::List(List&& other) noexcept : head_(other.head_) {
+  other.head_ = nullptr;
 }
 
 template<class T>
@@ -109,6 +115,16 @@ List<T>& List<T>::operator=(const List& other) {
   if (this != &other) {
     clear();
     copy_from(other);
+  }
+  return *this;
+}
+
+template<class T>
+List<T>& List<T>::operator=(List&& other) noexcept {
+  if (this != &other) {
+    clear();
+    head_ = other.head_;
+    other.head_ = nullptr;
   }
   return *this;
 }

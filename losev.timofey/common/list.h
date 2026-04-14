@@ -65,6 +65,7 @@ public:
 
   List() : head_(nullptr) {}
   List(const List& other);
+  List(List&& other) noexcept;
   ~List();
 
   bool empty() const { return head_ == nullptr; }
@@ -81,6 +82,7 @@ public:
   }
 
   List& operator=(const List& other);
+  List& operator=(List&& other) noexcept;
   void clear();
 
 private:

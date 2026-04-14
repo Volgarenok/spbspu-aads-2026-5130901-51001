@@ -4,6 +4,7 @@
 #include <cctype>
 #include <limits>
 #include <cstdlib>
+#include <cerrno>
 
 namespace losev {
   long long precedence(char op) {
@@ -150,11 +151,14 @@ namespace losev {
         long long a = vals.pop();
         vals.push(applyOperation(a, b, token[0]));
       } else {
-        std::istringstream numStream(token);
-        long long num;
-        numStream >> num;
-        if (numStream.fail()) {
+        char* endptr;
+        errno = 0;
+        long long num = std::strtoll(token.c_str(), &endptr, 10);
+        if (endptr == token.c_str() || *endptr != '\0') {
           throw std::runtime_error("Invalid number");
+        }
+        if (errno == ERANGE) {
+          throw std::runtime_error("Number too large");
         }
         vals.push(num);
       }
