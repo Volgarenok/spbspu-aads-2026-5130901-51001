@@ -93,6 +93,17 @@ namespace losev {
     std::istringstream iss(expr);
     std::string token;
 
+    std::string normalized;
+    for (size_t i = 0; i < expr.length(); ++i) {
+      char c = expr[i];
+      if (c == '(' || c == ')') {
+        normalized += ' ';
+        normalized += c;
+        normalized += ' ';
+      } else {
+        normalized += c;
+      }
+    }
     while (iss >> token) {
       if (token == "(") {
         ops.push('(');
