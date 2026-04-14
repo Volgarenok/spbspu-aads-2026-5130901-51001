@@ -26,8 +26,11 @@ namespace losev {
   }
 
   bool willSubOverflow(long long a, long long b) {
-    if (b < 0 && a > std::numeric_limits<long long>::max() + b) return true;
-    if (b > 0 && a < std::numeric_limits<long long>::min() + b) return true;
+    if (b > 0) {
+    if (a < std::numeric_limits<long long>::min() + b) return true;
+    } else if (b < 0) {
+    if (a > std::numeric_limits<long long>::max() + b) return true;
+    }
     return false;
   }
 
@@ -134,7 +137,6 @@ namespace losev {
     Stack<long long> vals;
     std::istringstream iss(postfix);
     std::string token;
-
     while (iss >> token) {
       if (token.length() == 1 && isOperator(token[0])) {
         if (vals.empty()) {
@@ -158,10 +160,19 @@ namespace losev {
           if (!isdigit(token[i])) {
             throw std::runtime_error("Invalid number");
           }
+          int digit = token[i] - '0';
           if (num > std::numeric_limits<long long>::max() / 10) {
             throw std::runtime_error("Number too large");
           }
-          num = num * 10 + (token[i] - '0');
+          if (num == std::numeric_limits<long long>::max() / 10) {
+            if (!negative && digit > std::numeric_limits<long long>::max() % 10) {
+              throw std::runtime_error("Number too large");
+            }
+            if (negative && digit > -(std::numeric_limits<long long>::min() % 10)) {
+              throw std::runtime_error("Number too large");
+            }
+          }
+          num = num * 10 + digit;
         }
         if (negative) {
           num = -num;
@@ -169,11 +180,9 @@ namespace losev {
         vals.push(num);
       }
     }
-
     if (vals.empty()) {
       throw std::runtime_error("No result");
     }
-
     long long result = vals.pop();
     if (!vals.empty()) {
       throw std::runtime_error("Invalid expression");
