@@ -147,6 +147,7 @@ template class LCIter<size_t>;
 template class LCIter<NamedList>;
 template class List<size_t>;
 template class List<NamedList>;
+
 template struct Node<int>;
 template struct Node<char>;
 template class LIter<int>;
@@ -155,4 +156,9 @@ template class LCIter<int>;
 template class LCIter<char>;
 template class List<int>;
 template class List<char>;
+
+template struct Node<std::string>;
+template class LIter<std::string>;
+template class LCIter<std::string>;
+template class List<std::string>;
 }
