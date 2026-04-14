@@ -88,11 +88,6 @@ namespace losev {
   }
 
   std::string infixToPostfix(const std::string& expr) {
-    Stack<char> ops;
-    std::string result;
-    std::istringstream iss(expr);
-    std::string token;
-
     std::string normalized;
     for (size_t i = 0; i < expr.length(); ++i) {
       char c = expr[i];
@@ -104,6 +99,12 @@ namespace losev {
         normalized += c;
       }
     }
+    Stack<char> ops;
+    std::string result;
+    std::istringstream iss(normalized); 
+    std::string token;
+
+
     while (iss >> token) {
       if (token == "(") {
         ops.push('(');
