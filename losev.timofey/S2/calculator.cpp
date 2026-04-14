@@ -96,7 +96,7 @@ namespace losev {
     while (iss >> token) {
       if (token == "(") {
         ops.push('(');
-      } 
+      }
       else if (token == ")") {
         while (!ops.empty() && ops.top() != '(') {
           result += ops.pop();
@@ -106,7 +106,7 @@ namespace losev {
           throw std::runtime_error("Mismatched parentheses");
         }
         ops.pop();
-      } 
+      }
       else if (token.length() == 1 && isOperator(token[0])) {
         char c = token[0];
         while (!ops.empty() && ops.top() != '(' &&
@@ -115,7 +115,7 @@ namespace losev {
           result += ' ';
         }
         ops.push(c);
-      } 
+      }
       else {
         bool valid = true;
         for (size_t i = 0; i < token.length(); ++i) {
