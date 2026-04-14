@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <cerrno>
 
+#include <iostream>
+
 namespace losev {
   long long precedence(char op) {
     switch (op) {
@@ -93,37 +95,43 @@ namespace losev {
     std::string token;
 
     while (iss >> token) {
-      if (token.length() == 1 && isOperator(token[0])) {
-        char c = token[0];
-        while (!ops.empty() && ops.top() != '(' &&
-               precedence(ops.top()) >= precedence(c)) {
-          result += ops.pop();
-          result += ' ';
-        }
-        ops.push(c);
-      } else if (token == "(") {
+      if (token == "(") {
         ops.push('(');
       } else if (token == ")") {
         while (!ops.empty() && ops.top() != '(') {
           result += ops.pop();
           result += ' ';
         }
-        if (ops.empty()) {
+       if (ops.empty()) {
           throw std::runtime_error("Mismatched parentheses");
         }
-        ops.pop();
-      } else if (token.length() == 1 && isdigit(token[0])) {
-        result += token + ' ';
+        ops.pop(); // удаляем '('
+      } else if (token.length() == 1 && isOperator(token[0])) {
+        char c = token[0];
+        while (!ops.empty() && ops.top() != '(' &&
+               precedence(ops.top()) >= precedence(c)) {
+          result += ops.pop();
+          result += ' ';
+        }
+      ops.push(c);
       } else {
+        // Это число
+        // Проверяем, что это действительно число
+        bool valid = true;
         for (size_t i = 0; i < token.length(); ++i) {
-          if (!isdigit(token[i]) && token[i] != '-') {
-            throw std::runtime_error("Invalid number");
+          if (i == 0 && token[i] == '-') continue;
+          if (!isdigit(token[i])) {
+            valid = false;
+            break;
           }
         }
-        result += token + ' ';
+        if (!valid) {
+          throw std::runtime_error("Invalid token: " + token);
+        }
+        result += token;
+        result += ' ';
       }
     }
-
     while (!ops.empty()) {
       if (ops.top() == '(' || ops.top() == ')') {
         throw std::runtime_error("Mismatched parentheses");
@@ -131,8 +139,10 @@ namespace losev {
       result += ops.pop();
       result += ' ';
     }
+
     return result;
   }
+
 
   long long evaluatePostfix(const std::string& postfix) {
     Stack<long long> vals;
@@ -172,6 +182,7 @@ namespace losev {
     if (!vals.empty()) {
       throw std::runtime_error("Invalid expression");
     }
+    std::cout << "Postfix: [" << result << "]" << std::endl;
     return result;
   }
 
