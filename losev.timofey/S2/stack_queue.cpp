@@ -178,4 +178,7 @@ T Queue<T>::pop() {
 template class Stack<int>;
 template class Queue<int>;
 
+template class Stack<char>;
+template class Queue<char>;
+
 }
