@@ -1,4 +1,3 @@
-#define BOOST_TEST_MODULE StackQueueTests
 #include <boost/test/included/unit_test.hpp>
 #include "stack_queue.h"
 
