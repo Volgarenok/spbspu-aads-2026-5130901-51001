@@ -1,4 +1,5 @@
 #include "calculator.h"
+#include "stack_queue.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -7,7 +8,6 @@ int main(int argc, char* argv[]) {
   try {
     std::istream* input = &std::cin;
     std::ifstream file;
-
     if (argc >= 2) {
       file.open(argv[1]);
       if (!file.is_open()) {
@@ -16,10 +16,8 @@ int main(int argc, char* argv[]) {
       }
       input = &file;
     }
-
-    std::string expressions[100];
-    int results[100];
-    int count = 0;
+    losev::List<std::string> expressions;
+    losev::List<int> results;
     std::string line;
     while (std::getline(*input, line)) {
       if (line.empty()) {
@@ -33,28 +31,38 @@ int main(int argc, char* argv[]) {
       while (end > start && (line[end - 1] == ' ' || line[end - 1] == '\t')) {
         --end;
       }
-
+      
       if (start < end) {
-        expressions[count++] = line.substr(start, end - start);
+        expressions.push_front(line.substr(start, end - start));
       }
     }
-    if (count == 0) {
+    if (expressions.empty()) {
       std::cout << std::endl;
       return 0;
     }
-    for (int i = 0; i < count; ++i) {
+    losev::List<std::string> reversed;
+    for (losev::List<std::string>::iterator it = expressions.begin();
+         it != expressions.end(); ++it) {
+      reversed.push_front(*it);
+    }
+    for (losev::List<std::string>::iterator it = reversed.begin();
+         it != reversed.end(); ++it) {
       try {
-        results[i] = losev::evaluateExpression(expressions[i]);
+        int result = losev::evaluateExpression(*it);
+        results.push_front(result);
       } catch (const std::exception& e) {
-        std::cerr << "Error: " << expressions[i] << " - " << e.what() << std::endl;
+        std::cerr << "Error: " << *it << " - " << e.what() << std::endl;
         return 1;
       }
     }
-    for (int i = count - 1; i >= 0; --i) {
-      if (i != count - 1) {
+    bool first = true;
+    for (losev::List<int>::iterator it = results.begin();
+         it != results.end(); ++it) {
+      if (!first) {
         std::cout << ' ';
       }
-      std::cout << results[i];
+      std::cout << *it;
+      first = false;
     }
     std::cout << std::endl;
   } catch (const std::exception& e) {
