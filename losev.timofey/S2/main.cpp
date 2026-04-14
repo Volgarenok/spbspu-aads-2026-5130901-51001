@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
       while (end > start && (line[end - 1] == ' ' || line[end - 1] == '\t')) {
         --end;
       }
-      
+
       if (start < end) {
         expressions.push_front(line.substr(start, end - start));
       }
