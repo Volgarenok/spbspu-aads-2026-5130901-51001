@@ -1,4 +1,4 @@
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include "stack_queue.h"
 
 BOOST_AUTO_TEST_SUITE(stack_tests)

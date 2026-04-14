@@ -1,4 +1,4 @@
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include "calculator.h"
 
 BOOST_AUTO_TEST_SUITE(bitwise_and_tests)
