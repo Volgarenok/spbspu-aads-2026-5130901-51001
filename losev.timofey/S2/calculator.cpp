@@ -101,7 +101,7 @@ namespace losev {
     }
     Stack<char> ops;
     std::string result;
-    std::istringstream iss(normalized); 
+    std::istringstream iss(normalized);
     std::string token;
 
 
