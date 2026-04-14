@@ -137,6 +137,7 @@ namespace losev {
     Stack<long long> vals;
     std::istringstream iss(postfix);
     std::string token;
+
     while (iss >> token) {
       if (token.length() == 1 && isOperator(token[0])) {
         if (vals.empty()) {
@@ -149,40 +150,20 @@ namespace losev {
         long long a = vals.pop();
         vals.push(applyOperation(a, b, token[0]));
       } else {
-        long long num = 0;
-        bool negative = false;
-        size_t i = 0;
-        if (token[0] == '-') {
-          negative = true;
-          i = 1;
-        }
-        for (; i < token.length(); ++i) {
-          if (!isdigit(token[i])) {
-            throw std::runtime_error("Invalid number");
-          }
-          int digit = token[i] - '0';
-          if (num > std::numeric_limits<long long>::max() / 10) {
-            throw std::runtime_error("Number too large");
-          }
-          if (num == std::numeric_limits<long long>::max() / 10) {
-            if (!negative && digit > std::numeric_limits<long long>::max() % 10) {
-              throw std::runtime_error("Number too large");
-            }
-            if (negative && digit > -(std::numeric_limits<long long>::min() % 10)) {
-              throw std::runtime_error("Number too large");
-            }
-          }
-          num = num * 10 + digit;
-        }
-        if (negative) {
-          num = -num;
+        std::istringstream numStream(token);
+        long long num;
+        numStream >> num;
+        if (numStream.fail()) {
+          throw std::runtime_error("Invalid number");
         }
         vals.push(num);
       }
     }
+
     if (vals.empty()) {
       throw std::runtime_error("No result");
     }
+
     long long result = vals.pop();
     if (!vals.empty()) {
       throw std::runtime_error("Invalid expression");
