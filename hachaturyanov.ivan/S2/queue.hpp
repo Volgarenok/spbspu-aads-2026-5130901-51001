@@ -71,7 +71,7 @@ template< class T > T Queue< T >::drop()
   if (data_.isEmpty()) {
     throw std::logic_error("Queue is empty");
   }
-  T res = *(data_.begin());
+  T res = begin();
   data_.popFront();
   return res;
 }
