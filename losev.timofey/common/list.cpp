@@ -161,4 +161,9 @@ template struct Node<std::string>;
 template class LIter<std::string>;
 template class LCIter<std::string>;
 template class List<std::string>;
+
+template struct Node<long long>;
+template class LIter<long long>;
+template class LCIter<long long>;
+template class List<long long>;
 }
