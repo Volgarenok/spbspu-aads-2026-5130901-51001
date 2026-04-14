@@ -5,7 +5,7 @@
 
 namespace losev {
 
-int evaluateExpression(const std::string& expression);
+long long evaluateExpression(const std::string& expression);
 
 }
 

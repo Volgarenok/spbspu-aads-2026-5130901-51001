@@ -2,11 +2,11 @@
 #include "stack_queue.h"
 #include <sstream>
 #include <cctype>
+#include <limits>
+#include <cstdlib>
 
 namespace losev {
-
-namespace {
-  int precedence(char op) {
+  long long precedence(char op) {
     switch (op) {
       case '+': case '-': return 1;
       case '*': case '/': case '%': return 2;
@@ -19,19 +19,66 @@ namespace {
     return c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '&';
   }
 
-  int applyOperation(int a, int b, char op) {
+  bool willAddOverflow(long long a, long long b) {
+    if (b > 0 && a > std::numeric_limits<long long>::max() - b) return true;
+    if (b < 0 && a < std::numeric_limits<long long>::min() - b) return true;
+    return false;
+  }
+
+  bool willSubOverflow(long long a, long long b) {
+    if (b < 0 && a > std::numeric_limits<long long>::max() + b) return true;
+    if (b > 0 && a < std::numeric_limits<long long>::min() + b) return true;
+    return false;
+  }
+
+  bool willMulOverflow(long long a, long long b) {
+    if (a == 0 || b == 0) return false;
+    if (a > 0 && b > 0 && a > std::numeric_limits<long long>::max() / b) return true;
+    if (a < 0 && b < 0 && a < std::numeric_limits<long long>::max() / b) return true;
+    if (a > 0 && b < 0 && b < std::numeric_limits<long long>::min() / a) return true;
+    if (a < 0 && b > 0 && a < std::numeric_limits<long long>::min() / b) return true;
+    return false;
+  }
+
+  long long positiveMod(long long a, long long b) {
+    long long result = a % b;
+    if (result < 0) {
+      result += b;
+    }
+    return result;
+  }
+
+  long long applyOperation(long long a, long long b, char op) {
     switch (op) {
-      case '+': return a + b;
-      case '-': return a - b;
-      case '*': return a * b;
+      case '+':
+        if (willAddOverflow(a, b)) {
+          throw std::runtime_error("Overflow");
+        }
+        return a + b;
+      case '-':
+        if (willSubOverflow(a, b)) {
+          throw std::runtime_error("Overflow");
+        }
+        return a - b;
+      case '*':
+        if (willMulOverflow(a, b)) {
+          throw std::runtime_error("Overflow");
+        }
+        return a * b;
       case '/':
-        if (b == 0) throw std::runtime_error("Division by zero");
+        if (b == 0) {
+          throw std::runtime_error("Division by zero");
+        }
         return a / b;
       case '%':
-        if (b == 0) throw std::runtime_error("Modulo by zero");
-        return a % b;
-      case '&': return a & b;
-      default: throw std::runtime_error("Unknown operator");
+        if (b == 0) {
+          throw std::runtime_error("Modulo by zero");
+        }
+        return positiveMod(a, b);
+      case '&':
+        return a & b;
+      default:
+        throw std::runtime_error("Unknown operator");
     }
   }
 
@@ -83,39 +130,60 @@ namespace {
     return result;
   }
 
-  int evaluatePostfix(const std::string& postfix) {
-    Stack<int> vals;
+  long long evaluatePostfix(const std::string& postfix) {
+    Stack<long long> vals;
     std::istringstream iss(postfix);
     std::string token;
 
     while (iss >> token) {
       if (token.length() == 1 && isOperator(token[0])) {
-        int b = vals.pop();
-        int a = vals.pop();
+        if (vals.empty()) {
+          throw std::runtime_error("Not enough operands");
+        }
+        long long b = vals.pop();
+        if (vals.empty()) {
+          throw std::runtime_error("Not enough operands");
+        }
+        long long a = vals.pop();
         vals.push(applyOperation(a, b, token[0]));
       } else {
-        int num = 0;
-        size_t i = (token[0] == '-') ? 1 : 0;
+        long long num = 0;
+        bool negative = false;
+        size_t i = 0;
+        if (token[0] == '-') {
+          negative = true;
+          i = 1;
+        }
         for (; i < token.length(); ++i) {
           if (!isdigit(token[i])) {
             throw std::runtime_error("Invalid number");
           }
+          if (num > std::numeric_limits<long long>::max() / 10) {
+            throw std::runtime_error("Number too large");
+          }
           num = num * 10 + (token[i] - '0');
         }
-        vals.push((token[0] == '-') ? -num : num);
+        if (negative) {
+          num = -num;
+        }
+        vals.push(num);
       }
     }
 
-    int result = vals.pop();
+    if (vals.empty()) {
+      throw std::runtime_error("No result");
+    }
+
+    long long result = vals.pop();
     if (!vals.empty()) {
       throw std::runtime_error("Invalid expression");
     }
     return result;
   }
+
+  long long evaluateExpression(const std::string& expr) {
+    return evaluatePostfix(infixToPostfix(expr));
+  }
+
 }
 
-int evaluateExpression(const std::string& expr) {
-  return evaluatePostfix(infixToPostfix(expr));
-}
-
-}

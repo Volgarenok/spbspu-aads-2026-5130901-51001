@@ -181,4 +181,7 @@ template class Queue<int>;
 template class Stack<char>;
 template class Queue<char>;
 
+template class Stack<long long>;
+template class Queue<long long>;
+
 }
