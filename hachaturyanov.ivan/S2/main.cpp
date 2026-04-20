@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <fstream>
+
 #include "calculator.hpp"
 
 int main(int argc, char* argv[])
@@ -12,9 +13,11 @@ int main(int argc, char* argv[])
         std::cerr << "Failed to open file: " << argv[1] << '\n';
         return 1;
       }
-      return hachaturyanov::calculate(input);
+      hachaturyanov::calculate(input);
+      return 0;
     } else if (argc == 1) {
-      return hachaturyanov::calculate(std::cin);
+      hachaturyanov::calculate(std::cin);
+      return 0;
     } else {
       std::cerr << "Invalid arguments\n";
       return 1;
