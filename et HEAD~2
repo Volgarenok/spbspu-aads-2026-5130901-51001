@@ -1,0 +1,587 @@
+[33mcommit a48a1a69c9759e262ad31ea515ef779ef0c095a5[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mpetrenko.esmira/S1[m[33m)[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Fri Mar 27 17:33:45 2026 +0300
+
+    cbegin
+
+[33mcommit 8bb9ae099234b512e54e951c62fbb284daf6f447[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Fri Mar 27 17:30:36 2026 +0300
+
+    const please2
+
+[33mcommit bf2bd4943b9f1fd49252dcab1df6626290e58f90[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Fri Mar 27 17:24:24 2026 +0300
+
+    const please
+
+[33mcommit cc6ea87413b7e996c1868bdcc45db6b62353de13[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Fri Mar 27 17:21:52 2026 +0300
+
+    fix const
+
+[33mcommit b0e5e16f354fec08cb23a45f6a276f90149bf1b2[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Fri Mar 27 16:52:10 2026 +0300
+
+    unit
+
+[33mcommit 9fadf5c65fd2c2ae5e852cd017b9d6a1793f1471[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Fri Mar 27 15:25:33 2026 +0300
+
+    fix build
+
+[33mcommit 159100dfec3a2bb0def3fa45e2f7395892e20cd2[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Fri Mar 27 15:21:12 2026 +0300
+
+    overflow
+
+[33mcommit 17c37ea576c43181d74fc69479cb6c739d4707eb[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Fri Mar 27 14:51:26 2026 +0300
+
+    overflow without sums with \n
+
+[33mcommit 668ad046c30c5feb9d4fe7c40fc9a304e00bdee7[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Fri Mar 27 14:46:14 2026 +0300
+
+    overflow without sums
+
+[33mcommit bf4035676dd018fa460d27e56ece2156ed601e44[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Fri Mar 27 14:40:46 2026 +0300
+
+    overflow with one \n
+
+[33mcommit 4220862e680bc7cee8459a153a1b3d0c62e23343[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Fri Mar 27 14:34:19 2026 +0300
+
+    overflow without \n
+
+[33mcommit 2542db219ecfe450bb6c2af75661021a264f6c1c[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Thu Mar 26 22:46:27 2026 +0300
+
+    overflow last please
+
+[33mcommit f08367db9a6bc5df0a02e566eacd7ebbc7d68bf6[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Thu Mar 26 22:36:10 2026 +0300
+
+    overflow last please
+
+[33mcommit ceaf70800bae422876786be013f127f7119d0a96[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Thu Mar 26 22:12:05 2026 +0300
+
+    overflow last with \n
+
+[33mcommit 88080265239085a38c89e782276f111a56227dfa[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Thu Mar 26 22:08:10 2026 +0300
+
+    overflow last without \n
+
+[33mcommit 8ca2a070371d07412e938b46046d8fd24bdd02c1[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Thu Mar 26 21:48:00 2026 +0300
+
+    overfloooow2
+
+[33mcommit 4269869717969375ac16081486e4846d95cacc96[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Wed Mar 25 22:03:17 2026 +0300
+
+    overfloooow
+
+[33mcommit 0236240e33e0b9ad7da26f120a11acfa6367dbb9[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Wed Mar 25 21:58:12 2026 +0300
+
+    overflow
+
+[33mcommit 5890a7415f7ef02d4ec31f2a4a0f62ea93f40f89[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Wed Mar 25 21:41:43 2026 +0300
+
+    overflow help
+
+[33mcommit 584679c2ecf54602626ee9e5b7c959d8a0ba9144[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Wed Mar 25 21:06:06 2026 +0300
+
+    overflow how
+
+[33mcommit 486d4b6a4e208c6d00e3e4815d110c5e953ad940[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Wed Mar 25 20:49:52 2026 +0300
+
+    overflow2
+
+[33mcommit 6e9685597ed3c7c09101492eb2f3142a612ca682[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Wed Mar 25 20:13:03 2026 +0300
+
+    overflow
+
+[33mcommit c8380de93c3fd234d2ebbbd1fbab1043031630bf[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Wed Mar 25 19:47:03 2026 +0300
+
+    may test2
+
+[33mcommit e4e42aa6e47418baa4d1c70d846273537cfd6e5b[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Wed Mar 25 19:30:05 2026 +0300
+
+    may test
+
+[33mcommit 386562494590331c9309177462075dfa7e5d6b9f[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Wed Mar 25 18:50:53 2026 +0300
+
+    fix test 2-5
+
+[33mcommit 0e8231bf8827057e31948aa15111ef977386b6ea[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Wed Mar 25 18:39:31 2026 +0300
+
+    fix 5 test
+
+[33mcommit 4e800ca2da159366559a7e0755bd8f72e94e2b86[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Tue Mar 24 21:55:51 2026 +0300
+
+    fix \n maybe
+
+[33mcommit a678ae340faaac6ff93f3ae60ebe7f4f089bf7be[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Tue Mar 24 21:36:24 2026 +0300
+
+    fix 0
+
+[33mcommit cbc670a994357fcbd93358d141f1668bf3d7554b[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Tue Mar 24 21:16:59 2026 +0300
+
+    fix space with bool
+
+[33mcommit 94ca4a35fdb54446099fc53f92201fc928fc989a[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Mon Mar 23 19:06:43 2026 +0300
+
+    fix space and zero
+
+[33mcommit 937f59b6431400ee77877c92d7b6c7ecd7c1d338[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Mon Mar 23 18:51:47 2026 +0300
+
+    fix space
+
+[33mcommit fa6b79a70e3a6d9348b1b63d20484d272e19db76[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Sun Mar 22 20:18:51 2026 +0300
+
+    acceptance4
+
+[33mcommit acdda3257115d423df68d44becdc39186f38d8c2[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Sun Mar 22 20:13:20 2026 +0300
+
+    acceptance3
+
+[33mcommit 6246388ddb611f6832e4bf3ba332752cd791e672[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Sun Mar 22 20:06:29 2026 +0300
+
+    acceptance2
+
+[33mcommit 7cacf800a291e3f6e5ee0b28d8d9787099755497[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Sun Mar 22 19:59:43 2026 +0300
+
+    acceptance
+
+[33mcommit bea82a9e9bbfdc56b4dec5a2e8db6b7782605309[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Sun Mar 22 19:29:28 2026 +0300
+
+    overflow2
+
+[33mcommit f9fdc3beb97f138b48201d9f59bc5879483645df[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Sun Mar 22 19:24:56 2026 +0300
+
+    overflow
+
+[33mcommit 459ce15f372908898d5fa447ed006966c14ead5a[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Sun Mar 22 19:03:44 2026 +0300
+
+    size_t and int
+
+[33mcommit 665a5eece3d4704c6d0edc5dfc971fc5ea84716f[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Sun Mar 22 18:59:00 2026 +0300
+
+    little win
+
+[33mcommit 37a55b084ceb0aa1e3154a0664f57a1864dafbc1[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Sun Mar 22 18:44:22 2026 +0300
+
+    create operator[]
+
+[33mcommit 62840b5406af7030d009fbfd8a6993e2bf6d8042[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Sun Mar 22 17:35:35 2026 +0300
+
+    fix main2
+
+[33mcommit e475cd88b439935be0d57e7b906e26ee0c336122[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Sun Mar 22 17:34:33 2026 +0300
+
+    fix main
+
+[33mcommit fe3660571c713e783797978519dd4b9651d70b87[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Sun Mar 22 16:00:55 2026 +0300
+
+    week fix
+
+[33mcommit ce52b716c2833e9ed07bca4f3a8bc1be9b81fac1[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Sat Mar 14 11:20:39 2026 +0300
+
+    fix iter
+
+[33mcommit 806ae42d047dcb69ace945f8e98870d934fd5daa[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Fri Mar 13 22:58:24 2026 +0300
+
+    fix indentation
+
+[33mcommit 8672f2307187d4e7580078bc5635537560dd670b[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Fri Mar 13 22:55:28 2026 +0300
+
+    create for List
+
+[33mcommit 888d30cf3109ed10af031eb69e9efdc7dcb57ddd[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Fri Mar 13 22:11:04 2026 +0300
+
+    create Node
+
+[33mcommit 43ddfcaa1f521294df904c3e81d32640a0185471[m
+Author: petrenko.esmira <esmira3942@gmail.com>
+Date:   Fri Mar 13 22:01:46 2026 +0300
+
+    first commit
+
+[33mcommit a5bd3a1cf7f92cfec3c5095c9895c9d8728d9ecc[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m
+Merge: b5858f2 6a61dd8
+Author: Ksenia_rgb <130300736+Ksenia-rgb@users.noreply.github.com>
+Date:   Sat Mar 7 11:41:14 2026 +0300
+
+    Merge pull request #16 from qLisper/musorin.arseniy/S0
+    
+    musorin.arseniy/S0
+
+[33mcommit 6a61dd853eef21d66823e5399a9ca223b072f4d2[m
+Author: arseniymusorin@gmail.com <quaka@quaka.localdomain>
+Date:   Thu Mar 5 21:28:12 2026 +0300
+
+    fix cg47
+
+[33mcommit e4e1b9a9179d979f2148f99f3cc865051de2fd46[m
+Author: arseniymusorin@gmail.com <quaka@quaka.localdomain>
+Date:   Wed Mar 4 20:04:39 2026 +0300
+
+    CG
+
+[33mcommit d320d993e2afeeb872769aad0f414d040b19a654[m
+Author: arseniymusorin@gmail.com <quaka@quaka.localdomain>
+Date:   Sat Feb 28 18:31:39 2026 +0300
+
+    fix test
+
+[33mcommit afb4557e1b64f7e19bf02a84a181f5b6ba175495[m
+Author: arseniymusorin@gmail.com <quaka@quaka.localdomain>
+Date:   Sat Feb 28 18:18:34 2026 +0300
+
+    fix test-main
+
+[33mcommit 7086bc1cd81dbb02d9f78d81fb997e14f8369991[m
+Author: arseniymusorin@gmail.com <quaka@quaka.localdomain>
+Date:   Sat Feb 28 18:10:13 2026 +0300
+
+    extra space
+
+[33mcommit 672c3f9ebe58fa6bc8efd857262784dcf4a59f06[m
+Author: arseniymusorin@gmail.com <quaka@quaka.localdomain>
+Date:   Sat Feb 28 18:06:35 2026 +0300
+
+    credentials test
+
+[33mcommit 59e54a4f2033e72003186b44eb1c8096ea84c2f1[m
+Author: arseniymusorin@gmail.com <quaka@quaka.localdomain>
+Date:   Sat Feb 28 17:51:17 2026 +0300
+
+    out_credentials implementation
+
+[33mcommit fe2d3be86fa2c63e9c22c3931d5743818c0681bb[m
+Author: arseniymusorin@gmail.com <quaka@quaka.localdomain>
+Date:   Sat Feb 28 17:46:47 2026 +0300
+
+    credentials header
+
+[33mcommit 93a275404213740da520b0bc72efd9f8fd6cd073[m
+Author: arseniymusorin@gmail.com <quaka@quaka.localdomain>
+Date:   Sat Feb 28 17:39:45 2026 +0300
+
+    correct output
+
+[33mcommit d6f9572bcb77221e43ae6f3cb167bc79c62d037e[m
+Author: arseniymusorin@gmail.com <quaka@quaka.localdomain>
+Date:   Sat Feb 28 17:35:22 2026 +0300
+
+    initial commit
+
+[33mcommit b5858f2dd7ce370d463061ec3b6f55af99bf48f7[m
+Merge: 0802aee 220cf78
+Author: Ksenia_rgb <130300736+Ksenia-rgb@users.noreply.github.com>
+Date:   Tue Feb 17 21:39:36 2026 +0300
+
+    Merge pull request #12 from RBorisov6/borisov.ruslan/S0
+    
+    borisov.ruslan/S0
+
+[33mcommit 220cf786b453d081dfb429aaa1e1dfb5dfbf4b56[m
+Author: RBorisov6 <borisovruslan1512@gmail.com>
+Date:   Mon Feb 16 19:33:22 2026 +0300
+
+    fix CG 47 try 2
+
+[33mcommit 0802aee5c70d8c321ed460486207cfe3626ca437[m
+Merge: f0e6dc0 c7e817c
+Author: Ksenia_rgb <130300736+Ksenia-rgb@users.noreply.github.com>
+Date:   Mon Feb 16 14:30:39 2026 +0300
+
+    Merge pull request #15 from pollinnshh/shevchenko.polina/S0
+    
+    shevchenko.polina/S0
+
+[33mcommit f0e6dc0b5683378591b0300ba5806be3491f4eee[m
+Merge: af04b43 ae8b243
+Author: Ksenia_rgb <130300736+Ksenia-rgb@users.noreply.github.com>
+Date:   Mon Feb 16 14:27:21 2026 +0300
+
+    Merge pull request #14 from sonnesso/sadovnik.sofi/S0
+    
+    sadovnik.sofi/S0
+
+[33mcommit c7e817c7e942902c64e84e06ed00653453ae4bbf[m
+Author: pollinnshh <polinashvch248@gmail.com>
+Date:   Sun Feb 15 22:59:12 2026 +0300
+
+    fixed test
+
+[33mcommit 0254e930062d4e62d39edcbfcf9ec3b2f62f68c9[m
+Author: pollinnshh <polinashvch248@gmail.com>
+Date:   Sun Feb 15 22:49:58 2026 +0300
+
+    tests
+
+[33mcommit 877b75f73d92bdcb6717d0f35a13869b01f15a58[m
+Author: pollinnshh <polinashvch248@gmail.com>
+Date:   Sun Feb 15 21:04:28 2026 +0300
+
+    out_credentials implementation
+
+[33mcommit 94b86ae42300e32a6cd5f9970e360d21249cf44f[m
+Author: pollinnshh <polinashvch248@gmail.com>
+Date:   Sun Feb 15 20:59:24 2026 +0300
+
+    credentials header
+
+[33mcommit f53b67b88f12b327c4a140acf195a563079a59df[m
+Author: pollinnshh <polinashvch248@gmail.com>
+Date:   Sun Feb 15 18:58:47 2026 +0300
+
+    initial commit
+
+[33mcommit e9bff9e4cb6267079cfec4c6e2b1a6a83e734a8a[m
+Author: RBorisov6 <borisovruslan1512@gmail.com>
+Date:   Sun Feb 15 12:53:48 2026 +0300
+
+    fix CG 47
+
+[33mcommit af04b4331de73bd6fd022b6ff3031f8434d81ea9[m
+Merge: 8f82888 b7bdd3a
+Author: Ksenia_rgb <130300736+Ksenia-rgb@users.noreply.github.com>
+Date:   Sun Feb 15 11:58:42 2026 +0300
+
+    Merge pull request #13 from yuklya/loseva.yulia/S0
+    
+    loseva.yulia/S0
+
+[33mcommit ae8b2437fb71ebd3eab49968fa4eaa2906cdfc09[m
+Author: s-sadovnik <sadovnik.sofi@gmail.com>
+Date:   Fri Feb 13 22:03:49 2026 +0300
+
+    fix include: use unit_test.hpp instead of unit_test.cpp
+
+[33mcommit 88361172a619dac718b419ff8edb226cafa9d20a[m
+Author: s-sadovnik <sadovnik.sofi@gmail.com>
+Date:   Fri Feb 13 21:58:16 2026 +0300
+
+    fix impl
+
+[33mcommit 99a2d8a251873a288b4be41e139a9e3723e3fd6b[m
+Author: s-sadovnik <sadovnik.sofi@gmail.com>
+Date:   Fri Feb 13 21:55:56 2026 +0300
+
+    fix test-main
+
+[33mcommit c0e6dd5110eab816bed927586811b6367af44bb3[m
+Author: s-sadovnik <sadovnik.sofi@gmail.com>
+Date:   Fri Feb 13 21:49:22 2026 +0300
+
+    credentials test
+
+[33mcommit 0a74c87166c9b1cea053e3b8ab02db84ae6ddcc0[m
+Author: s-sadovnik <sadovnik.sofi@gmail.com>
+Date:   Fri Feb 13 21:34:02 2026 +0300
+
+    unit test preparation
+
+[33mcommit b7bdd3afebc9d0e2e658bbe82d41658ff0da3289[m
+Author: yuklya <yuloseva@mail.ru>
+Date:   Fri Feb 13 21:25:39 2026 +0300
+
+    fix name test
+
+[33mcommit 8b89784290330310f4ec6d25a4d65552689f060f[m
+Author: yuklya <yuloseva@mail.ru>
+Date:   Fri Feb 13 21:22:43 2026 +0300
+
+    fix cg 1.4
+
+[33mcommit f57284d9f92e4c778c0286efd7ab1d51b15d0d69[m
+Author: yuklya <yuloseva@mail.ru>
+Date:   Fri Feb 13 21:19:19 2026 +0300
+
+    credentials test
+
+[33mcommit 10332d716098b8de80479a9c317b3b0a2edb97e2[m
+Author: s-sadovnik <sadovnik.sofi@gmail.com>
+Date:   Fri Feb 13 21:09:09 2026 +0300
+
+    out_credentials implementation
+
+[33mcommit 0661fd4572681247d90ec78f7fab9b00ad3e4daf[m
+Author: s-sadovnik <sadovnik.sofi@gmail.com>
+Date:   Fri Feb 13 21:06:37 2026 +0300
+
+    credentials header fixed
+
+[33mcommit e50d12f9b25cb1d30c1e93eabd58f9a1d3dc1061[m
+Author: yuklya <yuloseva@mail.ru>
+Date:   Fri Feb 13 21:05:25 2026 +0300
+
+    out_credentials implementation
+
+[33mcommit 911e828f36e3c4b0589cab47e69459d6a1be4fd3[m
+Author: yuklya <yuloseva@mail.ru>
+Date:   Fri Feb 13 20:56:31 2026 +0300
+
+    credentials header
+
+[33mcommit 81a0d6a15f8b3f39ff3633a2f8893e0e5393cd7b[m
+Author: s-sadovnik <sadovnik.sofi@gmail.com>
+Date:   Fri Feb 13 20:51:44 2026 +0300
+
+    credentials header
+
+[33mcommit 2b85ce3726e07cd4be0ec30fd5521b976ffdc144[m
+Author: s-sadovnik <sadovnik.sofi@gmail.com>
+Date:   Fri Feb 13 20:42:11 2026 +0300
+
+    fix acceptance
+
+[33mcommit 13675a83fb4a1aa25daa63f6e1f3104dd81671d6[m
+Author: s-sadovnik <sadovnik.sofi@gmail.com>
+Date:   Fri Feb 13 20:22:22 2026 +0300
+
+    Initial commit for S0
+
+[33mcommit cd5458b0733d37bf175a812f7593c23adc3a7496[m
+Author: yuklya <yuloseva@mail.ru>
+Date:   Fri Feb 13 19:58:10 2026 +0300
+
+    initial for S0
+
+[33mcommit eb95ce3e0eece166465322db98e2ec88e695164f[m
+Author: RBorisov6 <borisovruslan1512@gmail.com>
+Date:   Fri Feb 13 00:07:30 2026 +0300
+
+    fix CG 11
+
+[33mcommit 70c57119a462c0e3baef964f7b4f53b3fffa2b18[m
+Author: RBorisov6 <borisovruslan1512@gmail.com>
+Date:   Thu Feb 12 23:57:52 2026 +0300
+
+    fix namespace in credentials.cpp
+
+[33mcommit 832fbce23197aa44d74f241cffbfab5a150be57d[m
+Author: RBorisov6 <borisovruslan1512@gmail.com>
+Date:   Thu Feb 12 23:34:34 2026 +0300
+
+    add tests
+
+[33mcommit 8f828882864bd4f7db1f19ea4f6d99b88c3a9a4c[m
+Merge: 69c2a13 f66e431
+Author: Ksenia_rgb <130300736+Ksenia-rgb@users.noreply.github.com>
+Date:   Thu Feb 12 19:06:26 2026 +0300
+
+    Merge pull request #11 from Mishaster82/novikov.misha/S0
+    
+    novikov.misha/S0
+
+[33mcommit cd72e6888b6a46a2c941dc9b47ca2e2f882c5327[m
+Author: RBorisov6 <borisovruslan1512@gmail.com>
+Date:   Thu Feb 12 17:58:58 2026 +0300
+
+    unit test template
+
+[33mcommit d8cb31bac2aff57599654dfae71d3a27686751a5[m
+Author: RBorisov6 <borisovruslan1512@gmail.com>
+Date:   Thu Feb 12 17:40:59 2026 +0300
+
+    out_credentials implementation
+
+[33mcommit 9a9d675fbc1c5ae2d7ff0d3be5d75782b90dd38d[m
+Author: RBorisov6 <borisovruslan1512@gmail.com>
+Date:   Thu Feb 12 17:27:22 2026 +0300
+
+    credentials header
+
+[33mcommit 4c3a68b60c399762b3cddd6ed54779769e1a39e7[m
+Author: RBorisov6 <borisovruslan1512@gmail.com>
+Date:   Thu Feb 12 17:15:18 2026 +0300
+
+    fix acceptance
+
+[33mcommit 3b53098bee1648f37c79b83f190c22ef9ec885ed[m
+Author: RBorisov6 <borisovruslan1512@gmail.com>
+Date:   Thu Feb 12 17:07:01 2026 +0300
+
+    add m

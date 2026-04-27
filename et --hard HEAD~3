@@ -1,0 +1,196 @@
+[33m8d8d801[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mpetrenko.esmira/S1[m[33m, [m[1;31morigin/petrenko.esmira/S1[m[33m)[m Merge branch 'petrenko.esmira/S1' of github.com:MisssNothing/spbspu-aads-2026-5130901-51001 into petrenko.esmira/S1
+[33mc869a8d[m idk
+[33m2486ac6[m sums
+[33m015ba2a[m operator[] non const
+[33ma2deea8[m globalover2
+[33m9674c51[m globalover
+[33ma48a1a6[m cbegin
+[33m8bb9ae0[m const please2
+[33mbf2bd49[m const please
+[33mcc6ea87[m fix const
+[33mb0e5e16[m unit
+[33m9fadf5c[m fix build
+[33m159100d[m overflow
+[33m17c37ea[m overflow without sums with \n
+[33m668ad04[m overflow without sums
+[33mbf40356[m overflow with one \n
+[33m4220862[m overflow without \n
+[33m2542db2[m overflow last please
+[33mf08367d[m overflow last please
+[33mceaf708[m overflow last with \n
+[33m8808026[m overflow last without \n
+[33m8ca2a07[m overfloooow2
+[33m4269869[m overfloooow
+[33m0236240[m overflow
+[33m5890a74[m overflow help
+[33m584679c[m overflow how
+[33m486d4b6[m overflow2
+[33m6e96855[m overflow
+[33mc8380de[m may test2
+[33me4e42aa[m may test
+[33m3865624[m fix test 2-5
+[33m0e8231b[m fix 5 test
+[33m4e800ca[m fix \n maybe
+[33ma678ae3[m fix 0
+[33mcbc670a[m fix space with bool
+[33m94ca4a3[m fix space and zero
+[33m937f59b[m fix space
+[33mfa6b79a[m acceptance4
+[33macdda32[m acceptance3
+[33m6246388[m acceptance2
+[33m7cacf80[m acceptance
+[33mbea82a9[m overflow2
+[33mf9fdc3b[m overflow
+[33m459ce15[m size_t and int
+[33m665a5ee[m little win
+[33m37a55b0[m create operator[]
+[33m62840b5[m fix main2
+[33me475cd8[m fix main
+[33mfe36605[m week fix
+[33mce52b71[m fix iter
+[33m806ae42[m fix indentation
+[33m8672f23[m create for List
+[33m888d30c[m create Node
+[33m43ddfca[m first commit
+[33ma5bd3a1[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m Merge pull request #16 from qLisper/musorin.arseniy/S0
+[33m6a61dd8[m fix cg47
+[33me4e1b9a[m CG
+[33md320d99[m fix test
+[33mafb4557[m fix test-main
+[33m7086bc1[m extra space
+[33m672c3f9[m credentials test
+[33m59e54a4[m out_credentials implementation
+[33mfe2d3be[m credentials header
+[33m93a2754[m correct output
+[33md6f9572[m initial commit
+[33mb5858f2[m Merge pull request #12 from RBorisov6/borisov.ruslan/S0
+[33m220cf78[m fix CG 47 try 2
+[33m0802aee[m Merge pull request #15 from pollinnshh/shevchenko.polina/S0
+[33mf0e6dc0[m Merge pull request #14 from sonnesso/sadovnik.sofi/S0
+[33mc7e817c[m fixed test
+[33m0254e93[m tests
+[33m877b75f[m out_credentials implementation
+[33m94b86ae[m credentials header
+[33mf53b67b[m initial commit
+[33me9bff9e[m fix CG 47
+[33maf04b43[m Merge pull request #13 from yuklya/loseva.yulia/S0
+[33mae8b243[m fix include: use unit_test.hpp instead of unit_test.cpp
+[33m8836117[m fix impl
+[33m99a2d8a[m fix test-main
+[33mc0e6dd5[m credentials test
+[33m0a74c87[m unit test preparation
+[33mb7bdd3a[m fix name test
+[33m8b89784[m fix cg 1.4
+[33mf57284d[m credentials test
+[33m10332d7[m out_credentials implementation
+[33m0661fd4[m credentials header fixed
+[33me50d12f[m out_credentials implementation
+[33m911e828[m credentials header
+[33m81a0d6a[m credentials header
+[33m2b85ce3[m fix acceptance
+[33m13675a8[m Initial commit for S0
+[33mcd5458b[m initial for S0
+[33meb95ce3[m fix CG 11
+[33m70c5711[m fix namespace in credentials.cpp
+[33m832fbce[m add tests
+[33m8f82888[m Merge pull request #11 from Mishaster82/novikov.misha/S0
+[33mcd72e68[m unit test template
+[33md8cb31b[m out_credentials implementation
+[33m9a9d675[m credentials header
+[33m4c3a68b[m fix acceptance
+[33m3b53098[m add main.cpp
+[33mb4bde47[m Initialization commit
+[33mf66e431[m Merge branch 'master' into novikov.misha/S0
+[33mf4fc666[m deleted suite
+[33m69c2a13[m Merge pull request #7 from ahahhaha67/krivoshapov.ivan/S0
+[33m2e245d2[m credentialshpp CG fix
+[33m5894d43[m credentials CG fix
+[33m58a6825[m Merge pull request #9 from a1dram/muraviev.alexander/S0
+[33m291cc83[m Merge pull request #8 from L0syash/losev.timofey/S0
+[33mbe115fb[m CG fix
+[33mccda532[m Merge pull request #6 from ArtConion/vishnyakov.artiom/S0
+[33m27cf261[m Merge pull request #5 from SmirnovaMarya/smirnova.marya/S0
+[33m17434c4[m Merge pull request #4 from swagainator/alekseev.platon/S0
+[33mcda7a58[m Merge pull request #3 from CWSHBR/shaykhraziev.bulat/S0
+[33m835ef46[m excess whitespace in test-main deleted
+[33m596b459[m test suite
+[33med6a41e[m fix test-main.cpp
+[33m4c195de[m credentials test
+[33m29b61e6[m unit test template
+[33ma9ccb05[m out_credentials implementation
+[33m4c2df4a[m credentials header
+[33ma96a762[m fix main.cpp
+[33mb02fd32[m initial commit for S0
+[33mb2f7a9e[m fix unit
+[33m8fe3668[m fix name
+[33m28ec8d1[m add tests
+[33ma21380e[m fix build
+[33m6e70dc9[m fix CG 1.4 and 1.5 2
+[33m7bd30cb[m fix CG 1.4 and 1.5
+[33md00da7a[m fix CG 1.5
+[33mbee9b5c[m fix impl
+[33mfb2c943[m add crefentials header and inplementation
+[33m871b5d6[m fix test-main
+[33m6c5a6bf[m fix trailing whitespaces 2
+[33m639d460[m credentials test
+[33m4070083[m fix trailing whitespaces
+[33mc0ba65b[m unit test template
+[33m79980cf[m fix acceptance
+[33m17e777c[m out_credentials implementation
+[33mdf1094d[m credentials header
+[33mc2705cb[m fix impl
+[33m30b481e[m fix test-main
+[33mb0bf536[m credentials test
+[33m9a193c4[m main ready
+[33meba0c1e[m testiks ready
+[33m175ff89[m unit test template
+[33m9d5019a[m fix acceptance
+[33m9c45b92[m Initial commit for S0
+[33ma680dfd[m out_credentials implementation
+[33ma1f3d32[m credentials header
+[33m26a2b70[m fix acceptance
+[33m47cb913[m Initial commit for S0
+[33ma599276[m credentials ready
+[33m3746579[m initial commit
+[33m0682df6[m Initial commit
+[33m839cbe0[m fix test-main
+[33m7b6bad8[m credentials test
+[33m596b1ea[m refactor print_identity function and update test module name
+[33m8e4da10[m unit test template
+[33m0e56c41[m credentials header
+[33m283a758[m fix acceptance
+[33m0e3a933[m Initial commit for S0
+[33m37e7077[m Revert "Initial commit for S0"
+[33m4676700[m Initial commit for S0
+[33me6370d1[m Merge branch 'Volgarenok:master' into shaykhraziev.bulat/S0
+[33m4981538[m Update test-creds.cpp
+[33m572ccc2[m Merge pull request #2 from Kreniker/kitserov.mihail/S0
+[33m8aa2257[m Merge pull request #1 from restorte/karpenko.ivan/S0
+[33m66f85e3[m add unit test
+[33m332911c[m replace output with print_identity function
+[33m002468b[m add identity.cpp
+[33m5441913[m add identity head
+[33m9eb5af3[m cout alekseev.platon without units
+[33m6c5117f[m Initial commit
+[33mebb2321[m test: add unit tests for credentials printing
+[33mf219627[m fix: changed name of file
+[33ma09b9e6[m fix: add missing newline at end of creds.cpp
+[33m920ede3[m init
+[33m58e8dee[m fix implementation
+[33m5e05628[m fix test-main
+[33mbc4c71a[m out_credentials implementation
+[33m2d56c3e[m credentials test
+[33mf4de694[m unit test checking
+[33m1fc3b43[m credentials header
+[33m4ae3892[m print first and second name
+[33m02cdd2a[m initial commit S0
+[33meda64db[m fix unit
+[33m5f5bc75[m S0 done
+[33m8a3b8d4[m broke test
+[33m1ef53da[m test for credentials
+[33m91e9170[m unit test template
+[33mfb71c2c[m add credentials.cpp
+[33m6554807[m fix CG and add credentials.hpp
+[33mead3b10[m output name
+[33m9b34970[m initial commit
+[33ma70d882[m Initial commit
