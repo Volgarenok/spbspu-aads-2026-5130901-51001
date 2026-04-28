@@ -17,6 +17,8 @@ namespace borisov
     const T& back() const;
     void pop();
     bool empty() const;
+    std::size_t size() const;
+    void clear();
 
   private:
     List< T > list_;
@@ -82,6 +84,18 @@ namespace borisov
   bool Queue< T >::empty() const
   {
     return list_.empty();
+  }
+
+  template < typename T >
+  std::size_t Queue< T >::size() const
+  {
+    return list_.size();
+  }
+
+  template < typename T >
+  void Queue< T >::clear()
+  {
+    list_.clear();
   }
 }
 

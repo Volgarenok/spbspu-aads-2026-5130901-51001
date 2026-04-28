@@ -54,3 +54,25 @@ BOOST_AUTO_TEST_CASE(queue_back_on_empty_throws)
   borisov::Queue<int> q;
   BOOST_CHECK_THROW(q.back(), std::logic_error);
 }
+
+BOOST_AUTO_TEST_CASE(queue_size_reflects_elements)
+{
+  borisov::Queue<int> q;
+  BOOST_CHECK_EQUAL(q.size(), 0u);
+  q.push(1);
+  BOOST_CHECK_EQUAL(q.size(), 1u);
+  q.push(2);
+  BOOST_CHECK_EQUAL(q.size(), 2u);
+  q.pop();
+  BOOST_CHECK_EQUAL(q.size(), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(queue_clear_empties)
+{
+  borisov::Queue<int> q;
+  q.push(3);
+  q.push(4);
+  q.clear();
+  BOOST_CHECK(q.empty());
+  BOOST_CHECK_EQUAL(q.size(), 0u);
+}
