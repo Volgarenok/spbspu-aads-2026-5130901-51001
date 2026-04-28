@@ -10,6 +10,13 @@ namespace borisov
   class Stack
   {
   public:
+    Stack() = default;
+    Stack(const Stack& other);
+    Stack(Stack&& other) noexcept;
+    ~Stack() = default;
+    Stack& operator=(const Stack& other);
+    Stack& operator=(Stack&& other) noexcept;
+
     void push(const T& value);
     T& top();
     const T& top() const;
@@ -21,6 +28,36 @@ namespace borisov
   private:
     List< T > list_;
   };
+
+  template < typename T >
+  Stack< T >::Stack(const Stack& other):
+    list_(other.list_)
+  {}
+
+  template < typename T >
+  Stack< T >::Stack(Stack&& other) noexcept:
+    list_(std::move(other.list_))
+  {}
+
+  template < typename T >
+  Stack< T >& Stack< T >::operator=(const Stack& other)
+  {
+    if (this != &other)
+    {
+      list_ = other.list_;
+    }
+    return *this;
+  }
+
+  template < typename T >
+  Stack< T >& Stack< T >::operator=(Stack&& other) noexcept
+  {
+    if (this != &other)
+    {
+      list_ = std::move(other.list_);
+    }
+    return *this;
+  }
 
   template < typename T >
   void Stack< T >::push(const T& value)
