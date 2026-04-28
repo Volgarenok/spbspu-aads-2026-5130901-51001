@@ -15,6 +15,8 @@ namespace borisov
     const T& top() const;
     void pop();
     bool empty() const;
+    std::size_t size() const;
+    void clear();
 
   private:
     List< T > list_;
@@ -60,6 +62,18 @@ namespace borisov
   bool Stack< T >::empty() const
   {
     return list_.empty();
+  }
+
+  template < typename T >
+  std::size_t Stack< T >::size() const
+  {
+    return list_.size();
+  }
+
+  template < typename T >
+  void Stack< T >::clear()
+  {
+    list_.clear();
   }
 }
 
