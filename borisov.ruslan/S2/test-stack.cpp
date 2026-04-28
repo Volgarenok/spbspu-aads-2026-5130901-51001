@@ -38,3 +38,34 @@ BOOST_AUTO_TEST_CASE(stack_top_on_empty_throws)
   borisov::Stack<int> s;
   BOOST_CHECK_THROW(s.top(), std::logic_error);
 }
+
+BOOST_AUTO_TEST_CASE(stack_size_after_push)
+{
+  borisov::Stack<int> s;
+  BOOST_CHECK_EQUAL(s.size(), 0u);
+  s.push(100);
+  BOOST_CHECK_EQUAL(s.size(), 1u);
+  s.push(200);
+  BOOST_CHECK_EQUAL(s.size(), 2u);
+}
+
+BOOST_AUTO_TEST_CASE(stack_size_after_pop)
+{
+  borisov::Stack<int> s;
+  s.push(1);
+  s.push(2);
+  s.pop();
+  BOOST_CHECK_EQUAL(s.size(), 1u);
+  s.pop();
+  BOOST_CHECK_EQUAL(s.size(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(stack_clear_makes_empty)
+{
+  borisov::Stack<int> s;
+  s.push(5);
+  s.push(10);
+  s.clear();
+  BOOST_CHECK(s.empty());
+  BOOST_CHECK_EQUAL(s.size(), 0u);
+}
