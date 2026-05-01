@@ -8,7 +8,7 @@ namespace nabieva
   {
     T data;
     Node* next;
-    Node(const T& value) :
+    Node(const T& value):
       data(value),
       next(nullptr)
     {

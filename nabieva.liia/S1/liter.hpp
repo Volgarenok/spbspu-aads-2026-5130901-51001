@@ -12,7 +12,7 @@ namespace nabieva
   private:
     Node<T>* node;
   public:
-    LIter(Node<T>* n = nullptr) :
+    LIter(Node<T>* n = nullptr):
       node(n)
     {
     }
@@ -54,7 +54,7 @@ namespace nabieva
   private:
     const Node<T>* node;
   public:
-    LCIter(const Node<T>* n = nullptr) :
+    LCIter(const Node<T>* n = nullptr):
       node(n)
     {
     }
