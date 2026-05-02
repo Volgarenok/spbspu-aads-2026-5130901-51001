@@ -27,12 +27,11 @@ int main()
     NamedList seq;
     seq.name = name;
 
-    int number;
+    unsigned long long number;
     while (iss >> number)
     {
       seq.numbers.push_back(number);
     }
-
     sequences.push_back(seq);
   }
 
@@ -102,15 +101,21 @@ int main()
       std::cout << "\n";
     }
   }
-  for (nabieva::LIter<long long> it = sums.begin(); it != sums.end(); ++it)
+  if (sums.empty())
   {
-    std::cout << *it;
-    nabieva::LIter<long long> next = it;
-    ++next;
-    if (next != sums.end())
-      std::cout << " ";
+    std::cout << "0\n";
   }
-  std::cout << "\n";
-
+  else
+  {
+    for (nabieva::LIter<long long> it = sums.begin(); it != sums.end(); ++it)
+    {
+      std::cout << *it;
+      nabieva::LIter<long long> next = it;
+      ++next;
+      if (next != sums.end())
+        std::cout << " ";
+    }
+    std::cout << "\n";
+  }
   return 0;
 }
