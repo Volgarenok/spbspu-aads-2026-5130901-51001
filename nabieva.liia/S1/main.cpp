@@ -7,7 +7,7 @@
 struct NamedList
 {
   std::string name;
-  nabieva::List<int> numbers;
+  nabieva::List<unsigned long long> numbers;
 };
 
 int main()
@@ -49,7 +49,7 @@ int main()
       std::cout << " ";
   }
   std::cout << "\n";
-  nabieva::List<nabieva::LIter<int>> currentIters;
+  nabieva::List<nabieva::LIter<unsigned long long>> currentIters;
   for (nabieva::LIter<NamedList> it = sequences.begin(); it != sequences.end(); ++it)
   {
     currentIters.push_back((*it).numbers.begin());
@@ -62,17 +62,17 @@ int main()
   {
     hasElements = false;
     long long sum = 0;
-    nabieva::LIter<nabieva::LIter<int>> iterIt = currentIters.begin();
+    nabieva::LIter<nabieva::LIter<unsigned long long>> iterIt = currentIters.begin();
     nabieva::LIter<NamedList> seqIt = sequences.begin();
 
     while (seqIt != sequences.end() && iterIt != currentIters.end())
     {
-      nabieva::List<int>& numbers = (*seqIt).numbers;
-      nabieva::LIter<int>& current = *iterIt;
+      nabieva::List<unsigned long long>& numbers = (*seqIt).numbers;
+      nabieva::LIter<unsigned long long>& current = *iterIt;
 
       if (current != numbers.end())
       {
-        int value = *current;
+        unsigned long long value = *current;
         std::cout << value;
         if (sum > std::numeric_limits<long long>::max() - value)
         {
@@ -87,7 +87,7 @@ int main()
       ++iterIt;
       if (seqIt != sequences.end() && hasElements)
       {
-        nabieva::LIter<int>& nextCurrent = *iterIt;
+        nabieva::LIter<unsigned long long>& nextCurrent = *iterIt;
         if (nextCurrent != (*seqIt).numbers.end())
         {
           std::cout << " ";
