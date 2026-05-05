@@ -7,6 +7,12 @@
 
 namespace alekseev
 {
+  namespace detail
+  {
+    const size_t MinHashSlots = 1;
+    const size_t DefaultHashSlots = 101;
+  }
+
   enum class SlotState
   {
     EMPTY,
@@ -21,11 +27,12 @@ namespace alekseev
     class iterator;
     class const_iterator;
 
-    explicit HashTable(size_t slots = 101, Hash hash = Hash(), Equal equal = Equal()):
+    explicit HashTable(size_t slots = detail::DefaultHashSlots, Hash hash = Hash(),
+        Equal equal = Equal()):
       slots_(nullptr),
       size_(0),
       tombstones_(0),
-      capacity_(slots == 0 ? 1 : slots),
+      capacity_(slots == 0 ? detail::MinHashSlots : slots),
       hash_(hash),
       equal_(equal)
     {
@@ -103,17 +110,17 @@ namespace alekseev
 
     void add(const Key& key, const Value& value)
     {
-      insert_new(key, value);
+      insertNew(key, value);
     }
 
     void add(Key&& key, Value&& value)
     {
-      insert_new(std::move(key), std::move(value));
+      insertNew(std::move(key), std::move(value));
     }
 
     void insert_or_assign(const Key& key, const Value& value)
     {
-      Slot* slot = find_slot(key);
+      Slot* slot = findSlot(key);
       if (slot != nullptr)
       {
         slot->value = value;
@@ -124,12 +131,12 @@ namespace alekseev
 
     bool has(const Key& key) const
     {
-      return find_slot(key) != nullptr;
+      return findSlot(key) != nullptr;
     }
 
     Value& at(const Key& key)
     {
-      Slot* slot = find_slot(key);
+      Slot* slot = findSlot(key);
       if (slot == nullptr)
       {
         throw std::out_of_range("hash key");
@@ -139,7 +146,7 @@ namespace alekseev
 
     const Value& at(const Key& key) const
     {
-      const Slot* slot = find_slot(key);
+      const Slot* slot = findSlot(key);
       if (slot == nullptr)
       {
         throw std::out_of_range("hash key");
@@ -149,7 +156,7 @@ namespace alekseev
 
     Value drop(const Key& key)
     {
-      Slot* slot = find_slot(key);
+      Slot* slot = findSlot(key);
       if (slot == nullptr)
       {
         throw std::out_of_range("hash key");
@@ -163,7 +170,7 @@ namespace alekseev
 
     void rehash(size_t slots)
     {
-      HashTable next(slots == 0 ? 1 : slots, hash_, equal_);
+      HashTable next(slots == 0 ? detail::MinHashSlots : slots, hash_, equal_);
       for (size_t i = 0; i < capacity_; ++i)
       {
         if (slots_[i].state == SlotState::OCCUPIED)
@@ -247,20 +254,21 @@ namespace alekseev
         table_(nullptr),
         index_(0),
         item_{nullptr, nullptr}
-      {}
+      {
+      }
 
       iterator(HashTable* table, size_t index):
         table_(table),
         index_(index),
         item_{nullptr, nullptr}
       {
-        skip_to_occupied();
+        skipToOccupied();
       }
 
       iterator& operator++()
       {
         ++index_;
-        skip_to_occupied();
+        skipToOccupied();
         return *this;
       }
 
@@ -286,7 +294,7 @@ namespace alekseev
       }
 
     private:
-      void skip_to_occupied()
+      void skipToOccupied()
       {
         while (table_ != nullptr && index_ < table_->capacity_ &&
             table_->slots_[index_].state != SlotState::OCCUPIED)
@@ -323,20 +331,21 @@ namespace alekseev
         table_(nullptr),
         index_(0),
         item_{nullptr, nullptr}
-      {}
+      {
+      }
 
       const_iterator(const HashTable* table, size_t index):
         table_(table),
         index_(index),
         item_{nullptr, nullptr}
       {
-        skip_to_occupied();
+        skipToOccupied();
       }
 
       const_iterator& operator++()
       {
         ++index_;
-        skip_to_occupied();
+        skipToOccupied();
         return *this;
       }
 
@@ -362,7 +371,7 @@ namespace alekseev
       }
 
     private:
-      void skip_to_occupied()
+      void skipToOccupied()
       {
         while (table_ != nullptr && index_ < table_->capacity_ &&
             table_->slots_[index_].state != SlotState::OCCUPIED)
@@ -383,7 +392,8 @@ namespace alekseev
         state(SlotState::EMPTY),
         key(),
         value()
-      {}
+      {
+      }
 
       SlotState state;
       Key key;
@@ -391,7 +401,7 @@ namespace alekseev
     };
 
     template< class K, class V >
-    void insert_new(K&& key, V&& value)
+    void insertNew(K&& key, V&& value)
     {
       if (capacity_ == 0)
       {
@@ -444,12 +454,12 @@ namespace alekseev
       throw std::overflow_error("hash table full");
     }
 
-    Slot* find_slot(const Key& key)
+    Slot* findSlot(const Key& key)
     {
-      return const_cast< Slot* >(static_cast< const HashTable& >(*this).find_slot(key));
+      return const_cast< Slot* >(static_cast< const HashTable& >(*this).findSlot(key));
     }
 
-    const Slot* find_slot(const Key& key) const
+    const Slot* findSlot(const Key& key) const
     {
       if (capacity_ == 0)
       {

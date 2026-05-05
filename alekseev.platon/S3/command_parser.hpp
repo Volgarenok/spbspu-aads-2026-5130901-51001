@@ -1,6 +1,7 @@
 #ifndef ALEKSEEV_S3_COMMAND_PARSER_HPP
 #define ALEKSEEV_S3_COMMAND_PARSER_HPP
 
+#include <cstddef>
 #include <string>
 
 #include "input_reader.hpp"
@@ -8,13 +9,18 @@
 
 namespace alekseev
 {
-  inline Sequence< std::string > split_words(const std::string& line)
+  namespace detail
+  {
+    const char CommandSeparator = ' ';
+  }
+
+  inline Sequence< std::string > splitWords(const std::string& line)
   {
     Sequence< std::string > words;
     size_t pos = 0;
     while (pos < line.size())
     {
-      while (pos < line.size() && line[pos] == ' ')
+      while (pos < line.size() && line[pos] == detail::CommandSeparator)
       {
         ++pos;
       }
@@ -23,7 +29,7 @@ namespace alekseev
         break;
       }
       const size_t start = pos;
-      while (pos < line.size() && line[pos] != ' ')
+      while (pos < line.size() && line[pos] != detail::CommandSeparator)
       {
         ++pos;
       }
@@ -32,14 +38,14 @@ namespace alekseev
     return words;
   }
 
-  inline bool parse_size(const std::string& value, size_t& result)
+  inline bool parseSize(const std::string& value, size_t& result)
   {
-    return detail::parse_size(value, result);
+    return detail::parseSize(value, result);
   }
 
-  inline bool parse_ull(const std::string& value, unsigned long long& result)
+  inline bool parseUll(const std::string& value, unsigned long long& result)
   {
-    return detail::parse_ull(value, result);
+    return detail::parseUll(value, result);
   }
 }
 

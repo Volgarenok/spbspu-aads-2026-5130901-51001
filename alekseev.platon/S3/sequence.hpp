@@ -8,6 +8,12 @@
 
 namespace alekseev
 {
+  namespace detail
+  {
+    const size_t InitialSequenceCapacity = 4;
+    const size_t SequenceGrowthFactor = 2;
+  }
+
   template< class T >
   class Sequence
   {
@@ -16,7 +22,8 @@ namespace alekseev
       data_(nullptr),
       size_(0),
       capacity_(0)
-    {}
+    {
+    }
 
     Sequence(const Sequence& other):
       data_(nullptr),
@@ -86,14 +93,14 @@ namespace alekseev
 
     void push_back(const T& value)
     {
-      ensure_capacity_for_one_more();
+      ensureCapacityForOneMore();
       new (data_ + size_) T(value);
       ++size_;
     }
 
     void push_back(T&& value)
     {
-      ensure_capacity_for_one_more();
+      ensureCapacityForOneMore();
       new (data_ + size_) T(std::move(value));
       ++size_;
     }
@@ -196,11 +203,12 @@ namespace alekseev
     }
 
   private:
-    void ensure_capacity_for_one_more()
+    void ensureCapacityForOneMore()
     {
       if (size_ == capacity_)
       {
-        const size_t next = capacity_ == 0 ? 4 : capacity_ * 2;
+        const size_t next = capacity_ == 0 ? detail::InitialSequenceCapacity :
+            capacity_ * detail::SequenceGrowthFactor;
         reserve(next);
       }
     }

@@ -1,17 +1,39 @@
 #include "commands.hpp"
 
+#include <cstddef>
+#include <string>
+
 #include "command_parser.hpp"
 
 namespace alekseev
 {
   namespace
   {
-    bool valid_name(const std::string& name)
+    const size_t CommandTableSlots = 23;
+    const size_t CommandNameIndex = 0;
+    const size_t GraphNameIndex = 1;
+    const size_t VertexIndex = 2;
+    const size_t FromVertexIndex = 2;
+    const size_t ToVertexIndex = 3;
+    const size_t WeightIndex = 4;
+    const size_t CountIndex = 2;
+    const size_t ExtractCountIndex = 3;
+    const size_t CreateVertexBegin = 3;
+    const size_t ExtractVertexBegin = 4;
+    const size_t GraphsArgs = 1;
+    const size_t CreateEmptyArgs = 2;
+    const size_t VertexesArgs = 2;
+    const size_t EdgeQueryArgs = 3;
+    const size_t ExtractMinArgs = 4;
+    const size_t MergeArgs = 4;
+    const size_t EdgeMutationArgs = 5;
+
+    bool isValidNameLocal(const std::string& name)
     {
-      return detail::is_valid_name(name);
+      return detail::isValidName(name);
     }
 
-    void print_strings(const Sequence< std::string >& values, std::ostream& out)
+    void printStrings(const Sequence< std::string >& values, std::ostream& out)
     {
       for (size_t i = 0; i < values.size(); ++i)
       {
@@ -19,7 +41,7 @@ namespace alekseev
       }
     }
 
-    void print_edge_lines(const Sequence< EdgeQueryLine >& lines, std::ostream& out)
+    void printEdgeLines(const Sequence< EdgeQueryLine >& lines, std::ostream& out)
     {
       for (size_t i = 0; i < lines.size(); ++i)
       {
@@ -32,7 +54,7 @@ namespace alekseev
       }
     }
 
-    bool contains_string(const Sequence< std::string >& values, const std::string& value)
+    bool containsString(const Sequence< std::string >& values, const std::string& value)
     {
       for (size_t i = 0; i < values.size(); ++i)
       {
@@ -44,14 +66,15 @@ namespace alekseev
       return false;
     }
 
-    void copy_graph_into(const Graph& source, Graph& target)
+    void copyGraphInto(const Graph& source, Graph& target)
     {
-      Sequence< std::string > vertexes = source.vertexes_sorted();
+      Sequence< std::string > vertexes = source.getSortedVertexes();
       for (size_t i = 0; i < vertexes.size(); ++i)
       {
-        target.add_vertex(vertexes[i]);
+        target.addVertex(vertexes[i]);
       }
-      for (typename EdgeTable::const_iterator it = source.edges().begin(); it != source.edges().end(); ++it)
+      for (typename EdgeTable::const_iterator it = source.edges().begin();
+          it != source.edges().end(); ++it)
       {
         for (size_t i = 0; i < it->value().size(); ++i)
         {
@@ -61,99 +84,102 @@ namespace alekseev
     }
   }
 
-  void handle_graphs(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
+  void handleGraphs(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
   {
-    if (args.size() != 1)
+    if (args.size() != GraphsArgs)
     {
-      print_invalid(out);
+      printInvalid(out);
       return;
     }
-    print_strings(storage.graph_names_sorted(), out);
+    printStrings(storage.getSortedGraphNames(), out);
   }
 
-  void handle_vertexes(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
+  void handleVertexes(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
   {
-    if (args.size() != 2 || !storage.has_graph(args[1]))
+    if (args.size() != VertexesArgs || !storage.hasGraph(args[GraphNameIndex]))
     {
-      print_invalid(out);
+      printInvalid(out);
       return;
     }
-    print_strings(storage.get_graph(args[1]).vertexes_sorted(), out);
+    printStrings(storage.getGraph(args[GraphNameIndex]).getSortedVertexes(), out);
   }
 
-  void handle_outbound(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
+  void handleOutbound(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
   {
-    if (args.size() != 3 || !storage.has_graph(args[1]))
+    if (args.size() != EdgeQueryArgs || !storage.hasGraph(args[GraphNameIndex]))
     {
-      print_invalid(out);
+      printInvalid(out);
       return;
     }
-    const Graph& graph = storage.get_graph(args[1]);
-    if (!graph.has_vertex(args[2]))
+    const Graph& graph = storage.getGraph(args[GraphNameIndex]);
+    if (!graph.hasVertex(args[VertexIndex]))
     {
-      print_invalid(out);
+      printInvalid(out);
       return;
     }
-    print_edge_lines(graph.outbound_sorted(args[2]), out);
+    printEdgeLines(graph.getSortedOutbound(args[VertexIndex]), out);
   }
 
-  void handle_inbound(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
+  void handleInbound(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
   {
-    if (args.size() != 3 || !storage.has_graph(args[1]))
+    if (args.size() != EdgeQueryArgs || !storage.hasGraph(args[GraphNameIndex]))
     {
-      print_invalid(out);
+      printInvalid(out);
       return;
     }
-    const Graph& graph = storage.get_graph(args[1]);
-    if (!graph.has_vertex(args[2]))
+    const Graph& graph = storage.getGraph(args[GraphNameIndex]);
+    if (!graph.hasVertex(args[VertexIndex]))
     {
-      print_invalid(out);
+      printInvalid(out);
       return;
     }
-    print_edge_lines(graph.inbound_sorted(args[2]), out);
+    printEdgeLines(graph.getSortedInbound(args[VertexIndex]), out);
   }
 
-  void handle_bind(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
+  void handleBind(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
   {
-    if (args.size() != 5 || !storage.has_graph(args[1]) ||
-        !valid_name(args[2]) || !valid_name(args[3]))
+    if (args.size() != EdgeMutationArgs || !storage.hasGraph(args[GraphNameIndex]) ||
+        !isValidNameLocal(args[FromVertexIndex]) || !isValidNameLocal(args[ToVertexIndex]))
     {
-      print_invalid(out);
+      printInvalid(out);
       return;
     }
     unsigned long long weight = 0;
-    if (!parse_ull(args[4], weight))
+    if (!parseUll(args[WeightIndex], weight))
     {
-      print_invalid(out);
+      printInvalid(out);
       return;
     }
-    storage.get_graph(args[1]).bind(args[2], args[3], weight);
+    storage.getGraph(args[GraphNameIndex]).bind(
+        args[FromVertexIndex], args[ToVertexIndex], weight);
   }
 
-  void handle_cut(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
+  void handleCut(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
   {
-    if (args.size() != 5 || !storage.has_graph(args[1]))
+    if (args.size() != EdgeMutationArgs || !storage.hasGraph(args[GraphNameIndex]))
     {
-      print_invalid(out);
+      printInvalid(out);
       return;
     }
     unsigned long long weight = 0;
-    if (!parse_ull(args[4], weight))
+    if (!parseUll(args[WeightIndex], weight))
     {
-      print_invalid(out);
+      printInvalid(out);
       return;
     }
-    if (!storage.get_graph(args[1]).cut(args[2], args[3], weight))
+    if (!storage.getGraph(args[GraphNameIndex]).cut(
+        args[FromVertexIndex], args[ToVertexIndex], weight))
     {
-      print_invalid(out);
+      printInvalid(out);
     }
   }
 
-  void handle_create(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
+  void handleCreate(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
   {
-    if ((args.size() != 2 && args.size() < 4) || !valid_name(args[1]) || storage.has_graph(args[1]))
+    if ((args.size() != CreateEmptyArgs && args.size() < ExtractMinArgs) ||
+        !isValidNameLocal(args[GraphNameIndex]) || storage.hasGraph(args[GraphNameIndex]))
     {
-      print_invalid(out);
+      printInvalid(out);
       return;
     }
 
@@ -161,68 +187,70 @@ namespace alekseev
     if (args.size() > 2)
     {
       size_t count = 0;
-      if (!parse_size(args[2], count) || count != args.size() - 3)
+      if (!parseSize(args[CountIndex], count) || count != args.size() - CreateVertexBegin)
       {
-        print_invalid(out);
+        printInvalid(out);
         return;
       }
-      for (size_t i = 3; i < args.size(); ++i)
+      for (size_t i = CreateVertexBegin; i < args.size(); ++i)
       {
-        if (!valid_name(args[i]))
+        if (!isValidNameLocal(args[i]))
         {
-          print_invalid(out);
+          printInvalid(out);
           return;
         }
-        graph.add_vertex(args[i]);
+        graph.addVertex(args[i]);
       }
     }
-    if (!storage.add_graph(args[1], graph))
+    if (!storage.addGraph(args[GraphNameIndex], graph))
     {
-      print_invalid(out);
+      printInvalid(out);
     }
   }
 
-  void handle_merge(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
+  void handleMerge(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
   {
-    if (args.size() != 4 || !valid_name(args[1]) || storage.has_graph(args[1]) ||
-        !storage.has_graph(args[2]) || !storage.has_graph(args[3]))
+    if (args.size() != MergeArgs || !isValidNameLocal(args[GraphNameIndex]) ||
+        storage.hasGraph(args[GraphNameIndex]) || !storage.hasGraph(args[FromVertexIndex]) ||
+        !storage.hasGraph(args[ToVertexIndex]))
     {
-      print_invalid(out);
+      printInvalid(out);
       return;
     }
-    const Graph& first = storage.get_graph(args[2]);
-    const Graph& second = storage.get_graph(args[3]);
+    const Graph& first = storage.getGraph(args[FromVertexIndex]);
+    const Graph& second = storage.getGraph(args[ToVertexIndex]);
     Graph merged(first.edges().size() + second.edges().size());
-    copy_graph_into(first, merged);
-    copy_graph_into(second, merged);
-    if (!storage.add_graph(args[1], merged))
+    copyGraphInto(first, merged);
+    copyGraphInto(second, merged);
+    if (!storage.addGraph(args[GraphNameIndex], merged))
     {
-      print_invalid(out);
+      printInvalid(out);
     }
   }
 
-  void handle_extract(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
+  void handleExtract(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
   {
-    if (args.size() < 4 || !valid_name(args[1]) || storage.has_graph(args[1]) ||
-        !storage.has_graph(args[2]))
+    if (args.size() < ExtractMinArgs || !isValidNameLocal(args[GraphNameIndex]) ||
+        storage.hasGraph(args[GraphNameIndex]) || !storage.hasGraph(args[VertexIndex]))
     {
-      print_invalid(out);
+      printInvalid(out);
       return;
     }
     size_t count = 0;
-    if (!parse_size(args[3], count) || count != args.size() - 4)
+    if (!parseSize(args[ExtractCountIndex], count) ||
+        count != args.size() - ExtractVertexBegin)
     {
-      print_invalid(out);
+      printInvalid(out);
       return;
     }
 
-    const Graph& source = storage.get_graph(args[2]);
+    const Graph& source = storage.getGraph(args[VertexIndex]);
     Sequence< std::string > selected;
-    for (size_t i = 4; i < args.size(); ++i)
+    for (size_t i = ExtractVertexBegin; i < args.size(); ++i)
     {
-      if (!source.has_vertex(args[i]))
+      if (!source.hasVertex(args[i]))
       {
-        print_invalid(out);
+        printInvalid(out);
         return;
       }
       selected.push_back(args[i]);
@@ -231,11 +259,12 @@ namespace alekseev
     Graph extracted(source.edges().size());
     for (size_t i = 0; i < selected.size(); ++i)
     {
-      extracted.add_vertex(selected[i]);
+      extracted.addVertex(selected[i]);
     }
-    for (typename EdgeTable::const_iterator it = source.edges().begin(); it != source.edges().end(); ++it)
+    for (typename EdgeTable::const_iterator it = source.edges().begin();
+        it != source.edges().end(); ++it)
     {
-      if (contains_string(selected, it->key().from) && contains_string(selected, it->key().to))
+      if (containsString(selected, it->key().from) && containsString(selected, it->key().to))
       {
         for (size_t i = 0; i < it->value().size(); ++i)
         {
@@ -244,35 +273,35 @@ namespace alekseev
       }
     }
 
-    if (!storage.add_graph(args[1], extracted))
+    if (!storage.addGraph(args[GraphNameIndex], extracted))
     {
-      print_invalid(out);
+      printInvalid(out);
     }
   }
 
-  CommandTable make_command_table()
+  CommandTable makeCommandTable()
   {
-    CommandTable commands(23);
-    commands.add("graphs", handle_graphs);
-    commands.add("vertexes", handle_vertexes);
-    commands.add("outbound", handle_outbound);
-    commands.add("inbound", handle_inbound);
-    commands.add("bind", handle_bind);
-    commands.add("cut", handle_cut);
-    commands.add("create", handle_create);
-    commands.add("merge", handle_merge);
-    commands.add("extract", handle_extract);
+    CommandTable commands(CommandTableSlots);
+    commands.add("graphs", handleGraphs);
+    commands.add("vertexes", handleVertexes);
+    commands.add("outbound", handleOutbound);
+    commands.add("inbound", handleInbound);
+    commands.add("bind", handleBind);
+    commands.add("cut", handleCut);
+    commands.add("create", handleCreate);
+    commands.add("merge", handleMerge);
+    commands.add("extract", handleExtract);
     return commands;
   }
 
-  void dispatch_command(CommandTable& commands, const Sequence< std::string >& args,
+  void dispatchCommand(const CommandTable& commands, const Sequence< std::string >& args,
       GraphStorage& storage, std::ostream& out)
   {
-    if (args.empty() || !commands.has(args[0]))
+    if (args.empty() || !commands.has(args[CommandNameIndex]))
     {
-      print_invalid(out);
+      printInvalid(out);
       return;
     }
-    commands.at(args[0])(args, storage, out);
+    commands.at(args[CommandNameIndex])(args, storage, out);
   }
 }

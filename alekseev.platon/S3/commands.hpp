@@ -2,6 +2,7 @@
 #define ALEKSEEV_S3_COMMANDS_HPP
 
 #include <ostream>
+#include <string>
 
 #include "graph_storage.hpp"
 #include "hash_table.hpp"
@@ -13,23 +14,23 @@ namespace alekseev
   using CommandHandler = void (*)(const Sequence< std::string >&, GraphStorage&, std::ostream&);
   using CommandTable = HashTable< std::string, CommandHandler, HmacHash, StringEqual >;
 
-  inline void print_invalid(std::ostream& out)
+  inline void printInvalid(std::ostream& out)
   {
     out << "<INVALID COMMAND>\n";
   }
 
-  void handle_graphs(const Sequence< std::string >&, GraphStorage&, std::ostream&);
-  void handle_vertexes(const Sequence< std::string >&, GraphStorage&, std::ostream&);
-  void handle_outbound(const Sequence< std::string >&, GraphStorage&, std::ostream&);
-  void handle_inbound(const Sequence< std::string >&, GraphStorage&, std::ostream&);
-  void handle_bind(const Sequence< std::string >&, GraphStorage&, std::ostream&);
-  void handle_cut(const Sequence< std::string >&, GraphStorage&, std::ostream&);
-  void handle_create(const Sequence< std::string >&, GraphStorage&, std::ostream&);
-  void handle_merge(const Sequence< std::string >&, GraphStorage&, std::ostream&);
-  void handle_extract(const Sequence< std::string >&, GraphStorage&, std::ostream&);
+  void handleGraphs(const Sequence< std::string >&, GraphStorage&, std::ostream&);
+  void handleVertexes(const Sequence< std::string >&, GraphStorage&, std::ostream&);
+  void handleOutbound(const Sequence< std::string >&, GraphStorage&, std::ostream&);
+  void handleInbound(const Sequence< std::string >&, GraphStorage&, std::ostream&);
+  void handleBind(const Sequence< std::string >&, GraphStorage&, std::ostream&);
+  void handleCut(const Sequence< std::string >&, GraphStorage&, std::ostream&);
+  void handleCreate(const Sequence< std::string >&, GraphStorage&, std::ostream&);
+  void handleMerge(const Sequence< std::string >&, GraphStorage&, std::ostream&);
+  void handleExtract(const Sequence< std::string >&, GraphStorage&, std::ostream&);
 
-  CommandTable make_command_table();
-  void dispatch_command(CommandTable& commands, const Sequence< std::string >& args,
+  CommandTable makeCommandTable();
+  void dispatchCommand(const CommandTable& commands, const Sequence< std::string >& args,
       GraphStorage& storage, std::ostream& out);
 }
 

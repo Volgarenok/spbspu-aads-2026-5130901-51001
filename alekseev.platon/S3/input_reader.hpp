@@ -1,6 +1,7 @@
 #ifndef ALEKSEEV_S3_INPUT_READER_HPP
 #define ALEKSEEV_S3_INPUT_READER_HPP
 
+#include <cstddef>
 #include <istream>
 #include <limits>
 #include <string>
@@ -12,30 +13,40 @@ namespace alekseev
 {
   namespace detail
   {
-    inline bool is_digit(char c)
+    const size_t DecimalBase = 10;
+    const size_t GraphHeaderWords = 2;
+    const size_t EdgeWords = 3;
+    const size_t GraphNameWord = 0;
+    const size_t EdgeCountWord = 1;
+    const size_t FromWord = 0;
+    const size_t ToWord = 1;
+    const size_t WeightWord = 2;
+    const size_t FirstNameChar = 1;
+
+    inline bool isDigit(char c)
     {
       return c >= '0' && c <= '9';
     }
 
-    inline bool is_alpha(char c)
+    inline bool isAlpha(char c)
     {
       return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
     }
 
-    inline bool is_alnum(char c)
+    inline bool isAlnum(char c)
     {
-      return is_alpha(c) || is_digit(c);
+      return isAlpha(c) || isDigit(c);
     }
 
-    inline bool is_valid_name(const std::string& value)
+    inline bool isValidName(const std::string& value)
     {
-      if (value.empty() || !is_alpha(value[0]))
+      if (value.empty() || !isAlpha(value[0]))
       {
         return false;
       }
-      for (size_t i = 1; i < value.size(); ++i)
+      for (size_t i = FirstNameChar; i < value.size(); ++i)
       {
-        if (!is_alnum(value[i]))
+        if (!isAlnum(value[i]))
         {
           return false;
         }
@@ -43,7 +54,7 @@ namespace alekseev
       return true;
     }
 
-    inline bool parse_size(const std::string& value, size_t& result)
+    inline bool parseSize(const std::string& value, size_t& result)
     {
       if (value.empty())
       {
@@ -52,22 +63,22 @@ namespace alekseev
       size_t current = 0;
       for (size_t i = 0; i < value.size(); ++i)
       {
-        if (!is_digit(value[i]))
+        if (!isDigit(value[i]))
         {
           return false;
         }
         const size_t digit = static_cast< size_t >(value[i] - '0');
-        if (current > (std::numeric_limits< size_t >::max() - digit) / 10)
+        if (current > (std::numeric_limits< size_t >::max() - digit) / DecimalBase)
         {
           return false;
         }
-        current = current * 10 + digit;
+        current = current * DecimalBase + digit;
       }
       result = current;
       return true;
     }
 
-    inline bool parse_ull(const std::string& value, unsigned long long& result)
+    inline bool parseUll(const std::string& value, unsigned long long& result)
     {
       if (value.empty())
       {
@@ -76,22 +87,23 @@ namespace alekseev
       unsigned long long current = 0;
       for (size_t i = 0; i < value.size(); ++i)
       {
-        if (!is_digit(value[i]))
+        if (!isDigit(value[i]))
         {
           return false;
         }
         const unsigned long long digit = static_cast< unsigned long long >(value[i] - '0');
-        if (current > (std::numeric_limits< unsigned long long >::max() - digit) / 10)
+        if (current >
+            (std::numeric_limits< unsigned long long >::max() - digit) / DecimalBase)
         {
           return false;
         }
-        current = current * 10 + digit;
+        current = current * DecimalBase + digit;
       }
       result = current;
       return true;
     }
 
-    inline bool split_exact(const std::string& line, Sequence< std::string >& words)
+    inline bool splitExact(const std::string& line, Sequence< std::string >& words)
     {
       words.clear();
       if (line.empty())
@@ -115,13 +127,14 @@ namespace alekseev
         {
           return true;
         }
-        start = end + 1;
+        ++end;
+        start = end;
       }
       return true;
     }
   }
 
-  inline bool load_graphs(std::istream& input, GraphStorage& storage)
+  inline bool loadGraphs(std::istream& input, GraphStorage& storage)
   {
     std::string line;
     Sequence< std::string > words;
@@ -131,20 +144,20 @@ namespace alekseev
       {
         continue;
       }
-      if (!detail::split_exact(line, words) || words.size() != 2 ||
-          !detail::is_valid_name(words[0]))
+      if (!detail::splitExact(line, words) || words.size() != detail::GraphHeaderWords ||
+          !detail::isValidName(words[detail::GraphNameWord]))
       {
         return false;
       }
-      size_t edge_count = 0;
-      if (!detail::parse_size(words[1], edge_count))
+      size_t edgeCount = 0;
+      if (!detail::parseSize(words[detail::EdgeCountWord], edgeCount))
       {
         return false;
       }
 
-      const std::string graph_name = words[0];
-      Graph graph(edge_count);
-      for (size_t i = 0; i < edge_count; ++i)
+      const std::string graphName = words[detail::GraphNameWord];
+      Graph graph(edgeCount);
+      for (size_t i = 0; i < edgeCount; ++i)
       {
         if (!std::getline(input, line))
         {
@@ -157,20 +170,21 @@ namespace alekseev
             return false;
           }
         }
-        if (!detail::split_exact(line, words) || words.size() != 3 ||
-            !detail::is_valid_name(words[0]) || !detail::is_valid_name(words[1]))
+        if (!detail::splitExact(line, words) || words.size() != detail::EdgeWords ||
+            !detail::isValidName(words[detail::FromWord]) ||
+            !detail::isValidName(words[detail::ToWord]))
         {
           return false;
         }
         unsigned long long weight = 0;
-        if (!detail::parse_ull(words[2], weight))
+        if (!detail::parseUll(words[detail::WeightWord], weight))
         {
           return false;
         }
-        graph.bind(words[0], words[1], weight);
+        graph.bind(words[detail::FromWord], words[detail::ToWord], weight);
       }
 
-      if (!storage.add_graph(graph_name, graph))
+      if (!storage.addGraph(graphName, graph))
       {
         return false;
       }

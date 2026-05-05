@@ -1,6 +1,7 @@
 #ifndef ALEKSEEV_S3_GRAPH_HPP
 #define ALEKSEEV_S3_GRAPH_HPP
 
+#include <cstddef>
 #include <string>
 
 #include "edge_key.hpp"
@@ -13,6 +14,15 @@ namespace alekseev
 {
   using EdgeTable = HashTable< EdgeKey, Sequence< unsigned long long >, HmacHash, EdgeKeyEqual >;
 
+  namespace detail
+  {
+    const size_t DefaultEdgeSlots = 211;
+    const size_t MinEdgeSlots = 11;
+    const size_t EdgeCapacityMultiplier = 2;
+    const size_t EdgeCapacityReserve = 3;
+    const size_t MakeOddStep = 1;
+  }
+
   struct EdgeQueryLine
   {
     std::string vertex;
@@ -24,31 +34,34 @@ namespace alekseev
   public:
     Graph():
       vertexes_(),
-      edges_(211)
-    {}
+      edges_(detail::DefaultEdgeSlots)
+    {
+    }
 
     explicit Graph(size_t expected_edges):
       vertexes_(),
-      edges_(next_odd_capacity(expected_edges * 2 + 3))
-    {}
-
-    void add_vertex(const std::string& name)
+      edges_(getNextOddCapacity(
+          expected_edges * detail::EdgeCapacityMultiplier + detail::EdgeCapacityReserve))
     {
-      if (!has_vertex(name))
+    }
+
+    void addVertex(const std::string& name)
+    {
+      if (!hasVertex(name))
       {
         vertexes_.push_back(name);
       }
     }
 
-    bool has_vertex(const std::string& name) const
+    bool hasVertex(const std::string& name) const
     {
-      return contains_vertex(vertexes_, name);
+      return containsVertex(vertexes_, name);
     }
 
     void bind(const std::string& from, const std::string& to, unsigned long long weight)
     {
-      add_vertex(from);
-      add_vertex(to);
+      addVertex(from);
+      addVertex(to);
       EdgeKey key{from, to};
       if (edges_.has(key))
       {
@@ -64,7 +77,7 @@ namespace alekseev
 
     bool cut(const std::string& from, const std::string& to, unsigned long long weight)
     {
-      if (!has_vertex(from) || !has_vertex(to))
+      if (!hasVertex(from) || !hasVertex(to))
       {
         return false;
       }
@@ -89,38 +102,40 @@ namespace alekseev
       return false;
     }
 
-    Sequence< std::string > vertexes_sorted() const
+    Sequence< std::string > getSortedVertexes() const
     {
       Sequence< std::string > result(vertexes_);
       sort(result, StringLess());
       return result;
     }
 
-    Sequence< EdgeQueryLine > outbound_sorted(const std::string& vertex) const
+    Sequence< EdgeQueryLine > getSortedOutbound(const std::string& vertex) const
     {
       Sequence< EdgeQueryLine > result;
-      for (typename EdgeTable::const_iterator it = edges_.begin(); it != edges_.end(); ++it)
+      for (typename EdgeTable::const_iterator it = edges_.begin(); it != edges_.end();
+          ++it)
       {
         if (it->key().from == vertex)
         {
-          append_query_line(result, it->key().to, it->value());
+          appendQueryLine(result, it->key().to, it->value());
         }
       }
-      sort_query_lines(result);
+      sortQueryLines(result);
       return result;
     }
 
-    Sequence< EdgeQueryLine > inbound_sorted(const std::string& vertex) const
+    Sequence< EdgeQueryLine > getSortedInbound(const std::string& vertex) const
     {
       Sequence< EdgeQueryLine > result;
-      for (typename EdgeTable::const_iterator it = edges_.begin(); it != edges_.end(); ++it)
+      for (typename EdgeTable::const_iterator it = edges_.begin(); it != edges_.end();
+          ++it)
       {
         if (it->key().to == vertex)
         {
-          append_query_line(result, it->key().from, it->value());
+          appendQueryLine(result, it->key().from, it->value());
         }
       }
-      sort_query_lines(result);
+      sortQueryLines(result);
       return result;
     }
 
@@ -154,16 +169,16 @@ namespace alekseev
       }
     };
 
-    static size_t next_odd_capacity(size_t value)
+    static size_t getNextOddCapacity(size_t value)
     {
-      if (value < 11)
+      if (value < detail::MinEdgeSlots)
       {
-        return 11;
+        return detail::MinEdgeSlots;
       }
-      return value % 2 == 0 ? value + 1 : value;
+      return value % detail::EdgeCapacityMultiplier == 0 ? value + detail::MakeOddStep : value;
     }
 
-    static bool contains_vertex(const Sequence< std::string >& seq, const std::string& name)
+    static bool containsVertex(const Sequence< std::string >& seq, const std::string& name)
     {
       for (size_t i = 0; i < seq.size(); ++i)
       {
@@ -175,7 +190,7 @@ namespace alekseev
       return false;
     }
 
-    static void append_query_line(Sequence< EdgeQueryLine >& result, const std::string& vertex,
+    static void appendQueryLine(Sequence< EdgeQueryLine >& result, const std::string& vertex,
         const Sequence< unsigned long long >& weights)
     {
       EdgeQueryLine line;
@@ -185,7 +200,7 @@ namespace alekseev
       result.push_back(line);
     }
 
-    static void sort_query_lines(Sequence< EdgeQueryLine >& lines)
+    static void sortQueryLines(Sequence< EdgeQueryLine >& lines)
     {
       sort(lines, QueryLineLess());
     }

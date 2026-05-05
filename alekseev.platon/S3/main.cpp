@@ -1,3 +1,4 @@
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -23,23 +24,23 @@ int main(int argc, char* argv[])
   }
 
   alekseev::GraphStorage storage;
-  if (!alekseev::load_graphs(input, storage))
+  if (!alekseev::loadGraphs(input, storage))
   {
     return 1;
   }
 
-  alekseev::CommandTable commands = alekseev::make_command_table();
+  const alekseev::CommandTable commands = alekseev::makeCommandTable();
   std::string line;
   while (std::getline(std::cin, line))
   {
-    alekseev::Sequence< std::string > args = alekseev::split_words(line);
+    alekseev::Sequence< std::string > args = alekseev::splitWords(line);
     try
     {
-      alekseev::dispatch_command(commands, args, storage, std::cout);
+      alekseev::dispatchCommand(commands, args, storage, std::cout);
     }
     catch (const std::exception&)
     {
-      alekseev::print_invalid(std::cout);
+      alekseev::printInvalid(std::cout);
     }
   }
 
