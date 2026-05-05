@@ -3,7 +3,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <stdexcept>
 #include <string>
 
 #if __has_include(<boost/hash2/hmac.hpp>) && __has_include(<boost/hash2/sha2.hpp>) && __has_include(<boost/hash2/get_integral_result.hpp>)
