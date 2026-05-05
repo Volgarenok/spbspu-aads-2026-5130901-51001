@@ -8,13 +8,12 @@ namespace kitserov
   template< class Key, class Value, class Hash, class Equal >
   struct HashTable
   {
-    using Slot = std::pair < Value, bool >;
     HashTable() : size_(0), capacity_(0) {}
     HashTable(size_t size) : size_(0), capacity_(size)
     {
       slots_.resize(capacity_);
       for (size_t i = 0; i < capacity_; ++i) {
-        slots_[i].second = false;
+        slots_[i].fill_ = false;
       }
     }
     HashTable(const HashTable& other)
@@ -62,29 +61,34 @@ namespace kitserov
       std::swap(slots_, other.slots_);
     }
 
-    Slot* find(const Value& val)
+    const Slot* find(const Key& key) const noexcept
     {
-      Slot home = slots_[Hash(val) % capacity_];
+      if (isEmpty()) return nullptr;
       size_t i = 1;
-      while (!home.second || !(i < capacity_)) {
-        if (Equal(val, home.first)) {
-          return &home;
+      const Slot* home = &(slots_[Hash(key) % capacity_]);
+      while (!(i < capacity_)) {
+        size_t idx = probe(key, i++);
+        if (!(home -> fill_)) {
+          return nullptr;
         }
-        home = slots_[probe(val), i];
-        ++i;
+        if (Equal(home -> key_, key)) {
+          return home
+        }
+
+        home = &(slots_[idx]);
       }
       return nullptr;
     }
 
-    void add(const Value& value)
+    void add(const Key& key, const Value& value)
     {
       if (loadFactor() >= 0.9f) {
         throw std::out_of_range();
       }
-      Slot* home = find(value);
+      const Slot* home = find(value);
       if (home) {
-        home -> first = value;
-        home -> second = true;
+        home -> val_ = value;
+        home -> fill_ = true;
         return;
       }
       throw;
@@ -97,14 +101,30 @@ namespace kitserov
       }
       return size_ / capacity_;
     }
+
+    size_t size()
+    {
+      return size_;
+    }
+    size_t capacity()
+    {
+      return capacity_;
+    }
   private:
     size_t size_;
     size_t capacity_;
     std::vector< Slot > slots_;
     
-    size_t probe(const Value& val, size_t i) 
+    struct Slot
     {
-      return (Hash(val) + i * i) % capacity_;
+      Key key_;
+      Value val_
+      bool fill_;
+    };
+
+    size_t probe(const Key& key, size_t i) 
+    {
+      return (Hash(key) + i * i) % capacity_;
     }
     void rehash(size_t new_capacity)
     {
