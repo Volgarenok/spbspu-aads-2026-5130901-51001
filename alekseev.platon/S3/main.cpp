@@ -1,13 +1,8 @@
 #include <fstream>
 #include <iostream>
 
-namespace alekseev
-{
-  bool load_graphs(std::istream&)
-  {
-    return true;
-  }
-}
+#include "graph_storage.hpp"
+#include "input_reader.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -24,7 +19,8 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  if (!alekseev::load_graphs(input))
+  alekseev::GraphStorage storage;
+  if (!alekseev::load_graphs(input, storage))
   {
     return 1;
   }
