@@ -3,6 +3,7 @@
 
 int main(int argc, char* argv[])
 {
+  using namespace kitserov;
   if (argc != 2) {
     std::cerr << "Must be 2 argc\n";
     return 1;
