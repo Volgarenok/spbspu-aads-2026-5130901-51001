@@ -142,6 +142,16 @@ namespace alekseev
       return size_ == 0;
     }
 
+    T* data() noexcept
+    {
+      return data_;
+    }
+
+    const T* data() const noexcept
+    {
+      return data_;
+    }
+
     void reserve(size_t new_capacity)
     {
       if (new_capacity <= capacity_)
