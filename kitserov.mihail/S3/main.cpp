@@ -1,5 +1,6 @@
 #include <map>
 #include <iostream>
+#include "hash.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -21,4 +22,5 @@ int main(int argc, char* argv[])
       return 2;
     }
   }
+  return 0;
 }
