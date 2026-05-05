@@ -31,6 +31,34 @@ namespace alekseev
         out << '\n';
       }
     }
+
+    bool contains_string(const Sequence< std::string >& values, const std::string& value)
+    {
+      for (size_t i = 0; i < values.size(); ++i)
+      {
+        if (values[i] == value)
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    void copy_graph_into(const Graph& source, Graph& target)
+    {
+      Sequence< std::string > vertexes = source.vertexes_sorted();
+      for (size_t i = 0; i < vertexes.size(); ++i)
+      {
+        target.add_vertex(vertexes[i]);
+      }
+      for (typename EdgeTable::const_iterator it = source.edges().begin(); it != source.edges().end(); ++it)
+      {
+        for (size_t i = 0; i < it->value().size(); ++i)
+        {
+          target.bind(it->key().from, it->key().to, it->value()[i]);
+        }
+      }
+    }
   }
 
   void handle_graphs(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
@@ -156,16 +184,70 @@ namespace alekseev
 
   void handle_merge(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
   {
-    (void) args;
-    (void) storage;
-    print_invalid(out);
+    if (args.size() != 4 || !valid_name(args[1]) || storage.has_graph(args[1]) ||
+        !storage.has_graph(args[2]) || !storage.has_graph(args[3]))
+    {
+      print_invalid(out);
+      return;
+    }
+    const Graph& first = storage.get_graph(args[2]);
+    const Graph& second = storage.get_graph(args[3]);
+    Graph merged(first.edges().size() + second.edges().size());
+    copy_graph_into(first, merged);
+    copy_graph_into(second, merged);
+    if (!storage.add_graph(args[1], merged))
+    {
+      print_invalid(out);
+    }
   }
 
   void handle_extract(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
   {
-    (void) args;
-    (void) storage;
-    print_invalid(out);
+    if (args.size() < 4 || !valid_name(args[1]) || storage.has_graph(args[1]) ||
+        !storage.has_graph(args[2]))
+    {
+      print_invalid(out);
+      return;
+    }
+    size_t count = 0;
+    if (!parse_size(args[3], count) || count != args.size() - 4)
+    {
+      print_invalid(out);
+      return;
+    }
+
+    const Graph& source = storage.get_graph(args[2]);
+    Sequence< std::string > selected;
+    for (size_t i = 4; i < args.size(); ++i)
+    {
+      if (!source.has_vertex(args[i]))
+      {
+        print_invalid(out);
+        return;
+      }
+      selected.push_back(args[i]);
+    }
+
+    Graph extracted(source.edges().size());
+    for (size_t i = 0; i < selected.size(); ++i)
+    {
+      extracted.add_vertex(selected[i]);
+    }
+    for (typename EdgeTable::const_iterator it = source.edges().begin(); it != source.edges().end(); ++it)
+    {
+      if (contains_string(selected, it->key().from) && contains_string(selected, it->key().to))
+      {
+        for (size_t i = 0; i < it->value().size(); ++i)
+        {
+          extracted.bind(it->key().from, it->key().to, it->value()[i]);
+        }
+      }
+    }
+
+    if (!storage.add_graph(args[1], extracted))
+    {
+      print_invalid(out);
+    }
   }
 
   CommandTable make_command_table()
