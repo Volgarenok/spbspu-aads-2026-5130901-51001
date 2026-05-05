@@ -1,6 +1,9 @@
 #include <fstream>
 #include <iostream>
+#include <string>
 
+#include "command_parser.hpp"
+#include "commands.hpp"
 #include "graph_storage.hpp"
 #include "input_reader.hpp"
 
@@ -23,6 +26,31 @@ int main(int argc, char* argv[])
   if (!alekseev::load_graphs(input, storage))
   {
     return 1;
+  }
+
+  alekseev::CommandTable commands = alekseev::make_command_table();
+  std::string line;
+  while (std::getline(std::cin, line))
+  {
+    alekseev::Sequence< std::string > args = alekseev::split_words(line);
+    if (args.empty())
+    {
+      alekseev::print_invalid(std::cout);
+      continue;
+    }
+    try
+    {
+      if (!commands.has(args[0]))
+      {
+        alekseev::print_invalid(std::cout);
+        continue;
+      }
+      commands.at(args[0])(args, storage, std::cout);
+    }
+    catch (const std::exception&)
+    {
+      alekseev::print_invalid(std::cout);
+    }
   }
 
   return 0;
