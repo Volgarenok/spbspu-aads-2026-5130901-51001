@@ -18,6 +18,9 @@ namespace alekseev
   class HashTable
   {
   public:
+    class iterator;
+    class const_iterator;
+
     explicit HashTable(size_t slots = 101, Hash hash = Hash(), Equal equal = Equal()):
       slots_(nullptr),
       size_(0),
@@ -190,6 +193,188 @@ namespace alekseev
     {
       return capacity_;
     }
+
+    iterator begin()
+    {
+      return iterator(this, 0);
+    }
+
+    iterator end()
+    {
+      return iterator(this, capacity_);
+    }
+
+    const_iterator begin() const
+    {
+      return const_iterator(this, 0);
+    }
+
+    const_iterator end() const
+    {
+      return const_iterator(this, capacity_);
+    }
+
+    const_iterator cbegin() const
+    {
+      return const_iterator(this, 0);
+    }
+
+    const_iterator cend() const
+    {
+      return const_iterator(this, capacity_);
+    }
+
+    class iterator
+    {
+    public:
+      struct Item
+      {
+        const Key& key() const
+        {
+          return *key_;
+        }
+
+        Value& value() const
+        {
+          return *value_;
+        }
+
+        const Key* key_;
+        Value* value_;
+      };
+
+      iterator():
+        table_(nullptr),
+        index_(0),
+        item_{nullptr, nullptr}
+      {}
+
+      iterator(HashTable* table, size_t index):
+        table_(table),
+        index_(index),
+        item_{nullptr, nullptr}
+      {
+        skip_to_occupied();
+      }
+
+      iterator& operator++()
+      {
+        ++index_;
+        skip_to_occupied();
+        return *this;
+      }
+
+      Item operator*() const
+      {
+        return Item{&table_->slots_[index_].key, &table_->slots_[index_].value};
+      }
+
+      const Item* operator->() const
+      {
+        item_ = **this;
+        return &item_;
+      }
+
+      bool operator==(const iterator& other) const
+      {
+        return table_ == other.table_ && index_ == other.index_;
+      }
+
+      bool operator!=(const iterator& other) const
+      {
+        return !(*this == other);
+      }
+
+    private:
+      void skip_to_occupied()
+      {
+        while (table_ != nullptr && index_ < table_->capacity_ &&
+            table_->slots_[index_].state != SlotState::OCCUPIED)
+        {
+          ++index_;
+        }
+      }
+
+      HashTable* table_;
+      size_t index_;
+      mutable Item item_;
+    };
+
+    class const_iterator
+    {
+    public:
+      struct Item
+      {
+        const Key& key() const
+        {
+          return *key_;
+        }
+
+        const Value& value() const
+        {
+          return *value_;
+        }
+
+        const Key* key_;
+        const Value* value_;
+      };
+
+      const_iterator():
+        table_(nullptr),
+        index_(0),
+        item_{nullptr, nullptr}
+      {}
+
+      const_iterator(const HashTable* table, size_t index):
+        table_(table),
+        index_(index),
+        item_{nullptr, nullptr}
+      {
+        skip_to_occupied();
+      }
+
+      const_iterator& operator++()
+      {
+        ++index_;
+        skip_to_occupied();
+        return *this;
+      }
+
+      Item operator*() const
+      {
+        return Item{&table_->slots_[index_].key, &table_->slots_[index_].value};
+      }
+
+      const Item* operator->() const
+      {
+        item_ = **this;
+        return &item_;
+      }
+
+      bool operator==(const const_iterator& other) const
+      {
+        return table_ == other.table_ && index_ == other.index_;
+      }
+
+      bool operator!=(const const_iterator& other) const
+      {
+        return !(*this == other);
+      }
+
+    private:
+      void skip_to_occupied()
+      {
+        while (table_ != nullptr && index_ < table_->capacity_ &&
+            table_->slots_[index_].state != SlotState::OCCUPIED)
+        {
+          ++index_;
+        }
+      }
+
+      const HashTable* table_;
+      size_t index_;
+      mutable Item item_;
+    };
 
   private:
     struct Slot
