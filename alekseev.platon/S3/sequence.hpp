@@ -165,7 +165,7 @@ namespace alekseev
       {
         for (; constructed < size_; ++constructed)
         {
-          new (new_data + constructed) T(std::move(data_[constructed]));
+          new (new_data + constructed) T(data_[constructed]);
         }
       }
       catch (...)
