@@ -1,9 +1,16 @@
 #include "commands.hpp"
 
+#include "command_parser.hpp"
+
 namespace alekseev
 {
   namespace
   {
+    bool valid_name(const std::string& name)
+    {
+      return detail::is_valid_name(name);
+    }
+
     void print_strings(const Sequence< std::string >& values, std::ostream& out)
     {
       for (size_t i = 0; i < values.size(); ++i)
@@ -80,23 +87,71 @@ namespace alekseev
 
   void handle_bind(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
   {
-    (void) args;
-    (void) storage;
-    print_invalid(out);
+    if (args.size() != 5 || !storage.has_graph(args[1]) ||
+        !valid_name(args[2]) || !valid_name(args[3]))
+    {
+      print_invalid(out);
+      return;
+    }
+    unsigned long long weight = 0;
+    if (!parse_ull(args[4], weight))
+    {
+      print_invalid(out);
+      return;
+    }
+    storage.get_graph(args[1]).bind(args[2], args[3], weight);
   }
 
   void handle_cut(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
   {
-    (void) args;
-    (void) storage;
-    print_invalid(out);
+    if (args.size() != 5 || !storage.has_graph(args[1]))
+    {
+      print_invalid(out);
+      return;
+    }
+    unsigned long long weight = 0;
+    if (!parse_ull(args[4], weight))
+    {
+      print_invalid(out);
+      return;
+    }
+    if (!storage.get_graph(args[1]).cut(args[2], args[3], weight))
+    {
+      print_invalid(out);
+    }
   }
 
   void handle_create(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
   {
-    (void) args;
-    (void) storage;
-    print_invalid(out);
+    if ((args.size() != 2 && args.size() < 4) || !valid_name(args[1]) || storage.has_graph(args[1]))
+    {
+      print_invalid(out);
+      return;
+    }
+
+    Graph graph;
+    if (args.size() > 2)
+    {
+      size_t count = 0;
+      if (!parse_size(args[2], count) || count != args.size() - 3)
+      {
+        print_invalid(out);
+        return;
+      }
+      for (size_t i = 3; i < args.size(); ++i)
+      {
+        if (!valid_name(args[i]))
+        {
+          print_invalid(out);
+          return;
+        }
+        graph.add_vertex(args[i]);
+      }
+    }
+    if (!storage.add_graph(args[1], graph))
+    {
+      print_invalid(out);
+    }
   }
 
   void handle_merge(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
