@@ -29,6 +29,8 @@ namespace alekseev
   void handle_extract(const Sequence< std::string >&, GraphStorage&, std::ostream&);
 
   CommandTable make_command_table();
+  void dispatch_command(CommandTable& commands, const Sequence< std::string >& args,
+      GraphStorage& storage, std::ostream& out);
 }
 
 #endif

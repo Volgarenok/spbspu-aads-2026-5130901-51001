@@ -264,4 +264,15 @@ namespace alekseev
     commands.add("extract", handle_extract);
     return commands;
   }
+
+  void dispatch_command(CommandTable& commands, const Sequence< std::string >& args,
+      GraphStorage& storage, std::ostream& out)
+  {
+    if (args.empty() || !commands.has(args[0]))
+    {
+      print_invalid(out);
+      return;
+    }
+    commands.at(args[0])(args, storage, out);
+  }
 }
