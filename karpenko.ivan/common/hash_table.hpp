@@ -79,70 +79,6 @@ private:
   void constructFromRange(size_t start, IT begin, IT end);
 };
 
-
-template <class T>
-void Vector<T>::insert(size_t pos, const T& val)
-{
-  if (pos > size_) throw std::out_of_range("Vector::insert: position out of range");
-  T* newData = static_cast<T*>(::operator new(sizeof(T) * (size_ + 1)));
-  for (size_t i = 0; i < pos; ++i)
-  {
-    new (newData + i) T(std::move(data_[i]));
-    data_[i].~T();
-  }
-  new (newData + pos) T(val);
-  for (size_t i = pos; i < size_; ++i)
-  {
-    new (newData + i + 1) T(std::move(data_[i]));
-    data_[i].~T();
-  }
-  deallocate();
-  data_ = newData;
-  ++size_;
-  capacity_ = size_;
-}
-
-template <class T>
-void Vector<T>::insert(size_t pos, const Vector<T>& rhs, size_t b, size_t e)
-{
-  if (pos > size_) throw std::out_of_range("Vector::insert: position out of range");
-  if (b > e || e > rhs.size_) throw std::out_of_range("Vector::insert: range out of range");
-  size_t count = e - b;
-  if (count == 0) return;
-  T* newData = static_cast<T*>(::operator new(sizeof(T) * (size_ + count)));
-  for (size_t i = 0; i < pos; ++i)
-  {
-    new (newData + i) T(std::move(data_[i]));
-    data_[i].~T();
-  }
-  for (size_t i = 0; i < count; ++i)
-  {
-    new (newData + pos + i) T(rhs.data_[b + i]);
-  }
-  for (size_t i = pos; i < size_; ++i)
-  {
-    new (newData + i + count) T(std::move(data_[i]));
-    data_[i].~T();
-  }
-  deallocate();
-  data_ = newData;
-  size_ += count;
-  capacity_ = size_;
-}
-
-template <class T>
-void Vector<T>::erase(size_t pos)
-{
-  if (pos >= size_) throw std::out_of_range("Vector::erase: position out of range");
-  data_[pos].~T();
-  for (size_t i = pos + 1; i < size_; ++i)
-  {
-    new (data_ + i - 1) T(std::move(data_[i]));
-    data_[i].~T();
-  }
-  --size_;
-}
-
 template <class T>
 Vector<T>::Vector() : data_(nullptr), size_(0), capacity_(0)
 {
@@ -152,7 +88,10 @@ template <class T>
 Vector<T>::Vector(size_t size, const T& val)
   : data_(nullptr), size_(size), capacity_(size)
 {
-  if (size_ == 0) return;
+  if (size_ == 0)
+  {
+    return;
+  }
   data_ = static_cast<T*>(::operator new(sizeof(T) * size_));
   for (size_t i = 0; i < size_; ++i)
   {
@@ -251,7 +190,10 @@ void Vector<T>::pushBack(const T& val)
 template <class T>
 void Vector<T>::reserve(size_t k)
 {
-  if (k <= capacity_) return;
+  if (k <= capacity_)
+  {
+    return;
+  }
   T* newData = static_cast<T*>(::operator new(sizeof(T) * k));
   for (size_t i = 0; i < size_; ++i)
   {
@@ -266,7 +208,10 @@ void Vector<T>::reserve(size_t k)
 template <class T>
 void Vector<T>::shrinkToFit()
 {
-  if (size_ == capacity_) return;
+  if (size_ == capacity_)
+  {
+    return;
+  }
   if (size_ == 0)
   {
     destroyRange(0, size_);
@@ -289,7 +234,10 @@ void Vector<T>::shrinkToFit()
 template <class T>
 void Vector<T>::repeatPushBack(const T& val, size_t k)
 {
-  if (k == 0) return;
+  if (k == 0)
+  {
+    return;
+  }
   reserve(size_ + k);
   for (size_t i = 0; i < k; ++i)
   {
@@ -302,7 +250,10 @@ template <class T>
 template <class IT>
 void Vector<T>::rangedPushBack(IT beg, size_t count)
 {
-  if (count == 0) return;
+  if (count == 0)
+  {
+    return;
+  }
   reserve(size_ + count);
   for (size_t i = 0; i < count; ++i, ++beg)
   {
@@ -314,8 +265,14 @@ void Vector<T>::rangedPushBack(IT beg, size_t count)
 template <class T>
 void Vector<T>::repeatInsert(size_t id, const T& val, size_t k)
 {
-  if (id > size_) throw std::out_of_range("Vector::repeatInsert: position out of range");
-  if (k == 0) return;
+  if (id > size_)
+  {
+    throw std::out_of_range("Vector::repeatInsert: position out of range");
+  }
+  if (k == 0)
+  {
+    return;
+  }
   T* newData = static_cast<T*>(::operator new(sizeof(T) * (size_ + k)));
   for (size_t i = 0; i < id; ++i)
   {
@@ -340,10 +297,16 @@ void Vector<T>::repeatInsert(size_t id, const T& val, size_t k)
 template <class T>
 bool Vector<T>::operator==(const Vector<T>& rhs) const noexcept
 {
-  if (size_ != rhs.size_) return false;
+  if (size_ != rhs.size_)
+  {
+    return false;
+  }
   for (size_t i = 0; i < size_; ++i)
   {
-    if (data_[i] != rhs.data_[i]) return false;
+    if (data_[i] != rhs.data_[i])
+    {
+      return false;
+    }
   }
   return true;
 }
@@ -352,6 +315,361 @@ template <class T>
 bool Vector<T>::operator!=(const Vector<T>& rhs) const noexcept
 {
   return !(*this == rhs);
+}
+
+template <class T>
+void Vector<T>::insert(size_t pos, const T& val)
+{
+  if (pos > size_)
+  {
+    throw std::out_of_range("Vector::insert: position out of range");
+  }
+  T* newData = static_cast<T*>(::operator new(sizeof(T) * (size_ + 1)));
+  for (size_t i = 0; i < pos; ++i)
+  {
+    new (newData + i) T(std::move(data_[i]));
+    data_[i].~T();
+  }
+  new (newData + pos) T(val);
+  for (size_t i = pos; i < size_; ++i)
+  {
+    new (newData + i + 1) T(std::move(data_[i]));
+    data_[i].~T();
+  }
+  deallocate();
+  data_ = newData;
+  ++size_;
+  capacity_ = size_;
+}
+
+template <class T>
+void Vector<T>::insert(size_t pos, const Vector<T>& rhs, size_t b, size_t e)
+{
+  if (pos > size_)
+  {
+    throw std::out_of_range("Vector::insert: position out of range");
+  }
+  if (b > e || e > rhs.size_)
+  {
+    throw std::out_of_range("Vector::insert: range out of range");
+  }
+  size_t count = e - b;
+  if (count == 0)
+  {
+    return;
+  }
+  T* newData = static_cast<T*>(::operator new(sizeof(T) * (size_ + count)));
+  for (size_t i = 0; i < pos; ++i)
+  {
+    new (newData + i) T(std::move(data_[i]));
+    data_[i].~T();
+  }
+  for (size_t i = 0; i < count; ++i)
+  {
+    new (newData + pos + i) T(rhs.data_[b + i]);
+  }
+  for (size_t i = pos; i < size_; ++i)
+  {
+    new (newData + i + count) T(std::move(data_[i]));
+    data_[i].~T();
+  }
+  deallocate();
+  data_ = newData;
+  size_ += count;
+  capacity_ = size_;
+}
+
+template <class T>
+void Vector<T>::erase(size_t pos)
+{
+  if (pos >= size_)
+  {
+    throw std::out_of_range("Vector::erase: position out of range");
+  }
+  data_[pos].~T();
+  for (size_t i = pos + 1; i < size_; ++i)
+  {
+    new (data_ + i - 1) T(std::move(data_[i]));
+    data_[i].~T();
+  }
+  --size_;
+}
+
+template <class T>
+struct Vector<T>::VectorIterator
+{
+  using iterator_category = std::random_access_iterator_tag;
+  using value_type = T;
+  using difference_type = std::ptrdiff_t;
+  using pointer = T*;
+  using reference = T&;
+
+  VectorIterator() : ptr_(nullptr)
+  {
+  }
+  explicit VectorIterator(pointer ptr) : ptr_(ptr)
+  {
+  }
+
+  reference operator*() const
+  {
+    return *ptr_;
+  }
+  pointer operator->() const
+  {
+    return ptr_;
+  }
+
+  VectorIterator& operator++()
+  {
+    ++ptr_;
+    return *this;
+  }
+  VectorIterator operator++(int)
+  {
+    VectorIterator tmp = *this;
+    ++ptr_;
+    return tmp;
+  }
+  VectorIterator& operator--()
+  {
+    --ptr_;
+    return *this;
+  }
+  VectorIterator operator--(int)
+  {
+    VectorIterator tmp = *this;
+    --ptr_;
+    return tmp;
+  }
+
+  VectorIterator operator+(difference_type n) const
+  {
+    return VectorIterator(ptr_ + n);
+  }
+  VectorIterator operator-(difference_type n) const
+  {
+    return VectorIterator(ptr_ - n);
+  }
+  difference_type operator-(const VectorIterator& other) const
+  {
+    return ptr_ - other.ptr_;
+  }
+
+  VectorIterator& operator+=(difference_type n)
+  {
+    ptr_ += n;
+    return *this;
+  }
+  VectorIterator& operator-=(difference_type n)
+  {
+    ptr_ -= n;
+    return *this;
+  }
+
+  reference operator[](difference_type n) const
+  {
+    return ptr_[n];
+  }
+
+  bool operator==(const VectorIterator& other) const
+  {
+    return ptr_ == other.ptr_;
+  }
+  bool operator!=(const VectorIterator& other) const
+  {
+    return ptr_ != other.ptr_;
+  }
+  bool operator<(const VectorIterator& other) const
+  {
+    return ptr_ < other.ptr_;
+  }
+  bool operator>(const VectorIterator& other) const
+  {
+    return ptr_ > other.ptr_;
+  }
+  bool operator<=(const VectorIterator& other) const
+  {
+    return ptr_ <= other.ptr_;
+  }
+  bool operator>=(const VectorIterator& other) const
+  {
+    return ptr_ >= other.ptr_;
+  }
+
+private:
+  pointer ptr_;
+};
+
+template <class T>
+typename Vector<T>::iterator Vector<T>::begin()
+{
+  return iterator(data_);
+}
+
+template <class T>
+typename Vector<T>::iterator Vector<T>::end()
+{
+  return iterator(data_ + size_);
+}
+
+template <class T>
+void Vector<T>::insert(iterator pos, const T& val)
+{
+  insert(pos - begin(), val);
+}
+
+template <class T>
+template <class IT>
+void Vector<T>::insert(iterator pos, IT begin, IT end)
+{
+  size_t index = pos - this->begin();
+  size_t count = 0;
+  for (IT it = begin; it != end; ++it)
+  {
+    ++count;
+  }
+  if (count == 0)
+  {
+    return;
+  }
+  T* newData = static_cast<T*>(::operator new(sizeof(T) * (size_ + count)));
+  for (size_t i = 0; i < index; ++i)
+  {
+    new (newData + i) T(std::move(data_[i]));
+    data_[i].~T();
+  }
+  size_t j = 0;
+  for (IT it = begin; it != end; ++it, ++j)
+  {
+    new (newData + index + j) T(*it);
+  }
+  for (size_t i = index; i < size_; ++i)
+  {
+    new (newData + i + count) T(std::move(data_[i]));
+    data_[i].~T();
+  }
+  deallocate();
+  data_ = newData;
+  size_ += count;
+  capacity_ = size_;
+}
+
+template <class T>
+void Vector<T>::erase(iterator pos)
+{
+  erase(pos - begin());
+}
+
+template <class T>
+void Vector<T>::erase(iterator first, iterator last)
+{
+  size_t first_idx = first - begin();
+  size_t last_idx = last - begin();
+  if (first_idx > last_idx)
+  {
+    throw std::out_of_range("Vector::erase: invalid range");
+  }
+  if (first_idx >= size_)
+  {
+    throw std::out_of_range("Vector::erase: start out of range");
+  }
+  if (last_idx > size_)
+  {
+    throw std::out_of_range("Vector::erase: end out of range");
+  }
+  size_t count = last_idx - first_idx;
+  if (count == 0)
+  {
+    return;
+  }
+  destroyRange(first_idx, last_idx);
+  for (size_t i = last_idx; i < size_; ++i)
+  {
+    new (data_ + i - count) T(std::move(data_[i]));
+    data_[i].~T();
+  }
+  size_ -= count;
+}
+
+template <class T>
+void Vector<T>::eraseValue(const T& value)
+{
+  for (size_t i = 0; i < size_;)
+  {
+    if (data_[i] == value)
+    {
+      erase(i);
+    }
+    else
+    {
+      ++i;
+    }
+  }
+}
+
+template <class T>
+size_t Vector<T>::getCapacity() const noexcept
+{
+  return capacity_;
+}
+
+template <class T>
+bool Vector<T>::isEmpty() const noexcept
+{
+  return !size_;
+}
+
+template <class T>
+size_t Vector<T>::getSize() const noexcept
+{
+  return size_;
+}
+
+template <class T>
+T& Vector<T>::operator[](size_t id) noexcept
+{
+  return data_[id];
+}
+
+template <class T>
+const T& Vector<T>::operator[](size_t id) const noexcept
+{
+  return data_[id];
+}
+
+template <class T>
+T& Vector<T>::at(size_t id)
+{
+  if (id >= size_)
+  {
+    throw std::out_of_range("Vector::at: index out of range");
+  }
+  return data_[id];
+}
+
+template <class T>
+const T& Vector<T>::at(size_t id) const
+{
+  if (id >= size_)
+  {
+    throw std::out_of_range("Vector::at: index out of range");
+  }
+  return data_[id];
+}
+
+template <class T>
+void Vector<T>::pushFront(const T& val)
+{
+  insert(0, val);
+}
+
+template <class T>
+void Vector<T>::swap(Vector<T>& rhs) noexcept
+{
+  std::swap(data_, rhs.data_);
+  std::swap(size_, rhs.size_);
+  std::swap(capacity_, rhs.capacity_);
 }
 
 }
