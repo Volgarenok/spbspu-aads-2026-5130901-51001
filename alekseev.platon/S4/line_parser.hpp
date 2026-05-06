@@ -12,8 +12,13 @@ namespace alekseev
     explicit LineParser(const std::string& line);
 
     bool hasNext() const;
+    std::string readWord();
+    int readInt();
+    void expectEnd() const;
 
   private:
+    void skipSpaces();
+
     std::string line_;
     size_t pos_;
   };
