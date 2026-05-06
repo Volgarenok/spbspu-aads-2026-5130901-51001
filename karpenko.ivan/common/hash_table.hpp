@@ -860,6 +860,69 @@ private:
   }
 
 public:
+  class iterator
+  {
+    friend class BucketHashTable;
+    Slot* ptr_;
+    Slot* end_;
+    void skip_empty()
+    {
+      while (ptr_ != end_ && ptr_->state != Slot::OCCUPIED)
+      {
+        ++ptr_;
+      }
+    }
+  public:
+    using difference_type = std::ptrdiff_t;
+    using value_type = typename BucketHashTable::value_type;
+    using pointer = value_type*;
+    using reference = value_type&;
+    using iterator_category = std::forward_iterator_tag;
+
+    iterator() : ptr_(nullptr), end_(nullptr) {}
+    iterator(Slot* p, Slot* e) : ptr_(p), end_(e) { skip_empty(); }
+    reference operator*() { return ptr_->data; }
+    pointer operator->() { return &ptr_->data; }
+    iterator& operator++() { ++ptr_; skip_empty(); return *this; }
+    iterator operator++(int) { iterator tmp = *this; ++(*this); return tmp; }
+    bool operator==(const iterator& other) const { return ptr_ == other.ptr_; }
+    bool operator!=(const iterator& other) const { return !(*this == other); }
+  };
+
+  class const_iterator
+  {
+    friend class BucketHashTable;
+    const Slot* ptr_;
+    const Slot* end_;
+    void skip_empty()
+    {
+      while (ptr_ != end_ && ptr_->state != Slot::OCCUPIED)
+      {
+        ++ptr_;
+      }
+    }
+  public:
+    using difference_type = std::ptrdiff_t;
+    using value_type = const typename BucketHashTable::value_type;
+    using pointer = const value_type*;
+    using reference = const value_type&;
+    using iterator_category = std::forward_iterator_tag;
+
+    const_iterator() : ptr_(nullptr), end_(nullptr) {}
+    const_iterator(const Slot* p, const Slot* e) : ptr_(p), end_(e) { skip_empty(); }
+    reference operator*() const { return ptr_->data; }
+    pointer operator->() const { return &ptr_->data; }
+    const_iterator& operator++() { ++ptr_; skip_empty(); return *this; }
+    const_iterator operator++(int) { const_iterator tmp = *this; ++(*this); return tmp; }
+    bool operator==(const const_iterator& other) const { return ptr_ == other.ptr_; }
+    bool operator!=(const const_iterator& other) const { return !(*this == other); }
+  };
+
+  iterator begin() { return iterator(slots_, slots_ + total_slots_); }
+  iterator end()   { return iterator(slots_ + total_slots_, slots_ + total_slots_); }
+  const_iterator begin() const { return const_iterator(slots_, slots_ + total_slots_); }
+  const_iterator end()   const { return const_iterator(slots_ + total_slots_, slots_ + total_slots_); }
+
   BucketHashTable(std::size_t bucket_count = 16,
                   std::size_t bucket_size = 4,
                   std::size_t overflow_size = 16,
