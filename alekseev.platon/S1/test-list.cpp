@@ -1,7 +1,7 @@
 #define BOOST_TEST_MODULE S1
 #include <boost/test/included/unit_test.hpp>
 #include <sstream>
-#include "list.hpp"
+#include <list.hpp>
 #include "input-utils.hpp"
 #include "named-seq.hpp"
 

@@ -1,7 +1,7 @@
 #ifndef LIST_HPP
 #define LIST_HPP
 
-#include "iterator.hpp"
+#include <iterator.hpp>
 
 namespace alekseev
 {
