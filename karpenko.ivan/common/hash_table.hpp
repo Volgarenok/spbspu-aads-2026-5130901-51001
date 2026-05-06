@@ -1039,15 +1039,6 @@ public:
     return *this;
   }
 
-  BucketHashTable& operator=(BucketHashTable&& other) noexcept
-  {
-    if (this != &other)
-    {
-      swap(other);
-    }
-    return *this;
-  }
-
   class iterator
   {
     friend class BucketHashTable;
