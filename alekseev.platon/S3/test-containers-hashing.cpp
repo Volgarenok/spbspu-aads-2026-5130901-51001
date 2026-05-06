@@ -233,6 +233,36 @@ namespace
       table.add("c", 3);
     }, "full table add throws");
   }
+
+  void testHashTableOwnership()
+  {
+    CollisionTable original(17);
+    original.add("a", 1);
+    original.add("b", 2);
+
+    CollisionTable copy(original);
+    copy.insert_or_assign("a", 10);
+    require(original.at("a") == 1, "hash table copy constructor independent");
+    require(copy.at("a") == 10, "hash table copy constructor copies values");
+
+    CollisionTable assigned(17);
+    assigned.add("x", 9);
+    assigned = original;
+    assigned.insert_or_assign("b", 20);
+    require(original.at("b") == 2, "hash table copy assignment independent");
+    require(assigned.at("b") == 20, "hash table copy assignment copies values");
+
+    CollisionTable moved(std::move(copy));
+    require(moved.has("a") && moved.has("b"), "hash table move constructor");
+
+    CollisionTable moveAssigned(17);
+    moveAssigned = std::move(moved);
+    require(moveAssigned.has("a") && moveAssigned.has("b"), "hash table move assignment");
+
+    moveAssigned.clear();
+    require(moveAssigned.size() == 0, "hash table clear size");
+    require(!moveAssigned.has("a") && !moveAssigned.has("b"), "hash table clear removes keys");
+  }
 }
 
 int runContainerHashTests()
@@ -245,6 +275,7 @@ int runContainerHashTests()
     testHashTableBasic();
     testHashTableTombstoneAndIterator();
     testHashTableFull();
+    testHashTableOwnership();
     return 0;
   }
   catch (const std::exception& e)
