@@ -1,7 +1,7 @@
 #ifndef ITERATOR_HPP
 #define ITERATOR_HPP
 
-#include "node.hpp"
+#include <node.hpp>
 
 namespace alekseev
 {
