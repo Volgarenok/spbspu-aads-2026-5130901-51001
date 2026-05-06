@@ -149,6 +149,17 @@ BOOST_AUTO_TEST_CASE(command_check_project_dependency)
       "<PROJECT-DEP: YES>\n");
 }
 
+BOOST_AUTO_TEST_CASE(command_check_project_dependency_without_path)
+{
+  BOOST_CHECK_EQUAL(runCommands(
+      "make p1\n"
+      "add-task p1 compile\n"
+      "make p2\n"
+      "add-task p2 compile\n"
+      "check-project-dep p1 p2\n"),
+      "<PROJECT-DEP: NO>\n");
+}
+
 BOOST_AUTO_TEST_CASE(command_show_project_dependencies)
 {
   BOOST_CHECK_EQUAL(runCommands(
