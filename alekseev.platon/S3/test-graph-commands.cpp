@@ -1,7 +1,7 @@
-#include <exception>
-#include <iostream>
+#include <boost/test/unit_test.hpp>
+
+#include <cstddef>
 #include <sstream>
-#include <stdexcept>
 #include <string>
 
 #include "command_parser.hpp"
@@ -12,22 +12,6 @@
 
 namespace
 {
-  struct TestFailure: public std::runtime_error
-  {
-    explicit TestFailure(const std::string& message):
-      std::runtime_error(message)
-    {
-    }
-  };
-
-  void require(bool condition, const std::string& message)
-  {
-    if (!condition)
-    {
-      throw TestFailure(message);
-    }
-  }
-
   std::string dispatchLine(const std::string& line, alekseev::GraphStorage& storage)
   {
     const alekseev::CommandTable commands = alekseev::makeCommandTable();
@@ -36,208 +20,219 @@ namespace
     alekseev::dispatchCommand(commands, args, storage, out);
     return out.str();
   }
+}
 
-  void testGraph()
+BOOST_AUTO_TEST_CASE(graph_bind_cut_and_sorted_queries)
+{
+  alekseev::Graph graph;
+  graph.bind("b", "c", 5);
+  graph.bind("b", "c", 5);
+  graph.bind("b", "c", 1);
+  graph.bind("a", "b", 0);
+  graph.addVertex("d");
+
+  BOOST_TEST(graph.hasVertex("a"));
+  BOOST_TEST(graph.hasVertex("b"));
+  BOOST_TEST(graph.hasVertex("c"));
+  BOOST_TEST(graph.hasVertex("d"));
+
+  alekseev::Sequence< std::string > vertexes = graph.getSortedVertexes();
+  BOOST_TEST(vertexes.size() == 4);
+  BOOST_TEST(vertexes[0] == "a");
+  BOOST_TEST(vertexes[1] == "b");
+  BOOST_TEST(vertexes[2] == "c");
+  BOOST_TEST(vertexes[3] == "d");
+
+  alekseev::Sequence< alekseev::EdgeQueryLine > outbound = graph.getSortedOutbound("b");
+  BOOST_TEST(outbound.size() == 1);
+  BOOST_TEST(outbound[0].vertex == "c");
+  BOOST_TEST(outbound[0].weights.size() == 3);
+  BOOST_TEST(outbound[0].weights[0] == 1);
+  BOOST_TEST(outbound[0].weights[1] == 5);
+  BOOST_TEST(outbound[0].weights[2] == 5);
+
+  alekseev::Sequence< alekseev::EdgeQueryLine > inbound = graph.getSortedInbound("b");
+  BOOST_TEST(inbound.size() == 1);
+  BOOST_TEST(inbound[0].vertex == "a");
+  BOOST_TEST(inbound[0].weights.size() == 1);
+  BOOST_TEST(inbound[0].weights[0] == 0);
+
+  BOOST_TEST(graph.cut("b", "c", 5));
+  outbound = graph.getSortedOutbound("b");
+  BOOST_TEST(outbound[0].weights.size() == 2);
+  BOOST_TEST(outbound[0].weights[0] == 1);
+  BOOST_TEST(outbound[0].weights[1] == 5);
+  BOOST_TEST(!graph.cut("b", "c", 7));
+  BOOST_TEST(graph.cut("b", "c", 1));
+  BOOST_TEST(graph.cut("b", "c", 5));
+  BOOST_TEST(graph.getSortedOutbound("b").empty());
+  BOOST_TEST(graph.hasVertex("b"));
+  BOOST_TEST(graph.hasVertex("c"));
+  BOOST_TEST(graph.getSortedInbound("d").empty());
+  BOOST_TEST(graph.getSortedOutbound("d").empty());
+}
+
+BOOST_AUTO_TEST_CASE(graph_storage_operations)
+{
+  alekseev::GraphStorage storage;
+  BOOST_TEST(storage.createGraph("b"));
+  BOOST_TEST(!storage.createGraph("b"));
+  BOOST_TEST(storage.hasGraph("b"));
+  storage.getGraph("b").addVertex("v");
+  BOOST_TEST(storage.getGraph("b").hasVertex("v"));
+
+  alekseev::Graph graph;
+  graph.addVertex("x");
+  BOOST_TEST(storage.addGraph("a", graph));
+  alekseev::Sequence< std::string > names = storage.getSortedGraphNames();
+  BOOST_TEST(names.size() == 2);
+  BOOST_TEST(names[0] == "a");
+  BOOST_TEST(names[1] == "b");
+}
+
+BOOST_AUTO_TEST_CASE(input_reader_accepts_valid_graphs)
+{
   {
-    alekseev::Graph graph;
-    graph.bind("b", "c", 5);
-    graph.bind("b", "c", 5);
-    graph.bind("b", "c", 1);
-    graph.bind("a", "b", 0);
-    graph.addVertex("d");
-
-    require(graph.hasVertex("a") && graph.hasVertex("b"), "bind adds vertices");
-    require(graph.hasVertex("c") && graph.hasVertex("d"), "graph has all vertices");
-
-    alekseev::Sequence< std::string > vertexes = graph.getSortedVertexes();
-    require(vertexes.size() == 4, "sorted vertex count");
-    require(vertexes[0] == "a" && vertexes[1] == "b", "sorted vertex prefix");
-    require(vertexes[2] == "c" && vertexes[3] == "d", "sorted vertex suffix");
-
-    alekseev::Sequence< alekseev::EdgeQueryLine > outbound = graph.getSortedOutbound("b");
-    require(outbound.size() == 1 && outbound[0].vertex == "c", "outbound destination");
-    require(outbound[0].weights.size() == 3, "outbound duplicate weights");
-    require(outbound[0].weights[0] == 1 && outbound[0].weights[1] == 5, "outbound sorted");
-    require(outbound[0].weights[2] == 5, "outbound duplicate preserved");
-
-    alekseev::Sequence< alekseev::EdgeQueryLine > inbound = graph.getSortedInbound("b");
-    require(inbound.size() == 1 && inbound[0].vertex == "a", "inbound source");
-    require(inbound[0].weights.size() == 1 && inbound[0].weights[0] == 0, "inbound zero");
-
-    require(graph.cut("b", "c", 5), "cut existing weight");
-    outbound = graph.getSortedOutbound("b");
-    require(outbound[0].weights.size() == 2, "cut removes one duplicate");
-    require(outbound[0].weights[0] == 1 && outbound[0].weights[1] == 5, "cut keeps one");
-    require(!graph.cut("b", "c", 7), "cut missing weight false");
-    require(graph.cut("b", "c", 1), "cut remaining first weight");
-    require(graph.cut("b", "c", 5), "cut remaining second weight");
-    require(graph.getSortedOutbound("b").empty(), "cut removes empty edge key");
-    require(graph.hasVertex("b") && graph.hasVertex("c"), "cut keeps vertices");
-    require(graph.getSortedInbound("d").empty(), "inbound empty existing vertex");
-    require(graph.getSortedOutbound("d").empty(), "outbound empty existing vertex");
-  }
-
-  void testGraphStorage()
-  {
+    std::istringstream input("gr1 2\na b 0\na b 0\n");
     alekseev::GraphStorage storage;
-    require(storage.createGraph("b"), "create graph");
-    require(!storage.createGraph("b"), "create does not overwrite");
-    require(storage.hasGraph("b"), "has graph");
-    storage.getGraph("b").addVertex("v");
-    require(storage.getGraph("b").hasVertex("v"), "get graph returns stored graph");
-
-    alekseev::Graph graph;
-    graph.addVertex("x");
-    require(storage.addGraph("a", graph), "add graph");
-    alekseev::Sequence< std::string > names = storage.getSortedGraphNames();
-    require(names.size() == 2 && names[0] == "a" && names[1] == "b", "sorted graphs");
+    BOOST_TEST(alekseev::loadGraphs(input, storage));
+    BOOST_TEST(storage.hasGraph("gr1"));
+    const alekseev::Graph& graph = storage.getGraph("gr1");
+    alekseev::Sequence< alekseev::EdgeQueryLine > outbound = graph.getSortedOutbound("a");
+    BOOST_TEST(outbound[0].weights.size() == 2);
+    BOOST_TEST(outbound[0].weights[0] == 0);
+    BOOST_TEST(outbound[0].weights[1] == 0);
   }
-
-  void testInputReader()
   {
-    {
-      std::istringstream input("gr1 2\na b 0\na b 0\n");
-      alekseev::GraphStorage storage;
-      require(alekseev::loadGraphs(input, storage), "load one graph");
-      require(storage.hasGraph("gr1"), "loaded graph exists");
-      const alekseev::Graph& graph = storage.getGraph("gr1");
-      alekseev::Sequence< alekseev::EdgeQueryLine > outbound = graph.getSortedOutbound("a");
-      require(outbound[0].weights.size() == 2, "load duplicate weights");
-      require(outbound[0].weights[0] == 0 && outbound[0].weights[1] == 0, "load zero");
-    }
-    {
-      std::istringstream input("\ngr1 1\na b 1\n\ngr2 1\nc d 2\n");
-      alekseev::GraphStorage storage;
-      require(alekseev::loadGraphs(input, storage), "load several graphs with blanks");
-      require(storage.hasGraph("gr1") && storage.hasGraph("gr2"), "loaded several");
-    }
-    {
-      std::istringstream input("gr1 x\n");
-      alekseev::GraphStorage storage;
-      require(!alekseev::loadGraphs(input, storage), "bad edge count");
-    }
-    {
-      std::istringstream input("gr1 2\na b 1\n");
-      alekseev::GraphStorage storage;
-      require(!alekseev::loadGraphs(input, storage), "missing edge line");
-    }
-    {
-      std::istringstream input("gr1 1\na b q\n");
-      alekseev::GraphStorage storage;
-      require(!alekseev::loadGraphs(input, storage), "bad weight");
-    }
-    {
-      std::istringstream input("gr1 0\ngr1 0\n");
-      alekseev::GraphStorage storage;
-      require(!alekseev::loadGraphs(input, storage), "duplicate graph name");
-    }
-  }
-
-  void testCommandParser()
-  {
-    alekseev::Sequence< std::string > words = alekseev::splitWords("bind  gr a  b 0");
-    require(words.size() == 5, "split multiple spaces");
-    require(words[0] == "bind" && words[4] == "0", "split word values");
-    require(alekseev::splitWords("").empty(), "split empty");
-
-    size_t parsedSize = 0;
-    require(alekseev::parseSize("42", parsedSize) && parsedSize == 42, "parse size");
-    require(!alekseev::parseSize("", parsedSize), "parse size empty");
-    require(!alekseev::parseSize("12a", parsedSize), "parse size letters");
-
-    unsigned long long parsedWeight = 1;
-    require(alekseev::parseUll("0", parsedWeight) && parsedWeight == 0, "parse ull zero");
-    require(!alekseev::parseUll("-1", parsedWeight), "parse ull negative");
-    require(!alekseev::parseUll("x", parsedWeight), "parse ull letters");
-  }
-
-  void testCommands()
-  {
+    std::istringstream input("\ngr1 1\na b 1\n\ngr2 1\nc d 2\n");
     alekseev::GraphStorage storage;
-    alekseev::Graph first;
-    first.bind("a", "c", 3);
-    first.bind("a", "b", 1);
-    first.bind("c", "b", 2);
-    require(storage.addGraph("gr2", first), "add first command graph");
-    require(storage.createGraph("gr1"), "add second command graph");
-
-    require(dispatchLine("graphs", storage) == "gr1\ngr2\n", "graphs output");
-    require(dispatchLine("vertexes gr2", storage) == "a\nb\nc\n", "vertexes output");
-    require(dispatchLine("vertexes missing", storage) == "<INVALID COMMAND>\n",
-        "missing vertexes invalid");
-    require(dispatchLine("outbound gr2 a", storage) == "b 1\nc 3\n", "outbound order");
-    require(dispatchLine("inbound gr2 b", storage) == "a 1\nc 2\n", "inbound order");
-
-    require(dispatchLine("bind gr2 b d 0", storage).empty(), "bind no output");
-    require(storage.getGraph("gr2").hasVertex("d"), "bind adds vertex");
-    require(dispatchLine("outbound gr2 b", storage) == "d 0\n", "bind adds edge");
-    require(dispatchLine("cut gr2 b d 0", storage).empty(), "cut no output");
-    require(dispatchLine("cut gr2 b d 0", storage) == "<INVALID COMMAND>\n",
-        "cut missing invalid");
-
-    require(dispatchLine("create empty", storage).empty(), "create empty no output");
-    require(storage.hasGraph("empty"), "create empty graph");
-    require(dispatchLine("vertexes empty", storage) == "\n", "empty graph prints newline");
-    require(dispatchLine("create zero 0", storage).empty(), "create zero no output");
-    require(storage.hasGraph("zero"), "create zero graph");
-    require(dispatchLine("create made 3 x y z", storage).empty(), "create vertices");
-    require(dispatchLine("vertexes made", storage) == "x\ny\nz\n", "created vertices");
-    require(dispatchLine("create bad 2 x y z", storage) == "<INVALID COMMAND>\n",
-        "create wrong count invalid");
-    require(dispatchLine("create badZero 0 x", storage) == "<INVALID COMMAND>\n",
-        "create zero with extra vertex invalid");
-
-    require(dispatchLine("merge merged gr2 gr2", storage).empty(), "merge no output");
-    require(dispatchLine("inbound merged b", storage) == "a 1 1\nc 2 2\n",
-        "merge duplicates edges");
-    require(dispatchLine("merge gr2 gr1 gr1", storage) == "<INVALID COMMAND>\n",
-        "merge does not overwrite");
-
-    require(dispatchLine("extract sub gr2 2 a c", storage).empty(), "extract no output");
-    require(dispatchLine("vertexes sub", storage) == "a\nc\n", "extract vertexes");
-    require(dispatchLine("outbound sub a", storage) == "c 3\n", "extract internal edge");
-    require(dispatchLine("extract broken gr2 2 a missing", storage) == "<INVALID COMMAND>\n",
-        "extract missing vertex invalid");
-    require(dispatchLine("", storage) == "<INVALID COMMAND>\n", "empty command invalid");
-  }
-
-  void testOutputFormatting()
-  {
-    std::ostringstream invalid;
-    alekseev::printInvalid(invalid);
-    require(invalid.str() == "<INVALID COMMAND>\n", "print invalid exact");
-
-    alekseev::GraphStorage storage;
-    require(storage.createGraph("g"), "format graph create");
-    require(dispatchLine("graphs", storage) == "g\n", "nonempty graphs exact");
-    require(dispatchLine("bind g a b 2", storage).empty(), "command without result silent");
-    const std::string outbound = dispatchLine("outbound g a", storage);
-    require(outbound == "b 2\n", "edge line exact");
-    require(!outbound.empty() && outbound[outbound.size() - 1] == '\n', "edge newline");
-    require(outbound.size() >= 2 && outbound[outbound.size() - 2] != ' ', "no trailing space");
-    require(dispatchLine("outbound g b", storage) == "\n", "empty edge query newline");
-    require(dispatchLine("inbound g a", storage) == "\n", "empty inbound query newline");
-
-    alekseev::GraphStorage emptyStorage;
-    require(dispatchLine("graphs", emptyStorage) == "\n", "empty graphs newline");
+    BOOST_TEST(alekseev::loadGraphs(input, storage));
+    BOOST_TEST(storage.hasGraph("gr1"));
+    BOOST_TEST(storage.hasGraph("gr2"));
   }
 }
 
-int runGraphCommandTests()
+BOOST_AUTO_TEST_CASE(input_reader_rejects_invalid_graphs)
 {
-  try
   {
-    testGraph();
-    testGraphStorage();
-    testInputReader();
-    testCommandParser();
-    testCommands();
-    testOutputFormatting();
-    return 0;
+    std::istringstream input("gr1 x\n");
+    alekseev::GraphStorage storage;
+    BOOST_TEST(!alekseev::loadGraphs(input, storage));
   }
-  catch (const std::exception& e)
   {
-    std::cerr << "graph/command tests failed: " << e.what() << '\n';
-    return 1;
+    std::istringstream input("gr1 2\na b 1\n");
+    alekseev::GraphStorage storage;
+    BOOST_TEST(!alekseev::loadGraphs(input, storage));
   }
+  {
+    std::istringstream input("gr1 1\na b q\n");
+    alekseev::GraphStorage storage;
+    BOOST_TEST(!alekseev::loadGraphs(input, storage));
+  }
+  {
+    std::istringstream input("gr1 0\ngr1 0\n");
+    alekseev::GraphStorage storage;
+    BOOST_TEST(!alekseev::loadGraphs(input, storage));
+  }
+}
+
+BOOST_AUTO_TEST_CASE(command_parser_helpers)
+{
+  alekseev::Sequence< std::string > words = alekseev::splitWords("bind  gr a  b 0");
+  BOOST_TEST(words.size() == 5);
+  BOOST_TEST(words[0] == "bind");
+  BOOST_TEST(words[1] == "gr");
+  BOOST_TEST(words[2] == "a");
+  BOOST_TEST(words[3] == "b");
+  BOOST_TEST(words[4] == "0");
+  BOOST_TEST(alekseev::splitWords("").empty());
+
+  std::size_t parsedSize = 0;
+  BOOST_TEST(alekseev::parseSize("42", parsedSize));
+  BOOST_TEST(parsedSize == 42);
+  BOOST_TEST(!alekseev::parseSize("", parsedSize));
+  BOOST_TEST(!alekseev::parseSize("12a", parsedSize));
+
+  unsigned long long parsedWeight = 1;
+  BOOST_TEST(alekseev::parseUll("0", parsedWeight));
+  BOOST_TEST(parsedWeight == 0);
+  BOOST_TEST(!alekseev::parseUll("-1", parsedWeight));
+  BOOST_TEST(!alekseev::parseUll("x", parsedWeight));
+}
+
+BOOST_AUTO_TEST_CASE(commands_dispatch_graph_queries_and_mutations)
+{
+  alekseev::GraphStorage storage;
+  alekseev::Graph first;
+  first.bind("a", "c", 3);
+  first.bind("a", "b", 1);
+  first.bind("c", "b", 2);
+  BOOST_TEST(storage.addGraph("gr2", first));
+  BOOST_TEST(storage.createGraph("gr1"));
+
+  BOOST_TEST(dispatchLine("graphs", storage) == "gr1\ngr2\n");
+  BOOST_TEST(dispatchLine("vertexes gr2", storage) == "a\nb\nc\n");
+  BOOST_TEST(dispatchLine("vertexes missing", storage) == "<INVALID COMMAND>\n");
+  BOOST_TEST(dispatchLine("outbound gr2 a", storage) == "b 1\nc 3\n");
+  BOOST_TEST(dispatchLine("inbound gr2 b", storage) == "a 1\nc 2\n");
+
+  BOOST_TEST(dispatchLine("bind gr2 b d 0", storage).empty());
+  BOOST_TEST(storage.getGraph("gr2").hasVertex("d"));
+  BOOST_TEST(dispatchLine("outbound gr2 b", storage) == "d 0\n");
+  BOOST_TEST(dispatchLine("cut gr2 b d 0", storage).empty());
+  BOOST_TEST(dispatchLine("cut gr2 b d 0", storage) == "<INVALID COMMAND>\n");
+}
+
+BOOST_AUTO_TEST_CASE(commands_dispatch_create_merge_extract_and_invalid)
+{
+  alekseev::GraphStorage storage;
+  alekseev::Graph first;
+  first.bind("a", "c", 3);
+  first.bind("a", "b", 1);
+  first.bind("c", "b", 2);
+  BOOST_TEST(storage.addGraph("gr2", first));
+  BOOST_TEST(storage.createGraph("gr1"));
+
+  BOOST_TEST(dispatchLine("create empty", storage).empty());
+  BOOST_TEST(storage.hasGraph("empty"));
+  BOOST_TEST(dispatchLine("vertexes empty", storage) == "\n");
+  BOOST_TEST(dispatchLine("create zero 0", storage).empty());
+  BOOST_TEST(storage.hasGraph("zero"));
+  BOOST_TEST(dispatchLine("create made 3 x y z", storage).empty());
+  BOOST_TEST(dispatchLine("vertexes made", storage) == "x\ny\nz\n");
+  BOOST_TEST(dispatchLine("create bad 2 x y z", storage) == "<INVALID COMMAND>\n");
+  BOOST_TEST(dispatchLine("create badZero 0 x", storage) == "<INVALID COMMAND>\n");
+
+  BOOST_TEST(dispatchLine("merge merged gr2 gr2", storage).empty());
+  BOOST_TEST(dispatchLine("inbound merged b", storage) == "a 1 1\nc 2 2\n");
+  BOOST_TEST(dispatchLine("merge gr2 gr1 gr1", storage) == "<INVALID COMMAND>\n");
+
+  BOOST_TEST(dispatchLine("extract sub gr2 2 a c", storage).empty());
+  BOOST_TEST(dispatchLine("vertexes sub", storage) == "a\nc\n");
+  BOOST_TEST(dispatchLine("outbound sub a", storage) == "c 3\n");
+  BOOST_TEST(dispatchLine("extract broken gr2 2 a missing", storage) == "<INVALID COMMAND>\n");
+  BOOST_TEST(dispatchLine("", storage) == "<INVALID COMMAND>\n");
+}
+
+BOOST_AUTO_TEST_CASE(commands_output_formatting)
+{
+  std::ostringstream invalid;
+  alekseev::printInvalid(invalid);
+  BOOST_TEST(invalid.str() == "<INVALID COMMAND>\n");
+
+  alekseev::GraphStorage storage;
+  BOOST_TEST(storage.createGraph("g"));
+  BOOST_TEST(dispatchLine("graphs", storage) == "g\n");
+  BOOST_TEST(dispatchLine("bind g a b 2", storage).empty());
+  const std::string outbound = dispatchLine("outbound g a", storage);
+  BOOST_TEST(outbound == "b 2\n");
+  BOOST_TEST(!outbound.empty());
+  BOOST_TEST(outbound[outbound.size() - 1] == '\n');
+  BOOST_TEST(outbound.size() >= 2);
+  BOOST_TEST(outbound[outbound.size() - 2] != ' ');
+  BOOST_TEST(dispatchLine("outbound g b", storage) == "\n");
+  BOOST_TEST(dispatchLine("inbound g a", storage) == "\n");
+
+  alekseev::GraphStorage emptyStorage;
+  BOOST_TEST(dispatchLine("graphs", emptyStorage) == "\n");
 }
