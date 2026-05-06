@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <limits>
-#include "list.hpp"
+#include <list.hpp>
 #include "named-seq.hpp"
 #include "input-utils.hpp"
 
@@ -166,4 +166,3 @@ int main()
   alekseev::print_names(std::cout, seqs);
   return alekseev::compose_and_print(std::cout, std::cerr, seqs);
 }
-

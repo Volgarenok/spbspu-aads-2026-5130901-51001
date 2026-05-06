@@ -2,7 +2,7 @@
 #define NAMED_SEQ_HPP
 
 #include <string>
-#include "list.hpp"
+#include <list.hpp>
 
 namespace alekseev
 {

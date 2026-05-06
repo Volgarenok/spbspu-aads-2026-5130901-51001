@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 #include "operation.hpp"
-#include "stack.hpp"
+#include <stack.hpp>
 
 namespace alekseev
 {

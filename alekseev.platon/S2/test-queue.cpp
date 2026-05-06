@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "queue.hpp"
+#include <queue.hpp>
 
 BOOST_AUTO_TEST_CASE(fifo_order)
 {

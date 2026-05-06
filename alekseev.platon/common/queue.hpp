@@ -1,10 +1,10 @@
-#ifndef ALEKSEEV_S2_QUEUE_HPP
-#define ALEKSEEV_S2_QUEUE_HPP
+#ifndef ALEKSEEV_QUEUE_HPP
+#define ALEKSEEV_QUEUE_HPP
 
 #include <cstddef>
 #include <stdexcept>
 
-#include "../S1/list.hpp"
+#include <list.hpp>
 
 namespace alekseev
 {
