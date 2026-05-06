@@ -91,6 +91,38 @@ namespace
     require(dispatch("print fifth", storage) == "fifth 1 name 2 surname 4 mouse\n",
         "loop continues after invalid command");
   }
+
+  void testAcceptanceScenario()
+  {
+    alekseev::DictionaryStorage storage;
+
+    alekseev::Dictionary first;
+    first.push(1, "name");
+    first.push(2, "surname");
+    storage.push("first", first);
+
+    alekseev::Dictionary second;
+    second.push(4, "mouse");
+    second.push(1, "name");
+    second.push(2, "keyboard");
+    storage.push("second", second);
+
+    std::string output;
+    output += dispatch("print second", storage);
+    output += dispatch("complement third second first", storage);
+    output += dispatch("print third", storage);
+    output += dispatch("intersect fourth first second", storage);
+    output += dispatch("print fourth", storage);
+    output += dispatch("union fifth first second", storage);
+    output += dispatch("print fifth", storage);
+
+    const std::string expected =
+        "second 1 name 2 keyboard 4 mouse\n"
+        "third 4 mouse\n"
+        "fourth 1 name 2 surname\n"
+        "fifth 1 name 2 surname 4 mouse\n";
+    require(output == expected, "acceptance scenario output");
+  }
 }
 
 int runCommandTests()
@@ -99,6 +131,7 @@ int runCommandTests()
   {
     testPrintAndInvalid();
     testSetOperations();
+    testAcceptanceScenario();
     return 0;
   }
   catch (const std::exception& e)
