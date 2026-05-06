@@ -41,16 +41,21 @@ namespace alekseev
       }
     }
 
+    void printEdgeLine(const EdgeQueryLine& line, std::ostream& out)
+    {
+      out << line.vertex;
+      for (size_t i = 0; i < line.weights.size(); ++i)
+      {
+        out << ' ' << line.weights[i];
+      }
+      out << '\n';
+    }
+
     void printEdgeLines(const Sequence< EdgeQueryLine >& lines, std::ostream& out)
     {
       for (size_t i = 0; i < lines.size(); ++i)
       {
-        out << lines[i].vertex;
-        for (size_t j = 0; j < lines[i].weights.size(); ++j)
-        {
-          out << ' ' << lines[i].weights[j];
-        }
-        out << '\n';
+        printEdgeLine(lines[i], out);
       }
     }
 
