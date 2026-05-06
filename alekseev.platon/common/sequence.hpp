@@ -1,5 +1,5 @@
-#ifndef ALEKSEEV_S3_SEQUENCE_HPP
-#define ALEKSEEV_S3_SEQUENCE_HPP
+#ifndef ALEKSEEV_SEQUENCE_HPP
+#define ALEKSEEV_SEQUENCE_HPP
 
 #include <cstddef>
 #include <new>

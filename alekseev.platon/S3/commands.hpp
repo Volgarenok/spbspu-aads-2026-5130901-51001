@@ -5,9 +5,9 @@
 #include <string>
 
 #include "graph_storage.hpp"
-#include "hash_table.hpp"
+#include <hash_table.hpp>
 #include "hmac_hash.hpp"
-#include "sequence.hpp"
+#include <sequence.hpp>
 
 namespace alekseev
 {

@@ -5,7 +5,7 @@
 #include <string>
 
 #include "input_reader.hpp"
-#include "sequence.hpp"
+#include <sequence.hpp>
 
 namespace alekseev
 {

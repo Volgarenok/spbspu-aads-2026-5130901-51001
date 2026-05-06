@@ -1,10 +1,10 @@
-#ifndef ALEKSEEV_S2_STACK_HPP
-#define ALEKSEEV_S2_STACK_HPP
+#ifndef ALEKSEEV_STACK_HPP
+#define ALEKSEEV_STACK_HPP
 
 #include <cstddef>
 #include <stdexcept>
 
-#include "../S1/list.hpp"
+#include <list.hpp>
 
 namespace alekseev
 {

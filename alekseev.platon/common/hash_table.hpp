@@ -1,5 +1,5 @@
-#ifndef ALEKSEEV_S3_HASH_TABLE_HPP
-#define ALEKSEEV_S3_HASH_TABLE_HPP
+#ifndef ALEKSEEV_HASH_TABLE_HPP
+#define ALEKSEEV_HASH_TABLE_HPP
 
 #include <cstddef>
 #include <stdexcept>

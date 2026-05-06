@@ -1,10 +1,10 @@
-#ifndef ALEKSEEV_S3_SORT_UTILS_HPP
-#define ALEKSEEV_S3_SORT_UTILS_HPP
+#ifndef ALEKSEEV_SORT_UTILS_HPP
+#define ALEKSEEV_SORT_UTILS_HPP
 
 #include <cstddef>
 #include <utility>
 
-#include "sequence.hpp"
+#include <sequence.hpp>
 
 namespace alekseev
 {
