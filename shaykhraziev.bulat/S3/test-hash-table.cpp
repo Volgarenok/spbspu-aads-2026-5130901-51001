@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 namespace
 {
@@ -129,4 +130,82 @@ BOOST_AUTO_TEST_CASE(hash_table_find_returns_pointer_or_null)
   BOOST_REQUIRE(table.find("one") != nullptr);
   BOOST_TEST(*table.find("one") == 1);
   BOOST_CHECK(table.find("two") == nullptr);
+}
+
+BOOST_AUTO_TEST_CASE(hash_table_iterator_visits_all_entries)
+{
+  Table table(4);
+  table.add("one", 1);
+  table.add("two", 2);
+  table.add("three", 3);
+
+  int sum = 0;
+  std::size_t count = 0;
+  for (Table::iterator it = table.begin(); it != table.end(); ++it)
+  {
+    sum += it->value;
+    ++count;
+  }
+
+  BOOST_TEST(count == 3);
+  BOOST_TEST(sum == 6);
+}
+
+BOOST_AUTO_TEST_CASE(hash_table_const_iterator_visits_all_entries)
+{
+  Table table(4);
+  table.add("one", 1);
+  table.add("two", 2);
+  const Table& constTable = table;
+
+  int sum = 0;
+  for (Table::const_iterator it = constTable.begin(); it != constTable.end(); ++it)
+  {
+    sum += it->value;
+  }
+
+  BOOST_TEST(sum == 3);
+}
+
+BOOST_AUTO_TEST_CASE(hash_table_rehash_preserves_elements)
+{
+  CollisionTable table(1, 4);
+  table.add("a", 1);
+  table.add("b", 2);
+  table.add("c", 3);
+
+  table.rehash(4);
+
+  BOOST_TEST(table.slots() == 4);
+  BOOST_TEST(table.get("a") == 1);
+  BOOST_TEST(table.get("b") == 2);
+  BOOST_TEST(table.get("c") == 3);
+}
+
+BOOST_AUTO_TEST_CASE(hash_table_copy_is_independent)
+{
+  Table table(4);
+  table.add("one", 1);
+  table.add("two", 2);
+
+  Table copy(table);
+  copy.set("one", 10);
+  copy.add("three", 3);
+
+  BOOST_TEST(table.get("one") == 1);
+  BOOST_CHECK(!table.has("three"));
+  BOOST_TEST(copy.get("one") == 10);
+  BOOST_TEST(copy.get("three") == 3);
+}
+
+BOOST_AUTO_TEST_CASE(hash_table_move_transfers_entries)
+{
+  Table table(4);
+  table.add("one", 1);
+
+  Table moved(std::move(table));
+
+  BOOST_TEST(moved.get("one") == 1);
+  BOOST_TEST(moved.size() == 1);
+  BOOST_CHECK(table.empty());
 }
