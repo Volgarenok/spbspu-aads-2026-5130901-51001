@@ -51,6 +51,13 @@ namespace
 
   void testPrintAndInvalid()
   {
+    const alekseev::CommandTable commands = alekseev::makeCommandTable();
+    require(commands.contains("print"), "command table has print");
+    require(commands.contains("complement"), "command table has complement");
+    require(commands.contains("intersect"), "command table has intersect");
+    require(commands.contains("union"), "command table has union");
+    require(!commands.contains("merge"), "command table rejects unknown command");
+
     alekseev::DictionaryStorage storage;
     storage.push("first", makeFirst());
     storage.push("empty", alekseev::Dictionary());
