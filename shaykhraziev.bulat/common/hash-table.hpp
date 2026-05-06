@@ -2,6 +2,7 @@
 #define HASH_TABLE_HPP
 
 #include <cstddef>
+#include <limits>
 #include <stdexcept>
 
 namespace shaykhraziev
@@ -87,6 +88,86 @@ namespace shaykhraziev
       return slots_ * bucketSize_;
     }
 
+    bool add(const Key& key, const Value& value)
+    {
+      if (findEntry(key))
+      {
+        throw std::logic_error("duplicate key");
+      }
+
+      Entry* entry = findFreeEntry(key);
+      if (!entry)
+      {
+        throw std::overflow_error("hash table is full");
+      }
+      entry->key = key;
+      entry->value = value;
+      entry->occupied = true;
+      ++size_;
+      return true;
+    }
+
+    bool set(const Key& key, const Value& value)
+    {
+      Entry* entry = findEntry(key);
+      if (entry)
+      {
+        entry->value = value;
+        return false;
+      }
+      add(key, value);
+      return true;
+    }
+
+    bool drop(const Key& key)
+    {
+      Entry* entry = findEntry(key);
+      if (!entry)
+      {
+        return false;
+      }
+      entry->occupied = false;
+      --size_;
+      return true;
+    }
+
+    bool has(const Key& key) const
+    {
+      return findEntry(key) != nullptr;
+    }
+
+    Value* find(const Key& key)
+    {
+      Entry* entry = findEntry(key);
+      return entry ? &entry->value : nullptr;
+    }
+
+    const Value* find(const Key& key) const
+    {
+      const Entry* entry = findEntry(key);
+      return entry ? &entry->value : nullptr;
+    }
+
+    Value& get(const Key& key)
+    {
+      Entry* entry = findEntry(key);
+      if (!entry)
+      {
+        throw std::out_of_range("missing key");
+      }
+      return entry->value;
+    }
+
+    const Value& get(const Key& key) const
+    {
+      const Entry* entry = findEntry(key);
+      if (!entry)
+      {
+        throw std::out_of_range("missing key");
+      }
+      return entry->value;
+    }
+
   private:
     Entry* buckets_;
     std::size_t slots_;
@@ -94,6 +175,70 @@ namespace shaykhraziev
     std::size_t size_;
     Hash hash_;
     Equal equal_;
+
+    std::size_t firstSlot(const Key& key) const
+    {
+      return hash_(key) % slots_;
+    }
+
+    std::size_t flatIndex(std::size_t slot, std::size_t index) const
+    {
+      return slot * bucketSize_ + index;
+    }
+
+    Entry* findEntry(const Key& key) noexcept
+    {
+      std::size_t start = firstSlot(key);
+      for (std::size_t offset = 0; offset < slots_; ++offset)
+      {
+        std::size_t slot = (start + offset) % slots_;
+        for (std::size_t i = 0; i < bucketSize_; ++i)
+        {
+          Entry& entry = buckets_[flatIndex(slot, i)];
+          if (entry.occupied && equal_(entry.key, key))
+          {
+            return &entry;
+          }
+        }
+      }
+      return nullptr;
+    }
+
+    const Entry* findEntry(const Key& key) const noexcept
+    {
+      std::size_t start = firstSlot(key);
+      for (std::size_t offset = 0; offset < slots_; ++offset)
+      {
+        std::size_t slot = (start + offset) % slots_;
+        for (std::size_t i = 0; i < bucketSize_; ++i)
+        {
+          const Entry& entry = buckets_[flatIndex(slot, i)];
+          if (entry.occupied && equal_(entry.key, key))
+          {
+            return &entry;
+          }
+        }
+      }
+      return nullptr;
+    }
+
+    Entry* findFreeEntry(const Key& key) noexcept
+    {
+      std::size_t start = firstSlot(key);
+      for (std::size_t offset = 0; offset < slots_; ++offset)
+      {
+        std::size_t slot = (start + offset) % slots_;
+        for (std::size_t i = 0; i < bucketSize_; ++i)
+        {
+          Entry& entry = buckets_[flatIndex(slot, i)];
+          if (!entry.occupied)
+          {
+            return &entry;
+          }
+        }
+      }
+      return nullptr;
+    }
   };
 }
 
