@@ -952,6 +952,125 @@ public:
       ::operator delete(slots_);
     }
   }
+
+  BucketHashTable(const BucketHashTable& other)
+    : bucket_count_(other.bucket_count_), bucket_size_(other.bucket_size_),
+      total_slots_(other.total_slots_), overflow_start_(other.overflow_start_),
+      overflow_size_(other.overflow_size_), size_(other.size_),
+      hasher_(other.hasher_), equal_(other.equal_)
+  {
+    slots_ = static_cast<Slot*>(::operator new(sizeof(Slot) * total_slots_));
+    for (std::size_t i = 0; i < total_slots_; ++i)
+    {
+      new (slots_ + i) Slot(other.slots_[i]);
+    }
+  }
+
+  void swap(BucketHashTable& other) noexcept
+  {
+    std::swap(slots_, other.slots_);
+    std::swap(bucket_count_, other.bucket_count_);
+    std::swap(bucket_size_, other.bucket_size_);
+    std::swap(total_slots_, other.total_slots_);
+    std::swap(overflow_start_, other.overflow_start_);
+    std::swap(overflow_size_, other.overflow_size_);
+    std::swap(size_, other.size_);
+    std::swap(hasher_, other.hasher_);
+    std::swap(equal_, other.equal_);
+  }
+
+  BucketHashTable& operator=(BucketHashTable other)
+  {
+    swap(other);
+    return *this;
+  }
+
+  bool has(const Key& key) const
+  {
+    return find_slot(key) != nullptr;
+  }
+
+  void add(const Key& key, const Value& val)
+  {
+    Slot* exist = find_slot_any(key);
+    if (exist && exist->state == Slot::OCCUPIED)
+    {
+      exist->data.second = val;
+      return;
+    }
+
+    if (exist && exist->state == Slot::TOMBSTONE)
+    {
+      exist->data.~value_type();
+      new (&exist->data) value_type(key, val);
+      exist->state = Slot::OCCUPIED;
+      ++size_;
+      return;
+    }
+
+    std::size_t b = home_bucket(key);
+    Slot* dest = find_empty_in_bucket(b);
+    if (!dest)
+    {
+      dest = find_empty_in_overflow();
+    }
+    if (!dest)
+    {
+      throw std::runtime_error("Hash table overflow");
+    }
+
+    new (&dest->data) value_type(key, val);
+    dest->state = Slot::OCCUPIED;
+    ++size_;
+  }
+
+  bool remove(const Key& key)
+  {
+    Slot* s = find_slot_any(key);
+    if (s && s->state == Slot::OCCUPIED)
+    {
+      s->data.~value_type();
+      s->state = Slot::TOMBSTONE;
+      --size_;
+      return true;
+    }
+    return false;
+  }
+
+  iterator find(const Key& key)
+  {
+    Slot* s = find_slot(key);
+    if (s)
+    {
+      return iterator(s, slots_ + total_slots_);
+    }
+    return end();
+  }
+
+  const_iterator find(const Key& key) const
+  {
+    const Slot* s = find_slot(key);
+    if (s)
+    {
+      return const_iterator(s, slots_ + total_slots_);
+    }
+    return end();
+  }
+
+  void rehash(std::size_t new_bucket_count, std::size_t new_bucket_size,
+              std::size_t new_overflow_size)
+  {
+    BucketHashTable tmp(new_bucket_count, new_bucket_size, new_overflow_size,
+                        hasher_, equal_);
+    for (auto it = begin(); it != end(); ++it)
+    {
+      tmp.add(it->first, it->second);
+    }
+    swap(tmp);
+  }
+
+  std::size_t size() const { return size_; }
+  std::size_t bucket_count() const { return bucket_count_; }
 };
 
 }
