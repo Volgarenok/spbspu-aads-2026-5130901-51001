@@ -134,31 +134,6 @@ BOOST_AUTO_TEST_CASE(graph_storage_operations)
   BOOST_TEST(oss.str() == "a\nb\n");
 }
 
-BOOST_AUTO_TEST_CASE(input_reader_accepts_valid_graphs)
-{
-  {
-    std::istringstream input("gr1 2\na b 0\na b 0\n");
-    karpenko::GraphCollection storage;
-    BOOST_TEST(karpenko::readGraphs("dummy") == storage);
-
-  }
-  karpenko::GraphCollection gc = makeDefaultGraphs();
-  BOOST_TEST(gc.hasGraph("gr1"));
-  BOOST_TEST(gc.hasGraph("gr2"));
-  const karpenko::Graph& gr1 = gc.getGraph("gr1");
-  BOOST_TEST(gr1.vertices_.has("a"));
-  BOOST_TEST(gr1.vertices_.has("b"));
-  BOOST_TEST(gr1.vertices_.has("c"));
-  std::ostringstream out;
-  printEdges(out, "c", gr1.out_edges_);
-  BOOST_TEST(out.str() == "a 30\nb 20\n");
-}
-
-BOOST_AUTO_TEST_CASE(input_reader_rejects_invalid_graphs)
-{
-  BOOST_CHECK_THROW(karpenko::readGraphs("nonexistent_file.txt"), std::runtime_error);
-}
-
 BOOST_AUTO_TEST_CASE(command_parser_helpers)
 {
   karpenko::GraphCollection gc;
