@@ -72,6 +72,15 @@ BOOST_AUTO_TEST_CASE(project_dependency_check)
   BOOST_CHECK(!storage.checkProjectDependency("p1", "p3"));
 }
 
+BOOST_AUTO_TEST_CASE(project_dependency_rejects_missing_projects)
+{
+  alekseev::ProjectStorage storage;
+  BOOST_REQUIRE(storage.makeProject("p1"));
+
+  BOOST_CHECK(!storage.checkProjectDependency("p1", "missing"));
+  BOOST_CHECK(!storage.checkProjectDependency("missing", "p1"));
+}
+
 BOOST_AUTO_TEST_CASE(show_project_dependencies)
 {
   alekseev::ProjectStorage storage;
