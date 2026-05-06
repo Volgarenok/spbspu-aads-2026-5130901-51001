@@ -131,6 +131,9 @@ namespace alekseev
     iterator rotateLargeRight(const_iterator it);
 
   private:
+    friend class BSTIterator< Key, Value >;
+    friend class BSTConstIterator< Key, Value >;
+
     using Node = detail::TreeNode< Key, Value >;
 
     static detail::BaseNode* minimum(detail::BaseNode* node) noexcept;
