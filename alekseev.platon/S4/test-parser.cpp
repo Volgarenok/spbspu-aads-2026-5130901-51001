@@ -51,6 +51,9 @@ namespace
     require(positive.readInt() == 42, "read positive int");
     positive.expectEnd();
 
+    alekseev::LineParser signedPositive("+42");
+    require(signedPositive.readInt() == 42, "read signed positive int");
+
     alekseev::LineParser negative("-17");
     require(negative.readInt() == -17, "read negative int");
 
@@ -59,6 +62,16 @@ namespace
       alekseev::LineParser parser("12x");
       parser.readInt();
     }, "bad int rejected");
+    requireInvalid([]()
+    {
+      alekseev::LineParser parser("2147483648");
+      parser.readInt();
+    }, "positive int overflow rejected");
+    requireInvalid([]()
+    {
+      alekseev::LineParser parser("-2147483649");
+      parser.readInt();
+    }, "negative int overflow rejected");
     requireInvalid([]()
     {
       alekseev::LineParser parser("");
