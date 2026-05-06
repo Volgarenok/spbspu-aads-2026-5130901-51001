@@ -13,6 +13,28 @@ namespace alekseev
     const char IntersectCommand[] = "intersect";
     const char UnionCommand[] = "union";
 
+    struct SetOperationArgs
+    {
+      std::string resultName;
+      std::string leftName;
+      std::string rightName;
+    };
+
+    SetOperationArgs readSetOperationArgs(const std::string& line)
+    {
+      LineParser parser(line);
+      parser.readWord();
+      SetOperationArgs args{parser.readWord(), parser.readWord(), parser.readWord()};
+      parser.expectEnd();
+      return args;
+    }
+
+    bool hasValidSetOperationArgs(const SetOperationArgs& args, const DictionaryStorage& storage)
+    {
+      return !storage.contains(args.resultName) && storage.contains(args.leftName) &&
+          storage.contains(args.rightName);
+    }
+
     void printDictionary(const std::string& name, const Dictionary& dictionary,
         std::ostream& out)
     {
@@ -46,20 +68,15 @@ namespace alekseev
 
     void handleComplement(const std::string& line, DictionaryStorage& storage, std::ostream& out)
     {
-      LineParser parser(line);
-      parser.readWord();
-      const std::string resultName = parser.readWord();
-      const std::string leftName = parser.readWord();
-      const std::string rightName = parser.readWord();
-      parser.expectEnd();
-      if (storage.contains(resultName) || !storage.contains(leftName) || !storage.contains(rightName))
+      const SetOperationArgs args = readSetOperationArgs(line);
+      if (!hasValidSetOperationArgs(args, storage))
       {
         printInvalid(out);
         return;
       }
 
-      const Dictionary& left = storage.get(leftName);
-      const Dictionary& right = storage.get(rightName);
+      const Dictionary& left = storage.get(args.leftName);
+      const Dictionary& right = storage.get(args.rightName);
       Dictionary result;
       for (Dictionary::const_iterator it = left.cbegin(); it != left.cend(); ++it)
       {
@@ -68,25 +85,20 @@ namespace alekseev
           result.push(it->first, it->second);
         }
       }
-      storage.push(resultName, result);
+      storage.push(args.resultName, result);
     }
 
     void handleIntersect(const std::string& line, DictionaryStorage& storage, std::ostream& out)
     {
-      LineParser parser(line);
-      parser.readWord();
-      const std::string resultName = parser.readWord();
-      const std::string leftName = parser.readWord();
-      const std::string rightName = parser.readWord();
-      parser.expectEnd();
-      if (storage.contains(resultName) || !storage.contains(leftName) || !storage.contains(rightName))
+      const SetOperationArgs args = readSetOperationArgs(line);
+      if (!hasValidSetOperationArgs(args, storage))
       {
         printInvalid(out);
         return;
       }
 
-      const Dictionary& left = storage.get(leftName);
-      const Dictionary& right = storage.get(rightName);
+      const Dictionary& left = storage.get(args.leftName);
+      const Dictionary& right = storage.get(args.rightName);
       Dictionary result;
       for (Dictionary::const_iterator it = left.cbegin(); it != left.cend(); ++it)
       {
@@ -95,25 +107,20 @@ namespace alekseev
           result.push(it->first, it->second);
         }
       }
-      storage.push(resultName, result);
+      storage.push(args.resultName, result);
     }
 
     void handleUnion(const std::string& line, DictionaryStorage& storage, std::ostream& out)
     {
-      LineParser parser(line);
-      parser.readWord();
-      const std::string resultName = parser.readWord();
-      const std::string leftName = parser.readWord();
-      const std::string rightName = parser.readWord();
-      parser.expectEnd();
-      if (storage.contains(resultName) || !storage.contains(leftName) || !storage.contains(rightName))
+      const SetOperationArgs args = readSetOperationArgs(line);
+      if (!hasValidSetOperationArgs(args, storage))
       {
         printInvalid(out);
         return;
       }
 
-      const Dictionary& left = storage.get(leftName);
-      const Dictionary& right = storage.get(rightName);
+      const Dictionary& left = storage.get(args.leftName);
+      const Dictionary& right = storage.get(args.rightName);
       Dictionary result(left);
       for (Dictionary::const_iterator it = right.cbegin(); it != right.cend(); ++it)
       {
@@ -122,7 +129,7 @@ namespace alekseev
           result.push(it->first, it->second);
         }
       }
-      storage.push(resultName, result);
+      storage.push(args.resultName, result);
     }
   }
 
