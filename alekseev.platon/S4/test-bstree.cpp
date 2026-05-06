@@ -112,6 +112,15 @@ namespace
 
     moveAssigned.clear();
     require(moveAssigned.empty() && moveAssigned.size() == 0, "clear removes nodes");
+
+    alekseev::BSTree< int, std::string > left;
+    left.push(1, "one");
+    alekseev::BSTree< int, std::string > right;
+    right.push(2, "two");
+    right.push(3, "three");
+    left.swap(right);
+    require(keys(left) == "23", "swap moves right tree into left");
+    require(keys(right) == "1", "swap moves left tree into right");
   }
 
   void testDropAndHeight()
@@ -157,7 +166,8 @@ namespace
     leftTree.push(3, "three");
     alekseev::BSTree< int, std::string >::iterator stable = leftTree.begin();
     ++stable;
-    leftTree.rotateLeft(--leftTree.end());
+    alekseev::BSTree< int, std::string >::iterator raised = leftTree.rotateLeft(--leftTree.end());
+    require(raised->first == 4, "rotate left returns raised node");
     require(keys(leftTree) == "1234", "rotate left keeps order");
     require(stable->first == 2 && stable->second == "two", "left rotation keeps iterator stable");
 
@@ -166,7 +176,8 @@ namespace
     rightTree.push(1, "one");
     rightTree.push(4, "four");
     rightTree.push(2, "two");
-    rightTree.rotateRight(rightTree.begin());
+    raised = rightTree.rotateRight(rightTree.begin());
+    require(raised->first == 1, "rotate right returns raised node");
     require(keys(rightTree) == "1234", "rotate right keeps order");
 
     alekseev::BSTree< int, std::string > largeLeft;
@@ -176,7 +187,8 @@ namespace
     largeLeft.push(3, "three");
     alekseev::BSTree< int, std::string >::iterator inner = largeLeft.begin();
     ++inner;
-    largeLeft.rotateLargeLeft(inner);
+    raised = largeLeft.rotateLargeLeft(inner);
+    require(raised->first == 2, "large left returns top node");
     require(keys(largeLeft) == "1234", "large left keeps order");
 
     alekseev::BSTree< int, std::string > largeRight;
@@ -187,7 +199,8 @@ namespace
     inner = largeRight.begin();
     ++inner;
     ++inner;
-    largeRight.rotateLargeRight(inner);
+    raised = largeRight.rotateLargeRight(inner);
+    require(raised->first == 3, "large right returns top node");
     require(keys(largeRight) == "1234", "large right keeps order");
 
     alekseev::BSTree< int, std::string > rootRotate;
