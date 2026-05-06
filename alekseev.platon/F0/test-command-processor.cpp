@@ -110,6 +110,18 @@ BOOST_AUTO_TEST_CASE(command_build_order)
       "compile build test\n");
 }
 
+BOOST_AUTO_TEST_CASE(command_ready_without_ready_tasks_prints_blank_line)
+{
+  BOOST_CHECK_EQUAL(runCommands(
+      "make p1\n"
+      "add-task p1 a\n"
+      "add-task p1 b\n"
+      "add-dep p1 a b\n"
+      "add-dep p1 b a\n"
+      "ready p1\n"),
+      "\n");
+}
+
 BOOST_AUTO_TEST_CASE(command_merge)
 {
   BOOST_CHECK_EQUAL(runCommands(
