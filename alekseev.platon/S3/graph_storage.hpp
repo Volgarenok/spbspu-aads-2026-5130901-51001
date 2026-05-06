@@ -5,10 +5,10 @@
 #include <string>
 
 #include "graph.hpp"
-#include "hash_table.hpp"
+#include <hash_table.hpp>
 #include "hmac_hash.hpp"
-#include "sequence.hpp"
-#include "sort_utils.hpp"
+#include <sequence.hpp>
+#include <sort_utils.hpp>
 
 namespace alekseev
 {

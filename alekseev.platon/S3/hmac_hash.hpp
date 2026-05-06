@@ -17,7 +17,7 @@
 #endif
 
 #include "edge_key.hpp"
-#include "sequence.hpp"
+#include <sequence.hpp>
 
 namespace alekseev
 {
