@@ -3,7 +3,7 @@
 #include <string>
 
 #include "parser.hpp"
-#include "stack.hpp"
+#include <stack.hpp>
 
 namespace
 {

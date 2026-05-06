@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <utility>
 
-#include "stack.hpp"
+#include <stack.hpp>
 
 BOOST_AUTO_TEST_CASE(lifo_order)
 {

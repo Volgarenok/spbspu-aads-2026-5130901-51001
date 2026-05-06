@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "queue.hpp"
+#include <queue.hpp>
 #include "token.hpp"
 
 namespace alekseev
