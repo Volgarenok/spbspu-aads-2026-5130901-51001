@@ -69,6 +69,22 @@ BOOST_AUTO_TEST_CASE(command_remove_task_updates_project)
       "<TASK: compile, DEPENDS-ON: 0, REQUIRED-FOR: 0>\n");
 }
 
+BOOST_AUTO_TEST_CASE(command_rename_task_preserves_edges)
+{
+  BOOST_CHECK_EQUAL(runCommands(
+      "make p1\n"
+      "add-task p1 compile\n"
+      "add-task p1 build\n"
+      "add-task p1 test\n"
+      "add-dep p1 build compile\n"
+      "add-dep p1 test build\n"
+      "rename-task p1 build package\n"
+      "show-task p1 package\n"
+      "show-task p1 test\n"),
+      "<TASK: package, DEPENDS-ON: 1, REQUIRED-FOR: 1>\n"
+      "<TASK: test, DEPENDS-ON: 1, REQUIRED-FOR: 0>\n");
+}
+
 BOOST_AUTO_TEST_CASE(command_cycle_check)
 {
   BOOST_CHECK_EQUAL(runCommands(
