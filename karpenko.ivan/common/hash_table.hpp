@@ -59,6 +59,24 @@ struct Vector
 
   void erase(iterator first, iterator last);
   void eraseValue(const T& value);
+
+  T& operator[](size_t id) noexcept;
+  const T& operator[](size_t id) const noexcept;
+  T& at(size_t id);
+  const T& at(size_t id) const;
+
+private:
+  T* data_;
+  size_t size_;
+  size_t capacity_;
+  explicit Vector(size_t s);
+
+  void allocate(size_t new_capacity);
+  void deallocate();
+  void destroyRange(size_t start, size_t end);
+  void constructRange(size_t start, size_t end, const T& val);
+  template <class IT>
+  void constructFromRange(size_t start, IT begin, IT end);
 };
 
 }
