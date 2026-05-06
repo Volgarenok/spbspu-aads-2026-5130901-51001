@@ -1,7 +1,8 @@
-#ifndef ALEKSEEV_S4_BSTREE_TPP
-#define ALEKSEEV_S4_BSTREE_TPP
+#ifndef ALEKSEEV_BSTREE_IMPL_HPP
+#define ALEKSEEV_BSTREE_IMPL_HPP
 
 #include <utility>
+#include <bstree.hpp>
 
 namespace alekseev
 {

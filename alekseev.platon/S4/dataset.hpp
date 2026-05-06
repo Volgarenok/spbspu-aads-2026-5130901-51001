@@ -4,7 +4,7 @@
 #include <iosfwd>
 #include <string>
 
-#include "bstree.hpp"
+#include <bstree.hpp>
 
 namespace alekseev
 {

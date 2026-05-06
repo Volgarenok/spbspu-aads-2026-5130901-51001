@@ -1,5 +1,5 @@
-#ifndef ALEKSEEV_S4_BSTREE_HPP
-#define ALEKSEEV_S4_BSTREE_HPP
+#ifndef ALEKSEEV_BSTREE_HPP
+#define ALEKSEEV_BSTREE_HPP
 
 #include <cstddef>
 #include <functional>
@@ -160,6 +160,6 @@ namespace alekseev
   };
 }
 
-#include "bstree.tpp"
+#include <bstree-impl.hpp>
 
 #endif

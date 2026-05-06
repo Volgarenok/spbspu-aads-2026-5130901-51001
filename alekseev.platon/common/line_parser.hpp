@@ -1,5 +1,5 @@
-#ifndef ALEKSEEV_S4_LINE_PARSER_HPP
-#define ALEKSEEV_S4_LINE_PARSER_HPP
+#ifndef ALEKSEEV_LINE_PARSER_HPP
+#define ALEKSEEV_LINE_PARSER_HPP
 
 #include <cstddef>
 #include <string>

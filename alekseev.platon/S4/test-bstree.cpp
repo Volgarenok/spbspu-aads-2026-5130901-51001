@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "bstree.hpp"
+#include <bstree.hpp>
 
 namespace
 {
