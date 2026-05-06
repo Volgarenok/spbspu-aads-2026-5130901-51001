@@ -79,7 +79,69 @@ private:
   void constructFromRange(size_t start, IT begin, IT end);
 };
 
-// ── реализация конструкторов / деструктора / pushBack ──
+
+template <class T>
+void Vector<T>::insert(size_t pos, const T& val)
+{
+  if (pos > size_) throw std::out_of_range("Vector::insert: position out of range");
+  T* newData = static_cast<T*>(::operator new(sizeof(T) * (size_ + 1)));
+  for (size_t i = 0; i < pos; ++i)
+  {
+    new (newData + i) T(std::move(data_[i]));
+    data_[i].~T();
+  }
+  new (newData + pos) T(val);
+  for (size_t i = pos; i < size_; ++i)
+  {
+    new (newData + i + 1) T(std::move(data_[i]));
+    data_[i].~T();
+  }
+  deallocate();
+  data_ = newData;
+  ++size_;
+  capacity_ = size_;
+}
+
+template <class T>
+void Vector<T>::insert(size_t pos, const Vector<T>& rhs, size_t b, size_t e)
+{
+  if (pos > size_) throw std::out_of_range("Vector::insert: position out of range");
+  if (b > e || e > rhs.size_) throw std::out_of_range("Vector::insert: range out of range");
+  size_t count = e - b;
+  if (count == 0) return;
+  T* newData = static_cast<T*>(::operator new(sizeof(T) * (size_ + count)));
+  for (size_t i = 0; i < pos; ++i)
+  {
+    new (newData + i) T(std::move(data_[i]));
+    data_[i].~T();
+  }
+  for (size_t i = 0; i < count; ++i)
+  {
+    new (newData + pos + i) T(rhs.data_[b + i]);
+  }
+  for (size_t i = pos; i < size_; ++i)
+  {
+    new (newData + i + count) T(std::move(data_[i]));
+    data_[i].~T();
+  }
+  deallocate();
+  data_ = newData;
+  size_ += count;
+  capacity_ = size_;
+}
+
+template <class T>
+void Vector<T>::erase(size_t pos)
+{
+  if (pos >= size_) throw std::out_of_range("Vector::erase: position out of range");
+  data_[pos].~T();
+  for (size_t i = pos + 1; i < size_; ++i)
+  {
+    new (data_ + i - 1) T(std::move(data_[i]));
+    data_[i].~T();
+  }
+  --size_;
+}
 
 template <class T>
 Vector<T>::Vector() : data_(nullptr), size_(0), capacity_(0)
