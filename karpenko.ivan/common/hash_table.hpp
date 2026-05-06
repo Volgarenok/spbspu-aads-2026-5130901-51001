@@ -962,9 +962,9 @@ private:
   }
 
 public:
-  BucketHashTable(std::size_t bucket_count = 0,
-                  std::size_t bucket_size = 0,
-                  std::size_t overflow_size = 0,
+  BucketHashTable(std::size_t bucket_count = 16,
+                  std::size_t bucket_size = 4,
+                  std::size_t overflow_size = 16,
                   Hash h = Hash(), Equal e = Equal())
     : slots_(nullptr), bucket_count_(bucket_count ? bucket_count : 1),
       bucket_size_(bucket_size ? bucket_size : 1),
@@ -973,13 +973,10 @@ public:
       overflow_size_(overflow_size ? overflow_size : 1),
       size_(0), hasher_(h), equal_(e)
   {
-    if (total_slots_ > 0)
+    slots_ = static_cast<Slot*>(::operator new(sizeof(Slot) * total_slots_));
+    for (std::size_t i = 0; i < total_slots_; ++i)
     {
-      slots_ = static_cast<Slot*>(::operator new(sizeof(Slot) * total_slots_));
-      for (std::size_t i = 0; i < total_slots_; ++i)
-      {
-        new (slots_ + i) Slot();
-      }
+      new (slots_ + i) Slot();
     }
   }
 
@@ -1001,17 +998,10 @@ public:
       overflow_size_(other.overflow_size_), size_(other.size_),
       hasher_(other.hasher_), equal_(other.equal_)
   {
-    if (total_slots_ > 0)
+    slots_ = static_cast<Slot*>(::operator new(sizeof(Slot) * total_slots_));
+    for (std::size_t i = 0; i < total_slots_; ++i)
     {
-      slots_ = static_cast<Slot*>(::operator new(sizeof(Slot) * total_slots_));
-      for (std::size_t i = 0; i < total_slots_; ++i)
-      {
-        new (slots_ + i) Slot(other.slots_[i]);
-      }
-    }
-    else
-    {
-      slots_ = nullptr;
+      new (slots_ + i) Slot(other.slots_[i]);
     }
   }
 
@@ -1128,20 +1118,6 @@ public:
 
   void add(const Key& key, const Value& val)
   {
-    if (total_slots_ == 0)
-    {
-      bucket_count_ = 16;
-      bucket_size_ = 4;
-      overflow_size_ = 16;
-      total_slots_ = bucket_count_ * bucket_size_ + overflow_size_;
-      overflow_start_ = bucket_count_ * bucket_size_;
-      slots_ = static_cast<Slot*>(::operator new(sizeof(Slot) * total_slots_));
-      for (std::size_t i = 0; i < total_slots_; ++i)
-      {
-        new (slots_ + i) Slot();
-      }
-    }
-
     Slot* exist = find_slot_any(key);
     if (exist && exist->state == Slot::OCCUPIED)
     {
