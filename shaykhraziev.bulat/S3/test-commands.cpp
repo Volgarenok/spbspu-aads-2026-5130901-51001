@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "commands.hpp"
+#include "io.hpp"
 
 #include <sstream>
 #include <string>
@@ -92,4 +93,19 @@ BOOST_AUTO_TEST_CASE(commands_ignore_empty_lines_and_double_spaces)
 
   BOOST_TEST(run(graphs, "") == "");
   BOOST_TEST(run(graphs, "outbound  g1   a") == "b 1 3\n");
+}
+
+BOOST_AUTO_TEST_CASE(commands_process_integration_scenario)
+{
+  std::istringstream file("g1 2\na b 3\na c 1\n");
+  shaykhraziev::GraphTable graphs = shaykhraziev::readGraphs(file);
+  shaykhraziev::CommandContext context(graphs);
+  shaykhraziev::CommandTable commands = shaykhraziev::createCommandTable();
+  std::istringstream input("graphs\noutbound g1 a\ncreate empty\nbad command\n");
+  std::ostringstream output;
+
+  shaykhraziev::processCommands(context, commands, input, output);
+
+  BOOST_TEST(output.str() == "g1\nb 3\nc 1\n<INVALID COMMAND>\n");
+  BOOST_CHECK(graphs.has("empty"));
 }
