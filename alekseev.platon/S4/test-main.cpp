@@ -3,6 +3,7 @@
 int runBSTreeTests();
 int runParserTests();
 int runDatasetTests();
+int runCommandTests();
 
 int main()
 {
@@ -20,6 +21,11 @@ int main()
   if (datasetResult != 0)
   {
     return datasetResult + 2;
+  }
+  const int commandResult = runCommandTests();
+  if (commandResult != 0)
+  {
+    return commandResult + 3;
   }
   return 0;
 }
