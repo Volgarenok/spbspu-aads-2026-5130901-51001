@@ -35,6 +35,11 @@ namespace alekseev
 
     void printStrings(const Sequence< std::string >& values, std::ostream& out)
     {
+      if (values.empty())
+      {
+        out << '\n';
+        return;
+      }
       for (size_t i = 0; i < values.size(); ++i)
       {
         out << values[i] << '\n';
@@ -53,6 +58,11 @@ namespace alekseev
 
     void printEdgeLines(const Sequence< EdgeQueryLine >& lines, std::ostream& out)
     {
+      if (lines.empty())
+      {
+        out << '\n';
+        return;
+      }
       for (size_t i = 0; i < lines.size(); ++i)
       {
         printEdgeLine(lines[i], out);
@@ -181,7 +191,7 @@ namespace alekseev
 
   void handleCreate(const Sequence< std::string >& args, GraphStorage& storage, std::ostream& out)
   {
-    if ((args.size() != CreateEmptyArgs && args.size() < ExtractMinArgs) ||
+    if (args.size() < CreateEmptyArgs ||
         !isValidNameLocal(args[GraphNameIndex]) || storage.hasGraph(args[GraphNameIndex]))
     {
       printInvalid(out);

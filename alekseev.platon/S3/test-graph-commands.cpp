@@ -177,11 +177,15 @@ namespace
 
     require(dispatchLine("create empty", storage).empty(), "create empty no output");
     require(storage.hasGraph("empty"), "create empty graph");
-    require(dispatchLine("vertexes empty", storage).empty(), "empty graph no output");
+    require(dispatchLine("vertexes empty", storage) == "\n", "empty graph prints newline");
+    require(dispatchLine("create zero 0", storage).empty(), "create zero no output");
+    require(storage.hasGraph("zero"), "create zero graph");
     require(dispatchLine("create made 3 x y z", storage).empty(), "create vertices");
     require(dispatchLine("vertexes made", storage) == "x\ny\nz\n", "created vertices");
     require(dispatchLine("create bad 2 x y z", storage) == "<INVALID COMMAND>\n",
         "create wrong count invalid");
+    require(dispatchLine("create badZero 0 x", storage) == "<INVALID COMMAND>\n",
+        "create zero with extra vertex invalid");
 
     require(dispatchLine("merge merged gr2 gr2", storage).empty(), "merge no output");
     require(dispatchLine("inbound merged b", storage) == "a 1 1\nc 2 2\n",
@@ -205,12 +209,17 @@ namespace
 
     alekseev::GraphStorage storage;
     require(storage.createGraph("g"), "format graph create");
+    require(dispatchLine("graphs", storage) == "g\n", "nonempty graphs exact");
     require(dispatchLine("bind g a b 2", storage).empty(), "command without result silent");
     const std::string outbound = dispatchLine("outbound g a", storage);
     require(outbound == "b 2\n", "edge line exact");
     require(!outbound.empty() && outbound[outbound.size() - 1] == '\n', "edge newline");
     require(outbound.size() >= 2 && outbound[outbound.size() - 2] != ' ', "no trailing space");
-    require(dispatchLine("outbound g b", storage).empty(), "empty edge query silent");
+    require(dispatchLine("outbound g b", storage) == "\n", "empty edge query newline");
+    require(dispatchLine("inbound g a", storage) == "\n", "empty inbound query newline");
+
+    alekseev::GraphStorage emptyStorage;
+    require(dispatchLine("graphs", emptyStorage) == "\n", "empty graphs newline");
   }
 }
 
