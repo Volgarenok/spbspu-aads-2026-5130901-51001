@@ -63,6 +63,13 @@ namespace
       require(storage.get("first").get(1) == "new", "duplicate key uses last value");
     }
     {
+      std::istringstream input("limits -2147483648 min 2147483647 max\n");
+      alekseev::DictionaryStorage storage;
+      require(alekseev::loadDatasets(input, storage), "load int bounds");
+      require(storage.get("limits").get(-2147483647 - 1) == "min", "load min int");
+      require(storage.get("limits").get(2147483647) == "max", "load max int");
+    }
+    {
       std::istringstream input("first 1 name\nfirst 2 surname\n");
       alekseev::DictionaryStorage storage;
       require(!alekseev::loadDatasets(input, storage), "duplicate dataset rejected");
