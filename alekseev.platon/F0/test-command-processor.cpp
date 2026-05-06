@@ -55,6 +55,20 @@ BOOST_AUTO_TEST_CASE(command_task_flow)
       "compile\n");
 }
 
+BOOST_AUTO_TEST_CASE(command_remove_task_updates_project)
+{
+  BOOST_CHECK_EQUAL(runCommands(
+      "make p1\n"
+      "add-task p1 compile\n"
+      "add-task p1 build\n"
+      "add-dep p1 build compile\n"
+      "remove-task p1 build\n"
+      "show p1\n"
+      "show-task p1 compile\n"),
+      "<PROJECT: p1, TASKS: 1, DEPS: 0>\n"
+      "<TASK: compile, DEPENDS-ON: 0, REQUIRED-FOR: 0>\n");
+}
+
 BOOST_AUTO_TEST_CASE(command_cycle_check)
 {
   BOOST_CHECK_EQUAL(runCommands(
