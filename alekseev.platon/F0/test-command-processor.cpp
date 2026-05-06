@@ -174,6 +174,17 @@ BOOST_AUTO_TEST_CASE(command_show_project_dependencies)
       "p2\n");
 }
 
+BOOST_AUTO_TEST_CASE(command_show_project_dependencies_empty)
+{
+  BOOST_CHECK_EQUAL(runCommands(
+      "make p1\n"
+      "add-task p1 build\n"
+      "make p2\n"
+      "add-task p2 compile\n"
+      "show-project-deps p1\n"),
+      "<PROJECT-DEPS: p1, COUNT: 0>\n");
+}
+
 BOOST_AUTO_TEST_CASE(invalid_command_scenarios)
 {
   const char* invalidCommands[] = {
