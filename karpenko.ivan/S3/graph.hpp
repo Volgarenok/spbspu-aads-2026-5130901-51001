@@ -111,6 +111,7 @@ void printEdges(std::ostream& out, const std::string& vertex, const OuterEdgeMap
     auto it = edges.find(vertex);
     if (it == edges.end())
     {
+        out << '\n';
         return;
     }
     const InnerEdgeMap& inner = it->second;

@@ -146,6 +146,12 @@ void handleCreate(std::istream& in, std::ostream& out, GraphCollection& gc)
       }
       g.vertices_.add(v, true);
     }
+    std::string extra;
+    if (in >> extra)
+    {
+      out << "<INVALID COMMAND>\n";
+      return;
+    }
   }
   gc.addGraph(gname, g);
 }
