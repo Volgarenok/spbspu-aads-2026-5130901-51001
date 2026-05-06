@@ -1,6 +1,7 @@
 #include "dataset.hpp"
 
 #include <istream>
+#include <stdexcept>
 #include <string>
 
 #include "line_parser.hpp"
