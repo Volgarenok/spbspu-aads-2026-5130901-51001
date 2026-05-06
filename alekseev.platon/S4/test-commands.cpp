@@ -62,6 +62,8 @@ namespace
     require(dispatch("print first extra", storage) == "<INVALID COMMAND>\n",
         "print extra invalid");
     require(dispatch("unknown", storage) == "<INVALID COMMAND>\n", "unknown invalid");
+    require(dispatch("print", storage) == "<INVALID COMMAND>\n", "print missing arg invalid");
+    require(dispatch("", storage).empty(), "empty command line ignored");
   }
 
   void testSetOperations()
@@ -74,6 +76,10 @@ namespace
     require(dispatch("print third", storage) == "third 4 mouse\n", "complement result");
     require(dispatch("complement third second first", storage) == "<INVALID COMMAND>\n",
         "complement duplicate result invalid");
+    require(dispatch("complement broken second", storage) == "<INVALID COMMAND>\n",
+        "complement missing arg invalid");
+    require(dispatch("complement broken missing first", storage) == "<INVALID COMMAND>\n",
+        "complement missing dataset invalid");
 
     require(dispatch("complement empty first second", storage).empty(), "empty complement command");
     require(dispatch("print empty", storage) == "<EMPTY>\n", "empty complement result");
@@ -81,10 +87,14 @@ namespace
     require(dispatch("intersect fourth first second", storage).empty(), "intersect command");
     require(dispatch("print fourth", storage) == "fourth 1 name 2 surname\n",
         "intersect uses left values");
+    require(dispatch("intersect bad first", storage) == "<INVALID COMMAND>\n",
+        "intersect missing arg invalid");
 
     require(dispatch("union fifth first second", storage).empty(), "union command");
     require(dispatch("print fifth", storage) == "fifth 1 name 2 surname 4 mouse\n",
         "union uses left values");
+    require(dispatch("union bad first second extra", storage) == "<INVALID COMMAND>\n",
+        "union extra arg invalid");
 
     require(dispatch("bad command", storage) == "<INVALID COMMAND>\n",
         "invalid command does not stop loop");
