@@ -47,6 +47,11 @@ namespace
     words.expectEnd();
     require(!words.hasNext(), "parser has no trailing word");
 
+    alekseev::LineParser tabs("\talpha\tbeta");
+    require(tabs.readWord() == "alpha", "tab before first word");
+    require(tabs.readWord() == "beta", "tab between words");
+    tabs.expectEnd();
+
     alekseev::LineParser positive("42");
     require(positive.readInt() == 42, "read positive int");
     positive.expectEnd();
