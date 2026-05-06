@@ -31,8 +31,7 @@ namespace alekseev
 
     bool hasValidSetOperationArgs(const SetOperationArgs& args, const DictionaryStorage& storage)
     {
-      return !storage.contains(args.resultName) && storage.contains(args.leftName) &&
-          storage.contains(args.rightName);
+      return storage.contains(args.leftName) && storage.contains(args.rightName);
     }
 
     void printDictionary(const std::string& name, const Dictionary& dictionary,

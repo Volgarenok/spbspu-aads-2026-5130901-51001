@@ -44,8 +44,15 @@ namespace
   {
     alekseev::Dictionary dictionary;
     dictionary.push(4, "mouse");
-    dictionary.push(1, "left");
+    dictionary.push(1, "name");
     dictionary.push(2, "keyboard");
+    return dictionary;
+  }
+
+  alekseev::Dictionary makeMachineSecond()
+  {
+    alekseev::Dictionary dictionary = makeSecond();
+    dictionary.push(3, "machine");
     return dictionary;
   }
 
@@ -81,8 +88,10 @@ namespace
 
     require(dispatch("complement third second first", storage).empty(), "complement command");
     require(dispatch("print third", storage) == "third 4 mouse\n", "complement result");
-    require(dispatch("complement third second first", storage) == "<INVALID COMMAND>\n",
-        "complement duplicate result invalid");
+    require(dispatch("complement third second first", storage).empty(),
+        "complement overwrites existing result");
+    require(dispatch("print third", storage) == "third 4 mouse\n",
+        "complement overwrite result");
     require(dispatch("complement broken second", storage) == "<INVALID COMMAND>\n",
         "complement missing arg invalid");
     require(dispatch("complement broken missing first", storage) == "<INVALID COMMAND>\n",
@@ -107,6 +116,52 @@ namespace
         "invalid command does not stop loop");
     require(dispatch("print fifth", storage) == "fifth 1 name 2 surname 4 mouse\n",
         "loop continues after invalid command");
+  }
+
+  void testSetOperationOverwriteAliases()
+  {
+    {
+      alekseev::DictionaryStorage storage;
+      storage.push("first", makeFirst());
+      storage.push("second", makeSecond());
+
+      require(dispatch("complement second second first", storage).empty(),
+          "complement allows result equal lhs");
+      require(dispatch("print second", storage) == "second 4 mouse\n",
+          "complement overwrites lhs from old values");
+    }
+    {
+      alekseev::DictionaryStorage storage;
+      storage.push("first", makeFirst());
+      storage.push("second", makeSecond());
+
+      require(dispatch("intersect second second first", storage).empty(),
+          "intersect allows result equal lhs");
+      require(dispatch("print second", storage) == "second 1 name 2 keyboard\n",
+          "intersect overwrites lhs from old values");
+    }
+    {
+      alekseev::DictionaryStorage storage;
+      storage.push("first", makeFirst());
+      storage.push("second", makeMachineSecond());
+
+      require(dispatch("union first second first", storage).empty(),
+          "union allows result equal rhs");
+      require(dispatch("print first", storage) ==
+          "first 1 name 2 keyboard 3 machine 4 mouse\n",
+          "union overwrites rhs from old values");
+    }
+    {
+      alekseev::DictionaryStorage storage;
+      storage.push("first", makeFirst());
+      storage.push("third", makeFirst());
+      storage.push("fourth", alekseev::Dictionary());
+
+      require(dispatch("intersect first third fourth", storage).empty(),
+          "intersect existing result with empty operand");
+      require(dispatch("print first", storage) == "<EMPTY>\n",
+          "intersect overwrites existing result with empty dictionary");
+    }
   }
 
   void testAcceptanceScenario()
@@ -148,6 +203,7 @@ int runCommandTests()
   {
     testPrintAndInvalid();
     testSetOperations();
+    testSetOperationOverwriteAliases();
     testAcceptanceScenario();
     return 0;
   }
