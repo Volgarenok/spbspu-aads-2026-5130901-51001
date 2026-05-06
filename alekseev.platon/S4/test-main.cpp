@@ -4,6 +4,7 @@ int runBSTreeTests();
 int runParserTests();
 int runDatasetTests();
 int runCommandTests();
+int runMainFlowTests();
 
 int main()
 {
@@ -26,6 +27,11 @@ int main()
   if (commandResult != 0)
   {
     return commandResult + 3;
+  }
+  const int mainFlowResult = runMainFlowTests();
+  if (mainFlowResult != 0)
+  {
+    return mainFlowResult + 4;
   }
   return 0;
 }
