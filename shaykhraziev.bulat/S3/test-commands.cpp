@@ -109,3 +109,54 @@ BOOST_AUTO_TEST_CASE(commands_process_integration_scenario)
   BOOST_TEST(output.str() == "g1\nb 3\nc 1\n<INVALID COMMAND>\n");
   BOOST_CHECK(graphs.has("empty"));
 }
+
+BOOST_AUTO_TEST_CASE(commands_reject_invalid_graph_and_vertex_names)
+{
+  shaykhraziev::GraphTable graphs = makeGraphs();
+
+  BOOST_TEST(run(graphs, "create 1bad") == "<INVALID COMMAND>\n");
+  BOOST_TEST(run(graphs, "create good 1 bad-name") == "<INVALID COMMAND>\n");
+  BOOST_TEST(run(graphs, "bind g1 a bad-name 1") == "<INVALID COMMAND>\n");
+}
+
+BOOST_AUTO_TEST_CASE(commands_reject_duplicate_create_name)
+{
+  shaykhraziev::GraphTable graphs = makeGraphs();
+
+  BOOST_TEST(run(graphs, "create g1") == "<INVALID COMMAND>\n");
+}
+
+BOOST_AUTO_TEST_CASE(commands_merge_same_graph_into_new_graph)
+{
+  shaykhraziev::GraphTable graphs = makeGraphs();
+
+  BOOST_TEST(run(graphs, "merge doubled g1 g1") == "");
+  BOOST_TEST(run(graphs, "outbound doubled a") == "b 1 1 3 3\n");
+}
+
+BOOST_AUTO_TEST_CASE(commands_extract_subset_drops_external_edges)
+{
+  shaykhraziev::GraphTable graphs = makeGraphs();
+
+  BOOST_TEST(run(graphs, "extract onlyab g1 2 a b") == "");
+  BOOST_TEST(run(graphs, "vertexes onlyab") == "a\nb\n");
+  BOOST_TEST(run(graphs, "inbound onlyab b") == "a 1 3\n");
+  BOOST_TEST(run(graphs, "inbound onlyab c") == "<INVALID COMMAND>\n");
+}
+
+BOOST_AUTO_TEST_CASE(commands_keep_multiple_equal_weights_sorted)
+{
+  shaykhraziev::GraphTable graphs = makeGraphs();
+
+  BOOST_TEST(run(graphs, "bind g1 a b 1") == "");
+  BOOST_TEST(run(graphs, "bind g1 a b 2") == "");
+  BOOST_TEST(run(graphs, "outbound g1 a") == "b 1 1 2 3\n");
+}
+
+BOOST_AUTO_TEST_CASE(commands_support_empty_created_graph)
+{
+  shaykhraziev::GraphTable graphs = makeGraphs();
+
+  BOOST_TEST(run(graphs, "create gr3") == "");
+  BOOST_TEST(run(graphs, "vertexes gr3") == "");
+}
