@@ -36,6 +36,15 @@ BOOST_AUTO_TEST_CASE(task_graph_basic_tasks)
   BOOST_CHECK(!graph.removeTask("compile"));
 }
 
+BOOST_AUTO_TEST_CASE(task_graph_rejects_invalid_task_name)
+{
+  alekseev::TaskGraph graph;
+
+  BOOST_CHECK(!graph.addTask("1compile"));
+  BOOST_CHECK(!graph.addTask("compile-task"));
+  BOOST_CHECK_EQUAL(graph.taskCount(), 0);
+}
+
 BOOST_AUTO_TEST_CASE(task_graph_dependencies)
 {
   alekseev::TaskGraph graph;
