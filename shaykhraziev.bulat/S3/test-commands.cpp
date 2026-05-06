@@ -158,5 +158,18 @@ BOOST_AUTO_TEST_CASE(commands_support_empty_created_graph)
   shaykhraziev::GraphTable graphs = makeGraphs();
 
   BOOST_TEST(run(graphs, "create gr3") == "");
-  BOOST_TEST(run(graphs, "vertexes gr3") == "");
+  BOOST_TEST(run(graphs, "vertexes gr3") == "\n");
+}
+
+BOOST_AUTO_TEST_CASE(commands_print_empty_line_for_empty_results)
+{
+  shaykhraziev::GraphTable graphs(4);
+
+  BOOST_TEST(run(graphs, "graphs") == "\n");
+  BOOST_TEST(run(graphs, "create gr2") == "");
+  BOOST_TEST(run(graphs, "vertexes gr2") == "\n");
+  BOOST_TEST(run(graphs, "bind gr2 d a 0") == "");
+  BOOST_TEST(run(graphs, "outbound gr2 d") == "a 0\n");
+  BOOST_TEST(run(graphs, "cut gr2 d a 0") == "");
+  BOOST_TEST(run(graphs, "outbound gr2 d") == "\n");
 }

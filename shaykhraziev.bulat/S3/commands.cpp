@@ -66,6 +66,11 @@ namespace
 
   void printLines(std::ostream& out, const List< std::string >& values)
   {
+    if (values.empty())
+    {
+      out << '\n';
+      return;
+    }
     for (auto it = values.begin(); it != values.end(); ++it)
     {
       out << *it << '\n';
@@ -74,6 +79,11 @@ namespace
 
   void printAdjacent(std::ostream& out, const List< Graph::WeightedVertex >& values)
   {
+    if (values.empty())
+    {
+      out << '\n';
+      return;
+    }
     for (auto it = values.begin(); it != values.end(); ++it)
     {
       out << it->vertex;
