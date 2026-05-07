@@ -52,22 +52,32 @@ namespace karpenko
       if (*cur == w)
       {
         detail::NodeBase* target = cur.get_ptr();
-        detail::NodeBase* prev = weights.end().get_ptr();
-        auto scan = weights.begin();
-        while (scan != weights.end() && scan.get_ptr() != target)
+
+        if (cur == weights.begin())
         {
-          prev = scan.get_ptr();
-          ++scan;
+          weights.pop_front();
         }
-        if (scan != weights.end())
+        else if (target->next_ == weights.end().get_ptr())
         {
-          weights.erase_after(LIter < Weight >(prev));
-          if (weights.empty())
+          weights.pop_back();
+        }
+        else
+        {
+          detail::NodeBase* prev = weights.end().get_ptr();
+          auto scan = weights.begin();
+          while (scan != weights.end() && scan.get_ptr() != target)
           {
-            inner.remove(to);
+            prev = scan.get_ptr();
+            ++scan;
           }
-          return true;
+          weights.erase_after(LIter < Weight >(prev));
         }
+
+        if (weights.empty())
+        {
+          inner.remove(to);
+        }
+        return true;
       }
     }
     return false;

@@ -148,18 +148,33 @@ namespace karpenko
         return;
       }
       Graph g;
-      std::size_t k;
-      if (in >> k)
+      in >> std::ws;
+      if (in.peek() != std::char_traits < char >::eof())
       {
-        for (std::size_t i = 0; i < k; ++i)
+        std::size_t k;
+        if (in >> k)
         {
-          std::string v;
-          if (!(in >> v))
+          for (std::size_t i = 0; i < k; ++i)
+          {
+            std::string v;
+            if (!(in >> v))
+            {
+              out << "<INVALID COMMAND>\n";
+              return;
+            }
+            g.vertices_.add(v, true);
+          }
+          in >> std::ws;
+          if (in.peek() != std::char_traits < char >::eof())
           {
             out << "<INVALID COMMAND>\n";
             return;
           }
-          g.vertices_.add(v, true);
+        }
+        else
+        {
+          out << "<INVALID COMMAND>\n";
+          return;
         }
       }
       gc.addGraph(gname, g);
