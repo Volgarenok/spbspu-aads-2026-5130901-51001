@@ -5,185 +5,172 @@
 #include <iostream>
 #include <string>
 
-#include "../common/hash_table.hpp"
+#include "hash_table.hpp"
+#include "../common/list.hpp"
 
-namespace karpenko {
+namespace karpenko
+{
 
 using Vertex = std::string;
 using Weight = int;
 
-struct edge_weights_t {
-    Vector< Weight > weights;
+struct edge_weights_t
+{
+  List<Weight> weights;
 };
 
-using InnerEdgeMap = BucketHashTable< Vertex, edge_weights_t, Blake2Hash, std::equal_to< Vertex > >;
-using OuterEdgeMap = BucketHashTable< Vertex, InnerEdgeMap, Blake2Hash, std::equal_to< Vertex > >;
+using InnerEdgeMap = BucketHashTable<Vertex, edge_weights_t, Blake2Hash, std::equal_to<Vertex>>;
+using OuterEdgeMap = BucketHashTable<Vertex, InnerEdgeMap, Blake2Hash, std::equal_to<Vertex>>;
 
-struct Graph {
-    BucketHashTable< Vertex, bool, Blake2Hash, std::equal_to< Vertex > > vertices_;
-    OuterEdgeMap out_edges_;
-    OuterEdgeMap in_edges_;
+struct Graph
+{
+  BucketHashTable<Vertex, bool, Blake2Hash, std::equal_to<Vertex>> vertices_;
+  OuterEdgeMap out_edges_;
+  OuterEdgeMap in_edges_;
 
-    Graph() = default;
-    void swap(Graph& other) noexcept
-    {
-        vertices_.swap(other.vertices_);
-        out_edges_.swap(other.out_edges_);
-        in_edges_.swap(other.in_edges_);
-    }
-    Graph(const Graph& other)
-        : vertices_(other.vertices_),
-          out_edges_(other.out_edges_),
-          in_edges_(other.in_edges_)
-    {
-    }
-    Graph& operator=(Graph other)
-    {
-        swap(other);
-        return *this;
-    }
+  Graph() = default;
+  void swap(Graph& other) noexcept
+  {
+    vertices_.swap(other.vertices_);
+    out_edges_.swap(other.out_edges_);
+    in_edges_.swap(other.in_edges_);
+  }
+  Graph(const Graph& other)
+    : vertices_(other.vertices_), out_edges_(other.out_edges_), in_edges_(other.in_edges_) {}
+  Graph& operator=(Graph other) { swap(other); return *this; }
 };
 
 void addEdgeToMap(OuterEdgeMap& edges, const Vertex& from, const Vertex& to, Weight w);
 bool removeWeightFromMap(OuterEdgeMap& edges, const Vertex& from, const Vertex& to, Weight w);
 void printEdges(std::ostream& out, const std::string& vertex, const OuterEdgeMap& edges);
 void printSortedVertices(std::ostream& out, const Graph& g);
+bool hasWeightInMap(const OuterEdgeMap& edges, const Vertex& from, const Vertex& to, Weight w);
+
 
 void addEdgeToMap(OuterEdgeMap& edges, const Vertex& from, const Vertex& to, Weight w)
 {
-    auto it = edges.find(from);
-    if (it == edges.end())
-    {
-        InnerEdgeMap inner;
-        edge_weights_t ew;
-        ew.weights.pushBack(w);
-        inner.add(to, ew);
-        edges.add(from, inner);
-    }
-    else
-    {
-        InnerEdgeMap& inner = it->second;
-        auto to_it = inner.find(to);
-        if (to_it == inner.end())
-        {
-            edge_weights_t ew;
-            ew.weights.pushBack(w);
-            inner.add(to, ew);
-        }
-        else
-        {
-            to_it->second.weights.pushBack(w);
-        }
-    }
-}
-
-bool removeWeightFromMap(OuterEdgeMap& edges, const Vertex& from, const Vertex& to, Weight w)
-{
-    auto it = edges.find(from);
-    if (it == edges.end())
-    {
-        return false;
-    }
+  auto it = edges.find(from);
+  if (it == edges.end())
+  {
+    InnerEdgeMap inner;
+    edge_weights_t ew;
+    ew.weights.push_back(w);
+    inner.add(to, ew);
+    edges.add(from, inner);
+  }
+  else
+  {
     InnerEdgeMap& inner = it->second;
     auto to_it = inner.find(to);
     if (to_it == inner.end())
     {
-        return false;
+      edge_weights_t ew;
+      ew.weights.push_back(w);
+      inner.add(to, ew);
     }
-    Vector< Weight >& weights = to_it->second.weights;
-    for (std::size_t i = 0; i < weights.getSize(); ++i)
+    else
     {
-        if (weights[i] == w)
-        {
-            weights.erase(i);
-            if (weights.getSize() == 0)
-            {
-                inner.remove(to);
-            }
-            return true;
-        }
+      to_it->second.weights.push_back(w);
     }
-    return false;
+  }
+}
+
+bool removeWeightFromMap(OuterEdgeMap& edges, const Vertex& from, const Vertex& to, Weight w)
+{
+  auto it = edges.find(from);
+  if (it == edges.end()) return false;
+  InnerEdgeMap& inner = it->second;
+  auto to_it = inner.find(to);
+  if (to_it == inner.end()) return false;
+  List<Weight>& weights = to_it->second.weights;
+  for (auto wi = weights.begin(); wi != weights.end(); ++wi)
+  {
+    if (*wi == w)
+    {
+      weights.erase_after(wi);
+      if (weights.empty()) inner.remove(to);
+      return true;
+    }
+  }
+  return false;
+}
+
+namespace detail
+{
+  template<typename T>
+  T* listToSortedArray(const List<T>& lst, std::size_t& outSize)
+  {
+    outSize = lst.size();
+    if (outSize == 0) return nullptr;
+    T* arr = static_cast<T*>(::operator new(sizeof(T) * outSize));
+    std::size_t i = 0;
+    for (auto it = lst.begin(); it != lst.end(); ++it, ++i)
+      new (arr + i) T(*it);
+    std::sort(arr, arr + outSize);
+    return arr;
+  }
 }
 
 void printEdges(std::ostream& out, const std::string& vertex, const OuterEdgeMap& edges)
 {
-    auto it = edges.find(vertex);
-    if (it == edges.end())
-    {
-        out << '\n';
-        return;
-    }
-    const InnerEdgeMap& inner = it->second;
-    Vector< std::string > targets;
-    for (auto ti = inner.begin(); ti != inner.end(); ++ti)
-    {
-        targets.pushBack(ti->first);
-    }
-    std::sort(targets.begin(), targets.end());
-    if (targets.getSize() == 0)
-    {
-        out << '\n';
-        return;
-    }
-    for (std::size_t t = 0; t < targets.getSize(); ++t)
-    {
-        const std::string& target = targets[t];
-        auto wi = inner.find(target);
-        Vector< Weight > sorted_w = wi->second.weights;
-        std::sort(sorted_w.begin(), sorted_w.end());
-        out << target;
-        for (std::size_t w = 0; w < sorted_w.getSize(); ++w)
-        {
-            out << ' ' << sorted_w[w];
-        }
-        out << '\n';
-    }
-}
-
-bool hasWeightInMap(const OuterEdgeMap& edges,
-                           const Vertex& from, const Vertex& to,
-                           Weight w)
-{
-    auto it = edges.find(from);
-    if (it == edges.end())
-    {
-        return false;
-    }
-    const InnerEdgeMap& inner = it->second;
-    auto to_it = inner.find(to);
-    if (to_it == inner.end())
-    {
-        return false;
-    }
-    const Vector< Weight >& weights = to_it->second.weights;
-    for (std::size_t i = 0; i < weights.getSize(); ++i)
-    {
-        if (weights[i] == w)
-        {
-            return true;
-        }
-    }
-    return false;
+  auto it = edges.find(vertex);
+  if (it == edges.end())
+  {
+    out << '\n';
+    return;
+  }
+  const InnerEdgeMap& inner = it->second;
+  List<std::string> targetList;
+  for (auto ti = inner.begin(); ti != inner.end(); ++ti)
+    targetList.push_back(ti->first);
+  std::size_t n = 0;
+  std::string* targets = detail::listToSortedArray(targetList, n);
+  for (std::size_t t = 0; t < n; ++t)
+  {
+    const std::string& target = targets[t];
+    auto wi = inner.find(target);
+    const List<Weight>& wlist = wi->second.weights;
+    std::size_t wc = 0;
+    Weight* sorted_weights = detail::listToSortedArray(wlist, wc);
+    out << target;
+    for (std::size_t w = 0; w < wc; ++w)
+      out << ' ' << sorted_weights[w];
+    out << '\n';
+    for (std::size_t w = 0; w < wc; ++w) sorted_weights[w].~Weight();
+    ::operator delete(sorted_weights);
+  }
+  for (std::size_t t = 0; t < n; ++t) targets[t].~basic_string();
+  ::operator delete(targets);
+  if (n == 0) out << '\n';
 }
 
 void printSortedVertices(std::ostream& out, const Graph& g)
 {
-    Vector< std::string > verts;
-    for (auto it = g.vertices_.begin(); it != g.vertices_.end(); ++it)
-    {
-        verts.pushBack(it->first);
-    }
-    std::sort(verts.begin(), verts.end());
-    if (verts.getSize() == 0)
-    {
-        out << '\n';
-        return;
-    }
-    for (std::size_t i = 0; i < verts.getSize(); ++i)
-    {
-        out << verts[i] << '\n';
-    }
+  List<std::string> vertList;
+  for (auto it = g.vertices_.begin(); it != g.vertices_.end(); ++it)
+    vertList.push_back(it->first);
+  std::size_t n = 0;
+  std::string* verts = detail::listToSortedArray(vertList, n);
+  if (n == 0)
+    out << '\n';
+  else
+    for (std::size_t i = 0; i < n; ++i)
+      out << verts[i] << '\n';
+  for (std::size_t i = 0; i < n; ++i) verts[i].~basic_string();
+  ::operator delete(verts);
+}
+
+bool hasWeightInMap(const OuterEdgeMap& edges, const Vertex& from, const Vertex& to, Weight w)
+{
+  auto it = edges.find(from);
+  if (it == edges.end()) return false;
+  const InnerEdgeMap& inner = it->second;
+  auto to_it = inner.find(to);
+  if (to_it == inner.end()) return false;
+  const List<Weight>& weights = to_it->second.weights;
+  for (auto wi = weights.cbegin(); wi != weights.cend(); ++wi)
+    if (*wi == w) return true;
+  return false;
 }
 
 }
