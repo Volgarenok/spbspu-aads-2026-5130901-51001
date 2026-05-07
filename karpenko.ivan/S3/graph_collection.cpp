@@ -1,8 +1,8 @@
+#include "graph_collection.hpp"
+
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
-
-#include "graph_collection.hpp"
 
 namespace karpenko
 {
