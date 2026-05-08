@@ -4,18 +4,31 @@
 #include <stdexcept>
 namespace kitserov
 {
-  
+ 
   template< class Key, class Value, class Hash, class Equal >
-  struct HashTable
+  class HashTable
   {
-    HashTable() : size_(0), capacity_(0) {}
-    HashTable(size_t size) : size_(0), capacity_(size)
+    struct Slot
     {
-      slots_.resize(capacity_);
-      for (size_t i = 0; i < capacity_; ++i) {
-        slots_[i].fill_ = false;
-      }
+      Key key_;
+      Value val_;
+      bool fill_;
+    };
+ 	  size_t size_;
+    size_t capacity_;
+    std::vector< Slot > slots_;
+    size_t hash_k(const Key& key) const 
+    {
+        return Hash{}(key) % capacity_;
     }
+    size_t probe(const Key& key, size_t i) const
+    {
+      return (hash_k(key) + i * i) % capacity_;
+    }
+    static constexpr size_t DEFAULT_CAPACITY = 8;
+  public:
+    HashTable() : size_(0), capacity_(DEFAULT_CAPACITY) {}
+    HashTable(size_t size) : size_(0), capacity_(size), slots_(capacity_) {}
     HashTable(const HashTable& other)
     {
       copy(other);
@@ -61,38 +74,75 @@ namespace kitserov
       std::swap(slots_, other.slots_);
     }
 
-    const Slot* find(const Key& key) const noexcept
+    Value* find(const Key& key) noexcept
     {
-      if (isEmpty()) return nullptr;
-      size_t i = 1;
-      const Slot* home = &(slots_[Hash(key) % capacity_]);
-      while (!(i < capacity_)) {
-        size_t idx = probe(key, i++);
-        if (!(home -> fill_)) {
-          return nullptr;
+      for (size_t i = 0; i < capacity_; ++i) {
+        size_t idx = probe(key, i);
+        if (!slots_[idx].fill_) {
+            return nullptr;
         }
-        if (Equal(home -> key_, key)) {
-          return home
+        if (Equal{}(slots_[idx].key_, key)) {
+            return &slots_[idx].val_;
         }
-
-        home = &(slots_[idx]);
       }
       return nullptr;
     }
-
-    void add(const Key& key, const Value& value)
+    const Value* find(const Key& key) const noexcept
     {
-      if (loadFactor() >= 0.9f) {
-        throw std::out_of_range();
-      }
-      const Slot* home = find(value);
-      if (home) {
-        home -> val_ = value;
-        home -> fill_ = true;
-        return;
-      }
-      throw;
+      return find(key);
     }
+
+    bool contains(const Key& key) const {
+        return find(key) != nullptr;
+    }
+
+
+    bool add(const Key& key, const Value& value)
+    {
+      if (loadFactor() >= 0.8f) {
+        throw;
+      }
+      for (size_t i = 0; i < capacity_; ++i) {
+        size_t idx = probe(key, i);
+        if (!slots_[idx].fill_) {
+            slots_[idx].key_ = key;
+            slots_[idx].val_ = value;
+            slots_[idx].fill_ = true;
+            ++size_;
+            return true;
+        }
+        if (Equal{}(slots_[idx].key_, key)) {
+            slots_[idx].val_ = value;
+            return true;
+        }
+      }
+      return false;
+    }
+
+    Value& operator[](const Key& key) {
+      Value* found = find(key);
+      if (found) {
+          return *found;
+      }
+      insert(key, Value{});
+      return *find(key);
+    }
+
+    bool erase(const Key& key) {
+      for (size_t i = 0; i < capacity_; ++i) {
+        size_t idx = probe(key, i);
+        if (!slots_[idx].fill_) {
+          return false;
+        }
+        if (Equal{}(slots_[idx].key_, key)) {
+          slots_[idx].fill_ = false;
+          --size_;
+          return true;
+        }
+      }
+      return false;
+    }
+
 
     float loadFactor()
     {
@@ -110,49 +160,26 @@ namespace kitserov
     {
       return capacity_;
     }
-  private:
-    size_t size_;
-    size_t capacity_;
-    std::vector< Slot > slots_;
-    
-    struct Slot
-    {
-      Key key_;
-      Value val_
-      bool fill_;
-    };
-
-    size_t probe(const Key& key, size_t i) 
-    {
-      return (Hash(key) + i * i) % capacity_;
-    }
     void rehash(size_t new_capacity)
     {
-      std::vector< Slot > old_slots = std::move(slots_);
-      size_t old_capacity = capacity_;
-      capacity_ = new_capacity;
-      slots_.resize(capacity_);
-      size_ = 0;
-      for (size_t i = 0; i < old_capacity; ++i) {
-
+      std::vector<Slot> new_slots(new_capacity);
+      for (const Slot& slot : slots_) {
+        try {
+          if (slot.fill_) {
+            size_t i = 0;
+            size_t idx = probe(slot.key, i);
+            while (new_slots[idx].fill_) {
+                ++i;
+                idx = probe(slot.key, i);
+            }
+            new_slots[idx] = slot;
+          }
+        } catch (...) {
+          throw;
+        }
       }
+      slots_ = std::move(new_slots);
+      capacity_ = new_capacity;
     }
-  };
-
-  class siphash_64
-  {
-  public:
-
-    using result_type = std::uint64_t;
-
-    constexpr siphash_64();
-    explicit constexpr siphash_64( std::uint64_t seed );
-    siphash_64( void const* p, std::size_t n );
-    constexpr siphash_64( unsigned char const* p, std::size_t n );
-
-    void update( void const* p, std::size_t n );
-    constexpr void update( unsigned char const* p, std::size_t n );
-
-    constexpr result_type result();
   };
 }
