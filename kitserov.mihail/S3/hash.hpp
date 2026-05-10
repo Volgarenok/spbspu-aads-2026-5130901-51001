@@ -177,5 +177,138 @@ namespace kitserov
       slots_ = std::move(new_slots);
       capacity_ = new_capacity;
     }
+    class iterator
+    {
+      friend class HashTable;
+      const HashTable* table_ = nullptr;
+      size_t idx_;
+      iterator(const HashTable* t, size_t idx) noexcept : table_(t), idx_(idx) {}
+    public:
+      iterator() noexcept = default;
+      Value& operator*() const
+      {
+          return table_ -> slots_[idx_].val_;
+      }
+      Value* operator->() const
+      {
+          return &(table_ -> slots_[idx_].val_);
+      }
+      iterator& operator++() noexcept
+      {
+        size_t cap = table_ -> capacity();
+        while (++idx_ < cap) {
+          if (table_ -> slots_[idx_].fill_)
+            break;
+        }
+        return *this;
+      }
+      iterator operator++(int) noexcept
+      {
+        iterator tmp = *this;
+        ++(*this);
+        return tmp;
+      }
+      bool operator==(const iterator& o) const noexcept
+      {
+        return table_ == o.table_ && idx_ == o.idx_;
+      }
+      bool operator!=(const iterator& o) const noexcept
+      {
+        return !(*this == o);
+      }
+      bool operator<(const iterator& o) const noexcept
+      {
+        return table_ == o.table_ && idx_ < o.idx_;
+      }
+      bool operator>(const iterator& o) const noexcept
+      {
+        return table_ == o.table_ && idx_ > o.idx_;
+      }
+    };
+    class const_iterator
+    {
+      friend class HashTable;
+      const HashTable* table_ = nullptr;
+      size_t idx_;
+      const_iterator(const HashTable* t, size_t idx) noexcept : table_(t), idx_(idx) {}
+    public:
+      const_iterator() noexcept = default;
+      const_iterator(const iterator& it) noexcept : m_table(it.table_), m_idx(it.idx_) {}
+
+      const Value& operator*() const
+      {
+          return table_ -> slots_[idx_].val_;
+      }
+      const Value* operator->() const
+      {
+          return &(table_ -> slots_[idx_].val_);
+      }
+      const_iterator& operator++() noexcept
+      {
+        size_t cap = table_ -> capacity();
+        while (++idx_ < cap) {
+          if (table_ -> slots_[idx_].fill_)
+            break;
+        }
+        return *this;
+      }
+      const_iterator operator++(int) noexcept
+      {
+        const_iterator tmp = *this;
+        ++(*this);
+        return tmp;
+      }
+      bool operator==(const const_iterator& o) const noexcept
+      {
+        return table_ == o.table_ && idx_ == o.idx_;
+      }
+      bool operator!=(const const_iterator& o) const noexcept
+      {
+        return !(*this == o);
+      }
+      bool operator<(const const_iterator& o) const noexcept
+      {
+        return table_ == o.table_ && idx_ < o.idx_;
+      }
+      bool operator>(const const_iterator& o) const noexcept
+      {
+        return table_ == o.table_ && idx_ > o.idx_;
+      }
+    };
+
+    iterator begin() const noexcept
+    {
+      for (size_t i = 0; i < capacity_; ++i) {
+        if (slots_[i].fill_) {
+          return iterator(this, i);
+        }
+      }
+      return end();
+    }
+    iterator end() noexcept { return iterator(this, capacity()); }
+
+    const_iterator begin() const noexcept
+    {
+      for (size_t i = 0; i < capacity_; ++i) {
+        if (slots_[i].fill_) {
+          return const_iterator(this, i);
+        }
+      }
+      return end();
+    }
+    const_iterator end() noexcept { return const_iterator(this, capacity()); }
+
+    const_iterator cbegin() const noexcept { return begin(); }
+    const_iterator cend() const noexcept { return end(); }
+
+  };
+  template< class T >
+  struct SipHash {
+      size_t operator()(const T& key) const 
+      {
+          boost::hash2::siphash_64 hash;  
+          boost::hash2::hash_append(hash, {}, key);
+          return hash.result();
+      }
   };
 }
