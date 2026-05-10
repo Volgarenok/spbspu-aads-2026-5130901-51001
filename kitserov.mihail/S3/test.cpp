@@ -1,18 +1,8 @@
 #define BOOST_TEST_MODULE HashTests
 #include <boost/test/included/unit_test.hpp>
-#include <boost/hash2/hash_append.hpp>
-#include <boost/hash2/siphash.hpp>
 #include "hash.hpp"
 #include <utility>
 
-template<typename T>
-struct SipHash {
-    size_t operator()(const T& key) const {
-        boost::hash2::siphash_64 hash;  
-        boost::hash2::hash_append(hash, {}, key);
-        return hash.result();
-    }
-};
 
 using namespace kitserov;
 BOOST_AUTO_TEST_CASE(hash_start_empty)
@@ -51,7 +41,6 @@ BOOST_AUTO_TEST_CASE(find)
 {
   HashTable< int, int, SipHash< int >, std::equal_to< int > > r(5);
   BOOST_CHECK_EQUAL(r.find(4), nullptr);
-  BOOST_CHECK(!r.contains(4));
 }
 BOOST_AUTO_TEST_CASE(add)
 {
@@ -59,7 +48,6 @@ BOOST_AUTO_TEST_CASE(add)
   r.add(4, 16);
   BOOST_CHECK_EQUAL(r.size(), 1);
   BOOST_CHECK_EQUAL(*(r.find(4)), 16);
-  BOOST_CHECK(r.contains(4));
 }
 BOOST_AUTO_TEST_CASE(copy_equal)
 {
@@ -118,4 +106,22 @@ BOOST_AUTO_TEST_CASE(rehash)
   BOOST_CHECK(r.find(4));
   BOOST_CHECK(r.find(5));
   BOOST_CHECK(r.find(6));
+}
+BOOST_AUTO_TEST_CASE(begin_and_end)
+{
+  HashTable< int, int, SipHash< int >, std::equal_to< int > > r(5);
+  r.add(4, 16);
+  BOOST_CHECK_EQUAL(*(r.begin()), 16);
+  BOOST_CHECK(r.begin() == r.begin());
+  BOOST_CHECK(r.begin() < r.end());
+  HashTable< int, int, SipHash< int >, std::equal_to< int > > yar(5);
+  BOOST_CHECK(yar.begin() == yar.end());
+  yar.add(4, 16);
+  yar.add(5, 25);
+  yar.add(6, 36);
+  auto it = yar.begin();
+  BOOST_CHECK(*it);
+  ++it;
+  BOOST_CHECK(*(it++));
+  BOOST_CHECK(*it);
 }
