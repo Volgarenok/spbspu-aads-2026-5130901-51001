@@ -50,7 +50,7 @@ namespace kitserov
 
     bool isEmpty()
     {
-      return slots_.empty();
+      return size_ == 0;
     }
 
     void copy(const HashTable& other)
@@ -58,12 +58,13 @@ namespace kitserov
       if (this == &other) {
         return;
       }
-      HashTable tmp(capacity_);
+      HashTable tmp(other.capacity_);
       try {
         tmp.slots_ = other.slots_;
       } catch (...) {
         throw;
       }
+      tmp.size_ = other.size_;
       swap(tmp);
     }
 
@@ -120,11 +121,6 @@ namespace kitserov
     }
 
     Value& operator[](const Key& key) {
-      Value* found = find(key);
-      if (found) {
-          return *found;
-      }
-      insert(key, Value{});
       return *find(key);
     }
 
