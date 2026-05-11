@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
     std::cout << std::endl;
     return 0;
   } catch (...) {
-    std::cerr << "Error: " << '\n';
+    std::cerr << "Error" << '\n';
     return 1;
   }
 }
