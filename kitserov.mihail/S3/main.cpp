@@ -20,6 +20,7 @@ int main(int argc, char* argv[])
   HashGraphs graphs;
   std::string word;
   size_t countEdges = 0;
+  Graph* currentGraph = nullptr;
   while (inputFile >> word) {
     if (countEdges == 0) {
       Graph g(word);
@@ -28,8 +29,12 @@ int main(int argc, char* argv[])
         return 2;
       }
       graphs.add(word, std::move(g));
+      currentGraph = graphs.find(word);
+      if (!currentGraph) {
+        std::cerr << "Internal error: graph not found after add\n";
+        return 1;
+      }
     } else {
-      Graph& g = *(graphs.begin());
       std::string src = word;
       std::string dst;
       size_t weight = 0;
@@ -37,7 +42,7 @@ int main(int argc, char* argv[])
         std::cerr << "Error: incomplete edge data after vertex \n";
         return 2;
       }
-      g.addEdge(src, dst, weight);
+      currentGraph->addEdge(src, dst, weight);
       --countEdges;
     }
   }
