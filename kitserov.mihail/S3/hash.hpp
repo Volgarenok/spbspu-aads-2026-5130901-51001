@@ -329,4 +329,12 @@ namespace kitserov
       return hasher.result();
     }
   };
+  template < class T1, class T2, class Hash >
+  struct PairHash {
+    size_t operator()(const std::pair< T1, T2 >& p) const {
+      auto h1 = Hash< T1 >{}(p.first);
+      auto h2 = Hash< T2 >{}(p.second);
+      return h1 ^ (h2 << 1);
+    }
+  };
 }
