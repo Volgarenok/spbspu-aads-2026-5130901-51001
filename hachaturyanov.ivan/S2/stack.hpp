@@ -71,7 +71,7 @@ namespace hachaturyanov
     if (data_.isEmpty()) {
       throw std::logic_error("Stack is empty");
     }
-    T res = begin();
+    T res = std::move(begin());
     data_.popFront();
     return res;
   }
