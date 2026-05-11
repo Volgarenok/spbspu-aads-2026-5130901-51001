@@ -1,12 +1,13 @@
 #include <iostream>
 #include <fstream>
-#include "hash.hpp"
 #include "graph.hpp"
+#include "utils3.hpp"
 
 int main(int argc, char* argv[])
 {
   using namespace kitserov;
-  using CommandHandler = void (*)(std::ostream& out, std::istream& in);
+  using HashGraphs = HashTable< std::string, Graph, SipHash< std::string >, std::equal_to< std::string > >;
+  using CommandHandler = void (*)(std::ostream& out, std::istream& in, HashGraphs&);
   if (argc != 2) {
     std::cerr << "Must be 2 argc\n";
     return 1;
@@ -16,7 +17,7 @@ int main(int argc, char* argv[])
     std::cerr << "Error: cannot open file \"" << argv[1] << "\"" << std::endl;
     return 1;
   }
-  std::vector< std::string, Graph > graphs;
+  HashGraphs graphs;
   std::string word;
   size_t countEdges = 0;
   while (inputFile >> word) {
@@ -41,7 +42,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  HashTable< std::string, CommandHandler, SipHash< std::string > > cmds(20);
+  HashTable< std::string, CommandHandler, SipHash< std::string >, std::equal_to < std::string > > cmds(20);
   
   cmds.add("graphs", cmd_graphs);
   cmds.add("vertexes", cmd_vertexes);
@@ -61,7 +62,7 @@ int main(int argc, char* argv[])
       if (!handler) {
         throw std::invalid_argument("unknown command");
       }
-      (*handler)(std::cout, std::cin);
+      (*handler)(std::cout, std::cin, graphs);
       std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     } catch (...) {
       std::cout << "<INVALID COMMAND>\n";

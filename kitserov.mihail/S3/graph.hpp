@@ -1,13 +1,22 @@
+#ifndef GRAPH_HPP
+#define GRAPH_HPP
+
 #include "hash.hpp"
 #include <vector>
 #include <algorithm>
+#include <set>
 
 namespace kitserov
 {
   class Graph
   {
     std::string name_;
-    HashTable< std::pair< std::string, std::string >, std::vector< size_t >, PairHash< std::string, std::string > > edges_;
+    HashTable< 
+      std::pair<std::string, std::string>,
+      std::vector<size_t>,
+      PairHash<std::string, std::string, SipHash>,
+      std::equal_to< std::pair<std::string, std::string> >
+    > edges_;
     std::set< std::string > vertices_;
   public:
 
@@ -18,16 +27,21 @@ namespace kitserov
     {
       vertices_.insert(src);
       vertices_.insert(dst);
-      edges[{src, dst}].push_back(weight);
+      auto* vec = edges_.find({src, dst});
+      if (vec) {
+        vec->push_back(weight);
+      } else {
+        edges_.add({src, dst}, {weight});
+      }
     }
 
     bool cut(const std::string& src, const std::string& dst, size_t weight)
     {
-      std::vector< size_t >* point = (edges_.find({src, dst}));
+      std::vector< size_t >* point = edges_.find({src, dst});
       if (!point) return false;
       auto weightIt = std::find(point -> begin(), point -> end(), weight);
       if (weightIt == point -> end()) return false;
-      (*(point)).erase(weightIt);
+      point -> erase(weightIt);
       if (point -> empty()) {
         edges_.erase({src, dst});
       }
@@ -49,12 +63,12 @@ namespace kitserov
     {
       std::vector< std::pair< std::string, std::vector< size_t > > > res;
       for (const auto& dst : getVertices()) {
-        std::vector< size_t >* weights = edges_.find({src, dst});
+        std::vector< size_t >* weights = const_cast< std::vector< size_t >* >(edges_.find({src, dst}));
         if (weights) {
           std::vector< size_t > w(weights -> begin(), weights -> end());
           std::sort(w.begin(), w.end());
           for (const auto& weight : w) {
-            res.push_back({dst, weight});
+            res.push_back({dst, {weight}});
           }
         }
       }
@@ -65,12 +79,12 @@ namespace kitserov
     {
       std::vector< std::pair< std::string, std::vector< size_t > > > res;
       for (const auto& src : getVertices()) {
-        std::vector< size_t >* weights = edges_.find({src, dst});
+        std::vector< size_t >* weights = const_cast< std::vector< size_t >* >(edges_.find({src, dst}));
         if (weights) {
           std::vector< size_t > w(weights -> begin(), weights -> end());
           std::sort(w.begin(), w.end());
           for (const auto& weight : w) {
-            res.push_back({src, weight});
+            res.push_back({src, {weight}});
           }
         }
       }
@@ -92,7 +106,7 @@ namespace kitserov
       g.vertices_ = a.vertices_;
       g.vertices_.insert(b.vertices_.begin(), b.vertices_.end());
       g.edges_ = std::move(a.edges_);
-      for (auto it = b.edges_.begin(); it < b.edges.end(); ++it) {
+      for (auto it = b.edges_.begin(); it < b.edges_.end(); ++it) {
         g.edges_.add(it.key(), *it);
       }
       return g;
@@ -107,7 +121,7 @@ namespace kitserov
         }
         g.vertices_.insert(v);
       }
-      for (auto it = src.edges_.begin(); it < src.edges.end(); ++it) {
+      for (auto it = src.edges_.begin(); it < src.edges_.end(); ++it) {
         auto key = it.key();
         const std::string& v1 = key.first;
         const std::string& v2 = key.second;
@@ -115,7 +129,8 @@ namespace kitserov
           g.edges_.add(key, *it);
         }
       }
-      return g
+      return g;
     }
   };
 }
+#endif

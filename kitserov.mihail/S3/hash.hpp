@@ -1,3 +1,6 @@
+#ifndef HASH_HPP
+#define HASH_HPP
+
 #include <vector>
 #include <utility>
 #include <cstddef>
@@ -7,7 +10,7 @@
 namespace kitserov
 {
  
-  template< class Key, class Value, class Hash, class Equal  = std::equal_to< Key > >
+  template< class Key, class Value, class Hash, class Equal >
   class HashTable
   {
     Equal equal_;
@@ -38,7 +41,7 @@ namespace kitserov
     }
     static constexpr size_t DEFAULT_CAPACITY = 8;
   public:
-    HashTable() : size_(0), capacity_(DEFAULT_CAPACITY) {}
+    HashTable() : size_(0), capacity_(DEFAULT_CAPACITY), slots_(DEFAULT_CAPACITY) {}
     HashTable(size_t size) : size_(0), capacity_(size), slots_(capacity_) {}
     HashTable(const HashTable& other)
     {
@@ -346,3 +349,4 @@ namespace kitserov
     }
   };
 }
+#endif

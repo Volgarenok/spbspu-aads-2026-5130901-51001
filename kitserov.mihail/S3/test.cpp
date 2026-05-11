@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(begin_and_end)
   yar.add(5, 25);
   yar.add(6, 36);
   auto it = yar.begin();
-  BOOST_CHECK(*it);
+  BOOST_CHECK(*it == it.key() * it.key());
   ++it;
   BOOST_CHECK(*(it++));
   BOOST_CHECK(*it);
