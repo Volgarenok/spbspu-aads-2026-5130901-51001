@@ -49,7 +49,6 @@ namespace smirnova
     {
       return data[i];
     }
-
     size_t size() const
     {
       return sz;
