@@ -1,28 +1,25 @@
 #ifndef GRAPH_HPP
 #define GRAPH_HPP
 
-#include "hash.hpp"
 #include <vector>
 #include <algorithm>
 #include <set>
+#include <string>
+#include <utility>
+#include <stdexcept>
+#include "hash.hpp"
 
 namespace kitserov
 {
   class Graph
   {
-    std::string name_;
-    HashTable< 
-      std::pair<std::string, std::string>,
-      std::vector<size_t>,
-      PairHash<std::string, std::string, SipHash>,
-      std::equal_to< std::pair<std::string, std::string> >
-    > edges_;
-    std::set< std::string > vertices_;
   public:
-
     Graph() = default;
-    explicit Graph(const std::string& n) : name_(n) {}
-    
+
+    explicit Graph(const std::string& n) :
+      name_(n)
+    {}
+
     void addEdge(const std::string& src, const std::string& dst, size_t weight)
     {
       vertices_.insert(src);
@@ -38,15 +35,20 @@ namespace kitserov
     bool cut(const std::string& src, const std::string& dst, size_t weight)
     {
       std::vector< size_t >* point = edges_.find({src, dst});
-      if (!point) return false;
-      auto weightIt = std::find(point -> begin(), point -> end(), weight);
-      if (weightIt == point -> end()) return false;
-      point -> erase(weightIt);
-      if (point -> empty()) {
+      if (!point) {
+        return false;
+      }
+      auto weightIt = std::find(point->begin(), point->end(), weight);
+      if (weightIt == point->end()) {
+        return false;
+      }
+      point->erase(weightIt);
+      if (point->empty()) {
         edges_.erase({src, dst});
       }
       return true;
     }
+
     bool hasVertex(const std::string& v) const
     {
       return vertices_.find(v) != vertices_.end();
@@ -71,14 +73,16 @@ namespace kitserov
           }
         }
       }
-      std::sort(flat.begin(), flat.end(), 
+      std::sort(flat.begin(), flat.end(),
         [](const auto& a, const auto& b)
         {
-          if (a.first != b.first) return a.first < b.first;
+          if (a.first != b.first) {
+            return a.first < b.first;
+          }
           return a.second < b.second;
         }
       );
-      std::vector< std::pair< std::string, std::vector< size_t > > > res;
+      std::vector< std::pair< std::string, std::vector< size_t > > > result;
       for (size_t i = 0; i < flat.size();) {
         const std::string& vertex = flat[i].first;
         std::vector< size_t > weights;
@@ -86,9 +90,9 @@ namespace kitserov
           weights.push_back(flat[i].second);
           ++i;
         }
-        res.emplace_back(vertex, std::move(weights));
+        result.emplace_back(vertex, std::move(weights));
       }
-      return res;
+      return result;
     }
 
     std::vector< std::pair< std::string, std::vector< size_t > > > getInbound(const std::string& dst) const
@@ -103,14 +107,16 @@ namespace kitserov
           }
         }
       }
-      std::sort(flat.begin(), flat.end(), 
+      std::sort(flat.begin(), flat.end(),
         [](const auto& a, const auto& b)
         {
-          if (a.first != b.first) return a.first < b.first;
+          if (a.first != b.first) {
+            return a.first < b.first;
+          }
           return a.second < b.second;
         }
       );
-      std::vector< std::pair< std::string, std::vector< size_t > > > res;
+      std::vector< std::pair< std::string, std::vector< size_t > > > result;
       for (size_t i = 0; i < flat.size();) {
         const std::string& vertex = flat[i].first;
         std::vector< size_t > weights;
@@ -118,9 +124,9 @@ namespace kitserov
           weights.push_back(flat[i].second);
           ++i;
         }
-        res.emplace_back(vertex, std::move(weights));
+        result.emplace_back(vertex, std::move(weights));
       }
-      return res;
+      return result;
     }
 
     static Graph create(const std::string& name, const std::vector< std::string >& vertices)
@@ -137,7 +143,10 @@ namespace kitserov
       Graph g(name);
       g.vertices_ = a.vertices_;
       g.vertices_.insert(b.vertices_.begin(), b.vertices_.end());
-      g.edges_ = std::move(a.edges_);
+
+      for (auto it = a.edges_.begin(); it != a.edges_.end(); ++it) {
+        g.edges_.add(it.key(), *it);
+      }
       for (auto it = b.edges_.begin(); it != b.edges_.end(); ++it) {
         auto key = it.key();
         auto* existing = g.edges_.find(key);
@@ -148,10 +157,10 @@ namespace kitserov
         }
       }
       return g;
-
     }
 
-    static Graph extract(const Graph& src, const std::string& name, const std::vector<std::string>& vertices)
+    static Graph extract(const Graph& src, const std::string& name,
+                         const std::vector< std::string >& vertices)
     {
       Graph g(name);
       for (const auto& v : vertices) {
@@ -170,6 +179,17 @@ namespace kitserov
       }
       return g;
     }
+
+  private:
+    using EdgeKey = std::pair< std::string, std::string >;
+    using EdgeHash = PairHash< std::string, std::string, SipHash >;
+    using EdgeEqual = std::equal_to< EdgeKey >;
+    using EdgeTable = HashTable< EdgeKey, std::vector< size_t >, EdgeHash, EdgeEqual >;
+
+    std::string name_;
+    EdgeTable edges_;
+    std::set< std::string > vertices_;
   };
 }
-#endif
+
+#endif9
