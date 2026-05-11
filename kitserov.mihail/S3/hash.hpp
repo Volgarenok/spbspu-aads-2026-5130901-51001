@@ -210,6 +210,10 @@ namespace kitserov
       {
         return &(table_ -> slots_[idx_].val_);
       }
+      Key& key() noexcept
+      {
+        return (table_ -> slots_[idx_].key_);
+      }
       iterator& operator++() noexcept
       {
         size_t cap = table_ -> capacity();
@@ -260,6 +264,10 @@ namespace kitserov
       const Value* operator->() const
       {
           return &(table_ -> slots_[idx_].val_);
+      }
+      const Key& key() const noexcept
+      {
+        return (table_ -> slots_[idx_].key_);
       }
       const_iterator& operator++() noexcept
       {
@@ -329,12 +337,12 @@ namespace kitserov
       return hasher.result();
     }
   };
-  template < class T1, class T2, class Hash >
+  template < class T1, class T2, template< class > class Hash >
   struct PairHash {
     size_t operator()(const std::pair< T1, T2 >& p) const {
-      auto h1 = Hash< T1 >{}(p.first);
-      auto h2 = Hash< T2 >{}(p.second);
-      return h1 ^ (h2 << 1);
+      Hash<T1> h1;
+      Hash<T2> h2;
+      return h1(p.first) ^ (h2(p.second) << 1);
     }
   };
 }

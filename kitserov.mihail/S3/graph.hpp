@@ -61,6 +61,61 @@ namespace kitserov
       return res;
     }
 
-    
+    std::vector< std::pair< std::string, std::vector< size_t > > > getInbound(const std::string& dst) const
+    {
+      std::vector< std::pair< std::string, std::vector< size_t > > > res;
+      for (const auto& src : getVertices()) {
+        std::vector< size_t >* weights = edges_.find({src, dst});
+        if (weights) {
+          std::vector< size_t > w(weights -> begin(), weights -> end());
+          std::sort(w.begin(), w.end());
+          for (const auto& weight : w) {
+            res.push_back({src, weight});
+          }
+        }
+      }
+      return res;
+    }
+
+    Graph create(const std::string& name, const std::vector< std::string >& vertices)
+    {
+      Graph g(name);
+      for (const auto& v : vertices) {
+        g.vertices_.insert(v);
+      }
+      return g;
+    }
+
+    Graph merge(const std::string& name, const Graph& a, const Graph& b)
+    {
+      Graph g(name);
+      g.vertices_ = a.vertices_;
+      g.vertices_.insert(b.vertices_.begin(), b.vertices_.end());
+      g.edges_ = std::move(a.edges_);
+      for (auto it = b.edges_.begin(); it < b.edges.end(); ++it) {
+        g.edges_.add(it.key(), *it);
+      }
+      return g;
+    }
+
+    Graph extract(const Graph& src, const std::string& name, const std::vector<std::string>& vertices)
+    {
+      Graph g(name);
+      for (const auto& v : vertices) {
+        if (!src.hasVertex(v)) {
+          throw std::invalid_argument("Vertex not found in source graph");
+        }
+        g.vertices_.insert(v);
+      }
+      for (auto it = src.edges_.begin(); it < src.edges.end(); ++it) {
+        auto key = it.key();
+        const std::string& v1 = key.first;
+        const std::string& v2 = key.second;
+        if (g.vertices_.count(v1) && g.vertices_.count(v2)) {
+          g.edges_.add(key, *it);
+        }
+      }
+      return g
+    }
   };
 }
