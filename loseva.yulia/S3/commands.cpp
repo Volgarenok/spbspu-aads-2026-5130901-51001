@@ -288,7 +288,6 @@ void cmdExtract(GraphTable & table, std::istringstream & args,
       sub.removeEdge(v, v, 0);
     }
   }
-
   for (const auto & entry : g.edges()) {
     const EdgeKey & key = entry.first;
     const EdgeWeights & weights = entry.second;
@@ -315,7 +314,6 @@ void cmdExtract(GraphTable & table, std::istringstream & args,
 }
 
 }
-
 void loseva::runCommands(GraphTable & table, std::istream & in, std::ostream & out)
 {
   std::string line;
