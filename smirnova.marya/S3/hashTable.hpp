@@ -4,6 +4,8 @@
 #include "../common/list.hpp"
 #include "../common/vector.hpp"
 #include "blake2.hpp"
+#include "HashTableIterator.hpp"
+#include <stdexcept>
 
 namespace smirnova
 {
@@ -19,6 +21,8 @@ public:
     K key;
     V value;
   };
+
+  using Iterator = HashTableIterator<K, V, Hash, Equal>;
 
 private:
   Vector<List<Pair>> table;
@@ -67,7 +71,6 @@ public:
         return it.value().value;
       it.next();
     }
-
     throw std::runtime_error("not found");
   }
 
@@ -87,6 +90,70 @@ public:
     }
 
     b.pushBack(Pair{k, v});
+  }
+
+  V drop(const K& k)
+  {
+    size_t idx = index(k);
+    List<Pair>& b = table[idx];
+
+    LIter<Pair> it = b.begin();
+
+    while (it.valid())
+    {
+      if (eq(it.value().key, k))
+      {
+        V old = it.value().value;
+
+        List<Pair> newList;
+
+        LIter<Pair> jt = b.begin();
+        while (jt.valid())
+        {
+          if (!eq(jt.value().key, k))
+            newList.pushBack(jt.value());
+          jt.next();
+        }
+
+        b = newList;
+        return old;
+      }
+      it.next();
+    }
+
+    throw std::runtime_error("not found");
+  }
+
+  void rehash(size_t slots)
+  {
+    Vector<List<Pair>> old = table;
+
+    table = Vector<List<Pair>>();
+    n = slots;
+
+    for (size_t i = 0; i < n; ++i)
+      table.pushBack(List<Pair>());
+
+    for (size_t i = 0; i < old.size(); ++i)
+    {
+      LIter<Pair> it = old[i].begin();
+
+      while (it.valid())
+      {
+        add(it.value().key, it.value().value);
+        it.next();
+      }
+    }
+  }
+
+  Iterator begin()
+  {
+    return Iterator(this, 0);
+  }
+
+  Iterator end()
+  {
+    return Iterator(this, n);
   }
 };
 
