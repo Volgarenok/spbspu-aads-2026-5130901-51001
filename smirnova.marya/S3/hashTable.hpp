@@ -9,10 +9,8 @@
 
 namespace smirnova
 {
+template<class K, class V, class Hash = Blake2Hasher<K>, class Equal = std::equal_to<K>>
 
-template<class K, class V,
-         class Hash = Blake2Hasher<K>,
-         class Equal = std::equal_to<K>>
 class HashTable
 {
 public:

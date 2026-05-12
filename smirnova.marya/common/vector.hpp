@@ -2,6 +2,7 @@
 #define VECTOR_HPP
 
 #include <cstddef>
+#include <stdexcept>
 #include "vector-iter.hpp"
 
 namespace smirnova
@@ -35,6 +36,7 @@ public:
 
   void pushBack(const T& v);
   void pushBack(T&& v);
+  void popBack();
 
   VectorIterator<T> begin();
   VectorIterator<T> end();
@@ -101,6 +103,15 @@ void smirnova::Vector<T>::pushBack(T&& v)
 {
   ensureCapacity();
   data[sz++] = v;
+}
+
+template <typename T>
+void smirnova::Vector<T>::popBack()
+{
+  if (sz == 0)
+    throw std::out_of_range("pop_back on empty vector");
+
+  --sz;
 }
 
 template <typename T>

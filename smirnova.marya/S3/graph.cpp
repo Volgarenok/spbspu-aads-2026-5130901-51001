@@ -46,7 +46,7 @@ void smirnova::Graph::cut(const std::string& a, const std::string& b, int w)
         if (ws[j] == w)
         {
           ws[j] = ws[ws.size() - 1];
-          ws.pushBack(ws[ws.size() - 1]);
+          ws.popBack();
           return;
         }
       }
