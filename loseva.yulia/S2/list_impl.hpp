@@ -15,7 +15,7 @@ namespace loseva {
 
   template <typename T>
   List<T>::List(const List& other) : List() {
-    for (auto it = other.begin(); it != other.end(); ++it)
+    for (auto it = other.begin(); it != other.end(); ++it) {
       push_back(*it);
     }
   }
