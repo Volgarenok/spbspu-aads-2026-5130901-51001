@@ -2,7 +2,7 @@
 #define VECTOR_HPP
 
 #include <cstddef>
-#include "ector-Iterator.hpp"
+#include "vector-iter.hpp"
 
 namespace smirnova
 {

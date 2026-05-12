@@ -1,5 +1,5 @@
-#ifndef VECTORITERATOR_HPP
-#define VECTORITERATOR_HPP
+#ifndef VECTOR-ITER_HPP
+#define VECTOR-ITER_HPP
 
 namespace smirnova
 {

@@ -1,8 +1,8 @@
 #ifndef HASHTABLE_HPP
 #define HASHTABLE_HPP
 
+#include "../common/list.hpp"
 #include "../common/vector.hpp"
-#include "../common/vector.hpplist.hpp"
 #include "blake2.hpp"
 
 namespace smirnova
