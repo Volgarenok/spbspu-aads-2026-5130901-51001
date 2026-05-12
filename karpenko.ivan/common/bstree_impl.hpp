@@ -1,6 +1,7 @@
 #ifndef KARPENKO_BSTREE_IMPL_HPP
 #define KARPENKO_BSTREE_IMPL_HPP
 
+#include "bstree.hpp"
 #include <stdexcept>
 #include <utility>
 
