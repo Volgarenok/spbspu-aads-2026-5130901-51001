@@ -23,7 +23,7 @@ namespace loseva {
   List<T>& List<T>::operator=(const List& other) {
     if (this != &other) {
       clear();
-      for (auto it = other.begin(); it != other.end(); ++it)
+      for (auto it = other.begin(); it != other.end(); ++it) {
         push_back(*it);
       }
       return *this;
@@ -61,8 +61,9 @@ namespace loseva {
 
   template <typename T>
   void List<T>::clear() {
-    while (!empty())
+    while (!empty()) {
       pop_front();
+    }
   }
 
   template <typename T>
