@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <stdexcept>
+#include <utility>
 
 namespace yarmolinskaya
 {
@@ -12,13 +13,13 @@ namespace yarmolinskaya
   private:
     struct Node
     {
-      T data;
-      Node* next;
-
-      Node(const T& value):
+      explicit Node(const T& value):
         data(value),
         next(nullptr)
       {}
+
+      T data;
+      Node* next;
     };
 
   public:
@@ -27,11 +28,11 @@ namespace yarmolinskaya
       friend class List< T >;
 
     public:
-      Iterator(Node* ptr = nullptr):
+      explicit Iterator(Node* ptr = nullptr):
         ptr_(ptr)
       {}
 
-      T& operator*()
+      T& operator*() const
       {
         return ptr_->data;
       }
@@ -42,12 +43,12 @@ namespace yarmolinskaya
         return *this;
       }
 
-      bool operator!=(const Iterator& other) const
+      bool operator!=(const Iterator& other) const noexcept
       {
         return ptr_ != other.ptr_;
       }
 
-      bool operator==(const Iterator& other) const
+      bool operator==(const Iterator& other) const noexcept
       {
         return ptr_ == other.ptr_;
       }
@@ -74,6 +75,11 @@ namespace yarmolinskaya
       }
     }
 
+    ~List()
+    {
+      clear();
+    }
+
     List& operator=(const List& other)
     {
       if (this != &other)
@@ -83,11 +89,6 @@ namespace yarmolinskaya
       }
 
       return *this;
-    }
-
-    ~List()
-    {
-      clear();
     }
 
     bool empty() const noexcept
@@ -154,7 +155,8 @@ namespace yarmolinskaya
 
       if (!head_)
       {
-        head_ = tail_ = node;
+        head_ = node;
+        tail_ = node;
       }
       else
       {
@@ -193,25 +195,30 @@ namespace yarmolinskaya
       tail_ = nullptr;
     }
 
-    Iterator begin()
+    Iterator begin() noexcept
     {
       return Iterator(head_);
     }
 
-    Iterator end()
+    Iterator end() noexcept
+    {
+      return Iterator(nullptr);
+    }
+
+    Iterator begin() const noexcept
+    {
+      return Iterator(head_);
+    }
+
+    Iterator end() const noexcept
     {
       return Iterator(nullptr);
     }
 
     void swap(List& other) noexcept
     {
-      Node* tmpHead = head_;
-      head_ = other.head_;
-      other.head_ = tmpHead;
-
-      Node* tmpTail = tail_;
-      tail_ = other.tail_;
-      other.tail_ = tmpTail;
+      std::swap(head_, other.head_);
+      std::swap(tail_, other.tail_);
     }
 
   private:
