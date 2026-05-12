@@ -1,5 +1,5 @@
-#ifndef LIST_IMPL_HPP
-#define LIST_IMPL_HPP
+#ifndef LOSEVA_LIST_IMPL_HPP
+#define LOSEVA_LIST_IMPL_HPP
 
 #include <stdexcept>
 
@@ -17,8 +17,8 @@ namespace loseva {
   List<T>::List(const List& other) : List() {
     for (auto it = other.begin(); it != other.end(); ++it)
       push_back(*it);
+    }
   }
-
   template <typename T>
   List<T>& List<T>::operator=(const List& other) {
     if (this != &other) {
