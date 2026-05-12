@@ -26,6 +26,7 @@ namespace yarmolinskaya
       {
         throw std::logic_error("queue empty");
       }
+
       data_.pop_front();
     }
 
@@ -35,6 +36,17 @@ namespace yarmolinskaya
       {
         throw std::logic_error("queue empty");
       }
+
+      return data_.front();
+    }
+
+    const T& front() const
+    {
+      if (empty())
+      {
+        throw std::logic_error("queue empty");
+      }
+
       return data_.front();
     }
 

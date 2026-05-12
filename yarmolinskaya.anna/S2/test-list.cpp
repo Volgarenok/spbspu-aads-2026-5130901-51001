@@ -1,37 +1,54 @@
 #define BOOST_TEST_MODULE S2
+
 #include <boost/test/included/unit_test.hpp>
 #include "common/list.hpp"
 
 using namespace yarmolinskaya;
 
-BOOST_AUTO_TEST_CASE(push_and_iterate)
+BOOST_AUTO_TEST_CASE(empty_test)
 {
-  List<int> l;
-  l.push_back(1);
-  l.push_back(2);
-  l.push_back(3);
+  List< int > list;
+  BOOST_TEST(list.empty());
+}
 
-  auto it = l.begin();
-  BOOST_TEST(*it == 1); ++it;
-  BOOST_TEST(*it == 2); ++it;
+BOOST_AUTO_TEST_CASE(push_back_test)
+{
+  List< int > list;
+
+  list.push_back(1);
+  list.push_back(2);
+  list.push_back(3);
+
+  auto it = list.begin();
+
+  BOOST_TEST(*it == 1);
+  ++it;
+
+  BOOST_TEST(*it == 2);
+  ++it;
+
   BOOST_TEST(*it == 3);
 }
 
-BOOST_AUTO_TEST_CASE(push_front)
+BOOST_AUTO_TEST_CASE(push_front_test)
 {
-  List<int> l;
-  l.push_front(2);
-  l.push_front(1);
+  List< int > list;
 
-  BOOST_TEST(l.front() == 1);
+  list.push_front(3);
+  list.push_front(2);
+  list.push_front(1);
+
+  BOOST_TEST(list.front() == 1);
 }
 
-BOOST_AUTO_TEST_CASE(pop_front)
+BOOST_AUTO_TEST_CASE(pop_front_test)
 {
-  List<int> l;
-  l.push_back(1);
-  l.push_back(2);
-  l.pop_front();
+  List< int > list;
 
-  BOOST_TEST(l.front() == 2);
+  list.push_back(1);
+  list.push_back(2);
+
+  list.pop_front();
+
+  BOOST_TEST(list.front() == 2);
 }

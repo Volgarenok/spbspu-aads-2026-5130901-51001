@@ -1,38 +1,117 @@
 #include "expression.hpp"
 #include "stack.hpp"
-#include <stdexcept>
+
 #include <cctype>
+#include <stdexcept>
 
 namespace
 {
   int priority(const std::string& op)
   {
-    if (op == "+" || op == "-") return 1;
-    if (op == "*" || op == "/" || op == "%") return 2;
-    if (op == "^") return 0;
+    if (op == "^")
+    {
+      return 0;
+    }
+
+    if (op == "+" || op == "-")
+    {
+      return 1;
+    }
+
+    if (op == "*" || op == "/" || op == "%")
+    {
+      return 2;
+    }
+
     return -1;
   }
 
   bool isNumber(const std::string& s)
   {
-    if (s.empty()) return false;
+    if (s.empty())
+    {
+      return false;
+    }
+
     for (char c : s)
     {
-      if (!std::isdigit(c)) return false;
+      if (!std::isdigit(c))
+      {
+        return false;
+      }
     }
+
     return true;
   }
 
-  long apply(long a, long b, const std::string& op)
+  long apply(long lhs, long rhs, const std::string& op)
   {
-    if (op == "+") return a + b;
-    if (op == "-") return a - b;
-    if (op == "*") return a * b;
-    if (op == "/") return a / b;
-    if (op == "%") return a % b;
-    if (op == "^") return a ^ b;
+    if (op == "+")
+    {
+      return lhs + rhs;
+    }
+
+    if (op == "-")
+    {
+      return lhs - rhs;
+    }
+
+    if (op == "*")
+    {
+      return lhs * rhs;
+    }
+
+    if (op == "/")
+    {
+      if (rhs == 0)
+      {
+        throw std::logic_error("division by zero");
+      }
+
+      return lhs / rhs;
+    }
+
+    if (op == "%")
+    {
+      if (rhs == 0)
+      {
+        throw std::logic_error("division by zero");
+      }
+
+      return lhs % rhs;
+    }
+
+    if (op == "^")
+    {
+      return lhs ^ rhs;
+    }
 
     throw std::logic_error("unknown operator");
+  }
+
+  void calculateTop(yarmolinskaya::Stack< long >& values,
+                    yarmolinskaya::Stack< std::string >& ops)
+  {
+    if (values.empty())
+    {
+      throw std::logic_error("invalid expression");
+    }
+
+    long rhs = values.top();
+    values.pop();
+
+    if (values.empty())
+    {
+      throw std::logic_error("invalid expression");
+    }
+
+    long lhs = values.top();
+    values.pop();
+
+    std::string op = ops.top();
+    ops.pop();
+
+    values.push(apply(lhs, rhs, op));
   }
 }
 
@@ -40,8 +119,8 @@ namespace yarmolinskaya
 {
   long evaluateExpression(const std::string& line)
   {
-    Stack<long> values;
-    Stack<std::string> ops;
+    Stack< long > values;
+    Stack< std::string > ops;
 
     std::string token;
 
@@ -49,7 +128,10 @@ namespace yarmolinskaya
     {
       if (i == line.size() || line[i] == ' ')
       {
-        if (token.empty()) continue;
+        if (token.empty())
+        {
+          continue;
+        }
 
         if (isNumber(token))
         {
@@ -63,23 +145,25 @@ namespace yarmolinskaya
         {
           while (!ops.empty() && ops.top() != "(")
           {
-            long b = values.top(); values.pop();
-            long a = values.top(); values.pop();
-            values.push(apply(a, b, ops.top()));
-            ops.pop();
+            calculateTop(values, ops);
           }
+
+          if (ops.empty())
+          {
+            throw std::logic_error("invalid brackets");
+          }
+
           ops.pop();
         }
         else
         {
           while (!ops.empty() &&
+                 ops.top() != "(" &&
                  priority(ops.top()) >= priority(token))
           {
-            long b = values.top(); values.pop();
-            long a = values.top(); values.pop();
-            values.push(apply(a, b, ops.top()));
-            ops.pop();
+            calculateTop(values, ops);
           }
+
           ops.push(token);
         }
 
@@ -93,12 +177,22 @@ namespace yarmolinskaya
 
     while (!ops.empty())
     {
-      long b = values.top(); values.pop();
-      long a = values.top(); values.pop();
-      values.push(apply(a, b, ops.top()));
-      ops.pop();
+      if (ops.top() == "(")
+      {
+        throw std::logic_error("invalid brackets");
+      }
+
+      calculateTop(values, ops);
     }
 
-    return values.top();
+    long result = values.top();
+    values.pop();
+
+    if (!values.empty())
+    {
+      throw std::logic_error("invalid expression");
+    }
+
+    return result;
   }
 }

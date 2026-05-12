@@ -1,9 +1,9 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string>
 
-#include "expression.hpp"
 #include "common/list.hpp"
+#include "expression.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -12,13 +12,26 @@ int main(int argc, char* argv[])
   std::istream* input = &std::cin;
   std::ifstream file;
 
-  if (argc > 1)
+  if (argc > 2)
+  {
+    std::cerr << "invalid arguments\n";
+    return 1;
+  }
+
+  if (argc == 2)
   {
     file.open(argv[1]);
+
+    if (!file)
+    {
+      std::cerr << "cannot open file\n";
+      return 1;
+    }
+
     input = &file;
   }
 
-  List<long> results;
+  List< long > results;
   std::string line;
 
   try
@@ -36,6 +49,7 @@ int main(int argc, char* argv[])
     for (auto it = results.begin(); it != results.end(); ++it)
     {
       std::cout << *it;
+
       auto next = it;
       ++next;
 
