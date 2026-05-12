@@ -42,28 +42,28 @@ BSTree<Key, Value, Compare>& BSTree<Key, Value, Compare>::operator=(BSTree&& oth
 
 template <typename Key, typename Value, typename Compare>
 void BSTree<Key, Value, Compare>::push(const Key& k, Value v) {
-    Node* newNode = new Node(k, std::move(v));
     if (fake_root->left == nullptr) {
-        fake_root->left = newNode;
-        newNode->parent = fake_root;
+        fake_root->left = new Node(k, std::move(v));
+        fake_root->left->parent = fake_root;
         return;
     }
 
     Node* current = fake_root->left;
     Node* parent = fake_root;
+
     while (current) {
         parent = current;
-        if (cmp(k, current->data.first))
+        if (cmp(k, current->data.first)) {
             current = current->left;
-        else if (cmp(current->data.first, k))
+        } else if (cmp(current->data.first, k)) {
             current = current->right;
-        else {
-            delete newNode;
+        } else {
             current->data.second = std::move(v);
             return;
         }
     }
 
+    Node* newNode = new Node(k, std::move(v));
     if (cmp(k, parent->data.first))
         parent->left = newNode;
     else
@@ -118,12 +118,15 @@ BSTree<Key, Value, Compare>::rotateLeft(const_iterator it) {
     Node* p = x->parent;
     if (x != p->right)
         throw std::logic_error("node is not a right child for left rotation");
+
     p->right = x->left;
     if (x->left) x->left->parent = p;
     x->left = p;
     x->parent = p->parent;
-    if (p->parent->left == p) p->parent->left = x;
-    else p->parent->right = x;
+    if (p->parent->left == p)
+        p->parent->left = x;
+    else
+        p->parent->right = x;
     p->parent = x;
     return const_iterator(x);
 }
@@ -137,12 +140,15 @@ BSTree<Key, Value, Compare>::rotateRight(const_iterator it) {
     Node* p = x->parent;
     if (x != p->left)
         throw std::logic_error("node is not a left child for right rotation");
+
     p->left = x->right;
     if (x->right) x->right->parent = p;
     x->right = p;
     x->parent = p->parent;
-    if (p->parent->left == p) p->parent->left = x;
-    else p->parent->right = x;
+    if (p->parent->left == p)
+        p->parent->left = x;
+    else
+        p->parent->right = x;
     p->parent = x;
     return const_iterator(x);
 }
@@ -157,6 +163,7 @@ BSTree<Key, Value, Compare>::rotateLargeLeft(const_iterator it) {
     Node* g = p->parent;
     if (p != g->right || x != p->left)
         throw std::logic_error("wrong structure for large left rotation");
+
     rotateRight(const_iterator(x));
     return rotateLeft(const_iterator(x));
 }
@@ -171,6 +178,7 @@ BSTree<Key, Value, Compare>::rotateLargeRight(const_iterator it) {
     Node* g = p->parent;
     if (p != g->left || x != p->right)
         throw std::logic_error("wrong structure for large right rotation");
+
     rotateLeft(const_iterator(x));
     return rotateRight(const_iterator(x));
 }
@@ -190,9 +198,12 @@ typename BSTree<Key, Value, Compare>::Node*
 BSTree<Key, Value, Compare>::find_node(const Key& k) const {
     Node* cur = fake_root->left;
     while (cur) {
-        if (cmp(k, cur->data.first)) cur = cur->left;
-        else if (cmp(cur->data.first, k)) cur = cur->right;
-        else return cur;
+        if (cmp(k, cur->data.first))
+            cur = cur->left;
+        else if (cmp(cur->data.first, k))
+            cur = cur->right;
+        else
+            return cur;
     }
     return nullptr;
 }
@@ -201,6 +212,7 @@ template <typename Key, typename Value, typename Compare>
 void BSTree<Key, Value, Compare>::remove_node(Node* n) {
     if (!n || n == fake_root)
         throw std::logic_error("invalid node for removal");
+
     if (n->left && n->right) {
         Node* succ = n->right;
         while (succ->left) succ = succ->left;
@@ -208,10 +220,13 @@ void BSTree<Key, Value, Compare>::remove_node(Node* n) {
         n->data.second = std::move(succ->data.second);
         n = succ;
     }
+
     Node* child = n->left ? n->left : n->right;
     if (child) child->parent = n->parent;
-    if (n->parent->left == n) n->parent->left = child;
-    else n->parent->right = child;
+    if (n->parent->left == n)
+        n->parent->left = child;
+    else
+        n->parent->right = child;
     delete n;
 }
 
