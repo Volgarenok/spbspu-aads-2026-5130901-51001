@@ -24,7 +24,7 @@ using VertexSet = std::set< std::string >;
 
 class Graph {
 public:
-  explicit Graph(std::size_t edgeCapacity = 64);
+  Graph(std::size_t edgeCapacity = 64);
 
   Graph(const Graph &) = default;
   Graph(Graph &&) = default;
@@ -34,6 +34,7 @@ public:
   void addVertex(const std::string & v);
   void addEdge(const std::string & from, const std::string & to,
     unsigned int weight);
+
   bool removeEdge(const std::string & from, const std::string & to,
     unsigned int weight);
 
