@@ -9,7 +9,7 @@
 namespace karpenko
 {
 
-void split(const std::string& s, std::string*& out, size_t& count)
+inline void split(const std::string& s, std::string*& out, size_t& count)
 {
   count = 0;
   size_t pos = 0;
@@ -78,8 +78,8 @@ public:
   size_t height(const_iterator it) const;
 
 private:
-  Node* fake_root_;
-  Compare cmp_;
+  Node* fake_root;
+  Compare cmp;
 
   Node* find_node(const Key& k) const;
   void remove_node(Node* n);
