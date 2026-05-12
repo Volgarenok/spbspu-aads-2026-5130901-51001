@@ -6,7 +6,8 @@
 namespace loseva {
 
   template <typename T>
-  List<T>::List() : head_(nullptr), tail_(nullptr), size_(0) {}
+  List<T>::List() : head_(nullptr), tail_(nullptr), size_(0) {
+  }
 
   template <typename T>
   List<T>::~List() {
