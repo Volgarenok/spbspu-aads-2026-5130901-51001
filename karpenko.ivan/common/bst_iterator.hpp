@@ -2,6 +2,7 @@
 #define KARPENKO_BST_ITERATOR_HPP
 
 #include "tree_node.hpp"
+#include <ostream>
 
 namespace karpenko {
 
@@ -76,6 +77,26 @@ public:
     bool operator==(const BSTConstIterator& other) const { return node == other.node; }
     bool operator!=(const BSTConstIterator& other) const { return node != other.node; }
 };
+
+template <typename Key, typename Value>
+std::ostream& operator<<(std::ostream& os, const BSTIterator<Key, Value>& it) {
+    if (it.node) {
+        os << "iterator( key=" << it.node->data.first << " )";
+    } else {
+        os << "end-iterator";
+    }
+    return os;
+}
+
+template <typename Key, typename Value>
+std::ostream& operator<<(std::ostream& os, const BSTConstIterator<Key, Value>& it) {
+    if (it.node) {
+        os << "const_iterator( key=" << it.node->data.first << " )";
+    } else {
+        os << "end-const_iterator";
+    }
+    return os;
+}
 
 }
 
