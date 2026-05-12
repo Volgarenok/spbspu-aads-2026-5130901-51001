@@ -77,6 +77,6 @@ public:
     bool operator!=(const BSTConstIterator& other) const { return node != other.node; }
 };
 
-} // namespace karpenko
+}
 
 #endif
