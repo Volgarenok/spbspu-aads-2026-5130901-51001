@@ -1,8 +1,9 @@
 #ifndef QUEUE_HPP
 #define QUEUE_HPP
 
-#include "common/list.hpp"
 #include <stdexcept>
+
+#include "common/list.hpp"
 
 namespace yarmolinskaya
 {

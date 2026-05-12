@@ -7,8 +7,6 @@
 
 int main(int argc, char* argv[])
 {
-  using namespace yarmolinskaya;
-
   std::istream* input = &std::cin;
   std::ifstream file;
 
@@ -31,7 +29,7 @@ int main(int argc, char* argv[])
     input = &file;
   }
 
-  List< long > results;
+  yarmolinskaya::List< long > results;
   std::string line;
 
   try
@@ -43,27 +41,34 @@ int main(int argc, char* argv[])
         continue;
       }
 
-      results.push_front(evaluateExpression(line));
+      results.push_front(
+        yarmolinskaya::evaluateExpression(line)
+      );
     }
 
-    for (auto it = results.begin(); it != results.end(); ++it)
+    yarmolinskaya::List< long >::Iterator it =
+      results.begin();
+
+    while (it != results.end())
     {
       std::cout << *it;
 
-      auto next = it;
+      yarmolinskaya::List< long >::Iterator next = it;
       ++next;
 
       if (next != results.end())
       {
         std::cout << " ";
       }
+
+      ++it;
     }
 
     std::cout << "\n";
   }
-  catch (const std::exception& e)
+  catch (const std::exception& error)
   {
-    std::cerr << e.what() << "\n";
+    std::cerr << error.what() << "\n";
     return 1;
   }
 

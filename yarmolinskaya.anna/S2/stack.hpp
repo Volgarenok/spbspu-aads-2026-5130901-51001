@@ -1,8 +1,9 @@
 #ifndef STACK_HPP
 #define STACK_HPP
 
-#include "common/list.hpp"
 #include <stdexcept>
+
+#include "common/list.hpp"
 
 namespace yarmolinskaya
 {
