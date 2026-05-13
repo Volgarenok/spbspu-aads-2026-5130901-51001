@@ -76,6 +76,30 @@ public:
     Node * node = new Node(value);
     linkBack(node);
   }
+  void popFront()
+  {
+    Node * tmp = head_;
+    head_ = head_->next_;
+    if (head_ != nullptr) {
+      head_->prev_ = nullptr;
+    } else {
+      tail_ = nullptr;
+    }
+    delete tmp;
+    --size_;
+  }
+  void popBack()
+  {
+    Node * tmp = tail_;
+    tail_ = tail_->prev_;
+    if (tail_ != nullptr) {
+      tail_->next_ = nullptr;
+    } else {
+      head_ = nullptr;
+    }
+    delete tmp;
+    --size_;
+  }
   void clear()
   {
     while (head_ != nullptr) {
