@@ -33,6 +33,17 @@ public:
     node_ = node_->next_;
     return tmp;
   }
+  LIter & operator--()
+  {
+    node_ = node_->prev_;
+    return *this;
+  }
+  LIter operator--(int)
+  {
+    LIter tmp(*this);
+    node_ = node_->prev_;
+    return tmp;
+  }
   bool operator==(const LIter & rhs) const
   {
     return node_ == rhs.node_;
@@ -75,6 +86,17 @@ public:
   {
     LCIter tmp(*this);
     node_ = node_->next_;
+    return tmp;
+  }
+  LCIter & operator--()
+  {
+    node_ = node_->prev_;
+    return *this;
+  }
+  LCIter operator--(int)
+  {
+    LCIter tmp(*this);
+    node_ = node_->prev_;
     return tmp;
   }
   bool operator==(const LCIter & rhs) const
