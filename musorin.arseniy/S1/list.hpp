@@ -14,9 +14,31 @@ public:
     tail_(nullptr),
     size_(0)
   {}
+  List(const List & other):
+    head_(nullptr),
+    tail_(nullptr),
+    size_(0)
+  {
+    try {
+      for (auto it = other.cbegin(); it != other.cend(); ++it) {
+        pushBack(*it);
+      }
+    } catch (...) {
+      clear();
+      throw;
+    }
+  }
   ~List()
   {
     clear();
+  }
+  List & operator=(const List & other)
+  {
+    if (this != &other) {
+      List tmp(other);
+      swap(tmp);
+    }
+    return *this;
   }
   iterator begin()
   {
@@ -109,6 +131,18 @@ public:
     }
     tail_ = nullptr;
     size_ = 0;
+  }
+  void swap(List & other) noexcept
+  {
+    Node * tmpH = head_;
+    Node * tmpT = tail_;
+    std::size_t tmpS = size_;
+    head_ = other.head_;
+    tail_ = other.tail_;
+    size_ = other.size_;
+    other.head_ = tmpH;
+    other.tail_ = tmpT;
+    other.size_ = tmpS;
   }
 private:
   using Node = detail::Node< T >;
