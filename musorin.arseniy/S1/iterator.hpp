@@ -48,5 +48,49 @@ private:
   {}
   Node * node_;
 };
+template< class T >
+class LCIter {
+  friend class List< T >;
+public:
+  LCIter():
+    node_(nullptr)
+  {}
+  LCIter(const LIter< T > & other):
+    node_(other.node_)
+  {}
+  const T & operator*() const
+  {
+    return node_->value_;
+  }
+  const T * operator->() const
+  {
+    return &(node_->value_);
+  }
+  LCIter & operator++()
+  {
+    node_ = node_->next_;
+    return *this;
+  }
+  LCIter operator++(int)
+  {
+    LCIter tmp(*this);
+    node_ = node_->next_;
+    return tmp;
+  }
+  bool operator==(const LCIter & rhs) const
+  {
+    return node_ == rhs.node_;
+  }
+  bool operator!=(const LCIter & rhs) const
+  {
+    return node_ != rhs.node_;
+  }
+private:
+  using Node = detail::Node< T >;
+  explicit LCIter(const Node * node):
+    node_(node)
+  {}
+  const Node * node_;
+};
 }
 #endif
