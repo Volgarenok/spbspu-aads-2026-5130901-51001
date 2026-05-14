@@ -117,4 +117,33 @@ BOOST_AUTO_TEST_CASE(const_iterator_iterates)
   BOOST_CHECK_EQUAL(sum, 3);
 }
 
+BOOST_AUTO_TEST_SUITE(graph_tests)
+
+BOOST_AUTO_TEST_CASE(add_edge_and_has_vertex)
+{
+  losev::Graph g("test");
+  g.addEdge("a", "b", 10);
+  BOOST_CHECK(g.hasVertex("a"));
+  BOOST_CHECK(g.hasVertex("b"));
+}
+
+BOOST_AUTO_TEST_CASE(get_weights_returns_correct_list)
+{
+  losev::Graph g("test");
+  g.addEdge("a", "b", 10);
+  g.addEdge("a", "b", 20);
+  
+  const losev::List<int>* weights = g.getWeights("a", "b");
+  BOOST_CHECK(weights != nullptr);
+  BOOST_CHECK_EQUAL(weights->size(), 2u);
+}
+
+BOOST_AUTO_TEST_CASE(has_edge_returns_true)
+{
+  losev::Graph g("test");
+  g.addEdge("a", "b", 10);
+  BOOST_CHECK(g.hasEdge("a", "b"));
+  BOOST_CHECK(!g.hasEdge("a", "c"));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
