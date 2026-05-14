@@ -4,6 +4,8 @@
 #include <string>
 #include <utility>
 #include <stdexcept>
+#include <vector>
+#include <algorithm>
 
 #include "hash_table.hpp"
 #include "../common/list.h"
@@ -26,7 +28,7 @@ public:
   {
     addVertex(from);
     addVertex(to);
-    
+
     VertexPair key(from, to);
     if (edges_.has(key)) {
       WeightList& weights = edges_.get(key);
@@ -68,6 +70,62 @@ public:
   const std::string& name() const
   {
     return name_;
+  }
+
+  std::vector<std::string> getVerticesSorted() const
+  {
+    std::vector<std::string> result;
+    for (auto it = vertices_.begin(); it != vertices_.end(); ++it) {
+      result.push_back(it->first);
+    }
+    std::sort(result.begin(), result.end());
+    return result;
+  }
+
+  std::vector<std::pair<std::string, std::vector<int>>> getOutbound(const std::string& vertex) const
+  {
+    std::vector<std::pair<std::string, std::vector<int>>> result;
+
+    for (auto it = edges_.begin(); it != edges_.end(); ++it) {
+      const VertexPair& key = it->first;
+      if (key.first == vertex) {
+        std::vector<int> weights;
+        const WeightList& weightList = it->second;
+        for (auto wit = weightList.begin(); wit != weightList.end(); ++wit) {
+          weights.push_back(*wit);
+        }
+        std::sort(weights.begin(), weights.end());
+        result.push_back({key.second, weights});
+      }
+    }
+
+    std::sort(result.begin(), result.end(),
+      [](const auto& a, const auto& b) { return a.first < b.first; });
+
+    return result;
+  }
+
+  std::vector<std::pair<std::string, std::vector<int>>> getInbound(const std::string& vertex) const
+  {
+    std::vector<std::pair<std::string, std::vector<int>>> result;
+
+    for (auto it = edges_.begin(); it != edges_.end(); ++it) {
+      const VertexPair& key = it->first;
+      if (key.second == vertex) {
+        std::vector<int> weights;
+        const WeightList& weightList = it->second;
+        for (auto wit = weightList.begin(); wit != weightList.end(); ++wit) {
+          weights.push_back(*wit);
+        }
+        std::sort(weights.begin(), weights.end());
+        result.push_back({key.first, weights});
+      }
+    }
+
+    std::sort(result.begin(), result.end(),
+      [](const auto& a, const auto& b) { return a.first < b.first; });
+
+    return result;
   }
 
 private:
