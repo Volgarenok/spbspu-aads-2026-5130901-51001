@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "hash_table.hpp"
+#include "sip_hash.hpp"
 #include "../common/list.h"
 
 namespace losev {
@@ -67,6 +68,35 @@ public:
     return nullptr;
   }
 
+  bool cut(const std::string& from, const std::string& to, int weight)
+  {
+    VertexPair key(from, to);
+    if (!edges_.has(key)) {
+      return false;
+    }
+
+    WeightList weights = edges_.get(key);
+    WeightList newWeights;
+    bool found = false;
+
+    for (auto it = weights.begin(); it != weights.end(); ++it) {
+      if (!found && *it == weight) {
+        found = true;
+      } else {
+        newWeights.push_front(*it);
+      }
+    }
+
+    if (found) {
+      edges_.drop(key);
+      if (!newWeights.empty()) {
+        edges_.add(key, newWeights);
+      }
+      return true;
+    }
+    return false;
+  }
+
   const std::string& name() const
   {
     return name_;
@@ -76,7 +106,8 @@ public:
   {
     std::vector<std::string> result;
     for (auto it = vertices_.begin(); it != vertices_.end(); ++it) {
-      result.push_back(it->first);
+      auto pair = *it;
+      result.push_back(pair.first);
     }
     std::sort(result.begin(), result.end());
     return result;
@@ -87,10 +118,12 @@ public:
     std::vector<std::pair<std::string, std::vector<int>>> result;
 
     for (auto it = edges_.begin(); it != edges_.end(); ++it) {
-      const VertexPair& key = it->first;
+      auto pair = *it;
+      const VertexPair& key = pair.first;
+      const WeightList& weightList = pair.second;
+
       if (key.first == vertex) {
         std::vector<int> weights;
-        const WeightList& weightList = it->second;
         for (auto wit = weightList.begin(); wit != weightList.end(); ++wit) {
           weights.push_back(*wit);
         }
@@ -110,10 +143,12 @@ public:
     std::vector<std::pair<std::string, std::vector<int>>> result;
 
     for (auto it = edges_.begin(); it != edges_.end(); ++it) {
-      const VertexPair& key = it->first;
+      auto pair = *it;
+      const VertexPair& key = pair.first;
+      const WeightList& weightList = pair.second;
+
       if (key.second == vertex) {
         std::vector<int> weights;
-        const WeightList& weightList = it->second;
         for (auto wit = weightList.begin(); wit != weightList.end(); ++wit) {
           weights.push_back(*wit);
         }
@@ -124,6 +159,72 @@ public:
 
     std::sort(result.begin(), result.end(),
       [](const auto& a, const auto& b) { return a.first < b.first; });
+
+    return result;
+  }
+
+  static Graph create(const std::string& name, const std::vector<std::string>& vertices)
+  {
+    Graph g(name);
+    for (const auto& v : vertices) {
+      g.addVertex(v);
+    }
+    return g;
+  }
+
+  static Graph merge(const std::string& newName, const Graph& g1, const Graph& g2)
+  {
+    Graph result(newName);
+
+    for (auto it = g1.edges_.begin(); it != g1.edges_.end(); ++it) {
+      auto pair = *it;
+      const VertexPair& key = pair.first;
+      const WeightList& weights = pair.second;
+      for (auto wit = weights.begin(); wit != weights.end(); ++wit) {
+        result.addEdge(key.first, key.second, *wit);
+      }
+    }
+
+    for (auto it = g2.edges_.begin(); it != g2.edges_.end(); ++it) {
+      auto pair = *it;
+      const VertexPair& key = pair.first;
+      const WeightList& weights = pair.second;
+      for (auto wit = weights.begin(); wit != weights.end(); ++wit) {
+        result.addEdge(key.first, key.second, *wit);
+      }
+    }
+
+    return result;
+  }
+
+  static Graph extract(const Graph& source, const std::string& newName,
+                       const std::vector<std::string>& vertices)
+  {
+    Graph result(newName);
+
+    for (const auto& v : vertices) {
+      result.addVertex(v);
+    }
+
+    for (auto it = source.edges_.begin(); it != source.edges_.end(); ++it) {
+      auto pair = *it;
+      const VertexPair& key = pair.first;
+
+      bool fromIn = false;
+      bool toIn = false;
+
+      for (const auto& v : vertices) {
+        if (key.first == v) fromIn = true;
+        if (key.second == v) toIn = true;
+      }
+
+      if (fromIn && toIn) {
+        const WeightList& weights = pair.second;
+        for (auto wit = weights.begin(); wit != weights.end(); ++wit) {
+          result.addEdge(key.first, key.second, *wit);
+        }
+      }
+    }
 
     return result;
   }

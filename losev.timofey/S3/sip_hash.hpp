@@ -109,15 +109,6 @@ struct SipHash<std::pair<std::string, std::string>>
   }
 };
 
-template<>
-struct SipHash<std::pair<std::string, std::string>>
-{
-  uint64_t operator()(const std::pair<std::string, std::string>& key) const
-  {
-    return hashPair(key);
-  }
-};
-
 }
 
 #endif

@@ -221,7 +221,20 @@ public:
     return false;
   }
 
-  Value get(const Key& key) const
+  Value& get(const Key& key)
+  {
+    size_t idx = bucketIndex(key);
+    Node* current = buckets_[idx];
+    while (current != nullptr) {
+      if (equal_(current->key, key)) {
+        return current->value;
+      }
+      current = current->next;
+    }
+    throw std::out_of_range("key not found");
+  }
+
+  const Value& get(const Key& key) const
   {
     size_t idx = bucketIndex(key);
     Node* current = buckets_[idx];

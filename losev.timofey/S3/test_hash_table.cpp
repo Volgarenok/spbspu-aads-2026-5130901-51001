@@ -74,9 +74,9 @@ BOOST_AUTO_TEST_CASE(rehash_redistributes)
   }
   BOOST_CHECK_EQUAL(table.bucketCount(), 4u);
   BOOST_CHECK_EQUAL(table.size(), 20u);
-  
+
   table.rehash(100);
-  
+
   BOOST_CHECK_EQUAL(table.bucketCount(), 100u);
   BOOST_CHECK_EQUAL(table.size(), 20u);
   for (int i = 0; i < 20; ++i) {
@@ -93,7 +93,8 @@ BOOST_AUTO_TEST_CASE(iterator_iterates_all_elements)
 
   int sum = 0;
   for (auto it = table.begin(); it != table.end(); ++it) {
-    sum += it->second;
+    auto pair = *it;
+    sum += pair.second;
   }
   BOOST_CHECK_EQUAL(sum, 6);
 
@@ -106,16 +107,20 @@ BOOST_AUTO_TEST_CASE(iterator_iterates_all_elements)
 
 BOOST_AUTO_TEST_CASE(const_iterator_iterates)
 {
-  const losev::HashTable<std::string, int> table(4);
+  losev::HashTable<std::string, int> table(4);
   table.add("a", 1);
   table.add("b", 2);
 
+  const auto& constTable = table;
   int sum = 0;
-  for (auto it = table.begin(); it != table.end(); ++it) {
-    sum += it->second;
+  for (auto it = constTable.begin(); it != constTable.end(); ++it) {
+    auto pair = *it;
+    sum += pair.second;
   }
   BOOST_CHECK_EQUAL(sum, 3);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(graph_tests)
 
@@ -132,10 +137,16 @@ BOOST_AUTO_TEST_CASE(get_weights_returns_correct_list)
   losev::Graph g("test");
   g.addEdge("a", "b", 10);
   g.addEdge("a", "b", 20);
-  
+
   const losev::List<int>* weights = g.getWeights("a", "b");
-  BOOST_CHECK(weights != nullptr);
-  BOOST_CHECK_EQUAL(weights->size(), 2u);
+  BOOST_REQUIRE(weights != nullptr);
+  
+  // Подсчет через итератор
+  int count = 0;
+  for (auto it = weights->begin(); it != weights->end(); ++it) {
+    ++count;
+  }
+  BOOST_CHECK_EQUAL(count, 2);
 }
 
 BOOST_AUTO_TEST_CASE(has_edge_returns_true)
@@ -203,6 +214,98 @@ BOOST_AUTO_TEST_CASE(get_vertices_sorted_returns_all_vertices)
   BOOST_CHECK_EQUAL(vertices[1], "b");
   BOOST_CHECK_EQUAL(vertices[2], "c");
   BOOST_CHECK_EQUAL(vertices[3], "d");
+}
+
+BOOST_AUTO_TEST_CASE(cut_removes_one_edge)
+{
+  losev::Graph g("test");
+  g.addEdge("a", "b", 10);
+  g.addEdge("a", "b", 20);
+  g.addEdge("a", "b", 10);
+
+  bool result = g.cut("a", "b", 10);
+  BOOST_CHECK(result);
+
+  const losev::List<int>* weights = g.getWeights("a", "b");
+  BOOST_CHECK(weights != nullptr);
+
+  int count = 0;
+  for (auto it = weights->begin(); it != weights->end(); ++it) {
+    ++count;
+  }
+  BOOST_CHECK_EQUAL(count, 2);
+}
+
+BOOST_AUTO_TEST_CASE(cut_removes_last_edge)
+{
+  losev::Graph g("test");
+  g.addEdge("a", "b", 10);
+
+  bool result = g.cut("a", "b", 10);
+  BOOST_CHECK(result);
+  BOOST_CHECK(!g.hasEdge("a", "b"));
+}
+
+BOOST_AUTO_TEST_CASE(cut_nonexistent_returns_false)
+{
+  losev::Graph g("test");
+  g.addEdge("a", "b", 10);
+
+  bool result = g.cut("a", "b", 99);
+  BOOST_CHECK(!result);
+  BOOST_CHECK(g.hasEdge("a", "b"));
+}
+
+BOOST_AUTO_TEST_CASE(create_graph_with_vertices)
+{
+  std::vector<std::string> vertices = {"x", "y", "z"};
+  losev::Graph g = losev::Graph::create("new", vertices);
+
+  BOOST_CHECK(g.hasVertex("x"));
+  BOOST_CHECK(g.hasVertex("y"));
+  BOOST_CHECK(g.hasVertex("z"));
+  BOOST_CHECK_EQUAL(g.name(), "new");
+}
+
+BOOST_AUTO_TEST_CASE(merge_two_graphs)
+{
+  losev::Graph g1("g1");
+  g1.addEdge("a", "b", 10);
+  g1.addEdge("a", "c", 20);
+
+  losev::Graph g2("g2");
+  g2.addEdge("b", "c", 30);
+  g2.addEdge("a", "b", 40);
+
+  losev::Graph merged = losev::Graph::merge("merged", g1, g2);
+
+  BOOST_CHECK(merged.hasVertex("a"));
+  BOOST_CHECK(merged.hasVertex("b"));
+  BOOST_CHECK(merged.hasVertex("c"));
+
+  auto outboundA = merged.getOutbound("a");
+  BOOST_CHECK_EQUAL(outboundA.size(), 2);
+}
+
+BOOST_AUTO_TEST_CASE(extract_subgraph)
+{
+  losev::Graph g("original");
+  g.addEdge("a", "b", 10);
+  g.addEdge("a", "c", 20);
+  g.addEdge("b", "c", 30);
+  g.addEdge("c", "a", 40);
+
+  std::vector<std::string> vertices = {"a", "b"};
+  losev::Graph extracted = losev::Graph::extract(g, "sub", vertices);
+
+  BOOST_CHECK(extracted.hasVertex("a"));
+  BOOST_CHECK(extracted.hasVertex("b"));
+  BOOST_CHECK(!extracted.hasVertex("c"));
+
+  BOOST_CHECK(extracted.hasEdge("a", "b"));
+  BOOST_CHECK(!extracted.hasEdge("a", "c"));
+  BOOST_CHECK(!extracted.hasEdge("b", "c"));
+  BOOST_CHECK(!extracted.hasEdge("c", "a"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
