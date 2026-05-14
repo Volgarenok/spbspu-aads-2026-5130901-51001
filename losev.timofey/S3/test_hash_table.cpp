@@ -3,6 +3,7 @@
 
 #include "sip_hash.hpp"
 #include "hash_table.hpp"
+#include "graph.hpp"
 
 BOOST_AUTO_TEST_SUITE(sip_hash_tests)
 
@@ -51,6 +52,18 @@ BOOST_AUTO_TEST_CASE(drop_nonexistent_throws)
 {
   losev::HashTable<std::string, int> table(4);
   BOOST_CHECK_THROW(table.drop("missing"), std::out_of_range);
+}
+
+BOOST_AUTO_TEST_CASE(collision_handling)
+{
+  losev::HashTable<int, int> table(1);
+  for (int i = 0; i < 100; ++i) {
+    table.add(i, i * 2);
+  }
+  for (int i = 0; i < 100; ++i) {
+    BOOST_CHECK_EQUAL(table.get(i), i * 2);
+  }
+  BOOST_CHECK_EQUAL(table.size(), 100u);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
