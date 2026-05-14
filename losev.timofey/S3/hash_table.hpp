@@ -116,6 +116,37 @@ public:
     throw std::out_of_range("key not found");
   }
 
+  void rehash(size_t newBucketCount)
+  {
+    if (newBucketCount == bucketCount_) {
+      return;
+    }
+
+    Node** newBuckets = new Node*[newBucketCount]();
+
+    for (size_t i = 0; i < bucketCount_; ++i) {
+      Node* current = buckets_[i];
+      while (current != nullptr) {
+        Node* next = current->next;
+
+        size_t newIdx = hash_(current->key) % newBucketCount;
+        current->next = newBuckets[newIdx];
+        newBuckets[newIdx] = current;
+
+        current = next;
+      }
+    }
+
+    delete[] buckets_;
+    buckets_ = newBuckets;
+    bucketCount_ = newBucketCount;
+  }
+
+  double loadFactor() const
+  {
+    return static_cast<double>(size_) / bucketCount_;
+  }
+
   size_t size() const { return size_; }
   size_t bucketCount() const { return bucketCount_; }
   bool empty() const { return size_ == 0; }
