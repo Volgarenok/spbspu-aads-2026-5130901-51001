@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <cstdlib>
 
 #include "sip_hash.hpp"
 #include "hash_table.hpp"
@@ -30,7 +31,7 @@ void loadGraphs(const std::string& filename, GraphTable& graphs)
 
     std::istringstream iss(line);
     std::string graphName;
-    size_t edgeCount;
+    size_t edgeCount = 0;
 
     if (!(iss >> graphName >> edgeCount)) {
       continue;
@@ -49,7 +50,7 @@ void loadGraphs(const std::string& filename, GraphTable& graphs)
 
       std::istringstream edgeIss(line);
       std::string from, to;
-      int weight;
+      int weight = 0;
       if (edgeIss >> from >> to >> weight) {
         graph.addEdge(from, to, weight);
       }
@@ -153,7 +154,7 @@ void cmdInbound(std::ostream& out, std::istream& in, GraphTable& graphs)
 void cmdBind(std::ostream&, std::istream& in, GraphTable& graphs)
 {
   std::string graphName, from, to;
-  int weight;
+  int weight = 0;
   if (!(in >> graphName >> from >> to >> weight)) {
     return;
   }
@@ -169,7 +170,7 @@ void cmdBind(std::ostream&, std::istream& in, GraphTable& graphs)
 void cmdCut(std::ostream&, std::istream& in, GraphTable& graphs)
 {
   std::string graphName, from, to;
-  int weight;
+  int weight = 0;
   if (!(in >> graphName >> from >> to >> weight)) {
     return;
   }
@@ -185,7 +186,7 @@ void cmdCut(std::ostream&, std::istream& in, GraphTable& graphs)
 void cmdCreate(std::ostream&, std::istream& in, GraphTable& graphs)
 {
   std::string graphName;
-  size_t count;
+  size_t count = 0;
   if (!(in >> graphName >> count)) {
     return;
   }
@@ -230,7 +231,7 @@ void cmdMerge(std::ostream&, std::istream& in, GraphTable& graphs)
 void cmdExtract(std::ostream&, std::istream& in, GraphTable& graphs)
 {
   std::string newName, oldName;
-  size_t count;
+  size_t count = 0;
   if (!(in >> newName >> oldName >> count)) {
     return;
   }
@@ -274,12 +275,10 @@ void registerCommands(CommandTable& commands)
   commands.add("extract", cmdExtract);
 }
 
-}  // namespace losev
+}
 
 int main(int argc, char* argv[])
 {
-  (void)argv;
-
   if (argc != 2) {
     std::cerr << "Error: filename required\n";
     return 1;
