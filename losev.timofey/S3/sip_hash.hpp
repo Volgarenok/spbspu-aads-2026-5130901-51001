@@ -7,7 +7,7 @@
 
 namespace losev {
 
-namespace
+namespace detail
 {
 
 inline uint64_t rotl(uint64_t x, int b)
@@ -33,7 +33,7 @@ inline void sipRound(uint64_t& v0, uint64_t& v1, uint64_t& v2, uint64_t& v3)
   v2 = rotl(v2, 32);
 }
 
-}  // namespace
+}  // namespace detail
 
 inline uint64_t sipHash24(const uint8_t* data, size_t len,
                           uint64_t k0 = 0x0706050403020100ull,
@@ -53,8 +53,8 @@ inline uint64_t sipHash24(const uint8_t* data, size_t len,
       m |= static_cast<uint64_t>(data[i + j]) << (8 * j);
     }
     v3 ^= m;
-    sipRound(v0, v1, v2, v3);
-    sipRound(v0, v1, v2, v3);
+    detail::sipRound(v0, v1, v2, v3);
+    detail::sipRound(v0, v1, v2, v3);
     v0 ^= m;
   }
 
@@ -64,14 +64,14 @@ inline uint64_t sipHash24(const uint8_t* data, size_t len,
   }
 
   v3 ^= m;
-  sipRound(v0, v1, v2, v3);
-  sipRound(v0, v1, v2, v3);
+  detail::sipRound(v0, v1, v2, v3);
+  detail::sipRound(v0, v1, v2, v3);
   v0 ^= m;
   v2 ^= 0xff;
-  sipRound(v0, v1, v2, v3);
-  sipRound(v0, v1, v2, v3);
-  sipRound(v0, v1, v2, v3);
-  sipRound(v0, v1, v2, v3);
+  detail::sipRound(v0, v1, v2, v3);
+  detail::sipRound(v0, v1, v2, v3);
+  detail::sipRound(v0, v1, v2, v3);
+  detail::sipRound(v0, v1, v2, v3);
 
   return v0 ^ v1 ^ v2 ^ v3;
 }
