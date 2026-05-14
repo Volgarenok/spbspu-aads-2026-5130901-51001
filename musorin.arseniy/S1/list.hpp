@@ -115,9 +115,19 @@ public:
     Node * node = new Node(value);
     linkFront(node);
   }
+  void pushFront(T && value)
+  {
+    Node * node = new Node(static_cast< T && >(value));
+    linkFront(node);
+  }
   void pushBack(const T & value)
   {
     Node * node = new Node(value);
+    linkBack(node);
+  }
+  void pushBack(T && value)
+  {
+    Node * node = new Node(static_cast< T && >(value));
     linkBack(node);
   }
   void popFront()
@@ -143,6 +153,47 @@ public:
     }
     delete tmp;
     --size_;
+  }
+  iterator insert(const_iterator pos, const T & value)
+  {
+    if (pos.node_ == nullptr) {
+      pushBack(value);
+      return iterator(tail_);
+    }
+    Node * next = const_cast< Node * >(pos.node_);
+    Node * prev = next->prev_;
+    Node * node = new Node(value);
+    node->next_ = next;
+    node->prev_ = prev;
+    if (prev != nullptr) {
+      prev->next_ = node;
+    } else {
+      head_ = node;
+    }
+    next->prev_ = node;
+    ++size_;
+    return iterator(node);
+  }
+  iterator erase(iterator pos)
+  {
+    if (pos == end()) {
+      return end();
+    }
+    Node * curr = pos.node_;
+    Node * nextNode = curr->next_;
+    if (curr->prev_ != nullptr) {
+      curr->prev_->next_ = curr->next_;
+    } else {
+      head_ = curr->next_;
+    }
+    if (curr->next_ != nullptr) {
+      curr->next_->prev_ = curr->prev_;
+    } else {
+      tail_ = curr->prev_;
+    }
+    delete curr;
+    --size_;
+    return iterator(nextNode);
   }
   void clear()
   {
