@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <utility>
 
-#include "../../common/list.h"
+#include "../common/list.h"
 
 namespace losev {
 

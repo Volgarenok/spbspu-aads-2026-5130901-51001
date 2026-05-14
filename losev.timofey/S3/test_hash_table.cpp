@@ -47,4 +47,10 @@ BOOST_AUTO_TEST_CASE(drop_removes_element)
   BOOST_CHECK(!table.has("key"));
 }
 
+BOOST_AUTO_TEST_CASE(drop_nonexistent_throws)
+{
+  losev::HashTable<std::string, int> table(4);
+  BOOST_CHECK_THROW(table.drop("missing"), std::out_of_range);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
