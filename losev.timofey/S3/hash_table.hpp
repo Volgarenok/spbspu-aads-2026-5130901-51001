@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <utility>
 
-#include "../common/list.h"
+#include "../../common/list.h"
 
 namespace losev {
 
@@ -30,7 +30,7 @@ private:
 
   size_t bucketIndex(const Key& key) const
   {
-    return 0;  // временно всегда в корзину 0
+    return 0;
   }
 
 public:
@@ -86,15 +86,37 @@ public:
     throw std::out_of_range("key not found");
   }
 
+  Value drop(const Key& key)
+  {
+    size_t idx = bucketIndex(key);
+    Node* current = buckets_[idx];
+    Node* prev = nullptr;
+
+    while (current != nullptr) {
+      if (current->key == key) {
+        Value val = current->value;
+        if (prev == nullptr) {
+          buckets_[idx] = current->next;
+        } else {
+          prev->next = current->next;
+        }
+        delete current;
+        --size_;
+        return val;
+      }
+      prev = current;
+      current = current->next;
+    }
+    throw std::out_of_range("key not found");
+  }
+
   size_t size() const { return size_; }
   size_t bucketCount() const { return bucketCount_; }
   bool empty() const { return size_ == 0; }
 
-  // Запрещаем копирование
   HashTable(const HashTable&) = delete;
   HashTable& operator=(const HashTable&) = delete;
 
-  // Разрешаем перемещение
   HashTable(HashTable&& other) noexcept
     : buckets_(other.buckets_)
     , bucketCount_(other.bucketCount_)

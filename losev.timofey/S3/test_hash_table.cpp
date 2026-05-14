@@ -38,4 +38,13 @@ BOOST_AUTO_TEST_CASE(get_returns_value)
   BOOST_CHECK_EQUAL(table.get("key"), 42);
 }
 
+BOOST_AUTO_TEST_CASE(drop_removes_element)
+{
+  losev::HashTable<std::string, int> table(4);
+  table.add("key", 100);
+  int v = table.drop("key");
+  BOOST_CHECK_EQUAL(v, 100);
+  BOOST_CHECK(!table.has("key"));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
