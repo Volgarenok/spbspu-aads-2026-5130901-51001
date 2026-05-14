@@ -4,12 +4,15 @@
 #include <cstddef>
 #include <stdexcept>
 #include <utility>
+#include <functional>
 
-#include "../common/list.h"
+#include "../../common/list.h"
 
 namespace losev {
 
-template<typename Key, typename Value>
+template<typename Key, typename Value,
+         typename Hash = std::hash<Key>,
+         typename Equal = std::equal_to<Key>>
 class HashTable
 {
 private:
@@ -27,10 +30,12 @@ private:
   Node** buckets_;
   size_t bucketCount_;
   size_t size_;
+  Hash hash_;
+  Equal equal_;
 
   size_t bucketIndex(const Key& key) const
   {
-    return 0;
+    return hash_(key) % bucketCount_;
   }
 
 public:
@@ -38,6 +43,8 @@ public:
     : buckets_(new Node*[bucketCount]())
     , bucketCount_(bucketCount)
     , size_(0)
+    , hash_()
+    , equal_()
   {}
 
   ~HashTable()
@@ -65,7 +72,7 @@ public:
     size_t idx = bucketIndex(key);
     Node* current = buckets_[idx];
     while (current != nullptr) {
-      if (current->key == key) {
+      if (equal_(current->key, key)) {
         return true;
       }
       current = current->next;
@@ -78,7 +85,7 @@ public:
     size_t idx = bucketIndex(key);
     Node* current = buckets_[idx];
     while (current != nullptr) {
-      if (current->key == key) {
+      if (equal_(current->key, key)) {
         return current->value;
       }
       current = current->next;
@@ -89,11 +96,10 @@ public:
   Value drop(const Key& key)
   {
     size_t idx = bucketIndex(key);
-    Node* current = buckets_[idx];
     Node* prev = nullptr;
-
+    Node* current = buckets_[idx];
     while (current != nullptr) {
-      if (current->key == key) {
+      if (equal_(current->key, key)) {
         Value val = current->value;
         if (prev == nullptr) {
           buckets_[idx] = current->next;
@@ -121,6 +127,8 @@ public:
     : buckets_(other.buckets_)
     , bucketCount_(other.bucketCount_)
     , size_(other.size_)
+    , hash_(std::move(other.hash_))
+    , equal_(std::move(other.equal_))
   {
     other.buckets_ = nullptr;
     other.bucketCount_ = 0;
@@ -134,6 +142,8 @@ public:
       buckets_ = other.buckets_;
       bucketCount_ = other.bucketCount_;
       size_ = other.size_;
+      hash_ = std::move(other.hash_);
+      equal_ = std::move(other.equal_);
       other.buckets_ = nullptr;
       other.bucketCount_ = 0;
       other.size_ = 0;
