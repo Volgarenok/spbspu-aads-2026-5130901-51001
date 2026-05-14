@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(get_weights_returns_correct_list)
 
   const losev::List<int>* weights = g.getWeights("a", "b");
   BOOST_REQUIRE(weights != nullptr);
-  
+
   // Подсчет через итератор
   int count = 0;
   for (auto it = weights->begin(); it != weights->end(); ++it) {
