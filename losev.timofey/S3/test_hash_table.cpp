@@ -146,4 +146,63 @@ BOOST_AUTO_TEST_CASE(has_edge_returns_true)
   BOOST_CHECK(!g.hasEdge("a", "c"));
 }
 
+BOOST_AUTO_TEST_CASE(outbound_returns_correct_edges)
+{
+  losev::Graph g("test");
+  g.addEdge("a", "b", 10);
+  g.addEdge("a", "c", 20);
+  g.addEdge("a", "b", 30);
+  g.addEdge("b", "c", 40);
+
+  auto outbound = g.getOutbound("a");
+  BOOST_CHECK_EQUAL(outbound.size(), 2u);
+
+  for (const auto& p : outbound) {
+    if (p.first == "b") {
+      BOOST_CHECK_EQUAL(p.second.size(), 2u);
+    } else if (p.first == "c") {
+      BOOST_CHECK_EQUAL(p.second.size(), 1u);
+    } else {
+      BOOST_CHECK(false);
+    }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(inbound_returns_correct_edges)
+{
+  losev::Graph g("test");
+  g.addEdge("a", "b", 10);
+  g.addEdge("c", "b", 20);
+  g.addEdge("a", "b", 30);
+  g.addEdge("b", "a", 40);
+
+  auto inbound = g.getInbound("b");
+  BOOST_CHECK_EQUAL(inbound.size(), 2u);
+
+  for (const auto& p : inbound) {
+    if (p.first == "a") {
+      BOOST_CHECK_EQUAL(p.second.size(), 2u);
+    } else if (p.first == "c") {
+      BOOST_CHECK_EQUAL(p.second.size(), 1u);
+    } else {
+      BOOST_CHECK(false);
+    }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(get_vertices_sorted_returns_all_vertices)
+{
+  losev::Graph g("test");
+  g.addEdge("b", "c", 10);
+  g.addEdge("a", "d", 20);
+  g.addEdge("c", "a", 30);
+
+  auto vertices = g.getVerticesSorted();
+  BOOST_CHECK_EQUAL(vertices.size(), 4u);
+  BOOST_CHECK_EQUAL(vertices[0], "a");
+  BOOST_CHECK_EQUAL(vertices[1], "b");
+  BOOST_CHECK_EQUAL(vertices[2], "c");
+  BOOST_CHECK_EQUAL(vertices[3], "d");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
