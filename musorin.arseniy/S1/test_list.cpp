@@ -1,3 +1,4 @@
+#ifndef
 #include <iostream>
 #include <string>
 #include "list.hpp"
@@ -165,7 +166,6 @@ static void testString()
   check(lst.back() == "world", "string: back");
 }
 }
-#ifdef BUILD_TESTS
 int main()
 {
   musorin::testEmpty();
