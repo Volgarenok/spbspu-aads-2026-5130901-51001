@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <utility>
 #include <functional>
+#include <iterator>
 
 #include "../common/list.h"
 
@@ -39,6 +40,146 @@ private:
   }
 
 public:
+  class Iterator
+  {
+  private:
+    Node** buckets_;
+    size_t bucketCount_;
+    size_t currentBucket_;
+    Node* currentNode_;
+
+    void advanceToNextValid()
+    {
+      while (currentBucket_ < bucketCount_ && currentNode_ == nullptr) {
+        currentNode_ = buckets_[currentBucket_];
+        if (currentNode_ == nullptr) {
+          ++currentBucket_;
+        }
+      }
+    }
+
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = std::pair<Key, Value>;
+    using difference_type = std::ptrdiff_t;
+    using pointer = value_type*;
+    using reference = value_type&;
+
+    Iterator(Node** buckets, size_t bucketCount, size_t startBucket = 0)
+      : buckets_(buckets)
+      , bucketCount_(bucketCount)
+      , currentBucket_(startBucket)
+      , currentNode_(nullptr)
+    {
+      advanceToNextValid();
+    }
+
+    Iterator& operator++()
+    {
+      if (currentNode_ != nullptr) {
+        currentNode_ = currentNode_->next;
+        if (currentNode_ == nullptr) {
+          ++currentBucket_;
+          advanceToNextValid();
+        }
+      }
+      return *this;
+    }
+
+    Iterator operator++(int)
+    {
+      Iterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    std::pair<const Key, Value&> operator*()
+    {
+      return std::pair<const Key, Value&>(currentNode_->key, currentNode_->value);
+    }
+
+    bool operator==(const Iterator& other) const
+    {
+      return currentBucket_ == other.currentBucket_ &&
+             currentNode_ == other.currentNode_;
+    }
+
+    bool operator!=(const Iterator& other) const
+    {
+      return !(*this == other);
+    }
+  };
+
+  class ConstIterator
+  {
+  private:
+    Node** buckets_;
+    size_t bucketCount_;
+    size_t currentBucket_;
+    const Node* currentNode_;
+
+    void advanceToNextValid()
+    {
+      while (currentBucket_ < bucketCount_ && currentNode_ == nullptr) {
+        currentNode_ = buckets_[currentBucket_];
+        if (currentNode_ == nullptr) {
+          ++currentBucket_;
+        }
+      }
+    }
+
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = std::pair<const Key, Value>;
+    using difference_type = std::ptrdiff_t;
+    using pointer = value_type*;
+    using reference = value_type&;
+
+    ConstIterator(Node** buckets, size_t bucketCount, size_t startBucket = 0)
+      : buckets_(buckets)
+      , bucketCount_(bucketCount)
+      , currentBucket_(startBucket)
+      , currentNode_(nullptr)
+    {
+      advanceToNextValid();
+    }
+
+    ConstIterator& operator++()
+    {
+      if (currentNode_ != nullptr) {
+        currentNode_ = currentNode_->next;
+        if (currentNode_ == nullptr) {
+          ++currentBucket_;
+          advanceToNextValid();
+        }
+      }
+      return *this;
+    }
+
+    ConstIterator operator++(int)
+    {
+      ConstIterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    std::pair<const Key, const Value&> operator*() const
+    {
+      return std::pair<const Key, const Value&>(currentNode_->key, currentNode_->value);
+    }
+
+    bool operator==(const ConstIterator& other) const
+    {
+      return currentBucket_ == other.currentBucket_ &&
+             currentNode_ == other.currentNode_;
+    }
+
+    bool operator!=(const ConstIterator& other) const
+    {
+      return !(*this == other);
+    }
+  };
+
   explicit HashTable(size_t bucketCount)
     : buckets_(new Node*[bucketCount]())
     , bucketCount_(bucketCount)
@@ -150,6 +291,26 @@ public:
   size_t size() const { return size_; }
   size_t bucketCount() const { return bucketCount_; }
   bool empty() const { return size_ == 0; }
+
+  Iterator begin()
+  {
+    return Iterator(buckets_, bucketCount_, 0);
+  }
+
+  Iterator end()
+  {
+    return Iterator(buckets_, bucketCount_, bucketCount_);
+  }
+
+  ConstIterator begin() const
+  {
+    return ConstIterator(buckets_, bucketCount_, 0);
+  }
+
+  ConstIterator end() const
+  {
+    return ConstIterator(buckets_, bucketCount_, bucketCount_);
+  }
 
   HashTable(const HashTable&) = delete;
   HashTable& operator=(const HashTable&) = delete;
