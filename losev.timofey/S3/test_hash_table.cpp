@@ -84,4 +84,37 @@ BOOST_AUTO_TEST_CASE(rehash_redistributes)
   }
 }
 
+BOOST_AUTO_TEST_CASE(iterator_iterates_all_elements)
+{
+  losev::HashTable<std::string, int> table(4);
+  table.add("a", 1);
+  table.add("b", 2);
+  table.add("c", 3);
+
+  int sum = 0;
+  for (auto it = table.begin(); it != table.end(); ++it) {
+    sum += it->second;
+  }
+  BOOST_CHECK_EQUAL(sum, 6);
+
+  int count = 0;
+  for (auto it = table.begin(); it != table.end(); ++it) {
+    ++count;
+  }
+  BOOST_CHECK_EQUAL(count, 3);
+}
+
+BOOST_AUTO_TEST_CASE(const_iterator_iterates)
+{
+  const losev::HashTable<std::string, int> table(4);
+  table.add("a", 1);
+  table.add("b", 2);
+
+  int sum = 0;
+  for (auto it = table.begin(); it != table.end(); ++it) {
+    sum += it->second;
+  }
+  BOOST_CHECK_EQUAL(sum, 3);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
