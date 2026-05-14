@@ -28,6 +28,15 @@ public:
       throw;
     }
   }
+  List(List && other) noexcept:
+    head_(other.head_),
+    tail_(other.tail_),
+    size_(other.size_)
+  {
+    other.head_ = nullptr;
+    other.tail_ = nullptr;
+    other.size_ = 0;
+  }
   ~List()
   {
     clear();
@@ -37,6 +46,19 @@ public:
     if (this != &other) {
       List tmp(other);
       swap(tmp);
+    }
+    return *this;
+  }
+  List & operator=(List && other) noexcept
+  {
+    if (this != &other) {
+      clear();
+      head_ = other.head_;
+      tail_ = other.tail_;
+      size_ = other.size_;
+      other.head_ = nullptr;
+      other.tail_ = nullptr;
+      other.size_ = 0;
     }
     return *this;
   }
