@@ -66,4 +66,22 @@ BOOST_AUTO_TEST_CASE(collision_handling)
   BOOST_CHECK_EQUAL(table.size(), 100u);
 }
 
+BOOST_AUTO_TEST_CASE(rehash_redistributes)
+{
+  losev::HashTable<int, int> table(4);
+  for (int i = 0; i < 20; ++i) {
+    table.add(i, i);
+  }
+  BOOST_CHECK_EQUAL(table.bucketCount(), 4u);
+  BOOST_CHECK_EQUAL(table.size(), 20u);
+  
+  table.rehash(100);
+  
+  BOOST_CHECK_EQUAL(table.bucketCount(), 100u);
+  BOOST_CHECK_EQUAL(table.size(), 20u);
+  for (int i = 0; i < 20; ++i) {
+    BOOST_CHECK_EQUAL(table.get(i), i);
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
