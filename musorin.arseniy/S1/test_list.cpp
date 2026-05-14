@@ -165,6 +165,7 @@ static void testString()
   check(lst.back() == "world", "string: back");
 }
 }
+#ifdef BUILD_TESTS
 int main()
 {
   musorin::testEmpty();
@@ -188,3 +189,4 @@ int main()
   std::cout << musorin::failed << " / " << total << " tests FAILED." << '\n';
   return 1;
 }
+#endif
