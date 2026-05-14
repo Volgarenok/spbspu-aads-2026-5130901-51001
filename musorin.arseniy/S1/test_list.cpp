@@ -1,4 +1,3 @@
-#ifndef
 #include <iostream>
 #include <string>
 #include "list.hpp"
@@ -189,4 +188,3 @@ int main()
   std::cout << musorin::failed << " / " << total << " tests FAILED." << '\n';
   return 1;
 }
-#endif
