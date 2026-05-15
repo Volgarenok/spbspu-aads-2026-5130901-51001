@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <cstdlib>
+#include <stdexcept>
 
 namespace borisov
 {
@@ -82,6 +83,14 @@ namespace borisov
 
   long long evaluateExpression(const std::string& expression, std::ostream& err)
   {
+    Queue< Token > tokens;
+    std::string errorMsg;
+    tokenize(expression, tokens, errorMsg);
+    if (!errorMsg.empty())
+    {
+      err << "Error: " << errorMsg;
+      throw std::runtime_error("Tokenization failed");
+    }
     return 0;
   }
 }
