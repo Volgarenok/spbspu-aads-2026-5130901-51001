@@ -1,4 +1,5 @@
 #include "evaluateExpression.hpp"
+#include "stack.hpp"
 #include "queue.hpp"
 #include <string>
 #include <sstream>
@@ -27,6 +28,23 @@ namespace borisov
       TokenType type;
       long long value = 0;
     };
+
+    int precedence(TokenType type)
+    {
+      if (type == TokenType::op_not)
+      {
+        return 3;
+      }
+      if (type == TokenType::op_mult || type == TokenType::op_div || type == TokenType::op_mod)
+      {
+        return 2;
+      }
+      if (type == TokenType::op_plus || type == TokenType::op_minus)
+      {
+        return 1;
+      }
+      return 0;
+    }
 
     void tokenize(const std::string& expr, Queue< Token >& tokens, std::string& errorMsg)
     {
@@ -79,17 +97,107 @@ namespace borisov
         }
       }
     }
+
+    bool infixToPostfix(Queue< Token >& infix, Queue< Token >& postfix, std::string& errorMsg)
+    {
+      Stack< Token > opStack;
+      bool prevWasOperand = false;
+
+      while (!infix.empty())
+      {
+        Token t = infix.front();
+        infix.pop();
+
+        if (t.type == TokenType::number)
+        {
+          if (prevWasOperand)
+          {
+            errorMsg = "Two operands in a row";
+            return false;
+          }
+          postfix.push(t);
+          prevWasOperand = true;
+        }
+        else if (t.type == TokenType::lparen)
+        {
+          opStack.push(t);
+          prevWasOperand = false;
+        }
+        else if (t.type == TokenType::rparen)
+        {
+          while (!opStack.empty() && opStack.top().type != TokenType::lparen)
+          {
+            postfix.push(opStack.top());
+            opStack.pop();
+          }
+          if (opStack.empty())
+          {
+            errorMsg = "Mismatched parentheses";
+            return false;
+          }
+          opStack.pop(); // remove '('
+          prevWasOperand = true;
+        }
+        else if (t.type == TokenType::op_not)
+        {
+          if (prevWasOperand)
+          {
+            errorMsg = "Operator ! cannot appear after an operand";
+            return false;
+          }
+          opStack.push(t);
+          prevWasOperand = false;
+        }
+        else // binary operators
+        {
+          if (!prevWasOperand)
+          {
+            errorMsg = "Expected operand before binary operator";
+            return false;
+          }
+          while (!opStack.empty() && opStack.top().type != TokenType::lparen &&
+                 (precedence(opStack.top().type) > precedence(t.type) ||
+                  (precedence(opStack.top().type) == precedence(t.type) && t.type != TokenType::op_not)))
+          {
+            postfix.push(opStack.top());
+            opStack.pop();
+          }
+          opStack.push(t);
+          prevWasOperand = false;
+        }
+      }
+
+      while (!opStack.empty())
+      {
+        if (opStack.top().type == TokenType::lparen)
+        {
+          errorMsg = "Mismatched parentheses";
+          return false;
+        }
+        postfix.push(opStack.top());
+        opStack.pop();
+      }
+      return true;
+    }
   }
 
   long long evaluateExpression(const std::string& expression, std::ostream& err)
   {
-    Queue< Token > tokens;
+    Queue< Token > infixTokens;
     std::string errorMsg;
-    tokenize(expression, tokens, errorMsg);
+
+    tokenize(expression, infixTokens, errorMsg);
     if (!errorMsg.empty())
     {
       err << "Error: " << errorMsg;
       throw std::runtime_error("Tokenization failed");
+    }
+
+    Queue< Token > postfixTokens;
+    if (!infixToPostfix(infixTokens, postfixTokens, errorMsg))
+    {
+      err << "Error: " << errorMsg;
+      throw std::runtime_error("Conversion failed");
     }
     return 0;
   }
