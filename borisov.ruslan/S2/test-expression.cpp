@@ -84,3 +84,18 @@ BOOST_AUTO_TEST_CASE(leftover_operands_throws)
   std::ostringstream err;
   BOOST_CHECK_THROW(borisov::evaluateExpression("1 2", err), std::runtime_error);
 }
+
+BOOST_AUTO_TEST_CASE(complex_expressions_from_task)
+{
+  std::ostringstream err;
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("( 1 + 2 ) * ( 3 - 4 )", err), -3);
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("10 / ( 2 + 3 ) % 4", err), 2);
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("4 * 7 - 3", err), 25);
+}
+
+BOOST_AUTO_TEST_CASE(unary_not_with_parentheses)
+{
+  std::ostringstream err;
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("! ( 1 + 2 )", err), ~3LL);
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("( ! 1 ) + 5", err), (~1LL) + 5);
+}
