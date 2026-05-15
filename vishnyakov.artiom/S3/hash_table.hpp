@@ -203,9 +203,56 @@ namespace vishnyakov
       return array_capacity_;
     }
 
-    Value& operator[](const Key& key);
-    Value& at(const Key& key);
-    const Value& at(const Key& key) const;
+    Value& operator[](const Key& key)
+    {
+      std::size_t idx = index(key);
+      List< std::pair< const Key, Value > >& chain = array_[idx];
+
+      for (std::pair< const Key, Value >& item : chain)
+      {
+        if (equal_(item.first, key))
+        {
+          return item.second;
+        }
+      }
+
+      chain.push_front(std::pair< const Key, Value >(key, Value()));
+      ++size_;
+
+      return chain.front().second;
+    }
+
+    Value& at(const Key& key)
+    {
+      std::size_t idx = index(key);
+      List< std::pair< const Key, Value > >& chain = array_[idx];
+
+      for (std::pair< const Key, Value >& item : chain)
+      {
+        if (equal_(item.first, key))
+        {
+          return item.second;
+        }
+      }
+
+      throw std::out_of_range("Key not found");
+    }
+
+    const Value& at(const Key& key) const
+    {
+      std::size_t idx = index(key);
+      const List< std::pair< const Key, Value > >& chain = array_[idx];
+
+      for (const std::pair< const Key, Value >& item : chain)
+      {
+        if (equal_(item.first, key))
+        {
+          return item.second;
+        }
+      }
+
+      throw std::out_of_range("Key not found");
+    }
 
     void add(const Key& key, const Value& value)
     {
