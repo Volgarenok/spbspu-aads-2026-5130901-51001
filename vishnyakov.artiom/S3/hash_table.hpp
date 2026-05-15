@@ -1,3 +1,4 @@
+// lab3/hash_table.hpp
 #ifndef HASH_TABLE_HPP
 #define HASH_TABLE_HPP
 
@@ -206,32 +207,6 @@ namespace vishnyakov
     Value& at(const Key& key);
     const Value& at(const Key& key) const;
 
-    void add(const Key& key, const Value& value);
-    void add(Key&& key, Value&& value);
-    Value drop(const Key& key);
-    bool has(const Key& key) const;
-    void rehash(std::size_t new_capacity);
-    void clear() noexcept;
-
-    Hash hash_function() const
-    {
-      return hash_;
-    }
-
-    Equal key_eq() const
-    {
-      return equal_;
-    }
-
-    void swap(HashTable& other) noexcept
-    {
-      std::swap(array_, other.array_);
-      std::swap(array_capacity_, other.array_capacity_);
-      std::swap(size_, other.size_);
-      std::swap(hash_, other.hash_);
-      std::swap(equal_, other.equal_);
-    }
-
     void add(const Key& key, const Value& value)
     {
       std::size_t idx = index(key);
@@ -266,22 +241,6 @@ namespace vishnyakov
       ++size_;
     }
 
-    bool has(const Key& key) const
-    {
-      std::size_t idx = index(key);
-      const List< std::pair< const Key, Value > >& chain = array_[idx];
-
-      for (const std::pair< const Key, Value >& item : chain)
-      {
-        if (equal_(item.first, key))
-        {
-          return true;
-        }
-      }
-
-      return false;
-    }
-
     Value drop(const Key& key)
     {
       std::size_t idx = index(key);
@@ -306,6 +265,32 @@ namespace vishnyakov
       throw std::out_of_range("Key not found");
     }
 
+    bool has(const Key& key) const
+    {
+      std::size_t idx = index(key);
+      const List< std::pair< const Key, Value > >& chain = array_[idx];
+
+      for (const std::pair< const Key, Value >& item : chain)
+      {
+        if (equal_(item.first, key))
+        {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    void rehash(std::size_t new_capacity)
+    {
+      if (new_capacity == 0)
+      {
+        new_capacity = 16;
+      }
+
+      rehash_impl(new_capacity);
+    }
+
     void clear() noexcept
     {
       for (std::size_t i = 0; i < array_capacity_; ++i)
@@ -314,6 +299,25 @@ namespace vishnyakov
       }
 
       size_ = 0;
+    }
+
+    Hash hash_function() const
+    {
+      return hash_;
+    }
+
+    Equal key_eq() const
+    {
+      return equal_;
+    }
+
+    void swap(HashTable& other) noexcept
+    {
+      std::swap(array_, other.array_);
+      std::swap(array_capacity_, other.array_capacity_);
+      std::swap(size_, other.size_);
+      std::swap(hash_, other.hash_);
+      std::swap(equal_, other.equal_);
     }
 
   private:
@@ -328,7 +332,38 @@ namespace vishnyakov
       return hash_(key) % array_capacity_;
     }
 
-    void rehash_impl(std::size_t new_capacity);
+    void rehash_impl(std::size_t new_capacity)
+    {
+      List< std::pair< const Key, Value > >* new_array = static_cast< List< std::pair< const Key, Value > >* >(
+        ::operator new(sizeof(List< std::pair< const Key, Value > >) * new_capacity)
+      );
+
+      for (std::size_t i = 0; i < new_capacity; ++i)
+      {
+        new (&new_array[i]) List< std::pair< const Key, Value > >();
+      }
+
+      for (std::size_t i = 0; i < array_capacity_; ++i)
+      {
+        List< std::pair< const Key, Value > >& chain = array_[i];
+
+        while (!chain.empty())
+        {
+          std::pair< const Key, Value > item = std::move(chain.front());
+          chain.pop_front();
+
+          std::size_t new_idx = hash_(item.first) % new_capacity;
+          new_array[new_idx].push_front(std::move(item));
+        }
+
+        chain.~List();
+      }
+
+      ::operator delete(array_);
+
+      array_ = new_array;
+      array_capacity_ = new_capacity;
+    }
   };
 
   template < class Key, class Value, class Hash, class Equal >
