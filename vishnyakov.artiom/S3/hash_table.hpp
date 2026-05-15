@@ -1,4 +1,3 @@
-// lab3/hash_table.hpp
 #ifndef HASH_TABLE_HPP
 #define HASH_TABLE_HPP
 
