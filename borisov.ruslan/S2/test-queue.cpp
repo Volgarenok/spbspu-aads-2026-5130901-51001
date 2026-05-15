@@ -76,3 +76,68 @@ BOOST_AUTO_TEST_CASE(queue_clear_empties)
   BOOST_CHECK(q.empty());
   BOOST_CHECK_EQUAL(q.size(), 0u);
 }
+
+BOOST_AUTO_TEST_CASE(queue_copy_constructor_independent)
+{
+  borisov::Queue<int> original;
+  original.push(10);
+  original.push(20);
+  borisov::Queue<int> copy(original);
+  BOOST_CHECK_EQUAL(copy.size(), original.size());
+  BOOST_CHECK_EQUAL(copy.front(), original.front());
+  copy.pop();
+  BOOST_CHECK_EQUAL(copy.size(), original.size() - 1);
+  BOOST_CHECK_EQUAL(original.front(), 10); // original unchanged
+}
+
+BOOST_AUTO_TEST_CASE(queue_copy_assignment_replaces)
+{
+  borisov::Queue<int> q1;
+  q1.push(1);
+  q1.push(2);
+
+  borisov::Queue<int> q2;
+  q2.push(100);
+  q2 = q1;
+  BOOST_CHECK_EQUAL(q2.size(), 2);
+  BOOST_CHECK_EQUAL(q2.back(), 2);
+  q1.pop();
+  BOOST_CHECK_EQUAL(q2.size(), 2); // q2 independent
+}
+
+BOOST_AUTO_TEST_CASE(queue_move_constructor_transfers)
+{
+  borisov::Queue<int> source;
+  source.push(5);
+  source.push(6);
+  borisov::Queue<int> target(std::move(source));
+  BOOST_CHECK(source.empty());
+  BOOST_CHECK_EQUAL(target.size(), 2);
+  BOOST_CHECK_EQUAL(target.front(), 5);
+  BOOST_CHECK_EQUAL(target.back(), 6);
+}
+
+BOOST_AUTO_TEST_CASE(queue_move_assignment_transfers)
+{
+  borisov::Queue<int> source;
+  source.push(99);
+
+  borisov::Queue<int> target;
+  target.push(200);
+  target = std::move(source);
+  BOOST_CHECK(source.empty());
+  BOOST_CHECK_EQUAL(target.size(), 1);
+  BOOST_CHECK_EQUAL(target.front(), 99);
+}
+
+BOOST_AUTO_TEST_CASE(queue_self_assignment_ok)
+{
+  borisov::Queue<int> q;
+  q.push(45);
+  q = q;
+  BOOST_CHECK_EQUAL(q.size(), 1);
+  BOOST_CHECK_EQUAL(q.front(), 45);
+  q = std::move(q);
+  BOOST_CHECK_EQUAL(q.size(), 1);
+  BOOST_CHECK_EQUAL(q.front(), 45);
+}

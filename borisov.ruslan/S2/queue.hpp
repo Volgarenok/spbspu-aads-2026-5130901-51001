@@ -10,6 +10,13 @@ namespace borisov
   class Queue
   {
   public:
+    Queue() = default;
+    Queue(const Queue& other);
+    Queue(Queue&& other) noexcept;
+    ~Queue() = default;
+    Queue& operator=(const Queue& other);
+    Queue& operator=(Queue&& other) noexcept;
+
     void push(const T& value);
     T& front();
     const T& front() const;
@@ -23,6 +30,36 @@ namespace borisov
   private:
     List< T > list_;
   };
+
+  template < typename T >
+  Queue< T >::Queue(const Queue& other):
+    list_(other.list_)
+  {}
+
+  template < typename T >
+  Queue< T >::Queue(Queue&& other) noexcept:
+    list_(std::move(other.list_))
+  {}
+
+  template < typename T >
+  Queue< T >& Queue< T >::operator=(const Queue& other)
+  {
+    if (this != &other)
+    {
+      list_ = other.list_;
+    }
+    return *this;
+  }
+
+  template < typename T >
+  Queue< T >& Queue< T >::operator=(Queue&& other) noexcept
+  {
+    if (this != &other)
+    {
+      list_ = std::move(other.list_);
+    }
+    return *this;
+  }
 
   template < typename T >
   void Queue< T >::push(const T& value)
