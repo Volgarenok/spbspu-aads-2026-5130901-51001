@@ -135,7 +135,7 @@ namespace borisov
             errorMsg = "Mismatched parentheses";
             return false;
           }
-          opStack.pop(); // remove '('
+          opStack.pop();
           prevWasOperand = true;
         }
         else if (t.type == TokenType::op_not)
@@ -148,7 +148,7 @@ namespace borisov
           opStack.push(t);
           prevWasOperand = false;
         }
-        else // binary operators
+        else
         {
           if (!prevWasOperand)
           {
@@ -179,6 +179,83 @@ namespace borisov
       }
       return true;
     }
+
+    long long evalPostfix(Queue< Token >& postfix, std::string& errorMsg)
+    {
+      Stack< long long > operands;
+      while (!postfix.empty())
+      {
+        Token t = postfix.front();
+        postfix.pop();
+
+        if (t.type == TokenType::number)
+        {
+          operands.push(t.value);
+        }
+        else if (t.type == TokenType::op_not)
+        {
+          if (operands.empty())
+          {
+            errorMsg = "Not enough operands for !";
+            return 0;
+          }
+          long long a = operands.top();
+          operands.pop();
+          operands.push(~a);
+        }
+        else
+        {
+          if (operands.size() < 2)
+          {
+            errorMsg = "Not enough operands for binary operator";
+            return 0;
+          }
+          long long b = operands.top();
+          operands.pop();
+          long long a = operands.top();
+          operands.pop();
+
+          switch (t.type)
+          {
+          case TokenType::op_plus:
+            operands.push(a + b);
+            break;
+          case TokenType::op_minus:
+            operands.push(a - b);
+            break;
+          case TokenType::op_mult:
+            operands.push(a * b);
+            break;
+          case TokenType::op_div:
+            if (b == 0)
+            {
+              errorMsg = "Division by zero";
+              return 0;
+            }
+            operands.push(a / b);
+            break;
+          case TokenType::op_mod:
+            if (b == 0)
+            {
+              errorMsg = "Modulo by zero";
+              return 0;
+            }
+            operands.push(a % b);
+            break;
+          default:
+            errorMsg = "Unknown operator";
+            return 0;
+          }
+        }
+      }
+
+      if (operands.size() != 1)
+      {
+        errorMsg = "Invalid expression: leftover operands";
+        return 0;
+      }
+      return operands.top();
+    }
   }
 
   long long evaluateExpression(const std::string& expression, std::ostream& err)
@@ -199,6 +276,13 @@ namespace borisov
       err << "Error: " << errorMsg;
       throw std::runtime_error("Conversion failed");
     }
-    return 0;
+
+    long long result = evalPostfix(postfixTokens, errorMsg);
+    if (!errorMsg.empty())
+    {
+      err << "Error: " << errorMsg;
+      throw std::runtime_error("Evaluation failed");
+    }
+    return result;
   }
 }
