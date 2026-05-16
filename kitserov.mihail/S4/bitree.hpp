@@ -77,17 +77,98 @@ namespace kitserov
       grand -> update();
       return child;
     }
+
+    BSTree* find_root(const Key& k)
+    {
+      BSTree* cur = this;
+      while (cur) {
+        if (cmp_(k, cur -> data_.first)) {
+          cur = cur -> left_;
+        } else if (cmp_(cur -> data_.first, k)) {
+          cur = cur -> right_;
+        } else {
+          return cur;
+        }
+      }
+      return nullptr;
+    }
+    const BSTree* find_root(const Key& k) const
+    {
+      return const_cast< BSTree* >(this) -> find_root(k);
+    }
+    void clear(BSTree* n)
+    {
+      if (!n) return;
+      clear(n -> left_);
+      clear(n -> right_);
+      delete n;
+    }
+
   public:
     friend class BSTIterator< Key, Value >;
     friend class BSTConstIterator< Key, Value >;
     BSTree() : data_(), left_(nullptr), right_(nullptr), parent_(nullptr), height_(0), cmp_(Compare()), size_(0) {}
+    ~BSTree()
+    {
+      clear();
+    }
+    BSTree(const BSTree& other)
+    {
+      copy(other);
+    }
+    BSTree(BSTree&& other) noexcept
+    {
+      swap(other);
+    }
+    BSTree& operator=(const BSTree& other)
+    {
+      copy(other);
+      return *this;
+    }
+    BSTree& operator=(BSTree&& other)
+    {
+      swap(other);
+      return *this;
+    }
 
+    void swap(BSTree&& other) noexcept
+    {
+      std::swap(data_, other.data_);
+      std::swap(left_, other.left_);
+      std::swap(right_, other.right_);
+      std::swap(parent_, other.parent_);
+      std::swap(height_, other.height_);
+      std::swap(size_, other.size_);
+      std::swap(cmp_, other.cmp_);
+      if (left_) {
+        left_ -> parent_ = this;
+      }
+      if (right_) {
+        right_ -> parent_ = this;
+      }
+    }
+    void copy(const BSTree& other)
+    {
+      if (this == &other)
+      {
+        return;
+      }
+      BSTree* tmp = new BSTree();
+      tmp -> data_ = other -> data_;
+      tmp -> height_ = other -> height_;
+      tmp -> size_ = other -> size_;
+      tmp -> cmp_ = other -> cmp_;
+      tmp -> parent_ = other -> parent_;
+      tmp -> left_ -> copy(other.left_);
+      tmp -> right_ -> copy(other.right_);
+      swap(tmp);
+    }
     size_t height() noexcept
     {
-        return n ? n -> height_ : 0;
+      return n ? n -> height_ : 0;
     }
     size_t size() noexcept {
-        return n ? n->size_ : 0;
+      return n ? n->size_ : 0;
     }
   };
 }
