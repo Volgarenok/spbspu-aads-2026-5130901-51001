@@ -29,6 +29,7 @@ namespace vishnyakov
     bool has_vertex(const Vertex& v) const;
     bool has_edge(const Vertex& from, const Vertex& to, Weight weight) const;
     bool has_any_edge(const Vertex& from, const Vertex& to) const;
+    bool empty() const;
 
     List< Vertex >& get_vertices()
     {

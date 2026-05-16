@@ -119,6 +119,11 @@ namespace vishnyakov
     return edges_.has(key);
   }
 
+  bool Graph::empty() const
+  {
+    return vertices_.empty();
+  }
+
   List< std::pair< Graph::Vertex, List< Graph::Weight > > > Graph::get_outbound(const Vertex& v) const
   {
     List< std::pair< Vertex, List< Weight > > > result;
@@ -151,7 +156,12 @@ namespace vishnyakov
 
   List< Graph::Vertex > Graph::get_sorted_vertices() const
   {
-    List< Vertex > sorted = vertices_;
+    List< Vertex > sorted;
+
+    for (const Vertex& v : vertices_)
+    {
+      sorted.push_back(v);
+    }
 
     for (typename List< Vertex >::Iter it = sorted.begin(); it != sorted.end(); ++it)
     {
@@ -178,7 +188,12 @@ namespace vishnyakov
 
   List< Graph::Weight > Graph::get_sorted_weights(const List< Weight >& weights) const
   {
-    List< Weight > sorted = weights;
+    List< Weight > sorted;
+
+    for (Weight w : weights)
+    {
+      sorted.push_back(w);
+    }
 
     for (typename List< Weight >::Iter it = sorted.begin(); it != sorted.end(); ++it)
     {
