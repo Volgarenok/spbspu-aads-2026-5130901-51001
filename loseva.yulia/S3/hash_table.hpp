@@ -4,31 +4,17 @@
 #include <functional>
 #include <iterator>
 #include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
 
 namespace loseva {
-
-class TableFullException: public std::runtime_error {
-public:
-  explicit TableFullException(const std::string & msg):
-    std::runtime_error(msg)
-  {}
-};
-
-class KeyNotFoundException: public std::runtime_error {
-public:
-  explicit KeyNotFoundException(const std::string & msg):
-    std::runtime_error(msg)
-  {}
-};
 
 template< class Key, class Value, class Hash, class Equal >
 class HashTable {
 public:
   using key_type = Key;
   using mapped_type = Value;
-  using value_type = std::pair< const Key, Value >;
   using size_type = std::size_t;
 
 private:
@@ -49,52 +35,114 @@ private:
   Hash hasher_;
   Equal equal_;
 
-  size_type findSlot(const Key & k) const
+  size_type findOccupied(const Key & k) const
   {
     const size_type cap = slots_.size();
     if (cap == 0) {
-      throw KeyNotFoundException("Table is empty");
+      throw std::out_of_range("Key not found: table is empty");
     }
     const size_type h = hasher_(k) % cap;
     for (size_type i = 0; i < cap; ++i) {
       const size_type idx = (h + i * i) % cap;
       const auto & slot = slots_[idx];
       if (slot.state == SlotState::EMPTY) {
-        throw KeyNotFoundException("Key not found");
+        throw std::out_of_range("Key not found");
       }
       if (slot.state == SlotState::OCCUPIED && equal_(slot.key, k)) {
         return idx;
       }
     }
-    throw KeyNotFoundException("Key not found");
+    throw std::out_of_range("Key not found");
   }
 
 public:
+
+  class Entry {
+  public:
+    Entry(const Key & k, Value & v):
+      key_(k),
+      value_(v)
+    {}
+
+    const Key & key() const
+    {
+      return key_;
+    }
+
+    Value & value() const
+    {
+      return value_;
+    }
+
+  private:
+    const Key & key_;
+    Value & value_;
+  };
+
+  class ConstEntry {
+  public:
+    ConstEntry(const Key & k, const Value & v):
+      key_(k),
+      value_(v)
+    {}
+
+    const Key & key() const
+    {
+      return key_;
+    }
+
+    const Value & value() const
+    {
+      return value_;
+    }
+
+  private:
+    const Key & key_;
+    const Value & value_;
+  };
+
   class iterator {
   public:
     using iterator_category = std::forward_iterator_tag;
-    using value_type = std::pair< const Key &, Value & >;
     using difference_type = std::ptrdiff_t;
-    using pointer = void;
-    using reference = value_type;
 
     iterator(std::vector< Slot > * slots, size_type pos):
       slots_(slots),
-      pos_(pos)
+      pos_(pos),
+      entry_(nullptr)
     {
       advance();
+      updateEntry();
     }
 
-    reference operator*() const
+    Entry operator*() const
     {
       auto & slot = (*slots_)[pos_];
-      return { slot.key, slot.value };
+      return Entry(slot.key, slot.value);
+    }
+
+    struct Proxy {
+      explicit Proxy(Entry e):
+        entry_(e)
+      {}
+      Entry * operator->()
+      {
+        return &entry_;
+      }
+      Entry entry_;
+    };
+
+    Proxy operator->() const
+    {
+      auto & slot = (*slots_)[pos_];
+      return Proxy(Entry(slot.key, slot.value));
     }
 
     iterator & operator++()
     {
       ++pos_;
       advance();
+      updateEntry();
       return *this;
     }
 
@@ -111,6 +159,7 @@ public:
   private:
     std::vector< Slot > * slots_;
     size_type pos_;
+    Entry * entry_;
 
     void advance()
     {
@@ -119,15 +168,17 @@ public:
         ++pos_;
       }
     }
+
+    void updateEntry()
+    {
+      entry_ = nullptr;
+    }
   };
 
   class const_iterator {
   public:
     using iterator_category = std::forward_iterator_tag;
-    using value_type = std::pair< const Key &, const Value & >;
     using difference_type = std::ptrdiff_t;
-    using pointer = void;
-    using reference = value_type;
 
     const_iterator(const std::vector< Slot > * slots, size_type pos):
       slots_(slots),
@@ -136,10 +187,27 @@ public:
       advance();
     }
 
-    reference operator*() const
+    ConstEntry operator*() const
     {
       const auto & slot = (*slots_)[pos_];
-      return { slot.key, slot.value };
+      return ConstEntry(slot.key, slot.value);
+    }
+
+    struct Proxy {
+      explicit Proxy(ConstEntry e):
+        entry_(e)
+      {}
+      ConstEntry * operator->()
+      {
+        return &entry_;
+      }
+      ConstEntry entry_;
+    };
+
+    Proxy operator->() const
+    {
+      const auto & slot = (*slots_)[pos_];
+      return Proxy(ConstEntry(slot.key, slot.value));
     }
 
     const_iterator & operator++()
@@ -186,9 +254,12 @@ public:
 
   void add(const Key & k, const Value & v)
   {
+    if (has(k)) {
+      throw std::logic_error("Key already exists");
+    }
     const size_type cap = slots_.size();
     if (cap == 0) {
-      throw TableFullException("Hash table has zero capacity");
+      throw std::overflow_error("Hash table is full");
     }
     const size_type h = hasher_(k) % cap;
     size_type tombstoneIdx = cap;
@@ -214,12 +285,21 @@ public:
       ++size_;
       return;
     }
-    throw TableFullException("Hash table is full");
+    throw std::overflow_error("Hash table is full");
+  }
+
+  void insert_or_assign(const Key & k, const Value & v)
+  {
+    if (has(k)) {
+      slots_[findOccupied(k)].value = v;
+      return;
+    }
+    add(k, v);
   }
 
   Value drop(const Key & k)
   {
-    const size_type idx = findSlot(k);
+    const size_type idx = findOccupied(k);
     Value val = slots_[idx].value;
     slots_[idx].state = SlotState::TOMBSTONE;
     --size_;
@@ -246,14 +326,24 @@ public:
     return false;
   }
 
+  Value & at(const Key & k)
+  {
+    return slots_[findOccupied(k)].value;
+  }
+
+  const Value & at(const Key & k) const
+  {
+    return slots_[findOccupied(k)].value;
+  }
+
   Value & get(const Key & k)
   {
-    return slots_[findSlot(k)].value;
+    return at(k);
   }
 
   const Value & get(const Key & k) const
   {
-    return slots_[findSlot(k)].value;
+    return at(k);
   }
 
   void rehash(size_type newSlots)
@@ -266,6 +356,12 @@ public:
         add(slot.key, slot.value);
       }
     }
+  }
+
+  void clear()
+  {
+    slots_.assign(slots_.size(), Slot{});
+    size_ = 0;
   }
 
   size_type size() const
@@ -306,6 +402,13 @@ public:
   const_iterator cend() const
   {
     return end();
+  }
+};
+
+struct StringEqual {
+  bool operator()(const std::string & a, const std::string & b) const
+  {
+    return a == b;
   }
 };
 
