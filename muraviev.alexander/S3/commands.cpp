@@ -1,43 +1,42 @@
 #include "commands.hpp"
 
-#include <fstream>
+#include <iostream>
 #include <vector>
 
 #include "parsing.hpp"
 
-bool muraviev::loadGraphs(const std::string& filename, GraphTable& graphs)
+namespace
 {
-  std::ifstream input(filename.c_str());
-  if (!input) {
+  using Tokens = std::vector< std::string >;
+  using GraphTable = muraviev::GraphTable;
+  using CommandHandler = bool (*)(GraphTable&, const Tokens&, std::ostream&);
+  using CommandTable = muraviev::HashTable< std::string, CommandHandler,
+      muraviev::StringHash, muraviev::StringEqual >;
+
+  bool graphsCommand(GraphTable&, const Tokens&, std::ostream&)
+  {
     return false;
   }
+}
+
+void muraviev::executeCommands(std::istream& input, std::ostream& output,
+    GraphTable& graphs)
+{
+  CommandTable commands(17);
+  commands.add("graphs", graphsCommand);
 
   std::string line;
   while (std::getline(input, line)) {
     if (line.empty()) {
       continue;
     }
-    std::vector< std::string > tokens;
-    if (!splitStrictSpaces(line, tokens) || tokens.size() != 2 || !isValidName(tokens[0])) {
-      return false;
+    Tokens tokens;
+    if (!splitStrictSpaces(line, tokens) || tokens.empty() || !commands.has(tokens[0])) {
+      output << "INVALID COMMAND\n";
+      continue;
     }
-
-    size_t count = 0;
-    if (!parseSize(tokens[1], count)) {
-      return false;
+    if (!commands.at(tokens[0])(graphs, tokens, output)) {
+      output << "INVALID COMMAND\n";
     }
-    Graph graph(tokens[0]);
-    for (size_t i = 0; i < count; ++i) {
-      std::getline(input, line);
-      std::vector< std::string > edge;
-      unsigned long long weight = 0;
-      if (!splitStrictSpaces(line, edge) || edge.size() != 3 ||
-          !parseUnsignedLongLong(edge[2], weight)) {
-        return false;
-      }
-      graph.addEdge(edge[0], edge[1], weight);
-    }
-    graphs.add(tokens[0], graph);
   }
-  return true;
 }
