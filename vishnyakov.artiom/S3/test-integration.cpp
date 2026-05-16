@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(InvalidCommandsThroughout)
   {
     if (c == '\n') line_count++;
   }
-  
+
   BOOST_CHECK_EQUAL(line_count, 9);
 }
 
