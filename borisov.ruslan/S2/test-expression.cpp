@@ -99,3 +99,18 @@ BOOST_AUTO_TEST_CASE(unary_not_with_parentheses)
   BOOST_CHECK_EQUAL(borisov::evaluateExpression("! ( 1 + 2 )", err), ~3LL);
   BOOST_CHECK_EQUAL(borisov::evaluateExpression("( ! 1 ) + 5", err), (~1LL) + 5);
 }
+
+BOOST_AUTO_TEST_CASE(tokenizer_recognizes_not_operator)
+{
+  std::ostringstream err;
+  BOOST_CHECK_NO_THROW(borisov::evaluateExpression("! 1", err));
+  BOOST_CHECK_NO_THROW(borisov::evaluateExpression("2 + ! 3", err));
+  BOOST_CHECK_NO_THROW(borisov::evaluateExpression("( ! 0 )", err));
+}
+
+BOOST_AUTO_TEST_CASE(tokenizer_rejects_invalid_not_position)
+{
+  std::ostringstream err;
+  BOOST_CHECK_NO_THROW(borisov::evaluateExpression("1 !", err));
+  BOOST_CHECK_NO_THROW(borisov::evaluateExpression("! 1 2", err));
+}
