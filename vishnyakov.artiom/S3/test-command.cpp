@@ -95,8 +95,9 @@ BOOST_AUTO_TEST_CASE(CmdCut)
 {
   vishnyakov::CommandHandler handler;
   handler.add_graph("test", vishnyakov::Graph());
-  handler.execute("bind test a b 100", std::ostringstream());
-  handler.execute("bind test a b 200", std::ostringstream());
+  std::ostringstream dummy;
+  handler.execute("bind test a b 100", dummy);
+  handler.execute("bind test a b 200", dummy);
 
   std::ostringstream out;
   handler.execute("cut test a b 100", out);
@@ -110,7 +111,8 @@ BOOST_AUTO_TEST_CASE(CmdCutNonExistingEdge)
 {
   vishnyakov::CommandHandler handler;
   handler.add_graph("test", vishnyakov::Graph());
-  handler.execute("bind test a b 100", std::ostringstream());
+  std::ostringstream dummy;
+  handler.execute("bind test a b 100", dummy);
 
   std::ostringstream out;
   handler.execute("cut test a b 200", out);
