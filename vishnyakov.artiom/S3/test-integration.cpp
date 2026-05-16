@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(InvalidCommandsThroughout)
   int line_count = 0;
   std::string line;
   std::istringstream result(out.str());
-  
+
   while (std::getline(result, line))
   {
     if (line == "<INVALID COMMAND>")
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(InvalidCommandsThroughout)
       line_count++;
     }
   }
-  
+
   BOOST_CHECK_EQUAL(line_count, 10);
 }
 
