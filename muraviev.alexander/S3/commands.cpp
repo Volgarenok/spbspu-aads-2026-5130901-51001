@@ -1,5 +1,3 @@
-// This snapshot adds bind, cut, and create to the previous command dispatcher.#include "commands.hpp"
-
 #include "commands.hpp"
 
 #include <algorithm>
@@ -346,4 +344,3 @@ void muraviev::executeCommands(std::istream& input, std::ostream& output,
     }
   }
 }
-
