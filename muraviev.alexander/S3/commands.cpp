@@ -1,11 +1,6 @@
+// This snapshot adds bind, cut, and create to the previous command dispatcher.#include "commands.hpp"
+
 #include "commands.hpp"
-
-#include <algorithm>
-#include <fstream>
-#include <iostream>
-#include <vector>
-
-#include "parsing.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -158,6 +153,56 @@ namespace
     return true;
   }
 
+  bool bindCommand(GraphTable& graphs, const Tokens& tokens, std::ostream&)
+  {
+    unsigned long long weight = 0;
+    if (tokens.size() != 5 || !muraviev::isValidName(tokens[1]) ||
+        !muraviev::isValidName(tokens[2]) || !muraviev::isValidName(tokens[3]) ||
+        !graphs.has(tokens[1]) ||
+        !muraviev::parseUnsignedLongLong(tokens[4], weight)) {
+      return false;
+    }
+
+    graphs.at(tokens[1]).addEdge(tokens[2], tokens[3], weight);
+    return true;
+  }
+
+  bool cutCommand(GraphTable& graphs, const Tokens& tokens, std::ostream&)
+  {
+    unsigned long long weight = 0;
+    if (tokens.size() != 5 || !muraviev::isValidName(tokens[1]) ||
+        !muraviev::isValidName(tokens[2]) || !muraviev::isValidName(tokens[3]) ||
+        !graphs.has(tokens[1]) ||
+        !muraviev::parseUnsignedLongLong(tokens[4], weight)) {
+      return false;
+    }
+
+    return graphs.at(tokens[1]).removeEdge(tokens[2], tokens[3], weight);
+  }
+
+  bool createCommand(GraphTable& graphs, const Tokens& tokens, std::ostream&)
+  {
+    if ((tokens.size() != 2 && tokens.size() < 3) || !muraviev::isValidName(tokens[1]) ||
+        graphs.has(tokens[1])) {
+      return false;
+    }
+
+    muraviev::Graph graph(tokens[1]);
+    if (tokens.size() > 2) {
+      size_t count = 0;
+      if (!muraviev::parseSize(tokens[2], count) || tokens.size() != count + 3 ||
+          !validateNames(tokens, 3)) {
+        return false;
+      }
+      for (size_t i = 0; i < count; ++i) {
+        graph.addVertex(tokens[i + 3]);
+      }
+    }
+
+    graphs.add(tokens[1], graph);
+    return true;
+  }
+
   bool mergeCommand(GraphTable& graphs, const Tokens& tokens, std::ostream&)
   {
     if (tokens.size() != 4 || !validateNames(tokens, 1) || graphs.has(tokens[1]) ||
@@ -221,6 +266,9 @@ namespace
     commands.add("vertexes", vertexesCommand);
     commands.add("outbound", outboundCommand);
     commands.add("inbound", inboundCommand);
+    commands.add("bind", bindCommand);
+    commands.add("cut", cutCommand);
+    commands.add("create", createCommand);
     commands.add("merge", mergeCommand);
     commands.add("extract", extractCommand);
     return commands;
@@ -298,3 +346,4 @@ void muraviev::executeCommands(std::istream& input, std::ostream& output,
     }
   }
 }
+
