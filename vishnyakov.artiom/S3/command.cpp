@@ -1,6 +1,7 @@
 #include "command.hpp"
 #include <sstream>
 #include <string>
+#include <cstdlib>
 
 namespace vishnyakov
 {
@@ -100,6 +101,12 @@ namespace vishnyakov
   {
     List< std::string > names = graphs_.get_keys();
 
+    if (names.empty())
+    {
+      out << '\n';
+      return;
+    }
+
     for (LIter< std::string > it = names.begin(); it != names.end(); ++it)
     {
       LIter< std::string > min_it = it;
@@ -138,6 +145,12 @@ namespace vishnyakov
 
     const Graph& graph = graphs_.at(graph_name);
     List< std::string > vertices = graph.get_sorted_vertices();
+
+    if (vertices.empty())
+    {
+      out << '\n';
+      return;
+    }
 
     for (LIter< std::string > it = vertices.begin(); it != vertices.end(); ++it)
     {
@@ -360,7 +373,23 @@ namespace vishnyakov
       throw std::runtime_error("Graph already exists");
     }
 
-    graphs_.add(graph_name, Graph());
+    Graph new_graph;
+
+    if (in >> std::ws && !in.eof())
+    {
+      std::string count_str;
+      in >> count_str;
+      std::size_t vertex_count = std::stoul(count_str);
+
+      for (std::size_t i = 0; i < vertex_count; ++i)
+      {
+        std::string vertex;
+        in >> vertex;
+        new_graph.get_vertices().push_back(vertex);
+      }
+    }
+
+    graphs_.add(graph_name, new_graph);
   }
 
   void CommandHandler::cmd_merge(std::istream& in, std::ostream&)
