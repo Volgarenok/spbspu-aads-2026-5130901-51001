@@ -153,3 +153,54 @@ BOOST_AUTO_TEST_CASE(eval_unary_not_invalid_usage_throws)
   std::ostringstream err;
   BOOST_CHECK_THROW(borisov::evaluateExpression("! + 2", err), std::runtime_error);
 }
+
+BOOST_AUTO_TEST_CASE(acceptance_mixed_operators)
+{
+  std::ostringstream err;
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("1 + 2 * 3 - 4 / 2", err), 1 + 2 * 3 - 4 / 2);
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("10 % 3 + 5 * ( 2 - 1 )", err), 10 % 3 + 5 * (2 - 1));
+}
+
+BOOST_AUTO_TEST_CASE(acceptance_nested_parentheses)
+{
+  std::ostringstream err;
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("( ( 1 + 2 ) * ( 3 - 4 ) )", err), ((1 + 2) * (3 - 4)));
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("( 10 / ( 2 + 3 ) ) % 4", err), (10 / (2 + 3)) % 4);
+}
+
+BOOST_AUTO_TEST_CASE(acceptance_multiple_not)
+{
+  std::ostringstream err;
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("! ! 1", err), ~~1LL);
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("! ( ! 0 )", err), ~(~0LL));
+}
+
+BOOST_AUTO_TEST_CASE(acceptance_negative_numbers)
+{
+  std::ostringstream err;
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("-1 + 2", err), 1);
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("-5 * -3", err), 15);
+}
+
+BOOST_AUTO_TEST_CASE(acceptance_large_numbers)
+{
+  std::ostringstream err;
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("2147483647 + 1", err), 2147483647LL + 1);
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("9223372036854775807 % 2", err), 9223372036854775807LL % 2);
+}
+
+BOOST_AUTO_TEST_CASE(acceptance_division_by_zero_errors)
+{
+  std::ostringstream err;
+  BOOST_CHECK_THROW(borisov::evaluateExpression("1 / ( 2 - 2 )", err), std::runtime_error);
+  BOOST_CHECK_THROW(borisov::evaluateExpression("5 % ( 3 / 3 - 1 )", err), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(acceptance_invalid_syntax_errors)
+{
+  std::ostringstream err;
+  BOOST_CHECK_THROW(borisov::evaluateExpression("( 1 + 2", err), std::runtime_error);
+  BOOST_CHECK_THROW(borisov::evaluateExpression("1 + + 2", err), std::runtime_error);
+  BOOST_CHECK_THROW(borisov::evaluateExpression("1 2 3", err), std::runtime_error);
+  BOOST_CHECK_THROW(borisov::evaluateExpression("+", err), std::runtime_error);
+}
