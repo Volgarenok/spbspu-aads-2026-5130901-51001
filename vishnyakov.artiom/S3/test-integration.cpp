@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(MergeThenQuery)
 
   std::string result = out.str();
 
-  BOOST_CHECK(result.find("a\nb\nc\n") != std::string::npos || 
+  BOOST_CHECK(result.find("a\nb\nc\n") != std::string::npos ||
              result.find("a\nc\nb\n") != std::string::npos ||
              result.find("b\na\nc\n") != std::string::npos);
   
