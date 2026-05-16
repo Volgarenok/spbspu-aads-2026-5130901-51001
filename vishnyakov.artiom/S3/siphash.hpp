@@ -1,4 +1,3 @@
-// lab3/siphash.hpp
 #ifndef SIPHASH_HPP
 #define SIPHASH_HPP
 

@@ -22,11 +22,34 @@ namespace vishnyakov
       : impl_(nullptr)
     {}
 
-    Iter(const Iter&) = default;
-    Iter& operator=(const Iter&) = default;
+    Iter(const Iter& other)
+      : impl_(nullptr)
+    {
+      if (other.impl_)
+      {
+        impl_ = new Impl(*other.impl_);
+      }
+    }
+
+    Iter& operator=(const Iter& other)
+    {
+      if (this != &other)
+      {
+        Iter tmp(other);
+        swap(tmp);
+      }
+
+      return *this;
+    }
+
     ~Iter()
     {
       delete impl_;
+    }
+
+    void swap(Iter& other) noexcept
+    {
+      std::swap(impl_, other.impl_);
     }
 
     std::pair< const Key, Value >& operator*()
@@ -112,6 +135,13 @@ namespace vishnyakov
           current_iter_ = array_[current_index_].begin();
         }
       }
+
+      Impl(const Impl& other)
+        : array_(other.array_),
+          array_capacity_(other.array_capacity_),
+          current_index_(other.current_index_),
+          current_iter_(other.current_iter_)
+      {}
     };
 
     Impl* impl_;
@@ -139,7 +169,15 @@ namespace vishnyakov
       : impl_(nullptr)
     {}
 
-    CIter(const CIter&) = default;
+    CIter(const CIter& other)
+      : impl_(nullptr)
+    {
+      if (other.impl_)
+      {
+        impl_ = new Impl(*other.impl_);
+      }
+    }
+
     CIter(const Iter< Key, Value, Hash, Equal >& other)
     {
       if (other.impl_ != nullptr)
@@ -148,12 +186,26 @@ namespace vishnyakov
       }
     }
 
+    CIter& operator=(const CIter& other)
+    {
+      if (this != &other)
+      {
+        CIter tmp(other);
+        swap(tmp);
+      }
+
+      return *this;
+    }
+
     ~CIter()
     {
       delete impl_;
     }
 
-    CIter& operator=(const CIter&) = default;
+    void swap(CIter& other) noexcept
+    {
+      std::swap(impl_, other.impl_);
+    }
 
     const std::pair< const Key, Value >& operator*() const
     {
@@ -238,6 +290,13 @@ namespace vishnyakov
           current_iter_ = array_[current_index_].begin();
         }
       }
+
+      Impl(const Impl& other)
+        : array_(other.array_),
+          array_capacity_(other.array_capacity_),
+          current_index_(other.current_index_),
+          current_iter_(other.current_iter_)
+      {}
     };
 
     Impl* impl_;
