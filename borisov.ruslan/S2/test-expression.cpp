@@ -131,3 +131,25 @@ BOOST_AUTO_TEST_CASE(infixToPostfix_rejects_invalid_not)
   BOOST_CHECK_THROW(borisov::evaluateExpression("1 ! 2", err), std::runtime_error);
   BOOST_CHECK_THROW(borisov::evaluateExpression("! 1 !", err), std::runtime_error);
 }
+
+BOOST_AUTO_TEST_CASE(eval_unary_not_positive)
+{
+  std::ostringstream err;
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("! 0", err), ~0LL);
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("! 1", err), ~1LL);
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("! -1", err), ~(-1LL));
+}
+
+BOOST_AUTO_TEST_CASE(eval_unary_not_with_binary_ops)
+{
+  std::ostringstream err;
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("3 + ! 1", err), 3 + ~1LL);
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("! 5 * 2", err), (~5LL) * 2);
+  BOOST_CHECK_EQUAL(borisov::evaluateExpression("( ! 2 ) + 4", err), (~2LL) + 4);
+}
+
+BOOST_AUTO_TEST_CASE(eval_unary_not_invalid_usage_throws)
+{
+  std::ostringstream err;
+  BOOST_CHECK_THROW(borisov::evaluateExpression("! + 2", err), std::runtime_error);
+}
