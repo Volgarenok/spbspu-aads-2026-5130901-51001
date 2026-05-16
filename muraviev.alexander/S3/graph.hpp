@@ -1,27 +1,35 @@
 #ifndef GRAPH_HPP
 #define GRAPH_HPP
 
+#include <cstddef>
 #include <string>
-
-#include "../common/list.hpp"
-#include "hash_table.hpp"
 
 namespace muraviev
 {
+  struct StringHash
+  {
+    size_t operator()(const std::string& value) const;
+  };
+
+  struct StringEqual
+  {
+    bool operator()(const std::string& lhs, const std::string& rhs) const;
+  };
+
   struct EdgeKey
   {
     std::string from;
     std::string to;
   };
 
-  class Graph
+  struct EdgeKeyHash
   {
-  public:
-    explicit Graph(const std::string& name = "");
-    const std::string& getName() const;
+    size_t operator()(const EdgeKey& value) const;
+  };
 
-  private:
-    std::string name_;
+  struct EdgeKeyEqual
+  {
+    bool operator()(const EdgeKey& lhs, const EdgeKey& rhs) const;
   };
 }
 
