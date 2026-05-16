@@ -192,6 +192,17 @@ namespace borisov
         {
           operands.push(t.value);
         }
+        else if (t.type == TokenType::op_not)
+        {
+          if (operands.empty())
+          {
+            errorMsg = "Not enough operands for !";
+            return 0;
+          }
+          long long a = operands.top();
+          operands.pop();
+          operands.push(~a);
+        }
         else
         {
           if (operands.size() < 2)
