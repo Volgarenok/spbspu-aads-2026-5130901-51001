@@ -4,8 +4,11 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
+#include <utility>
 
 namespace loseva {
+
+using EdgeKey = std::pair< std::string, std::string >;
 
 class XxHash32 {
 public:
@@ -97,22 +100,26 @@ struct StringXxHash {
     XxHash32 h;
     return h(s.data(), s.size());
   }
+
+  std::size_t hashBytes(const unsigned char * data, std::size_t len) const
+  {
+    XxHash32 h;
+    return h(data, len);
+  }
 };
 
 struct PairStringXxHash {
-  std::size_t operator()(const std::pair< std::string, std::string > & p) const
+  std::size_t operator()(const EdgeKey & p) const
   {
     XxHash32 h;
     const std::size_t h1 = h(p.first.data(), p.first.size());
     const std::size_t h2 = h(p.second.data(), p.second.size());
-    return h1 ^ (h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2));
+    return h1 ^ (h2 + 0x9e3779b9u + (h1 << 6) + (h1 >> 2));
   }
 };
 
 struct PairStringEqual {
-  bool operator()(
-    const std::pair< std::string, std::string > & a,
-    const std::pair< std::string, std::string > & b) const
+  bool operator()(const EdgeKey & a, const EdgeKey & b) const
   {
     return a.first == b.first && a.second == b.second;
   }
