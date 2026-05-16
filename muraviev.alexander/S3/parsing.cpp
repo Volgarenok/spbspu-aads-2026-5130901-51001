@@ -1,5 +1,27 @@
 #include "parsing.hpp"
 
+#include <limits>
+
+bool muraviev::isValidName(const std::string& value)
+{
+  if (value.empty()) {
+    return false;
+  }
+  const char first = value[0];
+  if (!((first >= 'A' && first <= 'Z') || (first >= 'a' && first <= 'z'))) {
+    return false;
+  }
+  for (size_t i = 1; i < value.size(); ++i) {
+    const char c = value[i];
+    const bool isLetter = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+    const bool isDigit = c >= '0' && c <= '9';
+    if (!isLetter && !isDigit) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool muraviev::splitStrictSpaces(const std::string& line,
     std::vector< std::string >& tokens)
 {
@@ -10,7 +32,6 @@ bool muraviev::splitStrictSpaces(const std::string& line,
   if (line[0] == ' ' || line[line.size() - 1] == ' ') {
     return false;
   }
-
   std::string token;
   for (size_t i = 0; i < line.size(); ++i) {
     if (line[i] == ' ') {
@@ -24,5 +45,40 @@ bool muraviev::splitStrictSpaces(const std::string& line,
     }
   }
   tokens.push_back(token);
+  return true;
+}
+
+bool muraviev::parseUnsignedLongLong(const std::string& text,
+    unsigned long long& value)
+{
+  if (text.empty() || text[0] == '-') {
+    return false;
+  }
+  unsigned long long result = 0;
+  const unsigned long long max = std::numeric_limits< unsigned long long >::max();
+  for (size_t i = 0; i < text.size(); ++i) {
+    if (text[i] < '0' || text[i] > '9') {
+      return false;
+    }
+    const unsigned int digit = static_cast< unsigned int >(text[i] - '0');
+    if (result > (max - digit) / 10) {
+      return false;
+    }
+    result = result * 10 + digit;
+  }
+  value = result;
+  return true;
+}
+
+bool muraviev::parseSize(const std::string& text, size_t& value)
+{
+  unsigned long long parsed = 0;
+  if (!parseUnsignedLongLong(text, parsed)) {
+    return false;
+  }
+  if (parsed > std::numeric_limits< size_t >::max()) {
+    return false;
+  }
+  value = static_cast< size_t >(parsed);
   return true;
 }
