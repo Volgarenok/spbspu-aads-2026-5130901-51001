@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(InvalidCommandsThroughout)
   handler.execute("create existing", out);
   handler.execute("merge new missing1 missing2", out);
   handler.execute("extract new missing 1 a", out);
-  handler.execute("extract new missing 1 a", out);
+  handler.execute("invalid command with spaces", out);
 
   int line_count = 0;
   for (char c : out.str())
