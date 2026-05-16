@@ -80,7 +80,10 @@ namespace vishnyakov
 
   bool Graph::has_vertex(const Vertex& v) const
   {
-    for (LCIter< Vertex > it = vertices_.begin(); it != vertices_.end(); ++it)
+    LCIter< Vertex > it = vertices_.begin();
+    LCIter< Vertex > end = vertices_.end();
+
+    for (; it != end; ++it)
     {
       if (*it == v)
       {
@@ -101,8 +104,10 @@ namespace vishnyakov
     }
 
     const List< Weight >& weights = edges_.at(key);
+    LCIter< Weight > it = weights.begin();
+    LCIter< Weight > end = weights.end();
 
-    for (LCIter< Weight > it = weights.begin(); it != weights.end(); ++it)
+    for (; it != end; ++it)
     {
       if (*it == weight)
       {
@@ -129,7 +134,10 @@ namespace vishnyakov
     List< std::pair< Vertex, List< Weight > > > result;
     List< EdgeKey > keys = edges_.get_keys();
 
-    for (LCIter< EdgeKey > kit = keys.begin(); kit != keys.end(); ++kit)
+    LIter< EdgeKey > kit = keys.begin();
+    LIter< EdgeKey > kend = keys.end();
+
+    for (; kit != kend; ++kit)
     {
       if (kit->first == v)
       {
@@ -145,7 +153,10 @@ namespace vishnyakov
     List< std::pair< Vertex, List< Weight > > > result;
     List< EdgeKey > keys = edges_.get_keys();
 
-    for (LCIter< EdgeKey > kit = keys.begin(); kit != keys.end(); ++kit)
+    LIter< EdgeKey > kit = keys.begin();
+    LIter< EdgeKey > kend = keys.end();
+
+    for (; kit != kend; ++kit)
     {
       if (kit->second == v)
       {
@@ -160,16 +171,23 @@ namespace vishnyakov
   {
     List< Vertex > sorted;
 
-    for (LCIter< Vertex > it = vertices_.begin(); it != vertices_.end(); ++it)
+    LCIter< Vertex > it = vertices_.begin();
+    LCIter< Vertex > end = vertices_.end();
+
+    for (; it != end; ++it)
     {
       sorted.push_back(*it);
     }
 
-    for (LIter< Vertex > it = sorted.begin(); it != sorted.end(); ++it)
-    {
-      LIter< Vertex > min_it = it;
+    LIter< Vertex > sit = sorted.begin();
+    LIter< Vertex > send = sorted.end();
 
-      for (LIter< Vertex > jt = it; jt != sorted.end(); ++jt)
+    for (; sit != send; ++sit)
+    {
+      LIter< Vertex > min_it = sit;
+      LIter< Vertex > jt = sit;
+
+      for (++jt; jt != send; ++jt)
       {
         if (*jt < *min_it)
         {
@@ -177,10 +195,10 @@ namespace vishnyakov
         }
       }
 
-      if (min_it != it)
+      if (min_it != sit)
       {
-        Vertex tmp = *it;
-        *it = *min_it;
+        Vertex tmp = *sit;
+        *sit = *min_it;
         *min_it = tmp;
       }
     }
@@ -192,16 +210,23 @@ namespace vishnyakov
   {
     List< Weight > sorted;
 
-    for (LCIter< Weight > it = weights.begin(); it != weights.end(); ++it)
+    LCIter< Weight > it = weights.begin();
+    LCIter< Weight > end = weights.end();
+
+    for (; it != end; ++it)
     {
       sorted.push_back(*it);
     }
 
-    for (LIter< Weight > it = sorted.begin(); it != sorted.end(); ++it)
-    {
-      LIter< Weight > min_it = it;
+    LIter< Weight > sit = sorted.begin();
+    LIter< Weight > send = sorted.end();
 
-      for (LIter< Weight > jt = it; jt != sorted.end(); ++jt)
+    for (; sit != send; ++sit)
+    {
+      LIter< Weight > min_it = sit;
+      LIter< Weight > jt = sit;
+
+      for (++jt; jt != send; ++jt)
       {
         if (*jt < *min_it)
         {
@@ -209,10 +234,10 @@ namespace vishnyakov
         }
       }
 
-      if (min_it != it)
+      if (min_it != sit)
       {
-        Weight tmp = *it;
-        *it = *min_it;
+        Weight tmp = *sit;
+        *sit = *min_it;
         *min_it = tmp;
       }
     }
