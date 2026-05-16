@@ -1,12 +1,9 @@
+#define BOOST_TEST_MODULE S3
 #include <boost/test/unit_test.hpp>
 #include "command.hpp"
+#include "utils.hpp"
 #include <sstream>
 #include <string>
-
-namespace vishnyakov
-{
-  void parse_graph_file(std::istream& file, CommandHandler& handler);
-}
 
 BOOST_AUTO_TEST_SUITE(FileParsingTests)
 
