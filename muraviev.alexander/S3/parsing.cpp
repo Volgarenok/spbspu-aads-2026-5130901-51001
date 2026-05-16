@@ -1,21 +1,28 @@
 #include "parsing.hpp"
 
-std::vector< std::string > muraviev::splitTokens(const std::string& line)
+bool muraviev::splitStrictSpaces(const std::string& line,
+    std::vector< std::string >& tokens)
 {
-  std::vector< std::string > tokens;
+  tokens.clear();
+  if (line.empty()) {
+    return true;
+  }
+  if (line[0] == ' ' || line[line.size() - 1] == ' ') {
+    return false;
+  }
+
   std::string token;
   for (size_t i = 0; i < line.size(); ++i) {
     if (line[i] == ' ') {
-      if (!token.empty()) {
-        tokens.push_back(token);
-        token.clear();
+      if (token.empty()) {
+        return false;
       }
+      tokens.push_back(token);
+      token.clear();
     } else {
       token += line[i];
     }
   }
-  if (!token.empty()) {
-    tokens.push_back(token);
-  }
-  return tokens;
+  tokens.push_back(token);
+  return true;
 }

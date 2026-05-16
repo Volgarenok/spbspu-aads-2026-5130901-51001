@@ -6,7 +6,7 @@
 
 namespace muraviev
 {
-  std::vector< std::string > splitTokens(const std::string& line);
+  bool splitStrictSpaces(const std::string& line, std::vector< std::string >& tokens);
 }
 
 #endif
