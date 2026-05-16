@@ -98,7 +98,6 @@ const std::string hachaturyanov::convertToPostfix(const std::string& infix)
     postfix += ' ';
   }
 
-  std::cerr << postfix << '\n';
   return postfix;
 }
 
