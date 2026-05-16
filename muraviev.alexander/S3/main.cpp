@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 
 int main(int argc, char* argv[])
@@ -7,6 +8,11 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  (void)argv;
+  std::ifstream input(argv[1]);
+  if (!input) {
+    std::cerr << "invalid input file\n";
+    return 1;
+  }
+
   return 0;
 }
