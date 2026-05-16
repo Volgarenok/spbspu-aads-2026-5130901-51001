@@ -6,6 +6,7 @@
 #include <utility>
 #include <stdexcept>
 #include <algorithm>
+#include <functional>
 
 namespace vishnyakov
 {
@@ -13,136 +14,40 @@ namespace vishnyakov
   class HashTable;
 
   template < class Key, class Value, class Hash, class Equal >
-  class Iter
+  class HTIter
   {
     friend class HashTable< Key, Value, Hash, Equal >;
 
   public:
-    Iter()
-      : impl_(nullptr)
+    HTIter()
+      : array_(nullptr),
+        array_capacity_(0),
+        current_index_(0),
+        current_iter_()
     {}
 
-    Iter(const Iter& other)
-      : impl_(nullptr)
-    {
-      if (other.impl_)
-      {
-        impl_ = new Impl(*other.impl_);
-      }
-    }
-
-    Iter& operator=(const Iter& other)
-    {
-      if (this != &other)
-      {
-        Iter tmp(other);
-        swap(tmp);
-      }
-
-      return *this;
-    }
-
-    ~Iter()
-    {
-      delete impl_;
-    }
-
-    void swap(Iter& other) noexcept
-    {
-      std::swap(impl_, other.impl_);
-    }
+    HTIter(const HTIter&) = default;
+    HTIter& operator=(const HTIter&) = default;
+    ~HTIter() = default;
 
     std::pair< const Key, Value >& operator*()
     {
-      if (!impl_ || impl_->current_iter_ == impl_->array_[impl_->current_index_].end())
-      {
-        throw std::runtime_error("Dereferencing end iterator");
-      }
-
-      return *impl_->current_iter_;
+      return *current_iter_;
     }
 
     std::pair< const Key, Value >* operator->()
     {
-      if (!impl_ || impl_->current_iter_ == impl_->array_[impl_->current_index_].end())
-      {
-        throw std::runtime_error("Dereferencing end iterator");
-      }
-
-      return &(*impl_->current_iter_);
+      return &(*current_iter_);
     }
 
-    Iter& operator++()
+    HTIter& operator++()
     {
-      if (!impl_)
+      ++current_iter_;
+
+      while (current_index_ < array_capacity_ &&
+             current_iter_ == array_[current_index_].end())
       {
-        throw std::runtime_error("Incrementing invalid iterator");
-      }
-
-      ++(impl_->current_iter_);
-
-      while (impl_->current_index_ < impl_->array_capacity_ &&
-             impl_->current_iter_ == impl_->array_[impl_->current_index_].end())
-      {
-        ++(impl_->current_index_);
-
-        if (impl_->current_index_ < impl_->array_capacity_)
-        {
-          impl_->current_iter_ = impl_->array_[impl_->current_index_].begin();
-        }
-      }
-
-      return *this;
-    }
-
-    Iter operator++(int)
-    {
-      Iter tmp = *this;
-      ++(*this);
-      return tmp;
-    }
-
-    bool operator==(const Iter& other) const
-    {
-      if (impl_ == nullptr && other.impl_ == nullptr)
-      {
-        return true;
-      }
-
-      if (impl_ == nullptr || other.impl_ == nullptr)
-      {
-        return false;
-      }
-
-      return impl_->array_ == other.impl_->array_ &&
-             impl_->current_index_ == other.impl_->current_index_ &&
-             impl_->current_iter_ == other.impl_->current_iter_;
-    }
-
-    bool operator!=(const Iter& other) const
-    {
-      return !(*this == other);
-    }
-
-  private:
-    struct Impl
-    {
-      List< std::pair< const Key, Value > >* array_;
-      std::size_t array_capacity_;
-      std::size_t current_index_;
-      typename List< std::pair< const Key, Value > >::Iter current_iter_;
-
-      Impl(List< std::pair< const Key, Value > >* arr, std::size_t cap)
-        : array_(arr),
-          array_capacity_(cap),
-          current_index_(0),
-          current_iter_()
-      {
-        while (current_index_ < array_capacity_ &&
-               array_[current_index_].empty())
-        {
-          ++current_index_;
-        }
+        ++current_index_;
 
         if (current_index_ < array_capacity_)
         {
@@ -150,168 +55,105 @@ namespace vishnyakov
         }
       }
 
-      Impl(const Impl& other)
-        : array_(other.array_),
-          array_capacity_(other.array_capacity_),
-          current_index_(other.current_index_),
-          current_iter_(other.current_iter_)
-      {}
-    };
+      return *this;
+    }
 
-    Impl* impl_;
-
-    Iter(List< std::pair< const Key, Value > >* array, std::size_t capacity)
-      : impl_(new Impl(array, capacity))
-    {}
-
-    static Iter make_end(List< std::pair< const Key, Value > >* array, std::size_t capacity)
+    HTIter operator++(int)
     {
-      Iter result;
-      result.impl_ = new Impl(array, capacity);
-      result.impl_->current_index_ = capacity;
+      HTIter tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    bool operator==(const HTIter& other) const
+    {
+      return array_ == other.array_ &&
+             current_index_ == other.current_index_ &&
+             current_iter_ == other.current_iter_;
+    }
+
+    bool operator!=(const HTIter& other) const
+    {
+      return !(*this == other);
+    }
+
+  private:
+    List< std::pair< const Key, Value > >* array_;
+    std::size_t array_capacity_;
+    std::size_t current_index_;
+    typename List< std::pair< const Key, Value > >::LIter current_iter_;
+
+    HTIter(List< std::pair< const Key, Value > >* array, std::size_t capacity)
+      : array_(array),
+        array_capacity_(capacity),
+        current_index_(0),
+        current_iter_()
+    {
+      while (current_index_ < array_capacity_ &&
+             array_[current_index_].empty())
+      {
+        ++current_index_;
+      }
+
+      if (current_index_ < array_capacity_)
+      {
+        current_iter_ = array_[current_index_].begin();
+      }
+    }
+
+    static HTIter make_end(List< std::pair< const Key, Value > >* array, std::size_t capacity)
+    {
+      HTIter result;
+      result.array_ = array;
+      result.array_capacity_ = capacity;
+      result.current_index_ = capacity;
       return result;
     }
   };
 
   template < class Key, class Value, class Hash, class Equal >
-  class CIter
+  class HTCIter
   {
     friend class HashTable< Key, Value, Hash, Equal >;
 
   public:
-    CIter()
-      : impl_(nullptr)
+    HTCIter()
+      : array_(nullptr),
+        array_capacity_(0),
+        current_index_(0),
+        current_iter_()
     {}
 
-    CIter(const CIter& other)
-      : impl_(nullptr)
-    {
-      if (other.impl_)
-      {
-        impl_ = new Impl(*other.impl_);
-      }
-    }
+    HTCIter(const HTCIter&) = default;
+    HTCIter(const HTIter< Key, Value, Hash, Equal >& other)
+      : array_(other.array_),
+        array_capacity_(other.array_capacity_),
+        current_index_(other.current_index_),
+        current_iter_(other.current_iter_)
+    {}
 
-    CIter(const Iter< Key, Value, Hash, Equal >& other)
-    {
-      if (other.impl_ != nullptr)
-      {
-        impl_ = new Impl(*other.impl_);
-      }
-    }
+    ~HTCIter() = default;
 
-    CIter& operator=(const CIter& other)
-    {
-      if (this != &other)
-      {
-        CIter tmp(other);
-        swap(tmp);
-      }
-
-      return *this;
-    }
-
-    ~CIter()
-    {
-      delete impl_;
-    }
-
-    void swap(CIter& other) noexcept
-    {
-      std::swap(impl_, other.impl_);
-    }
+    HTCIter& operator=(const HTCIter&) = default;
 
     const std::pair< const Key, Value >& operator*() const
     {
-      if (!impl_ || impl_->current_iter_ == impl_->array_[impl_->current_index_].end())
-      {
-        throw std::runtime_error("Dereferencing end iterator");
-      }
-
-      return *impl_->current_iter_;
+      return *current_iter_;
     }
 
     const std::pair< const Key, Value >* operator->() const
     {
-      if (!impl_ || impl_->current_iter_ == impl_->array_[impl_->current_index_].end())
-      {
-        throw std::runtime_error("Dereferencing end iterator");
-      }
-
-      return &(*impl_->current_iter_);
+      return &(*current_iter_);
     }
 
-    CIter& operator++()
+    HTCIter& operator++()
     {
-      if (!impl_)
+      ++current_iter_;
+
+      while (current_index_ < array_capacity_ &&
+             current_iter_ == array_[current_index_].end())
       {
-        throw std::runtime_error("Incrementing invalid iterator");
-      }
-
-      ++(impl_->current_iter_);
-
-      while (impl_->current_index_ < impl_->array_capacity_ &&
-             impl_->current_iter_ == impl_->array_[impl_->current_index_].end())
-      {
-        ++(impl_->current_index_);
-
-        if (impl_->current_index_ < impl_->array_capacity_)
-        {
-          impl_->current_iter_ = impl_->array_[impl_->current_index_].begin();
-        }
-      }
-
-      return *this;
-    }
-
-    CIter operator++(int)
-    {
-      CIter tmp = *this;
-      ++(*this);
-      return tmp;
-    }
-
-    bool operator==(const CIter& other) const
-    {
-      if (impl_ == nullptr && other.impl_ == nullptr)
-      {
-        return true;
-      }
-
-      if (impl_ == nullptr || other.impl_ == nullptr)
-      {
-        return false;
-      }
-
-      return impl_->array_ == other.impl_->array_ &&
-             impl_->current_index_ == other.impl_->current_index_ &&
-             impl_->current_iter_ == other.impl_->current_iter_;
-    }
-
-    bool operator!=(const CIter& other) const
-    {
-      return !(*this == other);
-    }
-
-  private:
-    struct Impl
-    {
-      const List< std::pair< const Key, Value > >* array_;
-      std::size_t array_capacity_;
-      std::size_t current_index_;
-      typename List< std::pair< const Key, Value > >::CIter current_iter_;
-
-      Impl(const List< std::pair< const Key, Value > >* arr, std::size_t cap)
-        : array_(arr),
-          array_capacity_(cap),
-          current_index_(0),
-          current_iter_()
-      {
-        while (current_index_ < array_capacity_ &&
-               array_[current_index_].empty())
-        {
-          ++current_index_;
-        }
+        ++current_index_;
 
         if (current_index_ < array_capacity_)
         {
@@ -319,25 +161,58 @@ namespace vishnyakov
         }
       }
 
-      Impl(const Impl& other)
-        : array_(other.array_),
-          array_capacity_(other.array_capacity_),
-          current_index_(other.current_index_),
-          current_iter_(other.current_iter_)
-      {}
-    };
+      return *this;
+    }
 
-    Impl* impl_;
-
-    CIter(const List< std::pair< const Key, Value > >* array, std::size_t capacity)
-      : impl_(new Impl(array, capacity))
-    {}
-
-    static CIter make_end(const List< std::pair< const Key, Value > >* array, std::size_t capacity)
+    HTCIter operator++(int)
     {
-      CIter result;
-      result.impl_ = new Impl(array, capacity);
-      result.impl_->current_index_ = capacity;
+      HTCIter tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    bool operator==(const HTCIter& other) const
+    {
+      return array_ == other.array_ &&
+             current_index_ == other.current_index_ &&
+             current_iter_ == other.current_iter_;
+    }
+
+    bool operator!=(const HTCIter& other) const
+    {
+      return !(*this == other);
+    }
+
+  private:
+    const List< std::pair< const Key, Value > >* array_;
+    std::size_t array_capacity_;
+    std::size_t current_index_;
+    typename List< std::pair< const Key, Value > >::LCIter current_iter_;
+
+    HTCIter(const List< std::pair< const Key, Value > >* array, std::size_t capacity)
+      : array_(array),
+        array_capacity_(capacity),
+        current_index_(0),
+        current_iter_()
+    {
+      while (current_index_ < array_capacity_ &&
+             array_[current_index_].empty())
+      {
+        ++current_index_;
+      }
+
+      if (current_index_ < array_capacity_)
+      {
+        current_iter_ = array_[current_index_].cbegin();
+      }
+    }
+
+    static HTCIter make_end(const List< std::pair< const Key, Value > >* array, std::size_t capacity)
+    {
+      HTCIter result;
+      result.array_ = array;
+      result.array_capacity_ = capacity;
+      result.current_index_ = capacity;
       return result;
     }
   };
@@ -444,34 +319,34 @@ namespace vishnyakov
       return *this;
     }
 
-    Iter< Key, Value, Hash, Equal > begin() noexcept
+    HTIter< Key, Value, Hash, Equal > begin() noexcept
     {
-      return Iter< Key, Value, Hash, Equal >(array_, array_capacity_);
+      return HTIter< Key, Value, Hash, Equal >(array_, array_capacity_);
     }
 
-    Iter< Key, Value, Hash, Equal > end() noexcept
+    HTIter< Key, Value, Hash, Equal > end() noexcept
     {
-      return Iter< Key, Value, Hash, Equal >::make_end(array_, array_capacity_);
+      return HTIter< Key, Value, Hash, Equal >::make_end(array_, array_capacity_);
     }
 
-    CIter< Key, Value, Hash, Equal > begin() const noexcept
+    HTCIter< Key, Value, Hash, Equal > begin() const noexcept
     {
-      return CIter< Key, Value, Hash, Equal >(array_, array_capacity_);
+      return HTCIter< Key, Value, Hash, Equal >(array_, array_capacity_);
     }
 
-    CIter< Key, Value, Hash, Equal > end() const noexcept
+    HTCIter< Key, Value, Hash, Equal > end() const noexcept
     {
-      return CIter< Key, Value, Hash, Equal >::make_end(array_, array_capacity_);
+      return HTCIter< Key, Value, Hash, Equal >::make_end(array_, array_capacity_);
     }
 
-    CIter< Key, Value, Hash, Equal > cbegin() const noexcept
+    HTCIter< Key, Value, Hash, Equal > cbegin() const noexcept
     {
-      return CIter< Key, Value, Hash, Equal >(array_, array_capacity_);
+      return HTCIter< Key, Value, Hash, Equal >(array_, array_capacity_);
     }
 
-    CIter< Key, Value, Hash, Equal > cend() const noexcept
+    HTCIter< Key, Value, Hash, Equal > cend() const noexcept
     {
-      return CIter< Key, Value, Hash, Equal >::make_end(array_, array_capacity_);
+      return HTCIter< Key, Value, Hash, Equal >::make_end(array_, array_capacity_);
     }
 
     bool empty() const noexcept
@@ -502,10 +377,7 @@ namespace vishnyakov
         }
       }
 
-      List< std::pair< const Key, Value > > tmp_chain(chain);
-      tmp_chain.push_front(std::pair< const Key, Value >(key, Value()));
-
-      chain.swap(tmp_chain);
+      chain.push_front(std::pair< const Key, Value >(key, Value()));
       ++size_;
 
       return chain.front().second;
@@ -556,10 +428,7 @@ namespace vishnyakov
         }
       }
 
-      List< std::pair< const Key, Value > > tmp_chain(chain);
-      tmp_chain.push_front(std::pair< const Key, Value >(key, value));
-
-      chain.swap(tmp_chain);
+      chain.push_front(std::pair< const Key, Value >(key, value));
       ++size_;
     }
 
@@ -576,10 +445,7 @@ namespace vishnyakov
         }
       }
 
-      List< std::pair< const Key, Value > > tmp_chain(chain);
-      tmp_chain.push_front(std::pair< const Key, Value >(std::move(key), std::move(value)));
-
-      chain.swap(tmp_chain);
+      chain.push_front(std::pair< const Key, Value >(std::move(key), std::move(value)));
       ++size_;
     }
 
@@ -601,8 +467,8 @@ namespace vishnyakov
         return result;
       }
 
-      typename List< std::pair< const Key, Value > >::Iter prev = chain.begin();
-      typename List< std::pair< const Key, Value > >::Iter it = chain.begin();
+      typename List< std::pair< const Key, Value > >::LIter prev = chain.begin();
+      typename List< std::pair< const Key, Value > >::LIter it = chain.begin();
       ++it;
 
       for (; it != chain.end(); ++it)

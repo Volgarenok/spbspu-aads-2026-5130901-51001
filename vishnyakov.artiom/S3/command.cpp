@@ -80,7 +80,7 @@ namespace vishnyakov
 
     if (!commands_.has(cmd_name))
     {
-      out << "<INVALID COMMAND>" << '\n';
+      out << "<INVALID COMMAND>" << std::endl;
       return;
     }
 
@@ -90,7 +90,7 @@ namespace vishnyakov
     }
     catch (const std::exception&)
     {
-      out << "<INVALID COMMAND>" << '\n';
+      out << "<INVALID COMMAND>" << std::endl;
     }
   }
 
@@ -103,11 +103,11 @@ namespace vishnyakov
       names.push_back(pair.first);
     }
 
-    for (typename List< std::string >::Iter it = names.begin(); it != names.end(); ++it)
+    for (typename List< std::string >::LIter it = names.begin(); it != names.end(); ++it)
     {
-      typename List< std::string >::Iter min_it = it;
+      typename List< std::string >::LIter min_it = it;
 
-      for (typename List< std::string >::Iter jt = it; jt != names.end(); ++jt)
+      for (typename List< std::string >::LIter jt = it; jt != names.end(); ++jt)
       {
         if (*jt < *min_it)
         {
@@ -125,7 +125,7 @@ namespace vishnyakov
 
     for (const std::string& name : names)
     {
-      out << name << '\n';
+      out << name << std::endl;
     }
   }
 
@@ -144,7 +144,7 @@ namespace vishnyakov
 
     for (const std::string& v : vertices)
     {
-      out << v << '\n';
+      out << v << std::endl;
     }
   }
 
@@ -180,11 +180,11 @@ namespace vishnyakov
       dest_vertices.push_back(pair.first);
     }
 
-    for (typename List< std::string >::Iter it = dest_vertices.begin(); it != dest_vertices.end(); ++it)
+    for (typename List< std::string >::LIter it = dest_vertices.begin(); it != dest_vertices.end(); ++it)
     {
-      typename List< std::string >::Iter min_it = it;
+      typename List< std::string >::LIter min_it = it;
 
-      for (typename List< std::string >::Iter jt = it; jt != dest_vertices.end(); ++jt)
+      for (typename List< std::string >::LIter jt = it; jt != dest_vertices.end(); ++jt)
       {
         if (*jt < *min_it)
         {
@@ -219,7 +219,7 @@ namespace vishnyakov
         }
       }
 
-      out << '\n';
+      out << std::endl;
     }
   }
 
@@ -255,11 +255,11 @@ namespace vishnyakov
       src_vertices.push_back(pair.first);
     }
 
-    for (typename List< std::string >::Iter it = src_vertices.begin(); it != src_vertices.end(); ++it)
+    for (typename List< std::string >::LIter it = src_vertices.begin(); it != src_vertices.end(); ++it)
     {
-      typename List< std::string >::Iter min_it = it;
+      typename List< std::string >::LIter min_it = it;
 
-      for (typename List< std::string >::Iter jt = it; jt != src_vertices.end(); ++jt)
+      for (typename List< std::string >::LIter jt = it; jt != src_vertices.end(); ++jt)
       {
         if (*jt < *min_it)
         {
@@ -294,11 +294,11 @@ namespace vishnyakov
         }
       }
 
-      out << '\n';
+      out << std::endl;
     }
   }
 
-  void CommandHandler::cmd_bind(std::istream& in, std::ostream& out)
+  void CommandHandler::cmd_bind(std::istream& in, std::ostream&)
   {
     std::string graph_name;
     std::string vertex_a;
@@ -316,7 +316,7 @@ namespace vishnyakov
     graph.add_edge(vertex_a, vertex_b, weight);
   }
 
-  void CommandHandler::cmd_cut(std::istream& in, std::ostream& out)
+  void CommandHandler::cmd_cut(std::istream& in, std::ostream&)
   {
     std::string graph_name;
     std::string vertex_a;
@@ -345,7 +345,7 @@ namespace vishnyakov
     graph.remove_edge(vertex_a, vertex_b, weight);
   }
 
-  void CommandHandler::cmd_create(std::istream& in, std::ostream& out)
+  void CommandHandler::cmd_create(std::istream& in, std::ostream&)
   {
     std::string graph_name;
     in >> graph_name;
@@ -358,7 +358,7 @@ namespace vishnyakov
     graphs_.add(graph_name, Graph());
   }
 
-  void CommandHandler::cmd_merge(std::istream& in, std::ostream& out)
+  void CommandHandler::cmd_merge(std::istream& in, std::ostream&)
   {
     std::string new_name;
     std::string old_name1;
@@ -422,7 +422,7 @@ namespace vishnyakov
     graphs_.add(new_name, merged);
   }
 
-  void CommandHandler::cmd_extract(std::istream& in, std::ostream& out)
+  void CommandHandler::cmd_extract(std::istream& in, std::ostream&)
   {
     std::string new_name;
     std::string old_name;
