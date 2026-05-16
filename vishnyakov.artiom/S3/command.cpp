@@ -97,13 +97,12 @@ namespace vishnyakov
     }
   }
 
-  void CommandHandler::cmd_graphs(std::istream&, std::ostream& out)
-  {
+void CommandHandler::cmd_graphs(std::istream&, std::ostream& out)
+{
     List< std::string > names = graphs_.get_keys();
 
     if (names.empty())
     {
-      out << '\n';
       return;
     }
 
