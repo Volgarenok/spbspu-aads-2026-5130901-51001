@@ -31,10 +31,6 @@ namespace borisov
 
     int precedence(TokenType type)
     {
-      if (type == TokenType::op_not)
-      {
-        return 3;
-      }
       if (type == TokenType::op_mult || type == TokenType::op_div || type == TokenType::op_mod)
       {
         return 2;
@@ -138,16 +134,6 @@ namespace borisov
           opStack.pop();
           prevWasOperand = true;
         }
-        else if (t.type == TokenType::op_not)
-        {
-          if (prevWasOperand)
-          {
-            errorMsg = "Operator ! cannot appear after an operand";
-            return false;
-          }
-          opStack.push(t);
-          prevWasOperand = false;
-        }
         else
         {
           if (!prevWasOperand)
@@ -156,8 +142,7 @@ namespace borisov
             return false;
           }
           while (!opStack.empty() && opStack.top().type != TokenType::lparen &&
-                 (precedence(opStack.top().type) > precedence(t.type) ||
-                  (precedence(opStack.top().type) == precedence(t.type) && t.type != TokenType::op_not)))
+                 precedence(opStack.top().type) >= precedence(t.type))
           {
             postfix.push(opStack.top());
             opStack.pop();
@@ -191,17 +176,6 @@ namespace borisov
         if (t.type == TokenType::number)
         {
           operands.push(t.value);
-        }
-        else if (t.type == TokenType::op_not)
-        {
-          if (operands.empty())
-          {
-            errorMsg = "Not enough operands for !";
-            return 0;
-          }
-          long long a = operands.top();
-          operands.pop();
-          operands.push(~a);
         }
         else
         {
