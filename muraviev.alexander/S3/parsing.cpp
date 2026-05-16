@@ -32,19 +32,24 @@ bool muraviev::splitStrictSpaces(const std::string& line,
   if (line[0] == ' ' || line[line.size() - 1] == ' ') {
     return false;
   }
-  std::string token;
+
+  std::string current;
   for (size_t i = 0; i < line.size(); ++i) {
-    if (line[i] == ' ') {
-      if (token.empty()) {
+    const char c = line[i];
+    if (c == ' ') {
+      if (current.empty()) {
         return false;
       }
-      tokens.push_back(token);
-      token.clear();
+      tokens.push_back(current);
+      current.clear();
     } else {
-      token += line[i];
+      current += c;
     }
   }
-  tokens.push_back(token);
+
+  if (!current.empty()) {
+    tokens.push_back(current);
+  }
   return true;
 }
 
@@ -54,18 +59,21 @@ bool muraviev::parseUnsignedLongLong(const std::string& text,
   if (text.empty() || text[0] == '-') {
     return false;
   }
+
   unsigned long long result = 0;
   const unsigned long long max = std::numeric_limits< unsigned long long >::max();
   for (size_t i = 0; i < text.size(); ++i) {
-    if (text[i] < '0' || text[i] > '9') {
+    const char c = text[i];
+    if (c < '0' || c > '9') {
       return false;
     }
-    const unsigned int digit = static_cast< unsigned int >(text[i] - '0');
+    const unsigned int digit = static_cast< unsigned int >(c - '0');
     if (result > (max - digit) / 10) {
       return false;
     }
     result = result * 10 + digit;
   }
+
   value = result;
   return true;
 }

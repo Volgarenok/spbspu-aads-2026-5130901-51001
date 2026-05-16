@@ -134,4 +134,3 @@ const muraviev::Graph::WeightList& muraviev::Graph::getWeights(const EdgeKey& ke
 {
   return edges_.at(key);
 }
-
