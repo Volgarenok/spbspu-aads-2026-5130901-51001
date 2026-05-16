@@ -170,6 +170,37 @@ namespace kitserov
     size_t size() noexcept {
       return n ? n->size_ : 0;
     }
+    void push(const Key& k, const Value& v)
+    {
+      BSTree* cur = this;
+      BSTree* parent = parent_;
+      bool left_child;
+      while (cur) {
+        parent = cur;
+        if (cmp_(k, cur -> data_.first)) {
+          cur = cur -> left_;
+          left_child = true;
+        } else if (cmp_(cur -> data_.first, k)) {
+          cur = cur -> right_;
+          left_child = false;
+        } else {
+          cur->data_.second = v;
+          return;
+        }
+      }
+      BSTree* newNode = new BSTree(k, v, parent, cmp_);
+      if (parent) {
+        if (left_child) {
+          parent -> left_ = newNode;
+        } else {
+          parent -> right_ = newNode;
+        }
+      }
+      while (parent) {
+        parent -> update();
+        parent = parent -> parent_;
+      }
+    }
   };
 }
 
