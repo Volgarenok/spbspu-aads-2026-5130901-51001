@@ -3,7 +3,7 @@
 
 #include "hash_table.hpp"
 #include "siphash.hpp"
-#include "../common/list.hpp"
+#include "list.hpp"
 #include <string>
 #include <utility>
 
@@ -28,6 +28,7 @@ namespace vishnyakov
     void remove_edge(const Vertex& from, const Vertex& to, Weight weight);
     bool has_vertex(const Vertex& v) const;
     bool has_edge(const Vertex& from, const Vertex& to, Weight weight) const;
+    bool has_any_edge(const Vertex& from, const Vertex& to) const;
 
     List< Vertex >& get_vertices()
     {
@@ -51,6 +52,9 @@ namespace vishnyakov
 
     List< std::pair< Vertex, List< Weight > > > get_outbound(const Vertex& v) const;
     List< std::pair< Vertex, List< Weight > > > get_inbound(const Vertex& v) const;
+
+    List< Vertex > get_sorted_vertices() const;
+    List< Weight > get_sorted_weights(const List< Weight >& weights) const;
 
   private:
     List< Vertex > vertices_;
