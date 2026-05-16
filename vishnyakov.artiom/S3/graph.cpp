@@ -54,8 +54,8 @@ namespace vishnyakov
       return;
     }
 
-    typename List< Weight >::LIter prev = weights.begin();
-    typename List< Weight >::LIter it = weights.begin();
+    LIter< Weight > prev = weights.begin();
+    LIter< Weight > it = weights.begin();
     ++it;
 
     for (; it != weights.end(); ++it)
@@ -163,11 +163,11 @@ namespace vishnyakov
       sorted.push_back(v);
     }
 
-    for (typename List< Vertex >::LIter it = sorted.begin(); it != sorted.end(); ++it)
+    for (LIter< Vertex > it = sorted.begin(); it != sorted.end(); ++it)
     {
-      typename List< Vertex >::LIter min_it = it;
+      LIter< Vertex > min_it = it;
 
-      for (typename List< Vertex >::LIter jt = it; jt != sorted.end(); ++jt)
+      for (LIter< Vertex > jt = it; jt != sorted.end(); ++jt)
       {
         if (*jt < *min_it)
         {
@@ -195,11 +195,11 @@ namespace vishnyakov
       sorted.push_back(w);
     }
 
-    for (typename List< Weight >::LIter it = sorted.begin(); it != sorted.end(); ++it)
+    for (LIter< Weight > it = sorted.begin(); it != sorted.end(); ++it)
     {
-      typename List< Weight >::LIter min_it = it;
+      LIter< Weight > min_it = it;
 
-      for (typename List< Weight >::LIter jt = it; jt != sorted.end(); ++jt)
+      for (LIter< Weight > jt = it; jt != sorted.end(); ++jt)
       {
         if (*jt < *min_it)
         {

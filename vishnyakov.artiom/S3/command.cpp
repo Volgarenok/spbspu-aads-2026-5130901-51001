@@ -103,11 +103,11 @@ namespace vishnyakov
       names.push_back(pair.first);
     }
 
-    for (typename List< std::string >::LIter it = names.begin(); it != names.end(); ++it)
+    for (LIter< std::string > it = names.begin(); it != names.end(); ++it)
     {
-      typename List< std::string >::LIter min_it = it;
+      LIter< std::string > min_it = it;
 
-      for (typename List< std::string >::LIter jt = it; jt != names.end(); ++jt)
+      for (LIter< std::string > jt = it; jt != names.end(); ++jt)
       {
         if (*jt < *min_it)
         {
@@ -180,11 +180,11 @@ namespace vishnyakov
       dest_vertices.push_back(pair.first);
     }
 
-    for (typename List< std::string >::LIter it = dest_vertices.begin(); it != dest_vertices.end(); ++it)
+    for (LIter< std::string > it = dest_vertices.begin(); it != dest_vertices.end(); ++it)
     {
-      typename List< std::string >::LIter min_it = it;
+      LIter< std::string > min_it = it;
 
-      for (typename List< std::string >::LIter jt = it; jt != dest_vertices.end(); ++jt)
+      for (LIter< std::string > jt = it; jt != dest_vertices.end(); ++jt)
       {
         if (*jt < *min_it)
         {
@@ -255,11 +255,11 @@ namespace vishnyakov
       src_vertices.push_back(pair.first);
     }
 
-    for (typename List< std::string >::LIter it = src_vertices.begin(); it != src_vertices.end(); ++it)
+    for (LIter< std::string > it = src_vertices.begin(); it != src_vertices.end(); ++it)
     {
-      typename List< std::string >::LIter min_it = it;
+      LIter< std::string > min_it = it;
 
-      for (typename List< std::string >::LIter jt = it; jt != src_vertices.end(); ++jt)
+      for (LIter< std::string > jt = it; jt != src_vertices.end(); ++jt)
       {
         if (*jt < *min_it)
         {
