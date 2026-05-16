@@ -1,5 +1,7 @@
 #include "graph.hpp"
 
+#include <algorithm>
+
 #include "sip_hash.hpp"
 
 size_t muraviev::StringHash::operator()(const std::string& value) const
@@ -13,6 +15,16 @@ bool muraviev::StringEqual::operator()(const std::string& lhs,
 {
   return lhs == rhs;
 }
+
+muraviev::EdgeKey::EdgeKey():
+  from(),
+  to()
+{}
+
+muraviev::EdgeKey::EdgeKey(const std::string& edgeFrom, const std::string& edgeTo):
+  from(edgeFrom),
+  to(edgeTo)
+{}
 
 size_t muraviev::EdgeKeyHash::operator()(const EdgeKey& value) const
 {
@@ -34,6 +46,11 @@ muraviev::Graph::Graph(const std::string& name):
   vertexes_(53)
 {}
 
+const std::string& muraviev::Graph::getName() const
+{
+  return name_;
+}
+
 void muraviev::Graph::addVertex(const std::string& vertex)
 {
   vertexes_.add(vertex, true);
@@ -49,15 +66,72 @@ void muraviev::Graph::addEdge(const std::string& from, const std::string& to,
 {
   addVertex(from);
   addVertex(to);
-  EdgeKey key = {from, to};
-  WeightList weights;
+
+  const EdgeKey key(from, to);
   if (edges_.has(key)) {
-    weights = edges_.at(key);
-  }
-  if (weights.empty()) {
-    weights.pushFront(weight);
+    WeightList weights = edges_.at(key);
+    if (weights.empty()) {
+      weights.pushFront(weight);
+    } else {
+      weights.insert(weights.last(), weight);
+    }
+    edges_.add(key, weights);
   } else {
-    weights.insert(weights.last(), weight);
+    WeightList weights;
+    weights.pushFront(weight);
+    edges_.add(key, weights);
   }
-  edges_.add(key, weights);
 }
+
+bool muraviev::Graph::removeEdge(const std::string& from, const std::string& to,
+    unsigned long long weight)
+{
+  if (!hasVertex(from) || !hasVertex(to)) {
+    return false;
+  }
+
+  const EdgeKey key(from, to);
+  if (!edges_.has(key)) {
+    return false;
+  }
+
+  WeightList weights = edges_.at(key);
+  for (WeightList::iter it = weights.begin(); it != weights.end(); ++it) {
+    if (*it == weight) {
+      weights.erase(it);
+      if (weights.empty()) {
+        edges_.drop(key);
+      } else {
+        edges_.add(key, weights);
+      }
+      return true;
+    }
+  }
+
+  return false;
+}
+
+std::vector< std::string > muraviev::Graph::collectVertexNames() const
+{
+  std::vector< std::string > result;
+  for (VertexTable::const_iterator it = vertexes_.cbegin(); it != vertexes_.cend(); ++it) {
+    result.push_back(it->key);
+  }
+  std::sort(result.begin(), result.end());
+  return result;
+}
+
+std::vector< muraviev::EdgeKey > muraviev::Graph::collectEdgeKeys() const
+{
+  std::vector< EdgeKey > result;
+  for (EdgeTable::const_iterator it = edges_.cbegin(); it != edges_.cend(); ++it) {
+    result.push_back(it->key);
+  }
+  return result;
+}
+
+const muraviev::Graph::WeightList& muraviev::Graph::getWeights(const EdgeKey& key) const
+{
+  return edges_.at(key);
+}
+
