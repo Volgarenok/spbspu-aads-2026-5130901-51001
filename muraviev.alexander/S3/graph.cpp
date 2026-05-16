@@ -27,3 +27,37 @@ bool muraviev::EdgeKeyEqual::operator()(const EdgeKey& lhs, const EdgeKey& rhs) 
 {
   return lhs.from == rhs.from && lhs.to == rhs.to;
 }
+
+muraviev::Graph::Graph(const std::string& name):
+  name_(name),
+  edges_(53),
+  vertexes_(53)
+{}
+
+void muraviev::Graph::addVertex(const std::string& vertex)
+{
+  vertexes_.add(vertex, true);
+}
+
+bool muraviev::Graph::hasVertex(const std::string& vertex) const
+{
+  return vertexes_.has(vertex);
+}
+
+void muraviev::Graph::addEdge(const std::string& from, const std::string& to,
+    unsigned long long weight)
+{
+  addVertex(from);
+  addVertex(to);
+  EdgeKey key = {from, to};
+  WeightList weights;
+  if (edges_.has(key)) {
+    weights = edges_.at(key);
+  }
+  if (weights.empty()) {
+    weights.pushFront(weight);
+  } else {
+    weights.insert(weights.last(), weight);
+  }
+  edges_.add(key, weights);
+}
