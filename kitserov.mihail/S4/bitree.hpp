@@ -22,14 +22,61 @@ namespace kitserov
     BSTree(const Key& k, const Value& v, BSTree* p, const Compare& comp)
         : data_(k, v), left_(nullptr), right_(nullptr), parent_(p), height_(1), cmp_(comp), size_(1) {}
 
-    void update(BSTree* n) noexcept
+    void update() noexcept
     {
+      n = this;
       if (n) {
         n -> height_ = 1 + std::max(n -> left_ -> height, n -> right_ -> height);
         n -> size_ = 1 + (n -> left_ -> size + n -> right_ -> size);
       }
     }
 
+    BSTree* rotateLeft(BSTree* child)
+    {
+      BSTree* parent = child -> parent_;
+      BSTree* grand  = parent -> parent_;
+      parent -> right_ = child -> left_;
+      if (child -> left_) {
+        child -> left_ -> parent_ = parent;
+      }
+      child -> left_ = parent;
+      parent -> parent_ = child;
+      child -> parent_ = grand;
+      if (grand) {
+        if (grand -> left_ == parent) {
+          grand -> left_ = child;
+        } else {
+          grand -> right_ = child;
+        }
+      }
+      parent -> update();
+      child -> update();
+      grand -> update();
+      return child;
+    }
+    BSTree* rotateRight(BSTree* child)
+    {
+      BSTree* parent = child -> parent_;
+      BSTree* grand  = parent -> parent_;
+      parent -> left_ = child -> right_;
+      if (child -> right_) {
+        child -> right_ -> parent_ = parent;
+      }
+      child -> right_ = parent;
+      parent -> parent_ = child;
+      child -> parent_ = grand;
+      if (grand) {
+        if (grand -> left_ == parent) {
+          grand -> left_ = child;
+        } else {
+          grand -> right_ = child;
+        }
+      }
+      parent -> update();
+      child -> update();
+      grand -> update();
+      return child;
+    }
   public:
     friend class BSTIterator< Key, Value >;
     friend class BSTConstIterator< Key, Value >;
