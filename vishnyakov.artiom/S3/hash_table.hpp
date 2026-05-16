@@ -18,10 +18,11 @@ namespace vishnyakov
     friend class HashTable< Key, Value, Hash, Equal >;
 
   public:
-    HTIter()
-      : array_(nullptr),
-        array_capacity_(0),
-        current_index_(0)
+    HTIter():
+      array_(nullptr),
+      array_capacity_(0),
+      current_index_(0),
+      current_iter_()
     {}
 
     HTIter(const HTIter&) = default;
@@ -40,12 +41,21 @@ namespace vishnyakov
 
     HTIter& operator++()
     {
+      if (current_index_ >= array_capacity_)
+      {
+        return *this;
+      }
+
       ++current_iter_;
 
-      while (current_index_ < array_capacity_ &&
-             current_iter_ == array_[current_index_].end())
+      if (current_iter_ == array_[current_index_].end())
       {
         ++current_index_;
+
+        while (current_index_ < array_capacity_ && array_[current_index_].empty())
+        {
+          ++current_index_;
+        }
 
         if (current_index_ < array_capacity_)
         {
@@ -81,13 +91,13 @@ namespace vishnyakov
     std::size_t current_index_;
     LIter< std::pair< const Key, Value > > current_iter_;
 
-    HTIter(List< std::pair< const Key, Value > >* array, std::size_t capacity)
-      : array_(array),
-        array_capacity_(capacity),
-        current_index_(0)
+    HTIter(List< std::pair< const Key, Value > >* array, std::size_t capacity):
+      array_(array),
+      array_capacity_(capacity),
+      current_index_(0),
+      current_iter_()
     {
-      while (current_index_ < array_capacity_ &&
-             array_[current_index_].empty())
+      while (current_index_ < array_capacity_ && array_[current_index_].empty())
       {
         ++current_index_;
       }
@@ -114,18 +124,19 @@ namespace vishnyakov
     friend class HashTable< Key, Value, Hash, Equal >;
 
   public:
-    HTCIter()
-      : array_(nullptr),
-        array_capacity_(0),
-        current_index_(0)
+    HTCIter():
+      array_(nullptr),
+      array_capacity_(0),
+      current_index_(0),
+      current_iter_()
     {}
 
     HTCIter(const HTCIter&) = default;
-    HTCIter(const HTIter< Key, Value, Hash, Equal >& other)
-      : array_(other.array_),
-        array_capacity_(other.array_capacity_),
-        current_index_(other.current_index_),
-        current_iter_(other.current_iter_)
+    HTCIter(const HTIter< Key, Value, Hash, Equal >& other):
+      array_(other.array_),
+      array_capacity_(other.array_capacity_),
+      current_index_(other.current_index_),
+      current_iter_(other.current_iter_)
     {}
 
     ~HTCIter() = default;
@@ -144,12 +155,21 @@ namespace vishnyakov
 
     HTCIter& operator++()
     {
+      if (current_index_ >= array_capacity_)
+      {
+        return *this;
+      }
+
       ++current_iter_;
 
-      while (current_index_ < array_capacity_ &&
-             current_iter_ == array_[current_index_].end())
+      if (current_iter_ == array_[current_index_].end())
       {
         ++current_index_;
+
+        while (current_index_ < array_capacity_ && array_[current_index_].empty())
+        {
+          ++current_index_;
+        }
 
         if (current_index_ < array_capacity_)
         {
@@ -185,13 +205,13 @@ namespace vishnyakov
     std::size_t current_index_;
     LCIter< std::pair< const Key, Value > > current_iter_;
 
-    HTCIter(const List< std::pair< const Key, Value > >* array, std::size_t capacity)
-      : array_(array),
-        array_capacity_(capacity),
-        current_index_(0)
+    HTCIter(const List< std::pair< const Key, Value > >* array, std::size_t capacity):
+      array_(array),
+      array_capacity_(capacity),
+      current_index_(0),
+      current_iter_()
     {
-      while (current_index_ < array_capacity_ &&
-             array_[current_index_].empty())
+      while (current_index_ < array_capacity_ && array_[current_index_].empty())
       {
         ++current_index_;
       }
@@ -216,12 +236,12 @@ namespace vishnyakov
   class HashTable
   {
   public:
-    HashTable()
-      : array_(nullptr),
-        array_capacity_(16),
-        size_(0),
-        hash_(),
-        equal_()
+    HashTable():
+      array_(nullptr),
+      array_capacity_(16),
+      size_(0),
+      hash_(),
+      equal_()
     {
       array_ = static_cast< List< std::pair< const Key, Value > >* >(
         ::operator new(sizeof(List< std::pair< const Key, Value > >) * array_capacity_)
@@ -233,12 +253,12 @@ namespace vishnyakov
       }
     }
 
-    explicit HashTable(std::size_t initial_capacity)
-      : array_(nullptr),
-        array_capacity_(initial_capacity > 0 ? initial_capacity : 16),
-        size_(0),
-        hash_(),
-        equal_()
+    explicit HashTable(std::size_t initial_capacity):
+      array_(nullptr),
+      array_capacity_(initial_capacity > 0 ? initial_capacity : 16),
+      size_(0),
+      hash_(),
+      equal_()
     {
       array_ = static_cast< List< std::pair< const Key, Value > >* >(
         ::operator new(sizeof(List< std::pair< const Key, Value > >) * array_capacity_)
@@ -250,12 +270,12 @@ namespace vishnyakov
       }
     }
 
-    HashTable(const HashTable& other)
-      : array_(nullptr),
-        array_capacity_(other.array_capacity_),
-        size_(other.size_),
-        hash_(other.hash_),
-        equal_(other.equal_)
+    HashTable(const HashTable& other):
+      array_(nullptr),
+      array_capacity_(other.array_capacity_),
+      size_(other.size_),
+      hash_(other.hash_),
+      equal_(other.equal_)
     {
       array_ = static_cast< List< std::pair< const Key, Value > >* >(
         ::operator new(sizeof(List< std::pair< const Key, Value > >) * array_capacity_)
@@ -267,12 +287,12 @@ namespace vishnyakov
       }
     }
 
-    HashTable(HashTable&& other) noexcept
-      : array_(other.array_),
-        array_capacity_(other.array_capacity_),
-        size_(other.size_),
-        hash_(std::move(other.hash_)),
-        equal_(std::move(other.equal_))
+    HashTable(HashTable&& other) noexcept:
+      array_(other.array_),
+      array_capacity_(other.array_capacity_),
+      size_(other.size_),
+      hash_(std::move(other.hash_)),
+      equal_(std::move(other.equal_))
     {
       other.array_ = nullptr;
       other.array_capacity_ = 0;

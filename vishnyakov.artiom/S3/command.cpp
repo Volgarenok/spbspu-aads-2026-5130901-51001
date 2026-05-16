@@ -4,7 +4,9 @@
 
 namespace vishnyakov
 {
-  CommandHandler::CommandHandler()
+  CommandHandler::CommandHandler():
+    graphs_(),
+    commands_()
   {
     commands_.add("graphs", [this](std::istream& in, std::ostream& out)
     {

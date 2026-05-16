@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE IteratorTest
+#define BOOST_TEST_MODULE S3
 #include <boost/test/unit_test.hpp>
 #include "hash_table.hpp"
 #include "siphash.hpp"
