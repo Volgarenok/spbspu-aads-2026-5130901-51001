@@ -134,12 +134,6 @@ void process_commands(std::istream& in, BSTree< std::string, Dictionary, std::le
       std::string new_name, name1, name2;
       iss >> new_name >> name1 >> name2;
 
-      if (dicts.has(new_name))
-      {
-        out << "<INVALID COMMAND>\n";
-        continue;
-      }
-
       if (!dicts.has(name1) || !dicts.has(name2))
       {
         out << "<INVALID COMMAND>\n";
@@ -150,18 +144,18 @@ void process_commands(std::istream& in, BSTree< std::string, Dictionary, std::le
       const Dictionary& dict2 = dicts.at(name2);
 
       Dictionary result = complement(dict1, dict2);
+
+      if (dicts.has(new_name))
+      {
+        dicts.drop(new_name);
+      }
+
       dicts.push(new_name, result);
     }
     else if (cmd == "intersect")
     {
       std::string new_name, name1, name2;
       iss >> new_name >> name1 >> name2;
-
-      if (dicts.has(new_name))
-      {
-        out << "<INVALID COMMAND>\n";
-        continue;
-      }
 
       if (!dicts.has(name1) || !dicts.has(name2))
       {
@@ -173,18 +167,18 @@ void process_commands(std::istream& in, BSTree< std::string, Dictionary, std::le
       const Dictionary& dict2 = dicts.at(name2);
 
       Dictionary result = intersect(dict1, dict2);
+
+      if (dicts.has(new_name))
+      {
+        dicts.drop(new_name);
+      }
+
       dicts.push(new_name, result);
     }
     else if (cmd == "union")
     {
       std::string new_name, name1, name2;
       iss >> new_name >> name1 >> name2;
-
-      if (dicts.has(new_name))
-      {
-        out << "<INVALID COMMAND>\n";
-        continue;
-      }
 
       if (!dicts.has(name1) || !dicts.has(name2))
       {
@@ -196,6 +190,12 @@ void process_commands(std::istream& in, BSTree< std::string, Dictionary, std::le
       const Dictionary& dict2 = dicts.at(name2);
 
       Dictionary result = unite(dict1, dict2);
+
+      if (dicts.has(new_name))
+      {
+        dicts.drop(new_name);
+      }
+
       dicts.push(new_name, result);
     }
     else
