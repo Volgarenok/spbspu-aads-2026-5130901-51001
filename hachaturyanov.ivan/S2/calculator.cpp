@@ -189,7 +189,7 @@ long long hachaturyanov::calculatePostfix(const std::string& postfix)
           if (b == 0) {
             throw std::logic_error("Division by zero");
           }
-          result = a % b;
+          result = ((a % b) + b) % b;
           break;
         case '<':
           result = hachaturyanov::arithmeticShiftLeft(a, b);
