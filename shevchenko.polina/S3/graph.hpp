@@ -34,7 +34,7 @@ public:
   bool hasVertex(const std::string& vertex) const;
   void addVertex(const std::string& vertex);
   void bind(const std::string& from, const std::string& to, size_t weight);
-  void cut(const std::string& from, const std::string& to);
+  void cut(const std::string& from, const std::string& to, size_t weight);
   const EdgeList& outbound(const std::string& vertex) const;
   EdgeList inbound(const std::string& vertex) const;
   void merge(const Graph& other);

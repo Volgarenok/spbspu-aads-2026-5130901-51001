@@ -52,7 +52,7 @@ void Graph::bind(const std::string& from, const std::string& to, size_t weight)
   edges.pushBack(Edge(to, weight));
 }
 
-void Graph::cut(const std::string& from, const std::string& to)
+void Graph::cut(const std::string& from, const std::string& to, size_t weight)
 {
   if (!hasVertex(from))
   {
@@ -63,7 +63,7 @@ void Graph::cut(const std::string& from, const std::string& to)
   
   for (auto it = edges.begin(); it != edges.end();)
   {
-    if ((*it).to == to)
+    if (it->to == to && it->weight == weight)
     {
       it = edges.erase(it);
     }
