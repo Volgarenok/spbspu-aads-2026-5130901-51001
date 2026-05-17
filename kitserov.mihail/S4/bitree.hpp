@@ -105,6 +105,8 @@ namespace kitserov
     }
 
   public:
+    using iterator = BSTIterator<Key, Value, Compare>;
+    using const_iterator = BSTConstIterator<Key, Value, Compare>;
     friend class BSTIterator< Key, Value >;
     friend class BSTConstIterator< Key, Value >;
     BSTree() : data_(), left_(nullptr), right_(nullptr), parent_(nullptr), height_(0), cmp_(Compare()), size_(0) {}
@@ -280,6 +282,106 @@ namespace kitserov
       }
       delete n;
       return removed;
+    }
+  };
+  template < class Key, class Value, class Compare >
+  class BSTIterator
+  {
+    using Node = BSTree<Key, Value, Compare>;
+    Node* node_;
+    Node* sentinel_;
+    explicit BSTIterator(Node* n, Node* s) : node_(n), sentinel_(s) {}
+    friend class BSTConstIterator< Key, Value, Compare >;
+    friend class BSTree< Key, Value, Compare >;
+  public:
+    using value_type = std::pair< const Key, Value >;
+    BSTIterator() : node_(nullptr), sentinel_(nullptr) {}
+    value_type& operator*() const
+    {
+      return node_ -> data_;
+    }
+    value_type* operator->() const
+    {
+      return &(node_ -> data_);
+    }
+    BSTIterator& operator++()
+    {
+      if (node_ -> right_) {
+        node_ = node_ -> right_;
+        while (node_ -> left_) node_ = node_ -> left_;
+      } else {
+        Node* p = node_ -> parent_;
+        while (p != sentinel_ && node_ == p -> right_) {
+          node_ = p;
+          p = p -> parent_;
+        }
+        node_ = p;
+      }
+      return *this;
+    }
+    BSTIterator operator++(int)
+    {
+      BSTIterator tmp(*this);
+      ++(*this);
+      return tmp;
+    }
+    bool operator==(const BSTIterator& other) const
+    {
+      return node == other.node;
+    }
+    bool operator!=(const BSTIterator& other) const
+    {
+      return node != other.node;
+    }
+  };
+  template < class Key, class Value, class Compare >
+  class BSTConstIterator
+  {
+    using Node = BSTree<Key, Value, Compare>;
+    const Node* node_;
+    const Node* sentinel_;
+    explicit BSTConstIterator(const Node* n, const Node* s) : node_(n), sentinel_(s) {}
+    friend class BSTree< Key, Value, Compare >;
+  public:
+    using value_type = const std::pair< const Key, Value >;
+    BSTConstIterator() : node_(nullptr), sentinel_(nullptr) {}
+    BSTConstIterator(const BSTIterator< Key, Value, Compare >& it) : node(it.node), sentinel(it.sentinel) {}
+    value_type& operator*() const
+    {
+      return node_ -> data_;
+    }
+    value_type* operator->() const
+    {
+      return &(node_ -> data_);
+    }
+    BSTConstIterator& operator++()
+    {
+      if (node_ -> right_) {
+        node_ = node_ -> right_;
+        while (node_ -> left_) node_ = node_ -> left_;
+      } else {
+        Node* p = node_ -> parent_;
+        while (p != sentinel_ && node_ == p -> right_) {
+          node_ = p;
+          p = p -> parent_;
+        }
+        node_ = p;
+      }
+      return *this;
+    }
+    BSTConstIterator operator++(int)
+    {
+      BSTConstIterator tmp(*this);
+      ++(*this);
+      return tmp;
+    }
+    bool operator==(const BSTConstIterator& other) const
+    {
+      return node == other.node;
+    }
+    bool operator!=(const BSTConstIterator& other) const
+    {
+      return node != other.node;
     }
   };
 }
