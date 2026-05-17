@@ -61,8 +61,15 @@ namespace smirnova
 
     sortStrings(names);
 
-    for (size_t i = 0; i < names.size(); ++i)
-      out << names[i] << "\n";
+    if (names.size() == 0)
+    {
+      out << "\n";
+    }
+    else
+    {
+      for (size_t i = 0; i < names.size(); ++i)
+        out << names[i] << "\n";
+    }
   }
 
   void vertexes(std::istream&, std::ostream& out, GraphTable&, VertTable& graphVertices, std::string graphName)
@@ -76,10 +83,18 @@ namespace smirnova
     Vector< std::string > verts = graphVertices.get(graphName);
     sortStrings(verts);
 
+    bool hasOutput = false;
     for (size_t i = 0; i < verts.size(); ++i)
     {
       if (i == 0 || verts[i] != verts[i - 1])
+      {
         out << verts[i] << "\n";
+        hasOutput = true;
+      }
+    }
+    if (!hasOutput)
+    {
+      out << "\n";
     }
   }
   void create(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& graphVertices, std::string graphName)
