@@ -78,32 +78,12 @@ namespace vishnyakov
     }
 
   private:
-    struct Node
-    {
-      std::pair< const Key, Value > data_;
-      Node* left_;
-      Node* right_;
-      Node* parent_;
-
-      Node(const Key& key, const Value& value, Node* parent = nullptr):
-        data_(key, value),
-        left_(nullptr),
-        right_(nullptr),
-        parent_(parent)
-      {}
-
-      Node(Key&& key, Value&& value, Node* parent = nullptr):
-        data_(std::move(key), std::move(value)),
-        left_(nullptr),
-        right_(nullptr),
-        parent_(parent)
-      {}
-    };
-
+    struct Node;
     Node* node_;
     Stack< Node* > stack_;
 
-    BSTIter(Node* node, const Stack< Node* >& stack = Stack< Node* >()):
+    BSTIter(typename BSTree< Key, Value, Compare >::Node* node,
+            const Stack< typename BSTree< Key, Value, Compare >::Node* >& stack = Stack< typename BSTree< Key, Value, Compare >::Node* >()):
       node_(node),
       stack_(stack)
     {}
@@ -181,9 +161,27 @@ namespace vishnyakov
     }
 
   private:
+    const typename BSTree< Key, Value, Compare >::Node* node_;
+    Stack< const typename BSTree< Key, Value, Compare >::Node* > stack_;
+
+    BSTCIter(const typename BSTree< Key, Value, Compare >::Node* node,
+             const Stack< const typename BSTree< Key, Value, Compare >::Node* >& stack = Stack< const typename BSTree< Key, Value, Compare >::Node* >()):
+      node_(node),
+      stack_(stack)
+    {}
+  };
+
+  template< class Key, class Value, class Compare = std::less< Key > >
+  class BSTree
+  {
+  public:
+    using value_type = std::pair< const Key, Value >;
+    using iterator = BSTIter< Key, Value, Compare >;
+    using const_iterator = BSTCIter< Key, Value, Compare >;
+
     struct Node
     {
-      std::pair< const Key, Value > data_;
+      value_type data_;
       Node* left_;
       Node* right_;
       Node* parent_;
@@ -202,24 +200,6 @@ namespace vishnyakov
         parent_(parent)
       {}
     };
-
-    const Node* node_;
-    Stack< const Node* > stack_;
-
-    BSTCIter(const Node* node, const Stack< const Node* >& stack = Stack< const Node* >()):
-      node_(node),
-      stack_(stack)
-    {}
-  };
-
-  template< class Key, class Value, class Compare = std::less< Key > >
-  class BSTree
-  {
-  public:
-    using value_type = std::pair< const Key, Value >;
-    using iterator = BSTIter< Key, Value, Compare >;
-    using const_iterator = BSTCIter< Key, Value, Compare >;
-    using Node = typename iterator::Node;
 
     BSTree():
       root_(nullptr),
