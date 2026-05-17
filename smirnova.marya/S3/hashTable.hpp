@@ -5,12 +5,13 @@
 #include "../common/vector.hpp"
 #include "blake2.hpp"
 #include "hashTableIter.hpp"
+#include <functional>
 #include <stdexcept>
+#include <utility>
 
 namespace smirnova
 {
 template<class K, class V, class Hash = Blake2Hasher<K>, class Equal = std::equal_to<K>>
-
 class HashTable
 {
 public:
@@ -25,6 +26,7 @@ public:
 private:
   Vector<List<Pair>> table;
   size_t n;
+  size_t sz;
   Hash hash;
   Equal eq;
 
@@ -34,20 +36,37 @@ private:
   }
 
 public:
-  HashTable(size_t size = 16) : n(size)
+  HashTable(size_t size = 16)
+    : n(size ? size : 1), sz(0)
   {
     for (size_t i = 0; i < n; ++i)
       table.pushBack(List<Pair>());
   }
 
-  size_t bucketCount() const { return n; }
-
-  List<Pair>& bucket(size_t i) { return table[i]; }
-
-  bool has(const K& k)
+  size_t bucketCount() const
   {
-    List<Pair>& b = table[index(k)];
-    LIter<Pair> it = b.begin();
+    return n;
+  }
+
+  size_t size() const
+  {
+    return sz;
+  }
+
+  List<Pair>& bucket(size_t i)
+  {
+    return table[i];
+  }
+
+  const List<Pair>& bucket(size_t i) const
+  {
+    return table[i];
+  }
+
+  bool has(const K& k) const
+  {
+    const List<Pair>& b = table[index(k)];
+    LIter<Pair> it = const_cast<List<Pair>&>(b).begin();
 
     while (it.valid())
     {
@@ -62,6 +81,20 @@ public:
   {
     List<Pair>& b = table[index(k)];
     LIter<Pair> it = b.begin();
+
+    while (it.valid())
+    {
+      if (eq(it.value().key, k))
+        return it.value().value;
+      it.next();
+    }
+    throw std::runtime_error("not found");
+  }
+
+  const V& get(const K& k) const
+  {
+    const List<Pair>& b = table[index(k)];
+    LIter<Pair> it = const_cast<List<Pair>&>(b).begin();
 
     while (it.valid())
     {
@@ -87,14 +120,16 @@ public:
       it.next();
     }
 
+    if (sz >= n)
+      throw std::length_error("hash table is full");
+
     b.pushBack(Pair{k, v});
+    ++sz;
   }
 
   V drop(const K& k)
   {
-    size_t idx = index(k);
-    List<Pair>& b = table[idx];
-
+    List<Pair>& b = table[index(k)];
     LIter<Pair> it = b.begin();
 
     while (it.valid())
@@ -102,7 +137,6 @@ public:
       if (eq(it.value().key, k))
       {
         V old = it.value().value;
-
         List<Pair> newList;
 
         LIter<Pair> jt = b.begin();
@@ -114,6 +148,7 @@ public:
         }
 
         b = newList;
+        --sz;
         return old;
       }
       it.next();
@@ -124,10 +159,14 @@ public:
 
   void rehash(size_t slots)
   {
-    Vector<List<Pair>> old = table;
+    if (slots == 0)
+      slots = 1;
+
+    Vector<List<Pair>> old(std::move(table));
 
     table = Vector<List<Pair>>();
     n = slots;
+    sz = 0;
 
     for (size_t i = 0; i < n; ++i)
       table.pushBack(List<Pair>());
@@ -135,10 +174,11 @@ public:
     for (size_t i = 0; i < old.size(); ++i)
     {
       LIter<Pair> it = old[i].begin();
-
       while (it.valid())
       {
-        add(it.value().key, it.value().value);
+        const Pair& p = it.value();
+        table[index(p.key)].pushBack(p);
+        ++sz;
         it.next();
       }
     }
