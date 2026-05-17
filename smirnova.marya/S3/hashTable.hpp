@@ -4,7 +4,7 @@
 #include "../common/list.hpp"
 #include "../common/vector.hpp"
 #include "blake2.hpp"
-#include "HashTableIterator.hpp"
+#include "hashTableIter.hpp"
 #include <stdexcept>
 
 namespace smirnova
