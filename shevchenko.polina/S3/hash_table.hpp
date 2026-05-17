@@ -30,7 +30,12 @@ struct HashPair
   }
 };
 
-template<class Key, class Value, class Hash, class Equal = std::equal_to<Key>>
+template<
+class Key,
+class Value,
+class Hash,
+class Equal = std::equal_to< Key >
+>
 class HashTable
 {
 public:
@@ -455,13 +460,16 @@ public:
   
   void rehash(size_t new_bucket_count)
   {
-    HashTable tmp(new_bucket_count, bucket_size_);
+    if (new_bucket_count == 0)
+    {
+      throw std::invalid_argument("invalid bucket count");
+    }
     
+    HashTable tmp(new_bucket_count, bucket_size_);
     for (const_iterator it = cbegin(); it != cend(); ++it)
     {
       tmp.insert(it->first, it->second);
     }
-    
     swap(tmp);
   }
   
@@ -478,6 +486,10 @@ public:
 private:
   size_t getIndex(const Key& key) const
   {
+    if (bucket_count_ == 0)
+    {
+      throw std::logic_error("empty hash table");
+    }
     return hash_(key) % bucket_count_;
   }
   

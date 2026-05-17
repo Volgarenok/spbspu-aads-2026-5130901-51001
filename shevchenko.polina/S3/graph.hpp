@@ -81,7 +81,11 @@ private:
     }
   }
   
-  HashTable<Edge, WeightList, EdgeHash> edges_;
+  HashTable<
+  Edge,
+  WeightList,
+  EdgeHash
+  > edges_;
   
   List< std::string > vertexes_;
 };
