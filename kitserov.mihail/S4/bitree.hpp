@@ -169,8 +169,15 @@ namespace kitserov
     {
       return n ? n -> height_ : 0;
     }
+    size_t height(const_iterator it) const {
+      return height(it.node);
+    }
     size_t size() noexcept {
       return n ? n->size_ : 0;
+    }
+    bool empty() const
+    {
+      return size_ == 0;
     }
     void push(const Key& k, const Value& v)
     {
@@ -282,6 +289,92 @@ namespace kitserov
       }
       delete n;
       return removed;
+    }
+    iterator begin()
+    {
+      if (!left_) {
+        return end();
+      }
+      BSTree* n = left_;
+      while (n -> left_) {
+        n = n -> left_;
+      }
+      return iterator(n, this);
+    }
+    iterator end()
+    {
+      return iterator(this, this);
+    }
+    const_iterator begin() const
+    {
+      return cbegin();
+    }
+    const_iterator end() const
+    {
+      return cend();
+    }
+    const_iterator cbegin() const
+    {
+      if (!left_) {
+        return cend();
+      }
+      const BSTree* n = left_;
+      while (n -> left_) {
+        n = n -> left_;
+      }
+      return const_iterator(n, this);
+    }
+    const_iterator cend() const
+    {
+      return const_iterator(this, this);
+    }
+    iterator find(const Key& k) {
+      BSTree* n = find_root(k);
+      return n ? iterator(n, this) : end();
+    }
+    const_iterator find(const Key& k) const
+    {
+      const BSTree* n = find_root(k);
+      return n ? const_iterator(n, this) : cend();
+    }
+    const_iterator rotateLeft(const_iterator it)
+    {
+      if (!it.node || it.node == this || !it.node -> parent_ || it.node != it.node -> parent_ -> right_) {
+        throw std::invalid_argument("rotateLeft: bad argument");
+      }
+      BSTree* child = const_cast< BSTree* >(it.node);
+      BSTree* new_subroot = rotateLeft(child);
+      return const_iterator(new_subroot, this);
+    }
+    const_iterator rotateRight(const_iterator it)
+    {
+      if (!it.node || it.node == this || !it.node -> parent_ || it.node != it.node -> parent_ -> left_) {
+        throw std::invalid_argument("rotateRight: bad argument");
+      }
+      BSTree* child = const_cast< BSTree* >(it.node);
+      BSTree* new_subroot = rotateRight(child);
+      return const_iterator(new_subroot, this);
+    }
+    const_iterator rotateLargeLeft(const_iterator it)
+    {
+      if (!it.node || it.node == this || !it.node -> parent_ || !it.node -> parent_ -> parent_ ||
+        it.node != it.node -> parent_ -> left_ || it.node -> parent_ != it.node -> parent_ -> parent_ -> right_)
+      {
+        throw std::invalid_argument("rotateLargeLeft: bad argument");
+      }
+
+      rotateRight(it);
+      return rotateLeft(it);
+    }
+    const_iterator rotateLargeRight(const_iterator it)
+    {
+      if (!it.node || it.node == this || !it.node -> parent_ || !it.node -> parent_ -> parent_ ||
+        it.node != it.node -> parent_ -> right_ || it.node -> parent_ != it.node -> parent_ -> parent_ -> left_)
+      {
+        throw std::invalid_argument("rotateLargeLeft: bad argument");
+      }
+      rotateLeft(it);
+      return rotateRight(it);
     }
   };
   template < class Key, class Value, class Compare >
