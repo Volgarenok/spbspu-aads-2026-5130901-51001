@@ -79,26 +79,37 @@ int main(int argc, char* argv[])
         continue;
       }
 
+      if (cmd == "vertexes")
+      {
+        std::string graphNameCmd;
+        if (!(std::cin >> graphNameCmd))
+        {
+          std::cout << "<INVALID COMMAND>\n";
+          break;
+        }
+        sm::vertexes(std::cin, std::cout, graphs, graphVertices, graphNameCmd);
+        continue;
+      }
+
+      if (!cmds.has(cmd))
+      {
+        std::string graphNameCmd;
+        if (!(std::cin >> graphNameCmd))
+        {
+          std::cout << "<INVALID COMMAND>\n";
+          break;
+        }
+        std::cout << "<INVALID COMMAND>\n";
+        continue;
+      }
+
       std::string graphNameCmd;
       if (!(std::cin >> graphNameCmd))
       {
         std::cout << "<INVALID COMMAND>\n";
         break;
       }
-
-      if (cmd == "vertexes")
-      {
-        sm::vertexes(std::cin, std::cout, graphs, graphVertices, graphNameCmd);
-      }
-      else
-      {
-        if (!cmds.has(cmd))
-        {
-          std::cout << "<INVALID COMMAND>\n";
-          continue;
-        }
-        cmds.get(cmd)(std::cin, std::cout, graphs, graphVertices, graphNameCmd);
-      }
+      cmds.get(cmd)(std::cin, std::cout, graphs, graphVertices, graphNameCmd);
     }
     catch (const std::out_of_range&)
     {
