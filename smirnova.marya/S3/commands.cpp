@@ -8,6 +8,26 @@ namespace smirnova
   using Pair = GraphTable::Pair;
   using AdjPair = HashTable< std::string, Vector< Graph::Edge > >::Pair;
 
+  bool containsString(const Vector< std::string >& values, const std::string& value)
+  {
+    for (size_t i = 0; i < values.size(); ++i)
+      if (values[i] == value)
+        return true;
+    return false;
+  }
+
+  void sortInts(Vector< int >& v)
+  {
+    for (size_t i = 0; i < v.size(); ++i)
+      for (size_t j = i + 1; j < v.size(); ++j)
+        if (v[j] < v[i])
+        {
+          int tmp = v[i];
+          v[i] = v[j];
+          v[j] = tmp;
+        }
+  }
+
   void sortStrings(Vector< std::string >& v)
   {
     for (size_t i = 0; i < v.size(); ++i)
@@ -233,27 +253,51 @@ namespace smirnova
       return;
     }
 
-    Vector< Graph::Edge > edges = g.adj.get(v);
+    struct OutRes { std::string to; Vector< int > weights; };
+    Vector< OutRes > results;
 
-    for (size_t i = 0; i < edges.size(); ++i)
-      for (size_t j = i + 1; j < edges.size(); ++j)
-        if (edges[j].to < edges[i].to)
-        {
-          Graph::Edge tmp = edges[i];
-          edges[i] = edges[j];
-          edges[j] = tmp;
-        }
+    Vector< Graph::Edge >& edges = g.adj.get(v);
 
     for (size_t i = 0; i < edges.size(); ++i)
     {
-      Vector< int > ws = edges[i].weights;
-      for (size_t a = 0; a < ws.size(); ++a)
-        for (size_t b = a + 1; b < ws.size(); ++b)
-          if (ws[b] < ws[a]) { int t = ws[a]; ws[a] = ws[b]; ws[b] = t; }
+      bool found = false;
+      for (size_t j = 0; j < results.size(); ++j)
+      {
+        if (results[j].to == edges[i].to)
+        {
+          for (size_t k = 0; k < edges[i].weights.size(); ++k)
+            results[j].weights.pushBack(edges[i].weights[k]);
+          found = true;
+          break;
+        }
+      }
 
-      out << edges[i].to;
-      for (size_t j = 0; j < ws.size(); ++j)
-        out << " " << ws[j];
+      if (!found)
+      {
+        OutRes row;
+        row.to = edges[i].to;
+        row.weights = edges[i].weights;
+        results.pushBack(row);
+      }
+    }
+
+    for (size_t i = 0; i < results.size(); ++i)
+      sortInts(results[i].weights);
+
+    for (size_t i = 0; i < results.size(); ++i)
+      for (size_t j = i + 1; j < results.size(); ++j)
+        if (results[j].to < results[i].to)
+        {
+          OutRes tmp = results[i];
+          results[i] = results[j];
+          results[j] = tmp;
+        }
+
+    for (size_t i = 0; i < results.size(); ++i)
+    {
+      out << results[i].to;
+      for (size_t j = 0; j < results[i].weights.size(); ++j)
+        out << " " << results[i].weights[j];
       out << "\n";
     }
   }
@@ -297,20 +341,33 @@ namespace smirnova
         {
           if (edges[j].to == v)
           {
-            InRes row;
-            row.from = it.value().key;
-            row.weights = edges[j].weights;
-            for (size_t a = 0; a < row.weights.size(); ++a)
-              for (size_t b = a + 1; b < row.weights.size(); ++b)
-                if (row.weights[b] < row.weights[a])
-                { int t = row.weights[a]; row.weights[a] = row.weights[b]; row.weights[b] = t; }
+            bool found = false;
+            for (size_t r = 0; r < results.size(); ++r)
+            {
+              if (results[r].from == it.value().key)
+              {
+                for (size_t k = 0; k < edges[j].weights.size(); ++k)
+                  results[r].weights.pushBack(edges[j].weights[k]);
+                found = true;
+                break;
+              }
+            }
 
-            results.pushBack(row);
+            if (!found)
+            {
+              InRes row;
+              row.from = it.value().key;
+              row.weights = edges[j].weights;
+              results.pushBack(row);
+            }
           }
         }
         it.next();
       }
     }
+
+    for (size_t i = 0; i < results.size(); ++i)
+      sortInts(results[i].weights);
 
     for (size_t i = 0; i < results.size(); ++i)
       for (size_t j = i + 1; j < results.size(); ++j)
@@ -350,14 +407,9 @@ namespace smirnova
       {
         const std::string& from = it.value().key;
         Vector< Graph::Edge >& srcEdges = it.value().value;
-        if (!result.adj.has(from))
-        {
-          Vector< Graph::Edge > emptyEdges;
-          result.adj.add(from, emptyEdges);
-        }
-        Vector< Graph::Edge >& dstEdges = result.adj.get(from);
         for (size_t j = 0; j < srcEdges.size(); ++j)
-          dstEdges.pushBack(srcEdges[j]);
+          for (size_t k = 0; k < srcEdges[j].weights.size(); ++k)
+            result.addEdge(from, srcEdges[j].to, srcEdges[j].weights[k]);
         it.next();
       }
     }
@@ -370,14 +422,9 @@ namespace smirnova
       {
         const std::string& from = it.value().key;
         Vector< Graph::Edge >& srcEdges = it.value().value;
-        if (!result.adj.has(from))
-        {
-          Vector< Graph::Edge > emptyEdges;
-          result.adj.add(from, emptyEdges);
-        }
-        Vector< Graph::Edge >& dstEdges = result.adj.get(from);
         for (size_t j = 0; j < srcEdges.size(); ++j)
-          dstEdges.pushBack(srcEdges[j]);
+          for (size_t k = 0; k < srcEdges[j].weights.size(); ++k)
+            result.addEdge(from, srcEdges[j].to, srcEdges[j].weights[k]);
         it.next();
       }
     }
@@ -390,17 +437,13 @@ namespace smirnova
 
     for (size_t i = 0; i < va.size(); ++i)
     {
-      bool found = false;
-      for (size_t j = 0; j < verts.size(); ++j)
-        if (verts[j] == va[i]) { found = true; break; }
-      if (!found) verts.pushBack(va[i]);
+      if (!containsString(verts, va[i]))
+        verts.pushBack(va[i]);
     }
     for (size_t i = 0; i < vb.size(); ++i)
     {
-      bool found = false;
-      for (size_t j = 0; j < verts.size(); ++j)
-        if (verts[j] == vb[i]) { found = true; break; }
-      if (!found) verts.pushBack(vb[i]);
+      if (!containsString(verts, vb[i]))
+        verts.pushBack(vb[i]);
     }
 
     graphVertices.add(graphName, verts);
@@ -423,6 +466,7 @@ namespace smirnova
 
     Graph res;
     Vector< std::string > resVerts;
+    Vector< std::string > chosen;
 
     for (size_t i = 0; i < k; ++i)
     {
@@ -439,10 +483,31 @@ namespace smirnova
         return;
       }
 
-      resVerts.pushBack(v);
+      if (!containsString(chosen, v))
+        chosen.pushBack(v);
+    }
 
-      if (src.adj.has(v))
-        res.adj.add(v, src.adj.get(v));
+    for (size_t i = 0; i < chosen.size(); ++i)
+    {
+      resVerts.pushBack(chosen[i]);
+      res.addVertex(chosen[i]);
+    }
+
+    for (size_t i = 0; i < chosen.size(); ++i)
+    {
+      const std::string& from = chosen[i];
+      if (!src.adj.has(from))
+        continue;
+
+      Vector< Graph::Edge >& edges = src.adj.get(from);
+      for (size_t j = 0; j < edges.size(); ++j)
+      {
+        if (!containsString(chosen, edges[j].to))
+          continue;
+
+        for (size_t w = 0; w < edges[j].weights.size(); ++w)
+          res.addEdge(from, edges[j].to, edges[j].weights[w]);
+      }
     }
 
     graphs.add(graphName, res);
