@@ -7,22 +7,24 @@
 #include "graph.hpp"
 #include "hash-table.hpp"
 #include "sha1.hpp"
+#include "list.hpp"
 
 namespace shevchenko
 {
+
 using GraphTable = HashTable<std::string, Graph, SHA1Hasher>;
 
-inline void printInvalid(std::ostream& out)
-{
-  out << "<INVALID COMMAND>\n";
-}
+void printInvalid(std::ostream& out);
+void graphsCommand(const GraphTable& graphs, std::ostream& out);
+void vertexesCommand(const GraphTable& graphs, std::istream& in, std::ostream& out);
+void outboundCommand(const GraphTable& graphs, std::istream& in, std::ostream& out);
+void inboundCommand(const GraphTable& graphs, std::istream& in, std::ostream& out);
+void bindCommand(GraphTable& graphs, std::istream& in, std::ostream& out);
+void cutCommand(GraphTable& graphs, std::istream& in, std::ostream& out);
+void createCommand(GraphTable& graphs, std::istream& in, std::ostream& out);
+void mergeCommand(GraphTable& graphs, std::istream& in, std::ostream& out);
+void extractCommand(GraphTable& graphs, std::istream& in, std::ostream& out);
 
-inline void graphsCommand(const GraphTable& graphs, std::ostream& out)
-{
-  (void)graphs;
-  
-  out << "graphs\n";
-}
 }
 
 #endif
