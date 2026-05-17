@@ -6,6 +6,7 @@
 namespace smirnova
 {
   using Pair = GraphTable::Pair;
+  using AdjPair = HashTable< std::string, Vector< Graph::Edge > >::Pair;
 
   void sortStrings(Vector< std::string >& v)
   {
@@ -286,8 +287,8 @@ namespace smirnova
 
     for (size_t i = 0; i < g.adj.bucketCount(); ++i)
     {
-      List< Pair >& b = g.adj.bucket(i);
-      LIter< Pair > it = b.begin();
+      List< AdjPair >& b = g.adj.bucket(i);
+      LIter< AdjPair > it = b.begin();
 
       while (it.valid())
       {
@@ -343,8 +344,8 @@ namespace smirnova
 
     for (size_t i = 0; i < a.adj.bucketCount(); ++i)
     {
-      List< Pair >& buck = a.adj.bucket(i);
-      LIter< Pair > it = buck.begin();
+      List< AdjPair >& buck = a.adj.bucket(i);
+      LIter< AdjPair > it = buck.begin();
       while (it.valid())
       {
         const std::string& from = it.value().key;
@@ -363,8 +364,8 @@ namespace smirnova
 
     for (size_t i = 0; i < b.adj.bucketCount(); ++i)
     {
-      List< Pair >& buck = b.adj.bucket(i);
-      LIter< Pair > it = buck.begin();
+      List< AdjPair >& buck = b.adj.bucket(i);
+      LIter< AdjPair > it = buck.begin();
       while (it.valid())
       {
         const std::string& from = it.value().key;
