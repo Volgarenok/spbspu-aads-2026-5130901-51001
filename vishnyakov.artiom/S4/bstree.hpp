@@ -5,6 +5,7 @@
 #include <utility>
 #include <stdexcept>
 #include <algorithm>
+#include "../common/stack.hpp"
 
 namespace vishnyakov
 {
@@ -17,23 +18,75 @@ namespace vishnyakov
     friend class BSTree< Key, Value, Compare >;
 
   public:
-    BSTIter();
+    BSTIter():
+      node_(nullptr),
+      stack_()
+    {}
+
     BSTIter(const BSTIter&) = default;
     BSTIter& operator=(const BSTIter&) = default;
     ~BSTIter() = default;
 
-    std::pair< const Key, Value >& operator*();
-    std::pair< const Key, Value >* operator->();
+    std::pair< const Key, Value >& operator*()
+    {
+      return node_->data_;
+    }
 
-    BSTIter& operator++();
-    BSTIter operator++(int);
+    std::pair< const Key, Value >* operator->()
+    {
+      return &node_->data_;
+    }
 
-    bool operator==(const BSTIter& other) const;
-    bool operator!=(const BSTIter& other) const;
+    BSTIter& operator++()
+    {
+      if (node_->right_)
+      {
+        node_ = node_->right_;
+        while (node_->left_)
+        {
+          stack_.push(node_);
+          node_ = node_->left_;
+        }
+      }
+      else if (!stack_.empty())
+      {
+        node_ = stack_.pop();
+      }
+      else
+      {
+        node_ = nullptr;
+      }
+
+      return *this;
+    }
+
+    BSTIter operator++(int)
+    {
+      BSTIter tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    bool operator==(const BSTIter& other) const
+    {
+      return node_ == other.node_;
+    }
+
+    bool operator!=(const BSTIter& other) const
+    {
+      return !(*this == other);
+    }
 
   private:
-    struct Impl;
-    Impl* impl_;
+    using Node = typename BSTree< Key, Value, Compare >::Node;
+
+    Node* node_;
+    Stack< Node* > stack_;
+
+    BSTIter(Node* node, const Stack< Node* >& stack = Stack< Node* >()):
+      node_(node),
+      stack_(stack)
+    {}
   };
 
   template< class Key, class Value, class Compare >
@@ -42,25 +95,81 @@ namespace vishnyakov
     friend class BSTree< Key, Value, Compare >;
 
   public:
-    BSTCIter();
+    BSTCIter():
+      node_(nullptr),
+      stack_()
+    {}
+
     BSTCIter(const BSTCIter&) = default;
-    BSTCIter(const BSTIter< Key, Value, Compare >& other);
+    BSTCIter(const BSTIter< Key, Value, Compare >& other):
+      node_(other.node_),
+      stack_(other.stack_)
+    {}
+
     ~BSTCIter() = default;
 
     BSTCIter& operator=(const BSTCIter&) = default;
 
-    const std::pair< const Key, Value >& operator*() const;
-    const std::pair< const Key, Value >* operator->() const;
+    const std::pair< const Key, Value >& operator*() const
+    {
+      return node_->data_;
+    }
 
-    BSTCIter& operator++();
-    BSTCIter operator++(int);
+    const std::pair< const Key, Value >* operator->() const
+    {
+      return &node_->data_;
+    }
 
-    bool operator==(const BSTCIter& other) const;
-    bool operator!=(const BSTCIter& other) const;
+    BSTCIter& operator++()
+    {
+      if (node_->right_)
+      {
+        node_ = node_->right_;
+        while (node_->left_)
+        {
+          stack_.push(node_);
+          node_ = node_->left_;
+        }
+      }
+      else if (!stack_.empty())
+      {
+        node_ = stack_.pop();
+      }
+      else
+      {
+        node_ = nullptr;
+      }
+
+      return *this;
+    }
+
+    BSTCIter operator++(int)
+    {
+      BSTCIter tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    bool operator==(const BSTCIter& other) const
+    {
+      return node_ == other.node_;
+    }
+
+    bool operator!=(const BSTCIter& other) const
+    {
+      return !(*this == other);
+    }
 
   private:
-    struct Impl;
-    Impl* impl_;
+    using Node = typename BSTree< Key, Value, Compare >::Node;
+
+    const Node* node_;
+    Stack< const Node* > stack_;
+
+    BSTCIter(const Node* node, const Stack< const Node* >& stack = Stack< const Node* >()):
+      node_(node),
+      stack_(stack)
+    {}
   };
 
   template< class Key, class Value, class Compare = std::less< Key > >
@@ -121,12 +230,63 @@ namespace vishnyakov
       return *this;
     }
 
-    iterator begin() noexcept;
-    iterator end() noexcept;
-    const_iterator begin() const noexcept;
-    const_iterator end() const noexcept;
-    const_iterator cbegin() const noexcept;
-    const_iterator cend() const noexcept;
+    iterator begin() noexcept
+    {
+      if (!root_)
+      {
+        return end();
+      }
+
+      Node* current = root_;
+      Stack< Node* > stack;
+
+      while (current->left_)
+      {
+        stack.push(current);
+        current = current->left_;
+      }
+
+      return iterator(current, stack);
+    }
+
+    iterator end() noexcept
+    {
+      return iterator(nullptr);
+    }
+
+    const_iterator begin() const noexcept
+    {
+      if (!root_)
+      {
+        return end();
+      }
+
+      const Node* current = root_;
+      Stack< const Node* > stack;
+
+      while (current->left_)
+      {
+        stack.push(current);
+        current = current->left_;
+      }
+
+      return const_iterator(current, stack);
+    }
+
+    const_iterator end() const noexcept
+    {
+      return const_iterator(nullptr);
+    }
+
+    const_iterator cbegin() const noexcept
+    {
+      return begin();
+    }
+
+    const_iterator cend() const noexcept
+    {
+      return end();
+    }
 
     bool empty() const noexcept
     {
@@ -150,80 +310,13 @@ namespace vishnyakov
     iterator find(const Key& key);
     const_iterator find(const Key& key) const;
 
-    iterator rotate_left(iterator pos)
-    {
-      Node* node = pos.node_;
+    iterator rotate_left(iterator pos);
+    iterator rotate_right(iterator pos);
+    iterator rotate_left_large(iterator pos);
+    iterator rotate_right_large(iterator pos);
 
-      if (!node || !node->right_)
-      {
-        return pos;
-      }
-
-      Node* new_root = rotate_left_impl(node);
-      return make_iter(new_root);
-    }
-
-    iterator rotate_right(iterator pos)
-    {
-      Node* node = pos.node_;
-
-      if (!node || !node->left_)
-      {
-        return pos;
-      }
-
-      Node* new_root = rotate_right_impl(node);
-      return make_iter(new_root);
-    }
-
-    iterator rotate_left_large(iterator pos)
-    {
-      Node* node = pos.node_;
-
-      if (!node || !node->right_ || !node->right_->left_)
-      {
-        return pos;
-      }
-
-      Node* new_root = rotate_right_impl(node->right_);
-      node->right_ = new_root;
-      new_root->parent_ = node;
-      new_root = rotate_left_impl(node);
-
-      return make_iter(new_root);
-    }
-
-    iterator rotate_right_large(iterator pos)
-    {
-      Node* node = pos.node_;
-
-      if (!node || !node->left_ || !node->left_->right_)
-      {
-        return pos;
-      }
-
-      Node* new_root = rotate_left_impl(node->left_);
-      node->left_ = new_root;
-      new_root->parent_ = node;
-      new_root = rotate_right_impl(node);
-
-      return make_iter(new_root);
-    }
-
-    size_t height() const
-    {
-      return get_height(root_);
-    }
-
-    size_t height(const_iterator pos) const
-    {
-      if (pos.node_)
-      {
-        return get_height(pos.node_);
-      }
-
-      return 0;
-    }
+    size_t height() const;
+    size_t height(const_iterator pos) const;
 
     void clear()
     {
@@ -627,20 +720,92 @@ namespace vishnyakov
       return left;
     }
 
+    iterator rotate_left(iterator pos)
+    {
+      Node* node = pos.node_;
+
+      if (!node || !node->right_)
+      {
+        return pos;
+      }
+
+      Node* new_root = rotate_left_impl(node);
+      return iterator(new_root, pos.stack_);
+    }
+
+    iterator rotate_right(iterator pos)
+    {
+      Node* node = pos.node_;
+
+      if (!node || !node->left_)
+      {
+        return pos;
+      }
+
+      Node* new_root = rotate_right_impl(node);
+      return iterator(new_root, pos.stack_);
+    }
+
+    iterator rotate_left_large(iterator pos)
+    {
+      Node* node = pos.node_;
+
+      if (!node || !node->right_ || !node->right_->left_)
+      {
+        return pos;
+      }
+
+      Node* new_root = rotate_right_impl(node->right_);
+      node->right_ = new_root;
+      new_root->parent_ = node;
+      new_root = rotate_left_impl(node);
+
+      return iterator(new_root, pos.stack_);
+    }
+
+    iterator rotate_right_large(iterator pos)
+    {
+      Node* node = pos.node_;
+
+      if (!node || !node->left_ || !node->left_->right_)
+      {
+        return pos;
+      }
+
+      Node* new_root = rotate_left_impl(node->left_);
+      node->left_ = new_root;
+      new_root->parent_ = node;
+      new_root = rotate_right_impl(node);
+
+      return iterator(new_root, pos.stack_);
+    }
+
+    size_t height() const
+    {
+      return get_height(root_);
+    }
+
+    size_t height(const_iterator pos) const
+    {
+      if (pos.node_)
+      {
+        return get_height(const_cast< Node* >(pos.node_));
+      }
+
+      return 0;
+    }
+
     iterator find(const Key& key)
     {
       Node* node = find_node(key);
-      return make_iter(node);
+      return iterator(node);
     }
 
     const_iterator find(const Key& key) const
     {
       Node* node = find_node(key);
-      return make_citer(node);
+      return const_iterator(node);
     }
-
-    iterator make_iter(Node* node) const;
-    const_iterator make_citer(Node* node) const;
   };
 
   template< class Key, class Value, class Compare >
@@ -651,4 +816,5 @@ namespace vishnyakov
 }
 
 #endif
+
 
