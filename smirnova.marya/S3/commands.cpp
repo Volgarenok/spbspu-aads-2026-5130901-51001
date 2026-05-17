@@ -265,6 +265,7 @@ namespace smirnova
     Graph& g = graphs.get(graphName);
     if (!g.adj.has(v))
     {
+      out << "\n";
       return;
     }
 
