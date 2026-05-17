@@ -116,6 +116,7 @@ namespace vishnyakov
           continue;
         }
 
+        out << name << " ";
         bool first = true;
         for (auto it = dict.begin(); it != dict.end(); ++it)
         {
