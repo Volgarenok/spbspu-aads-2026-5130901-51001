@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <limits>
 #include "commands.hpp"
 #include "graph.hpp"
 #include "hashTable.hpp"
@@ -87,41 +88,39 @@ int main(int argc, char* argv[])
           std::cout << "<INVALID COMMAND>\n";
           break;
         }
+
         sm::vertexes(std::cin, std::cout, graphs, graphVertices, graphNameCmd);
         continue;
       }
 
       if (!cmds.has(cmd))
       {
-        std::string graphNameCmd;
-        if (!(std::cin >> graphNameCmd))
-        {
-          std::cout << "<INVALID COMMAND>\n";
-          break;
-        }
         std::cout << "<INVALID COMMAND>\n";
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         continue;
       }
 
       std::string graphNameCmd;
+
       if (!(std::cin >> graphNameCmd))
       {
         std::cout << "<INVALID COMMAND>\n";
         break;
       }
+
       cmds.get(cmd)(std::cin, std::cout, graphs, graphVertices, graphNameCmd);
     }
     catch (const std::out_of_range&)
     {
       std::cout << "<INVALID COMMAND>\n";
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
     catch (const std::logic_error&)
     {
       std::cout << "<INVALID COMMAND>\n";
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
   }
-
   return 0;
 }
-
 
