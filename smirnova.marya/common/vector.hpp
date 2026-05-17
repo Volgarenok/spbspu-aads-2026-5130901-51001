@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <stdexcept>
+#include <utility>
 #include "vector-iter.hpp"
 
 namespace smirnova
@@ -23,6 +24,52 @@ public:
   Vector()
     : data(0), sz(0), cap(0)
   {}
+
+  Vector(const Vector& other)
+    : data(0), sz(other.sz), cap(other.cap)
+  {
+    if (cap)
+    {
+      data = new T[cap];
+      for (size_t i = 0; i < sz; ++i)
+        data[i] = other.data[i];
+    }
+  }
+
+  Vector(Vector&& other) noexcept
+    : data(other.data), sz(other.sz), cap(other.cap)
+  {
+    other.data = 0;
+    other.sz = 0;
+    other.cap = 0;
+  }
+
+  Vector& operator=(const Vector& other)
+  {
+    if (this != &other)
+    {
+      Vector tmp(other);
+      std::swap(data, tmp.data);
+      std::swap(sz, tmp.sz);
+      std::swap(cap, tmp.cap);
+    }
+    return *this;
+  }
+
+  Vector& operator=(Vector&& other) noexcept
+  {
+    if (this != &other)
+    {
+      delete[] data;
+      data = other.data;
+      sz = other.sz;
+      cap = other.cap;
+      other.data = 0;
+      other.sz = 0;
+      other.cap = 0;
+    }
+    return *this;
+  }
 
   ~Vector()
   {
@@ -102,7 +149,7 @@ template <typename T>
 void smirnova::Vector<T>::pushBack(T&& v)
 {
   ensureCapacity();
-  data[sz++] = v;
+  data[sz++] = std::move(v);
 }
 
 template <typename T>
