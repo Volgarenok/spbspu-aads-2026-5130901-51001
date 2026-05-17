@@ -93,12 +93,6 @@ int main(int argc, char* argv[])
 
       if (!cmds.has(cmd))
       {
-        std::string graphNameCmd;
-        if (!(std::cin >> graphNameCmd))
-        {
-          std::cout << "<INVALID COMMAND>\n";
-          break;
-        }
         std::cout << "<INVALID COMMAND>\n";
         continue;
       }
