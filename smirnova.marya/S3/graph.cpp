@@ -45,6 +45,8 @@ void smirnova::Graph::cut(const std::string& a, const std::string& b, int w)
       {
         if (ws[j] == w)
         {
+          ws[j] = ws[ws.size() - 1];
+          ws.popBack();
           if (ws.size() == 0)
           {
             edges[i] = edges[edges.size() - 1];
@@ -55,6 +57,7 @@ void smirnova::Graph::cut(const std::string& a, const std::string& b, int w)
           {
             adj.drop(a);
           }
+          return;
         }
       }
     }
