@@ -104,14 +104,11 @@ void Graph::merge(const Graph& other)
 {
   for (auto it = other.adjacency_.cbegin(); it != other.adjacency_.cend(); ++it)
   {
-    const std::string& vertex = it->first;
-    addVertex(vertex);
+    addVertex(it->first);
     
-    const EdgeList& edges = it->second;
-    
-    for (auto edge_it = edges.begin(); edge_it != edges.end(); ++edge_it)
+    for (auto e = it->second.begin(); e != it->second.end(); ++e)
     {
-      bind(vertex, (*edge_it).to, (*edge_it).weight);
+      adjacency_.at(it->first).pushBack(*e);
     }
   }
 }
@@ -127,11 +124,19 @@ Graph Graph::extract(const std::string& vertex) const
   
   result.addVertex(vertex);
   
-  const EdgeList& edges = adjacency_.at(vertex);
-  
-  for (auto it = edges.begin(); it != edges.end(); ++it)
+  for (auto it = adjacency_.cbegin(); it != adjacency_.cend(); ++it)
   {
-    result.bind(vertex, (*it).to, (*it).weight);
+    const std::string& from = it->first;
+    
+    for (auto e = it->second.begin(); e != it->second.end(); ++e)
+    {
+      if (from == vertex || e->to == vertex)
+      {
+        result.addVertex(from);
+        result.addVertex(e->to);
+        result.bind(from, e->to, e->weight);
+      }
+    }
   }
   
   return result;
