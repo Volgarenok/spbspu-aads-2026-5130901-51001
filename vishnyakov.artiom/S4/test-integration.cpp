@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(FullWorkflow)
 
   vishnyakov::process_commands(commands, dicts, out);
 
-  std::string expected = 
+  std::string expected =
     "1 name 2 surname\n"
     "1 name 2 keyboard 4 mouse\n"
     "2 surname\n"
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(InvalidCommandsWorkflow)
 
   vishnyakov::process_commands(commands, dicts, out);
 
-  std::string expected = 
+  std::string expected =
     "<INVALID COMMAND>\n"
     "<INVALID COMMAND>\n"
     "<INVALID COMMAND>\n"
