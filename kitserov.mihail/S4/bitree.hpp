@@ -201,6 +201,86 @@ namespace kitserov
         parent = parent -> parent_;
       }
     }
+    Value& get(const Key& k)
+    {
+      BSTree* n = find_root(k);
+      if (!n) {
+        throw std::out_of_range("BSTree::get: key not found");
+      }
+      return n -> data_.second;
+    }
+    const Value& get(const Key& k) const {
+        return const_cast< BSTree* >(this) -> get(k);
+    }
+    bool contains(const Key& k) const {
+        return find_root(k) != nullptr;
+    }
+    Value drop(const Key& k)
+    {
+      BSTree* n = find_root(k);
+      if (!n) {
+        throw std::out_of_range("BSTree::get: key not found");
+      }
+      Value removed = n -> data_.second;
+      BSTree* child = nullptr;
+      BSTree* parent = n -> parent_;
+      if (!n -> left_ && !n -> right_) {
+        if (parent -> left_ == n) {
+          parent -> left_ = nullptr;
+        } else {
+          parent -> right_ = nullptr;
+        }
+      } else if (!n -> left_ || !n -> right_) {
+        child = n -> left_ ? n -> left_ : n -> right_;
+        child -> parent_ = parent;
+        if (parent -> left_ == n) {
+          parent -> left_ = child;
+        } else {
+          parent -> right_ = child;
+        }
+      } else {
+        BSTree* succ = n -> right_;
+        while (succ -> left_) {
+          succ = succ -> left_;
+        }
+        if (succ -> parent_ != n) {
+          if (succ -> right_) {
+            succ -> right_ -> parent_ = succ -> parent_;
+            succ -> parent_ -> left_ = succ -> right_;
+          } else {
+            n -> right_ = succ -> right_;
+            if (succ -> right_) {
+              succ -> right_ -> parent_ = n;
+            }
+          }
+          succ -> left_ = n -> left_;
+          if (n -> left_) {
+            n -> left_ -> parent_ = succ;
+          }
+          if (n -> right_ != succ) {
+            succ -> right_ = n -> right_;
+            if (n -> right_) {
+              n -> right_ -> parent_ = succ;
+            }
+          }
+          succ -> parent_ = n -> parent_;
+          if (n -> parent_ -> left_ == n) {
+            n -> parent_ -> left_ = succ;
+          } else {
+            n -> parent_ -> right_ = succ;
+          }
+          child = succ;
+          parent = succ -> parent_ ? succ->parent_ : succ;
+        }
+      }
+      BSTree* update_node = parent;
+      while (update_node) {
+        update_node -> update();
+        update_node = update_node -> parent_;
+      }
+      delete n;
+      return removed;
+    }
   };
 }
 
