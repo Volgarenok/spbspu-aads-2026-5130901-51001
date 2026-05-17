@@ -1,7 +1,6 @@
 #include "utils.hpp"
 #include <sstream>
 #include <string>
-#include <algorithm>
 
 namespace vishnyakov
 {
@@ -130,25 +129,14 @@ namespace vishnyakov
           continue;
         }
 
-        std::vector< std::pair< int, std::string > > items;
-        for (auto it = dict.begin(); it != dict.end(); ++it)
-        {
-          items.push_back(std::make_pair(it->first, it->second));
-        }
-
-        std::sort(items.begin(), items.end(),
-          [](const std::pair<int, std::string>& a, const std::pair<int, std::string>& b) {
-            return a.first < b.first;
-          });
-
         bool first = true;
-        for (const auto& item : items)
+        for (auto it = dict.begin(); it != dict.end(); ++it)
         {
           if (!first)
           {
             out << " ";
           }
-          out << item.first << " " << item.second;
+          out << it->first << " " << it->second;
           first = false;
         }
         out << "\n";
@@ -191,7 +179,7 @@ namespace vishnyakov
         const Dictionary& dict2 = dicts.at(name2);
 
         Dictionary result;
-
+        
         for (auto it = dict1.begin(); it != dict1.end(); ++it)
         {
           if (dict2.has(it->first))
@@ -222,7 +210,7 @@ namespace vishnyakov
         const Dictionary& dict2 = dicts.at(name2);
 
         Dictionary result = dict1;
-
+        
         for (auto it = dict2.begin(); it != dict2.end(); ++it)
         {
           if (!result.has(it->first))
