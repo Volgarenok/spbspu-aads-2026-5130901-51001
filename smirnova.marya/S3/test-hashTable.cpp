@@ -100,10 +100,11 @@ BOOST_AUTO_TEST_CASE(HasReturnsFalseForMissing)
 {
   HashTable<std::string, int> ht;
   ht.add("exists", 1);
- 
+
   BOOST_CHECK(ht.has("exists"));
   BOOST_CHECK(!ht.has("missing"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
 
