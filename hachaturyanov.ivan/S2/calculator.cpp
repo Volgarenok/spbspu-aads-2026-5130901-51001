@@ -98,6 +98,7 @@ const std::string hachaturyanov::convertToPostfix(const std::string& infix)
     postfix += ' ';
   }
 
+  std::cerr << "Postfix: " << postfix << '\n';
   return postfix;
 }
 
@@ -111,7 +112,7 @@ long long hachaturyanov::arithmeticShiftLeft(long long a, long long b)
     throw std::overflow_error("Overflow in left shift: " + std::to_string(a) + " << " + std::to_string(b));
   }
 
-  long long b2 = pow(2, b);
+  long long b2 = 1LL << b;
   if ((a > 0 && a > std::numeric_limits< long long >::max() / b2) ||
       (a < 0 && a < std::numeric_limits< long long >::min() / b2)) {
     throw std::overflow_error("Overflow in left shift: " + std::to_string(a) + " << " + std::to_string(b));
@@ -164,8 +165,17 @@ long long hachaturyanov::calculatePostfix(const std::string& postfix)
           result = a - b;
           break;
         case '*':
-          if ((b > 0 && a > std::numeric_limits< long long >::max() / b) ||
-              (b < 0 && a < std::numeric_limits< long long >::min() / b)) {
+          if (b == -1) {
+            if (a == std::numeric_limits< long long >::min()) {
+              throw std::overflow_error("Overflow in multiplication: " + std::to_string(a) + " * " + std::to_string(b));
+            }
+            result = -a;
+            break;
+          }
+          if ((a > 0 && b > 0 && a > std::numeric_limits< long long >::max() / b) ||
+              (a < 0 && b < 0 && a < std::numeric_limits< long long >::max() / b) ||
+              (a > 0 && b < 0 && a > std::numeric_limits< long long >::min() / b) ||
+              (a < 0 && b > 0 && a < std::numeric_limits< long long >::min() / b)) {
             throw std::overflow_error("Overflow in multiplication: " + std::to_string(a) + " * " + std::to_string(b));
           }
           result = a * b;
@@ -221,15 +231,16 @@ void hachaturyanov::calculate(std::istream& in)
 
     long long value = hachaturyanov::calculatePostfix(hachaturyanov::convertToPostfix(input));
     res.push(value);
-
-    bool first = true;
-    while (!res.isEmpty()) {
-      if (!first) {
-        std::cout << ' ';
-      }
-      first = false;
-      std::cout << res.drop();
-    }
-    std::cout << '\n';
   }
+
+  bool first = true;
+  while (!res.isEmpty()) {
+    if (!first) {
+      std::cout << ' ';
+    }
+    first = false;
+    std::cout << res.drop();
+  }
+  std::cout << '\n';
+
 }
