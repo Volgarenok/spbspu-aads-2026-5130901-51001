@@ -1,3 +1,4 @@
+// lab4/test-integration.cpp
 #include <boost/test/unit_test.hpp>
 #include "utils.hpp"
 #include <sstream>
@@ -28,11 +29,11 @@ BOOST_AUTO_TEST_CASE(FullWorkflow)
   vishnyakov::process_commands(commands, dicts, out);
 
   std::string expected =
-    "1 name 2 surname\n"
-    "1 name 2 keyboard 4 mouse\n"
-    "4 mouse\n"
-    "1 name 2 keyboard\n"
-    "1 name 2 keyboard 4 mouse\n";
+    "first 1 name 2 surname\n"
+    "second 1 name 2 keyboard 4 mouse\n"
+    "third 4 mouse\n"
+    "fourth 1 name 2 keyboard\n"
+    "fifth 1 name 2 keyboard 4 mouse\n";
 
   BOOST_CHECK_EQUAL(out.str(), expected);
 }
