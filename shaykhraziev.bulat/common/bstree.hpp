@@ -1,0 +1,301 @@
+#ifndef BSTREE_HPP
+#define BSTREE_HPP
+
+#include <cstddef>
+#include <stdexcept>
+#include <utility>
+
+namespace shaykhraziev
+{
+  template< class Key, class Value >
+  struct BSTNode
+  {
+    Key key;
+    Value value;
+    BSTNode* parent;
+    BSTNode* left;
+    BSTNode* right;
+    bool fake;
+
+    BSTNode():
+      key(),
+      value(),
+      parent(nullptr),
+      left(nullptr),
+      right(nullptr),
+      fake(true)
+    {}
+
+    BSTNode(Key&& newKey, Value&& newValue, BSTNode* fakeLeaf):
+      key(std::move(newKey)),
+      value(std::move(newValue)),
+      parent(fakeLeaf),
+      left(fakeLeaf),
+      right(fakeLeaf),
+      fake(false)
+    {}
+  };
+
+  template< class Key, class Value, class Compare >
+  class BSTree
+  {
+  public:
+    using Node = BSTNode< Key, Value >;
+
+    BSTree():
+      fakeLeaf_(new Node()),
+      root_(fakeLeaf_),
+      size_(0),
+      compare_()
+    {
+      fakeLeaf_->left = fakeLeaf_;
+      fakeLeaf_->right = fakeLeaf_;
+    }
+
+    ~BSTree()
+    {
+      clear();
+      delete fakeLeaf_;
+    }
+
+    BSTree(const BSTree& other):
+      BSTree()
+    {
+      copyFrom(other.root_, other.fakeLeaf_);
+    }
+
+    BSTree(BSTree&& other) noexcept:
+      fakeLeaf_(other.fakeLeaf_),
+      root_(other.root_),
+      size_(other.size_),
+      compare_(std::move(other.compare_))
+    {
+      other.fakeLeaf_ = new Node();
+      other.fakeLeaf_->left = other.fakeLeaf_;
+      other.fakeLeaf_->right = other.fakeLeaf_;
+      other.root_ = other.fakeLeaf_;
+      other.size_ = 0;
+      refreshFakeLinks();
+    }
+
+    BSTree& operator=(const BSTree& other)
+    {
+      if (this != &other)
+      {
+        BSTree tmp(other);
+        swap(tmp);
+      }
+      return *this;
+    }
+
+    BSTree& operator=(BSTree&& other) noexcept
+    {
+      if (this != &other)
+      {
+        clear();
+        delete fakeLeaf_;
+        fakeLeaf_ = other.fakeLeaf_;
+        root_ = other.root_;
+        size_ = other.size_;
+        compare_ = std::move(other.compare_);
+        other.fakeLeaf_ = new Node();
+        other.fakeLeaf_->left = other.fakeLeaf_;
+        other.fakeLeaf_->right = other.fakeLeaf_;
+        other.root_ = other.fakeLeaf_;
+        other.size_ = 0;
+        refreshFakeLinks();
+      }
+      return *this;
+    }
+
+    bool empty() const noexcept
+    {
+      return size_ == 0;
+    }
+
+    std::size_t size() const noexcept
+    {
+      return size_;
+    }
+
+    void clear() noexcept
+    {
+      clearNode(root_);
+      root_ = fakeLeaf_;
+      size_ = 0;
+      fakeLeaf_->left = fakeLeaf_;
+      fakeLeaf_->right = fakeLeaf_;
+    }
+
+    bool push(Key key, Value value)
+    {
+      Node* parent = fakeLeaf_;
+      Node* current = root_;
+      while (current != fakeLeaf_)
+      {
+        parent = current;
+        if (compare_(key, current->key))
+        {
+          current = current->left;
+        }
+        else if (compare_(current->key, key))
+        {
+          current = current->right;
+        }
+        else
+        {
+          current->value = std::move(value);
+          return false;
+        }
+      }
+
+      Node* created = new Node(std::move(key), std::move(value), fakeLeaf_);
+      created->parent = parent;
+      if (parent == fakeLeaf_)
+      {
+        root_ = created;
+      }
+      else if (compare_(created->key, parent->key))
+      {
+        parent->left = created;
+      }
+      else
+      {
+        parent->right = created;
+      }
+      ++size_;
+      refreshFakeLinks();
+      return true;
+    }
+
+    bool has(const Key& key) const
+    {
+      return findNode(key) != fakeLeaf_;
+    }
+
+    Value& get(const Key& key)
+    {
+      Node* node = findNode(key);
+      if (node == fakeLeaf_)
+      {
+        throw std::out_of_range("missing key");
+      }
+      return node->value;
+    }
+
+    const Value& get(const Key& key) const
+    {
+      const Node* node = findNode(key);
+      if (node == fakeLeaf_)
+      {
+        throw std::out_of_range("missing key");
+      }
+      return node->value;
+    }
+
+    void swap(BSTree& other) noexcept
+    {
+      Node* tmpFake = fakeLeaf_;
+      fakeLeaf_ = other.fakeLeaf_;
+      other.fakeLeaf_ = tmpFake;
+
+      Node* tmpRoot = root_;
+      root_ = other.root_;
+      other.root_ = tmpRoot;
+
+      std::size_t tmpSize = size_;
+      size_ = other.size_;
+      other.size_ = tmpSize;
+
+      Compare tmpCompare = compare_;
+      compare_ = other.compare_;
+      other.compare_ = tmpCompare;
+
+      refreshFakeLinks();
+      other.refreshFakeLinks();
+    }
+
+  private:
+    Node* fakeLeaf_;
+    Node* root_;
+    std::size_t size_;
+    Compare compare_;
+
+    Node* findNode(const Key& key) noexcept
+    {
+      Node* current = root_;
+      while (current != fakeLeaf_)
+      {
+        if (compare_(key, current->key))
+        {
+          current = current->left;
+        }
+        else if (compare_(current->key, key))
+        {
+          current = current->right;
+        }
+        else
+        {
+          return current;
+        }
+      }
+      return fakeLeaf_;
+    }
+
+    const Node* findNode(const Key& key) const noexcept
+    {
+      const Node* current = root_;
+      while (current != fakeLeaf_)
+      {
+        if (compare_(key, current->key))
+        {
+          current = current->left;
+        }
+        else if (compare_(current->key, key))
+        {
+          current = current->right;
+        }
+        else
+        {
+          return current;
+        }
+      }
+      return fakeLeaf_;
+    }
+
+    void clearNode(Node* node) noexcept
+    {
+      if (node == fakeLeaf_)
+      {
+        return;
+      }
+      clearNode(node->left);
+      clearNode(node->right);
+      delete node;
+    }
+
+    void copyFrom(const Node* node, const Node* otherFakeLeaf)
+    {
+      if (node == otherFakeLeaf)
+      {
+        return;
+      }
+      push(node->key, node->value);
+      copyFrom(node->left, otherFakeLeaf);
+      copyFrom(node->right, otherFakeLeaf);
+    }
+
+    void refreshFakeLinks() noexcept
+    {
+      fakeLeaf_->parent = fakeLeaf_;
+      fakeLeaf_->left = root_;
+      fakeLeaf_->right = fakeLeaf_;
+      if (root_ != fakeLeaf_)
+      {
+        root_->parent = fakeLeaf_;
+      }
+    }
+  };
+}
+
+#endif
