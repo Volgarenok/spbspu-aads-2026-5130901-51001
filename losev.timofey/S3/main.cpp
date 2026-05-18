@@ -10,6 +10,7 @@
 #include "hash_table.hpp"
 #include "graph.hpp"
 
+
 namespace losev {
 
 using GraphTable = HashTable<std::string, Graph, SipHash<std::string>, std::equal_to<std::string>>;
