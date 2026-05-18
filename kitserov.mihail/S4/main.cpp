@@ -7,6 +7,7 @@
 
 #include "common/hash.hpp"
 #include "bitree.hpp"
+#include "utils4.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -77,6 +78,11 @@ int main(int argc, char* argv[])
 
   HashTable< std::string, CommandHandler, SipHash< std::string >,
              std::equal_to< std::string > > cmds(20);
+
+  cmds.add("print", printHandler);
+  cmds.add("complement", complementHandler);
+  cmds.add("intersect", intersectHandler);
+  cmds.add("union", unionHandler);
 
   std::string cmd;
   while (std::cin >> cmd)
