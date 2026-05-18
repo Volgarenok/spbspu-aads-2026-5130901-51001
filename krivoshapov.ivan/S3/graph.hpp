@@ -71,6 +71,49 @@ namespace krivoshapov
         edges_.rehash(edges_.slotCount() * 2);
       }
     }
+    bool cutEdge(const std::string &a, const std::string &b, size_t w)
+    {
+      if (!vertices_.has(a) || !vertices_.has(b))
+      {
+        return false;
+      }
+      VertexPair key(a, b);
+      if (!edges_.has(key))
+      {
+        return false;
+      }
+      Weights &ws = edges_.at(key);
+      size_t found = ws.size();
+      for (size_t i = 0; i < ws.size(); ++i)
+      {
+        if (ws[i] == w)
+        {
+          found = i;
+          break;
+        }
+      }
+      if (found == ws.size())
+      {
+        return false;
+      }
+      Weights nw;
+      for (size_t i = 0; i < ws.size(); ++i)
+      {
+        if (i != found)
+        {
+          nw.push_back(ws[i]);
+        }
+      }
+      if (nw.empty())
+      {
+        edges_.drop(key);
+      }
+      else
+      {
+        ws = nw;
+      }
+      return true;
+    }
   };
 }
 
