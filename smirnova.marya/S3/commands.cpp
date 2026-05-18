@@ -93,7 +93,7 @@ void graphs(std::istream&, std::ostream& out, GraphTable& graphs,
   }
 }
 
-void vertexes(std::istream&, std::ostream& out, GraphTable&, 
+void vertexes(std::istream&, std::ostream& out, GraphTable&,
               VertTable& graphVertices, std::string graphName)
 {
   if (!graphVertices.has(graphName)) { out << "<INVALID COMMAND>\n"; return; }
