@@ -248,7 +248,6 @@ void outbound(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable
 {
   std::string v;
   in >> v;
-
   if (!graphs.has(graphName) || !graphVertices.has(graphName))
   {
     out << "<INVALID COMMAND>\n";
@@ -296,6 +295,7 @@ void outbound(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable
       results.pushBack(row);
     }
   }
+
   for (size_t i = 0; i < results.size(); ++i) sortInts(results[i].weights);
   for (size_t i = 0; i < results.size(); ++i)
   {
@@ -307,6 +307,7 @@ void outbound(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable
       }
     }
   }
+
   for (auto rit = results.begin(); rit != results.end(); ++rit)
   {
     out << rit->to;
@@ -337,35 +338,38 @@ void inbound(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable&
     return;
   }
   Graph& g = graphs.get(graphName);
+
   struct InRes { std::string from; Vector< int > weights; };
   Vector< InRes > results;
+
   for (auto it = g.adj.begin(); it != g.adj.end(); ++it)
   {
+    const std::string& from = it->key;
     Vector< Graph::Edge >& edges = it->value;
     for (auto eit = edges.begin(); eit != edges.end(); ++eit)
     {
-      if (eit->to == v)
+      if (eit->to != v) continue;
+      bool found = false;
+      for (auto rIt = results.begin(); rIt != results.end(); ++rIt)
       {
-        bool found = false;
-        for (auto rIt = results.begin(); rIt != results.end(); ++rIt)
+        if (rIt->from == from)
         {
-          if (rIt->from == it->key)
-          {
-            for (auto wIt = eit->weights.begin(); wIt != eit->weights.end(); ++wIt)
-              rIt->weights.pushBack(*wIt);
-            found = true; break;
-          }
+          for (auto wIt = eit->weights.begin(); wIt != eit->weights.end(); ++wIt)
+            rIt->weights.pushBack(*wIt);
+          found = true;
+          break;
         }
-        if (!found)
-        {
-          InRes row;
-          row.from = it->key;
-          row.weights = eit->weights;
-          results.pushBack(row);
-        }
+      }
+      if (!found)
+      {
+        InRes row;
+        row.from = from;
+        row.weights = eit->weights;
+        results.pushBack(row);
       }
     }
   }
+
   for (size_t i = 0; i < results.size(); ++i) sortInts(results[i].weights);
   for (size_t i = 0; i < results.size(); ++i)
   {
@@ -374,6 +378,7 @@ void inbound(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable&
       if (results[j].from < results[i].from) { InRes tmp = results[i]; results[i] = results[j]; results[j] = tmp; }
     }
   }
+
   for (auto rit = results.begin(); rit != results.end(); ++rit)
   {
     out << rit->from;
@@ -385,7 +390,8 @@ void inbound(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable&
 
 void merge(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& graphVertices, std::string graphName)
 {
-  std::string g1, g2; in >> g1 >> g2;
+  std::string g1, g2;
+  in >> g1 >> g2;
   if (graphs.has(graphName) || !graphs.has(g1) || !graphs.has(g2) || !graphVertices.has(g1) || !graphVertices.has(g2))
   {
     out << "<INVALID COMMAND>\n"; return;
@@ -393,27 +399,25 @@ void merge(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& g
   Graph result;
   Graph& a = graphs.get(g1);
   Graph& b = graphs.get(g2);
-  for (auto it = a.adj.begin(); it != a.adj.end(); ++it)
-  {
-    const std::string& from = it->key;
-    Vector< Graph::Edge >& srcEdges = it->value;
-    for (auto eIt = srcEdges.begin(); eIt != srcEdges.end(); ++eIt)
+
+  auto appendEdges = [&](Graph& src) {
+    for (auto it = src.adj.begin(); it != src.adj.end(); ++it)
     {
-      for (auto wIt = eIt->weights.begin(); wIt != eIt->weights.end(); ++wIt)
-        result.addEdge(from, eIt->to, *wIt);
+      const std::string& from = it->key;
+      Vector< Graph::Edge >& srcEdges = it->value;
+      for (auto eIt = srcEdges.begin(); eIt != srcEdges.end(); ++eIt)
+      {
+        for (auto wIt = eIt->weights.begin(); wIt != eIt->weights.end(); ++wIt)
+          result.addEdge(from, eIt->to, *wIt);
+      }
     }
-  }
-  for (auto it = b.adj.begin(); it != b.adj.end(); ++it)
-  {
-    const std::string& from = it->key;
-    Vector< Graph::Edge >& srcEdges = it->value;
-    for (auto eIt = srcEdges.begin(); eIt != srcEdges.end(); ++eIt)
-    {
-      for (auto wIt = eIt->weights.begin(); wIt != eIt->weights.end(); ++wIt)
-        result.addEdge(from, eIt->to, *wIt);
-    }
-  }
+  };
+
+  appendEdges(a);
+  appendEdges(b);
+
   graphs.add(graphName, result);
+
   Vector< std::string > verts;
   Vector< std::string >& va = graphVertices.get(g1);
   Vector< std::string >& vb = graphVertices.get(g2);
@@ -424,20 +428,29 @@ void merge(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& g
 
 void extract(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& graphVertices, std::string graphName)
 {
-  std::string oldG; size_t k; in >> oldG >> k;
+  std::string oldG;
+  size_t k;
+  in >> oldG >> k;
   if (graphs.has(graphName) || !graphs.has(oldG) || !graphVertices.has(oldG)) { out << "<INVALID COMMAND>\n"; return; }
+
   Graph& src = graphs.get(oldG);
   Vector< std::string >& srcVerts = graphVertices.get(oldG);
-  Graph res; Vector< std::string > resVerts; Vector< std::string > chosen;
+
+  Vector< std::string > chosen;
   for (size_t i = 0; i < k; ++i)
   {
-    std::string v; in >> v;
+    std::string v;
+    in >> v;
     bool found = false;
     for (auto it = srcVerts.begin(); it != srcVerts.end(); ++it) { if (*it == v) { found = true; break; } }
     if (!found) { out << "<INVALID COMMAND>\n"; return; }
     if (!containsString(chosen, v)) chosen.pushBack(v);
   }
+
+  Graph res;
+  Vector< std::string > resVerts;
   for (auto it = chosen.begin(); it != chosen.end(); ++it) { resVerts.pushBack(*it); res.addVertex(*it); }
+
   for (auto it = chosen.begin(); it != chosen.end(); ++it)
   {
     const std::string& from = *it;
@@ -450,6 +463,7 @@ void extract(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable&
         res.addEdge(from, eIt->to, *wIt);
     }
   }
+
   graphs.add(graphName, res);
   graphVertices.add(graphName, resVerts);
 }
