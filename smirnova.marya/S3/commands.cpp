@@ -205,7 +205,7 @@ void cut(std::istream& in, std::ostream& out, GraphTable& graphs,
       hasB = true;
     }
   }
-  if (!hasA || !hasB) { 
+  if (!hasA || !hasB) {
     out << "<INVALID COMMAND>\n";
     return;
   }
