@@ -7,15 +7,15 @@ namespace smirnova
 {
 
 using Pair = GraphTable::Pair;
-using AdjPair = HashTable<std::string, Vector<Graph::Edge>>::Pair;
+using AdjPair = HashTable< std::string, Vector<Graph::Edge > >::Pair;
 
-bool containsString(const Vector<std::string>& values,
+bool containsString(const Vector< std::string >& values,
                     const std::string& value);
 
-void sortInts(Vector<int>& v);
-void sortStrings(Vector<std::string>& v);
+void sortInts(Vector< int >& v);
+void sortStrings(Vector< std::string >& v);
 
-bool containsString(const Vector<std::string>& values,
+bool containsString(const Vector< std::string >& values,
                     const std::string& value)
 {
   for (auto it = values.begin(); it != values.end(); ++it)
@@ -28,8 +28,8 @@ bool containsString(const Vector<std::string>& values,
   return false;
 }
 
-template <class T>
-void sortValues(Vector<T>& v)
+template < class T >
+void sortValues(Vector< T >& v)
 {
   for (size_t i = 1; i < v.size(); ++i)
   {
@@ -46,17 +46,17 @@ void sortValues(Vector<T>& v)
   }
 }
 
-void sortInts(Vector<int>& v)
+void sortInts(Vector< int >& v)
 {
   sortValues(v);
 }
 
-void sortStrings(Vector<std::string>& v)
+void sortStrings(Vector< std::string >& v)
 {
   sortValues(v);
 }
 
-void appendUnique(Vector<std::string>& values, const std::string& value)
+void appendUnique(Vector< std::string >& values, const std::string& value)
 {
   if (!containsString(values, value))
   {
@@ -81,13 +81,15 @@ void appendEdges(Graph& result, Graph& src)
 void graphs(std::istream&, std::ostream& out, GraphTable& graphs,
             VertTable&, std::string)
 {
-  Vector<std::string> names;
+  Vector< std::string > names;
   for (auto it = graphs.begin(); it != graphs.end(); ++it)
   {
     names.pushBack(it->key);
   }
   sortStrings(names);
-  if (names.size() == 0) { out << "\n"; return; }
+  if (names.size() == 0) {
+    out << "\n"; return;
+  }
   for (auto it = names.begin(); it != names.end(); ++it)
   {
     out << *it << "\n";
@@ -97,8 +99,11 @@ void graphs(std::istream&, std::ostream& out, GraphTable& graphs,
 void vertexes(std::istream&, std::ostream& out, GraphTable&,
               VertTable& graphVertices, std::string graphName)
 {
-  if (!graphVertices.has(graphName)) { out << "<INVALID COMMAND>\n"; return; }
-  Vector<std::string> verts = graphVertices.get(graphName);
+  if (!graphVertices.has(graphName)) {
+    out << "<INVALID COMMAND>\n";
+    return;
+  }
+  Vector< std::string > verts = graphVertices.get(graphName);
   sortStrings(verts);
   bool printed = false;
   std::string prev;
@@ -113,7 +118,9 @@ void vertexes(std::istream&, std::ostream& out, GraphTable&,
       printed = true;
     }
   }
-  if (!printed) out << "\n";
+  if (!printed) {
+    out << "\n";
+  }
 }
 
 void create(std::istream& in, std::ostream& out, GraphTable& graphs,
@@ -122,11 +129,11 @@ void create(std::istream& in, std::ostream& out, GraphTable& graphs,
   if (graphs.has(graphName))
   {
     out << "<INVALID COMMAND>\n";
-    in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    in.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
     return;
   }
   size_t k = 0;
-  Vector<std::string> verts;
+  Vector< std::string > verts;
   if (!(in >> k))
   {
     in.clear();
@@ -151,21 +158,32 @@ void bind(std::istream& in, std::ostream& out, GraphTable& graphs,
   std::string a, b;
   int w;
   in >> a >> b >> w;
-  if (!graphs.has(graphName)) { out << "<INVALID COMMAND>\n"; return; }
+  if (!graphs.has(graphName)) {
+    out << "<INVALID COMMAND>\n";
+    return;
+  }
   if (!graphVertices.has(graphName))
   {
-    Vector<std::string> verts;
+    Vector< std::string > verts;
     graphVertices.add(graphName, verts);
   }
-  Vector<std::string>& verts = graphVertices.get(graphName);
+  Vector< std::string >& verts = graphVertices.get(graphName);
   bool hasA = false, hasB = false;
   for (auto it = verts.begin(); it != verts.end(); ++it)
   {
-    if (*it == a) hasA = true;
-    if (*it == b) hasB = true;
+    if (*it == a) {
+      hasA = true;
+    }
+    if (*it == b) {
+      hasB = true;
+    }
   }
-  if (!hasA) verts.pushBack(a);
-  if (!hasB) verts.pushBack(b);
+  if (!hasA) {
+    verts.pushBack(a);
+  }
+  if (!hasB) {
+    verts.pushBack(b);
+  }
   graphs.get(graphName).addEdge(a, b, w);
 }
 
@@ -180,14 +198,24 @@ void cut(std::istream& in, std::ostream& out, GraphTable& graphs,
   bool hasA = false, hasB = false;
   for (auto it = verts.begin(); it != verts.end(); ++it)
   {
-    if (*it == a) hasA = true;
-    if (*it == b) hasB = true;
+    if (*it == a) {
+      hasA = true;
+    }
+    if (*it == b) {
+      hasB = true;
+    }
   }
-  if (!hasA || !hasB) { out << "<INVALID COMMAND>\n"; return; }
+  if (!hasA || !hasB) { 
+    out << "<INVALID COMMAND>\n";
+    return;
+  }
   Graph& g = graphs.get(graphName);
-  if (!g.adj.has(a)) { out << "<INVALID COMMAND>\n"; return; }
-  Vector<Graph::Edge>& edges = g.adj.get(a);
-  Vector<Graph::Edge> updated;
+  if (!g.adj.has(a)) {
+    out << "<INVALID COMMAND>\n";
+    return;
+  }
+  Vector< Graph::Edge >& edges = g.adj.get(a);
+  Vector< Graph::Edge > updated;
   bool foundEdge = false;
   for (auto eit = edges.begin(); eit != edges.end(); ++eit)
   {
@@ -196,8 +224,8 @@ void cut(std::istream& in, std::ostream& out, GraphTable& graphs,
       updated.pushBack(*eit);
       continue;
     }
-    Vector<int>& weights = eit->weights;
-    Vector<int> newWeights;
+    Vector< int >& weights = eit->weights;
+    Vector< int > newWeights;
     bool removed = false;
     bool skipped = false;
     for (auto wIt = weights.begin(); wIt != weights.end(); ++wIt)
@@ -210,7 +238,10 @@ void cut(std::istream& in, std::ostream& out, GraphTable& graphs,
       }
       newWeights.pushBack(*wIt);
     }
-    if (!removed) { out << "<INVALID COMMAND>\n"; return; }
+    if (!removed) {
+      out << "<INVALID COMMAND>\n";
+      return;
+    }
     if (newWeights.size() > 0)
     {
       Graph::Edge edge = *eit;
@@ -229,25 +260,39 @@ void outbound(std::istream& in, std::ostream& out, GraphTable& graphs,
 {
   std::string v;
   in >> v;
-  if (!graphs.has(graphName) || !graphVertices.has(graphName)) { out << "<INVALID COMMAND>\n"; return; }
-  Vector<std::string>& verts = graphVertices.get(graphName);
+  if (!graphs.has(graphName) || !graphVertices.has(graphName)) {
+    out << "<INVALID COMMAND>\n";
+    return;
+  }
+  Vector< std::string >& verts = graphVertices.get(graphName);
   bool hasV = false;
   for (auto it = verts.begin(); it != verts.end(); ++it)
   {
-    if (*it == v) { hasV = true; break; }
+    if (*it == v)
+    {
+      hasV = true;
+      break;
+    }
   }
-  if (!hasV) { out << "<INVALID COMMAND>\n"; return; }
+  if (!hasV) {
+    out << "<INVALID COMMAND>\n";
+    return;
+  }
   Graph& g = graphs.get(graphName);
-  if (!g.adj.has(v)) { out << "\n"; return; }
-  struct OutRes { std::string to; Vector<int> weights; };
-  Vector<OutRes> results;
-  Vector<Graph::Edge>& edges = g.adj.get(v);
+  if (!g.adj.has(v)) {
+    out << "\n";
+    return;
+  }
+  Vector< Graph::Edge > results;
+  Vector< Graph::Edge >& edges = g.adj.get(v);
   for (auto eit = edges.begin(); eit != edges.end(); ++eit)
   {
     bool found = false;
     for (auto rit = results.begin(); rit != results.end(); ++rit)
     {
-      if (rit->to != eit->to) continue;
+      if (rit->to != eit->to) {
+        continue;
+      }
       for (auto wIt = eit->weights.begin(); wIt != eit->weights.end(); ++wIt)
       {
         rit->weights.pushBack(*wIt);
@@ -257,7 +302,7 @@ void outbound(std::istream& in, std::ostream& out, GraphTable& graphs,
     }
     if (!found)
     {
-      OutRes row;
+      Graph::Edge row;
       row.to = eit->to;
       row.weights = eit->weights;
       results.pushBack(row);
@@ -278,7 +323,7 @@ void outbound(std::istream& in, std::ostream& out, GraphTable& graphs,
     {
       if (results[j].to < results[i].to)
       {
-        OutRes tmp = results[i];
+        Graph::Edge tmp = results[i];
         results[i] = results[j];
         results[j] = tmp;
       }
@@ -300,17 +345,25 @@ void inbound(std::istream& in, std::ostream& out, GraphTable& graphs,
 {
   std::string v;
   in >> v;
-  if (!graphs.has(graphName) || !graphVertices.has(graphName)) { out << "<INVALID COMMAND>\n"; return; }
-  Vector<std::string>& verts = graphVertices.get(graphName);
+  if (!graphs.has(graphName) || !graphVertices.has(graphName)) {
+    out << "<INVALID COMMAND>\n";
+    return;
+  }
+  Vector< std::string >& verts = graphVertices.get(graphName);
   bool hasV = false;
   for (auto it = verts.begin(); it != verts.end(); ++it)
   {
-    if (*it == v) { hasV = true; break; }
+    if (*it == v) {
+      hasV = true;
+      break;
+    }
   }
-  if (!hasV) { out << "<INVALID COMMAND>\n"; return; }
+  if (!hasV) {
+    out << "<INVALID COMMAND>\n";
+    return;
+  }
   Graph& g = graphs.get(graphName);
-  struct InRes { std::string from; Vector<int> weights; };
-  Vector<InRes> results;
+  Vector< Graph::Edge > results;
   for (auto it = g.adj.begin(); it != g.adj.end(); ++it)
   {
     const std::string& from = it->key;
@@ -321,7 +374,7 @@ void inbound(std::istream& in, std::ostream& out, GraphTable& graphs,
       bool found = false;
       for (auto rIt = results.begin(); rIt != results.end(); ++rIt)
       {
-        if (rIt->from != from) continue;
+        if (rIt->to != from) continue;
         for (auto wIt = eit->weights.begin(); wIt != eit->weights.end(); ++wIt)
         {
           rIt->weights.pushBack(*wIt);
@@ -331,8 +384,8 @@ void inbound(std::istream& in, std::ostream& out, GraphTable& graphs,
       }
       if (!found)
       {
-        InRes row;
-        row.from = from;
+        Graph::Edge row;
+        row.to = from;
         row.weights = eit->weights;
         results.pushBack(row);
       }
@@ -353,7 +406,7 @@ void inbound(std::istream& in, std::ostream& out, GraphTable& graphs,
     {
       if (results[j].from < results[i].from)
       {
-        InRes tmp = results[i];
+        Graph::Edge tmp = results[i];
         results[i] = results[j];
         results[j] = tmp;
       }
@@ -361,7 +414,7 @@ void inbound(std::istream& in, std::ostream& out, GraphTable& graphs,
   }
   for (auto rit = results.begin(); rit != results.end(); ++rit)
   {
-    out << rit->from;
+    out << rit->to;
     for (auto wIt = rit->weights.begin(); wIt != rit->weights.end(); ++wIt)
     {
       out << " " << *wIt;
