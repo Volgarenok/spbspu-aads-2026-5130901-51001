@@ -193,6 +193,42 @@ namespace shaykhraziev
       return node->value;
     }
 
+    bool drop(const Key& key)
+    {
+      Node* node = findNode(key);
+      if (node == fakeLeaf_)
+      {
+        return false;
+      }
+
+      if (node->left != fakeLeaf_ && node->right != fakeLeaf_)
+      {
+        Node* replacement = minimum(node->right);
+        if (replacement->parent != node)
+        {
+          transplantNode(replacement, replacement->right);
+          replacement->right = node->right;
+          replacement->right->parent = replacement;
+        }
+        transplantNode(node, replacement);
+        replacement->left = node->left;
+        replacement->left->parent = replacement;
+      }
+      else if (node->left != fakeLeaf_)
+      {
+        transplantNode(node, node->left);
+      }
+      else
+      {
+        transplantNode(node, node->right);
+      }
+
+      delete node;
+      --size_;
+      refreshFakeLinks();
+      return true;
+    }
+
     void swap(BSTree& other) noexcept
     {
       Node* tmpFake = fakeLeaf_;
@@ -263,6 +299,15 @@ namespace shaykhraziev
       return fakeLeaf_;
     }
 
+    static Node* minimum(Node* node) noexcept
+    {
+      while (!node->left->fake)
+      {
+        node = node->left;
+      }
+      return node;
+    }
+
     void clearNode(Node* node) noexcept
     {
       if (node == fakeLeaf_)
@@ -283,6 +328,26 @@ namespace shaykhraziev
       push(node->key, node->value);
       copyFrom(node->left, otherFakeLeaf);
       copyFrom(node->right, otherFakeLeaf);
+    }
+
+    void transplantNode(Node* oldNode, Node* newNode) noexcept
+    {
+      if (oldNode->parent == fakeLeaf_)
+      {
+        root_ = newNode;
+      }
+      else if (oldNode == oldNode->parent->left)
+      {
+        oldNode->parent->left = newNode;
+      }
+      else
+      {
+        oldNode->parent->right = newNode;
+      }
+      if (newNode != fakeLeaf_)
+      {
+        newNode->parent = oldNode->parent;
+      }
     }
 
     void refreshFakeLinks() noexcept

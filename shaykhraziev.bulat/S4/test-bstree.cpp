@@ -87,3 +87,80 @@ BOOST_AUTO_TEST_CASE(bstree_push_existing_key_replaces_value)
   BOOST_TEST(tree.size() == 1);
   BOOST_TEST(tree.get(1) == "uno");
 }
+
+BOOST_AUTO_TEST_CASE(bstree_drop_leaf)
+{
+  Tree tree;
+  tree.push(2, "two");
+  tree.push(1, "one");
+  tree.push(3, "three");
+
+  BOOST_CHECK(tree.drop(1));
+
+  BOOST_TEST(tree.size() == 2);
+  BOOST_CHECK(!tree.has(1));
+  BOOST_CHECK(tree.has(2));
+  BOOST_CHECK(tree.has(3));
+}
+
+BOOST_AUTO_TEST_CASE(bstree_drop_node_with_one_child)
+{
+  Tree tree;
+  tree.push(4, "four");
+  tree.push(2, "two");
+  tree.push(1, "one");
+
+  BOOST_CHECK(tree.drop(2));
+
+  BOOST_TEST(tree.size() == 2);
+  BOOST_CHECK(!tree.has(2));
+  BOOST_TEST(tree.get(1) == "one");
+  BOOST_TEST(tree.get(4) == "four");
+}
+
+BOOST_AUTO_TEST_CASE(bstree_drop_node_with_two_children)
+{
+  Tree tree;
+  tree.push(4, "four");
+  tree.push(2, "two");
+  tree.push(6, "six");
+  tree.push(1, "one");
+  tree.push(3, "three");
+  tree.push(5, "five");
+  tree.push(7, "seven");
+
+  BOOST_CHECK(tree.drop(4));
+
+  BOOST_TEST(tree.size() == 6);
+  BOOST_CHECK(!tree.has(4));
+  BOOST_TEST(tree.get(1) == "one");
+  BOOST_TEST(tree.get(2) == "two");
+  BOOST_TEST(tree.get(3) == "three");
+  BOOST_TEST(tree.get(5) == "five");
+  BOOST_TEST(tree.get(6) == "six");
+  BOOST_TEST(tree.get(7) == "seven");
+}
+
+BOOST_AUTO_TEST_CASE(bstree_drop_root_until_empty)
+{
+  Tree tree;
+  tree.push(2, "two");
+  tree.push(1, "one");
+
+  BOOST_CHECK(tree.drop(2));
+  BOOST_CHECK(tree.drop(1));
+
+  BOOST_CHECK(tree.empty());
+  BOOST_TEST(tree.size() == 0);
+}
+
+BOOST_AUTO_TEST_CASE(bstree_drop_missing_key_returns_false)
+{
+  Tree tree;
+  tree.push(1, "one");
+
+  BOOST_CHECK(!tree.drop(2));
+
+  BOOST_TEST(tree.size() == 1);
+  BOOST_TEST(tree.get(1) == "one");
+}
