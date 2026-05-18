@@ -36,6 +36,34 @@ namespace krivoshapov
       ++size_;
     }
 
+    void pop()
+    {
+      if (size_ == 0)
+      {
+        throw std::out_of_range("pop from empty stack");
+      }
+      --size_;
+      data_[size_] = T();
+    }
+
+    T &top()
+    {
+      if (size_ == 0)
+      {
+        throw std::out_of_range("top from empty stack");
+      }
+      return data_[size_ - 1];
+    }
+
+    const T &top() const
+    {
+      if (size_ == 0)
+      {
+        throw std::out_of_range("top from empty stack");
+      }
+      return data_[size_ - 1];
+    }
+
   private:
     T *data_;
     size_t size_;
