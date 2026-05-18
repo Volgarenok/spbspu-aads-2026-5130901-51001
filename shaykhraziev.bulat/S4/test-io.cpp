@@ -4,6 +4,8 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 BOOST_AUTO_TEST_CASE(io_reads_valid_datasets)
 {
@@ -16,6 +18,40 @@ BOOST_AUTO_TEST_CASE(io_reads_valid_datasets)
   BOOST_TEST(datasets.get("first").get(1) == "name");
   BOOST_TEST(datasets.get("first").get(2) == "surname");
   BOOST_TEST(datasets.get("second").get(4) == "mouse");
+}
+
+BOOST_AUTO_TEST_CASE(io_dataset_storage_keeps_named_dictionaries_in_order)
+{
+  shaykhraziev::DatasetStorage datasets;
+  shaykhraziev::Dictionary beta;
+  beta.push(2, "two");
+  beta.push(1, "one");
+  shaykhraziev::Dictionary alpha;
+  alpha.push(3, "three");
+
+  BOOST_CHECK(datasets.push("beta", beta));
+  BOOST_CHECK(datasets.push("alpha", alpha));
+
+  BOOST_CHECK(datasets.has("beta"));
+  BOOST_TEST(datasets.get("beta").get(1) == "one");
+  BOOST_TEST(datasets.get("beta").get(2) == "two");
+
+  std::vector< std::string > names;
+  for (shaykhraziev::DatasetStorage::const_iterator it = datasets.cbegin(); it != datasets.cend(); ++it)
+  {
+    names.push_back(it->key);
+  }
+  std::vector< std::string > expectedNames{"alpha", "beta"};
+  BOOST_TEST(names == expectedNames, boost::test_tools::per_element());
+
+  std::vector< int > keys;
+  const shaykhraziev::Dictionary& dictionary = datasets.get("beta");
+  for (shaykhraziev::Dictionary::const_iterator it = dictionary.cbegin(); it != dictionary.cend(); ++it)
+  {
+    keys.push_back(it->key);
+  }
+  std::vector< int > expectedKeys{1, 2};
+  BOOST_TEST(keys == expectedKeys, boost::test_tools::per_element());
 }
 
 BOOST_AUTO_TEST_CASE(io_ignores_empty_lines)

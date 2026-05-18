@@ -4,6 +4,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace
@@ -87,6 +88,21 @@ BOOST_AUTO_TEST_CASE(bstree_get_returns_mutable_reference)
 
   tree.get(1) = "changed";
 
+  BOOST_TEST(tree.get(1) == "changed");
+}
+
+BOOST_AUTO_TEST_CASE(bstree_iterator_exposes_readonly_key_and_mutable_value)
+{
+  Tree tree;
+  tree.push(1, "one");
+
+  Tree::iterator it = tree.begin();
+  static_assert(
+      std::is_const< std::remove_reference< decltype(it->key) >::type >::value,
+      "BSTree iterator key must not be mutable");
+  it->value = "changed";
+
+  BOOST_TEST(it->key == 1);
   BOOST_TEST(tree.get(1) == "changed");
 }
 

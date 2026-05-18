@@ -95,6 +95,21 @@ BOOST_AUTO_TEST_CASE(commands_reject_wrong_argument_count)
   BOOST_TEST(run(datasets, "union new first") == "<INVALID COMMAND>\n");
 }
 
+BOOST_AUTO_TEST_CASE(commands_registry_contains_handlers)
+{
+  shaykhraziev::CommandRegistry registry = shaykhraziev::makeCommandRegistry();
+
+  BOOST_CHECK(registry.has("print"));
+  BOOST_CHECK(registry.has("complement"));
+  BOOST_CHECK(registry.has("intersect"));
+  BOOST_CHECK(registry.has("union"));
+  BOOST_CHECK(!registry.has("missing"));
+  BOOST_TEST(registry.get("print").argumentCount == 1);
+  BOOST_TEST(registry.get("complement").argumentCount == 3);
+  BOOST_TEST(registry.get("intersect").argumentCount == 3);
+  BOOST_TEST(registry.get("union").argumentCount == 3);
+}
+
 BOOST_AUTO_TEST_CASE(commands_processes_lines_until_eof)
 {
   shaykhraziev::DatasetTable datasets = makeDatasets();

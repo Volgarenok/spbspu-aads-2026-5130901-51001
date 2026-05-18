@@ -19,7 +19,8 @@ namespace shaykhraziev
   };
 
   using Dictionary = BSTree< int, std::string, IntLess >;
-  using DatasetTable = BSTree< std::string, Dictionary, StringLess >;
+  using DatasetStorage = BSTree< std::string, Dictionary, StringLess >;
+  using DatasetTable = DatasetStorage;
 
   bool parseInt(const std::string& value, int& result);
   DatasetTable readDatasets(std::istream& in);

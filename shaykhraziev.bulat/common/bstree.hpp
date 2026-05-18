@@ -10,7 +10,7 @@ namespace shaykhraziev
   template< class Key, class Value >
   struct BSTNode
   {
-    Key key;
+    const Key key;
     Value value;
     BSTNode* parent;
     BSTNode* left;

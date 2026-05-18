@@ -79,14 +79,15 @@ namespace
 
   bool executeSetOperation(
       shaykhraziev::DatasetTable& datasets,
-      const shaykhraziev::List< std::string >& tokens)
+      const shaykhraziev::List< std::string >& tokens,
+      shaykhraziev::Dictionary (*operation)(
+          const shaykhraziev::Dictionary&,
+          const shaykhraziev::Dictionary&) = nullptr)
   {
-    if (tokens.size() != 4)
+    if (!operation)
     {
       return false;
     }
-
-    const std::string command = tokenAt(tokens, 0);
     const std::string newName = tokenAt(tokens, 1);
     const std::string leftName = tokenAt(tokens, 2);
     const std::string rightName = tokenAt(tokens, 3);
@@ -97,20 +98,42 @@ namespace
 
     const shaykhraziev::Dictionary& left = datasets.get(leftName);
     const shaykhraziev::Dictionary& right = datasets.get(rightName);
-    if (command == "complement")
-    {
-      return addResult(datasets, newName, shaykhraziev::complementDictionaries(left, right));
-    }
-    if (command == "intersect")
-    {
-      return addResult(datasets, newName, shaykhraziev::intersectDictionaries(left, right));
-    }
-    if (command == "union")
-    {
-      return addResult(datasets, newName, shaykhraziev::uniteDictionaries(left, right));
-    }
-    return false;
+    return addResult(datasets, newName, operation(left, right));
   }
+
+  bool executeComplement(
+      shaykhraziev::DatasetTable& datasets,
+      const shaykhraziev::List< std::string >& tokens,
+      std::ostream&)
+  {
+    return executeSetOperation(datasets, tokens, shaykhraziev::complementDictionaries);
+  }
+
+  bool executeIntersect(
+      shaykhraziev::DatasetTable& datasets,
+      const shaykhraziev::List< std::string >& tokens,
+      std::ostream&)
+  {
+    return executeSetOperation(datasets, tokens, shaykhraziev::intersectDictionaries);
+  }
+
+  bool executeUnion(
+      shaykhraziev::DatasetTable& datasets,
+      const shaykhraziev::List< std::string >& tokens,
+      std::ostream&)
+  {
+    return executeSetOperation(datasets, tokens, shaykhraziev::uniteDictionaries);
+  }
+}
+
+shaykhraziev::CommandRegistry shaykhraziev::makeCommandRegistry()
+{
+  CommandRegistry registry;
+  registry.push("print", CommandHandler{1, executePrint});
+  registry.push("complement", CommandHandler{3, executeComplement});
+  registry.push("intersect", CommandHandler{3, executeIntersect});
+  registry.push("union", CommandHandler{3, executeUnion});
+  return registry;
 }
 
 bool shaykhraziev::executeCommandLine(
@@ -125,14 +148,12 @@ bool shaykhraziev::executeCommandLine(
   }
 
   const std::string command = tokenAt(tokens, 0);
-  bool ok = false;
-  if (command == "print")
+  CommandRegistry registry = makeCommandRegistry();
+  bool ok = registry.has(command);
+  if (ok)
   {
-    ok = executePrint(datasets, tokens, out);
-  }
-  else if (command == "complement" || command == "intersect" || command == "union")
-  {
-    ok = executeSetOperation(datasets, tokens);
+    const CommandHandler& handler = registry.get(command);
+    ok = tokens.size() == handler.argumentCount + 1 && handler.function(datasets, tokens, out);
   }
 
   if (!ok)
