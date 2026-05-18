@@ -263,6 +263,11 @@ void outbound(std::istream& in, std::ostream& out, GraphTable& graphs,
       results.pushBack(row);
     }
   }
+  if (results.size() == 0)
+  {
+    out << "\n";
+    return;
+  }
   for (size_t i = 0; i < results.size(); ++i)
   {
     sortInts(results[i].weights);
@@ -332,6 +337,11 @@ void inbound(std::istream& in, std::ostream& out, GraphTable& graphs,
         results.pushBack(row);
       }
     }
+  }
+  if (results.size() == 0)
+  {
+    out << "\n";
+    return;
   }
   for (size_t i = 0; i < results.size(); ++i)
   {
