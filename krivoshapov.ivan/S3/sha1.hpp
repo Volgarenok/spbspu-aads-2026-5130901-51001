@@ -3,6 +3,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
+#include <utility>
 
 namespace krivoshapov
 {
@@ -117,6 +119,55 @@ namespace krivoshapov
       out[i * 4 + 3] = static_cast<unsigned char>(hs[i] & 0xFF);
     }
   }
+
+  inline size_t sha1Hash(const unsigned char *data, size_t len)
+  {
+    unsigned char d[20];
+    sha1(data, len, d);
+    size_t r = 0;
+    for (int i = 0; i < 8; ++i)
+    {
+      r = (r << 8) | d[i];
+    }
+    return r;
+  }
+
+  struct StringHash
+  {
+    size_t operator()(const std::string &s) const
+    {
+      return sha1Hash(reinterpret_cast<const unsigned char *>(s.data()), s.size());
+    }
+  };
+
+  struct StringEqual
+  {
+    bool operator()(const std::string &a, const std::string &b) const
+    {
+      return a == b;
+    }
+  };
+
+  using VertexPair = std::pair<std::string, std::string>;
+
+  struct PairHash
+  {
+    size_t operator()(const VertexPair &p) const
+    {
+      std::string buf = p.first;
+      buf.push_back('\0');
+      buf += p.second;
+      return sha1Hash(reinterpret_cast<const unsigned char *>(buf.data()), buf.size());
+    }
+  };
+
+  struct PairEqual
+  {
+    bool operator()(const VertexPair &a, const VertexPair &b) const
+    {
+      return a.first == b.first && a.second == b.second;
+    }
+  };
 }
 
 #endif
