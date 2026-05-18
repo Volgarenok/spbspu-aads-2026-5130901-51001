@@ -36,6 +36,61 @@ namespace
     }
     values.swap(kept);
   }
+
+  using VisitStateTable = shaykhraziev::HashTable<
+      std::string,
+      std::size_t,
+      shaykhraziev::HmacHash,
+      shaykhraziev::StringEqual >;
+
+  const std::size_t UNVISITED = 0;
+  const std::size_t VISITING = 1;
+  const std::size_t VISITED = 2;
+
+  std::size_t getVisitState(const VisitStateTable& states, const std::string& taskId)
+  {
+    const std::size_t* state = states.find(taskId);
+    return state ? *state : UNVISITED;
+  }
+
+  bool visitTask(
+      const shaykhraziev::Project& project,
+      const std::string& taskId,
+      VisitStateTable& states,
+      shaykhraziev::List< std::string >* order)
+  {
+    const std::size_t state = getVisitState(states, taskId);
+    if (state == VISITING)
+    {
+      return false;
+    }
+    if (state == VISITED)
+    {
+      return true;
+    }
+
+    states.set(taskId, VISITING);
+    const shaykhraziev::Task* task = project.findTask(taskId);
+    if (!task)
+    {
+      return false;
+    }
+    for (shaykhraziev::List< std::string >::const_iterator it = task->dependencies.cbegin();
+        it != task->dependencies.cend();
+        ++it)
+    {
+      if (!visitTask(project, *it, states, order))
+      {
+        return false;
+      }
+    }
+    states.set(taskId, VISITED);
+    if (order)
+    {
+      order->pushBack(taskId);
+    }
+    return true;
+  }
 }
 
 shaykhraziev::Task::Task():
@@ -147,6 +202,12 @@ bool shaykhraziev::Project::addDependency(const std::string& taskId, const std::
   }
   task->dependencies.pushBack(dependencyId);
   dependency->dependents.pushBack(taskId);
+  if (hasCycle())
+  {
+    removeString(task->dependencies, dependencyId);
+    removeString(dependency->dependents, taskId);
+    return false;
+  }
   resetPlan();
   return true;
 }
@@ -169,6 +230,27 @@ bool shaykhraziev::Project::hasDependency(const std::string& taskId, const std::
 {
   const Task* task = findTask(taskId);
   return task && containsString(task->dependencies, dependencyId);
+}
+
+bool shaykhraziev::Project::hasCycle() const
+{
+  List< std::string > order;
+  return !getTopologicalOrder(order);
+}
+
+bool shaykhraziev::Project::getTopologicalOrder(List< std::string >& order) const
+{
+  order.clear();
+  VisitStateTable states(countTasks() + 1, BUCKET_SIZE);
+  for (List< std::string >::const_iterator it = taskOrder_.cbegin(); it != taskOrder_.cend(); ++it)
+  {
+    if (!visitTask(*this, *it, states, &order))
+    {
+      order.clear();
+      return false;
+    }
+  }
+  return true;
 }
 
 shaykhraziev::Task* shaykhraziev::Project::findTask(const std::string& taskId)

@@ -40,6 +40,8 @@ namespace shaykhraziev
     bool addDependency(const std::string& taskId, const std::string& dependencyId);
     bool dropDependency(const std::string& taskId, const std::string& dependencyId);
     bool hasDependency(const std::string& taskId, const std::string& dependencyId) const;
+    bool hasCycle() const;
+    bool getTopologicalOrder(List< std::string >& order) const;
     Task* findTask(const std::string& taskId);
     const Task* findTask(const std::string& taskId) const;
     const List< std::string >& getTaskOrder() const noexcept;

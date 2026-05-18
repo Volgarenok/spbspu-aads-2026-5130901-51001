@@ -127,3 +127,34 @@ BOOST_AUTO_TEST_CASE(project_drop_task_removes_dependencies)
   BOOST_CHECK(project.dropTask("design"));
   BOOST_CHECK(!project.hasDependency("backend", "design"));
 }
+
+BOOST_AUTO_TEST_CASE(project_builds_topological_order)
+{
+  shaykhraziev::Project project("site", 1, 2);
+  project.addTask("design", 3, "Design");
+  project.addTask("backend", 4, "Backend");
+  project.addTask("test", 2, "Test");
+  project.addDependency("backend", "design");
+  project.addDependency("test", "backend");
+
+  shaykhraziev::List< std::string > order;
+
+  BOOST_CHECK(project.getTopologicalOrder(order));
+  BOOST_TEST(order.size() == 3);
+  BOOST_TEST(order.front() == "design");
+  BOOST_TEST(order.back() == "test");
+}
+
+BOOST_AUTO_TEST_CASE(project_rejects_simple_and_complex_cycles)
+{
+  shaykhraziev::Project project("site", 1, 2);
+  project.addTask("a", 1, "A");
+  project.addTask("b", 1, "B");
+  project.addTask("c", 1, "C");
+
+  BOOST_CHECK(project.addDependency("b", "a"));
+  BOOST_CHECK(project.addDependency("c", "b"));
+  BOOST_CHECK(!project.addDependency("a", "c"));
+  BOOST_CHECK(!project.hasCycle());
+  BOOST_CHECK(!project.hasDependency("a", "c"));
+}

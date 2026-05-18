@@ -173,6 +173,21 @@ namespace
     shaykhraziev::Project* project = storage.findProject(tokenAt(tokens, 1));
     return project && project->dropDependency(tokenAt(tokens, 2), tokenAt(tokens, 3));
   }
+
+  bool checkCyclesCommand(
+      shaykhraziev::ProjectStorage& storage,
+      const shaykhraziev::List< std::string >& tokens,
+      const std::string&,
+      std::ostream& out)
+  {
+    const shaykhraziev::Project* project = storage.findProject(tokenAt(tokens, 1));
+    if (!project)
+    {
+      return false;
+    }
+    out << (project->hasCycle() ? "<CYCLE>\n" : "<NO CYCLES>\n");
+    return true;
+  }
 }
 
 shaykhraziev::CommandRegistry shaykhraziev::makeCommandRegistry()
@@ -186,6 +201,7 @@ shaykhraziev::CommandRegistry shaykhraziev::makeCommandRegistry()
   commands.add("show-task", CommandHandler{2, 2, showTaskCommand});
   commands.add("add-dependency", CommandHandler{3, 3, addDependencyCommand});
   commands.add("drop-dependency", CommandHandler{3, 3, dropDependencyCommand});
+  commands.add("check-cycles", CommandHandler{1, 1, checkCyclesCommand});
   return commands;
 }
 
