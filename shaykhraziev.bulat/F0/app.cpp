@@ -1,6 +1,7 @@
 #include "app.hpp"
 
-#include <fstream>
+#include "io.hpp"
+
 #include <istream>
 #include <ostream>
 #include <stdexcept>
@@ -37,14 +38,16 @@ int shaykhraziev::runF0(const char* filename, std::istream& in, std::ostream& ou
 {
   try
   {
-    std::ifstream file(filename);
-    if (!file)
-    {
-      throw std::runtime_error("cannot open file");
-    }
+    ProjectStorage storage = readProjectsFromFile(filename);
+    static_cast< void >(storage);
     processInput(in, out);
   }
   catch (const std::runtime_error& e)
+  {
+    err << e.what() << '\n';
+    return 1;
+  }
+  catch (const std::logic_error& e)
   {
     err << e.what() << '\n';
     return 1;
