@@ -15,7 +15,7 @@ namespace kitserov
   template < class Key, class Value, class Compare = std::less< Key > >
   class BSTree
   {
-    std::pair<const Key, Value> data_;
+    std::pair< const Key, Value > data_;
     BSTree* left_;
     BSTree* right_;
     BSTree* parent_;
@@ -76,7 +76,7 @@ namespace kitserov
     BSTree* rotateLeft(BSTree* child)
     {
       BSTree* parent = child -> parent_;
-      BSTree* grand  = parent -> parent_;
+      BSTree* grand = parent -> parent_;
       parent -> right_ = child -> left_;
       if (child -> left_) {
         child -> left_ -> parent_ = parent;
@@ -102,7 +102,7 @@ namespace kitserov
     BSTree* rotateRight(BSTree* child)
     {
       BSTree* parent = child -> parent_;
-      BSTree* grand  = parent -> parent_;
+      BSTree* grand = parent -> parent_;
       parent -> left_ = child -> right_;
       if (child -> right_) {
         child -> right_ -> parent_ = parent;
@@ -169,7 +169,7 @@ namespace kitserov
     }
 
   public:
-    using iterator = BSTIterator< Key, Value, Compare >;
+    using iterator = BSTIterator< Key, Value, Compare> ;
     using const_iterator = BSTConstIterator< Key, Value, Compare >;
     friend class BSTIterator< Key, Value, Compare >;
     friend class BSTConstIterator< Key, Value, Compare >;
@@ -423,8 +423,8 @@ namespace kitserov
     }
     const_iterator rotateRight(const_iterator it)
     {
-      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_ 
-         || it.node -> parent_ -> is_fake_root_ || it.node != it.node -> parent_ -> left_) {
+      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_
+          || it.node -> parent_ -> is_fake_root_ || it.node != it.node -> parent_ -> left_) {
         throw std::invalid_argument("rotateRight: bad argument");
       }
       BSTree* child = const_cast< BSTree* >(it.node);
@@ -433,9 +433,9 @@ namespace kitserov
     }
     const_iterator rotateLargeLeft(const_iterator it)
     {
-      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_ 
+      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_
           || !it.node -> parent_ -> parent_ ||
-          it.node != it.node -> parent_ -> left_ 
+          it.node != it.node -> parent_ -> left_
           || it.node -> parent_ != it.node -> parent_ -> parent_ -> right_) {
         throw std::invalid_argument("rotateLargeLeft: bad argument");
       }
@@ -444,9 +444,9 @@ namespace kitserov
     }
     const_iterator rotateLargeRight(const_iterator it)
     {
-      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_ 
+      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_
           || !it.node -> parent_ -> parent_ ||
-          it.node != it.node -> parent_ -> right_ 
+          it.node != it.node -> parent_ -> right_
           || it.node -> parent_ != it.node -> parent_ -> parent_ -> left_) {
         throw std::invalid_argument("rotateLargeRight: bad argument");
       }
@@ -457,7 +457,7 @@ namespace kitserov
   template < class Key, class Value, class Compare >
   class BSTIterator
   {
-    using Node = BSTree<Key, Value, Compare>;
+    using Node = BSTree< Key, Value, Compare >;
     Node* node_;
     Node* sentinel_;
 
@@ -475,7 +475,7 @@ namespace kitserov
       return node_ -> data_;
     }
 
-    value_type* operator->() const
+    value_type* operator -> () const
     {
       return &(node_ -> data_);
     }
@@ -518,7 +518,7 @@ namespace kitserov
   template < class Key, class Value, class Compare >
   class BSTConstIterator
   {
-    using Node = BSTree<Key, Value, Compare>;
+    using Node = BSTree< Key, Value, Compare >;
     const Node* node_;
     const Node* sentinel_;
 
@@ -526,7 +526,7 @@ namespace kitserov
     friend class BSTree< Key, Value, Compare >;
 
   public:
-    using value_type = const std::pair< const Key, Value >;
+    using value_type = const std::pair< const Key, Value>;
 
     BSTConstIterator() : node_(nullptr), sentinel_(nullptr) {}
 
@@ -538,7 +538,7 @@ namespace kitserov
       return node_ -> data_;
     }
 
-    value_type* operator->() const
+    value_type* operator -> () const
     {
       return &(node_ -> data_);
     }
