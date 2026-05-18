@@ -1,6 +1,6 @@
 #ifndef HASH_TABLE_HPP
 #define HASH_TABLE_HPP
-
+#include <iostream>
 #include <vector>
 #include <utility>
 
@@ -63,7 +63,6 @@ private:
           equal_func_(table_[idx].key_, key)) {
         return idx;
       }
-
       ++attempt;
     }
 
@@ -100,8 +99,7 @@ private:
     if (table_.empty()) {
       return 1.0;
     }
-    double total = static_cast<double>(num_elements_ + num_tombstones_);
-    return total / table_.size();
+    return static_cast<double>(num_elements_ + num_tombstones_) / table_.size();
   }
 
 public:
@@ -140,13 +138,17 @@ public:
   }
 
   void add(const Key& key, const Value& value) {
-    if (loadFactor() > 0.7) {
+    while (num_elements_ > table_.size() / 2) {
       rehash(table_.size() * 2);
     }
 
     size_t idx = findIndex(key);
     if (idx == table_.size()) {
-      return;
+      rehash(table_.size() * 2);
+      idx = findIndex(key);
+      if (idx == table_.size()) {
+        return;
+      }
     }
 
     size_t existing_idx = findExistingIndex(key);
@@ -201,16 +203,25 @@ public:
     std::vector<Bucket> old_table = std::move(table_);
     table_.clear();
     table_.resize(slots);
+
+    size_t old_elements = num_elements_;
     num_elements_ = 0;
     num_tombstones_ = 0;
 
     for (size_t i = 0; i < old_table.size(); ++i) {
-      Bucket& bucket = old_table[i];
-      if (bucket.state_ == BucketState::OCCUPIED) {
-        size_t idx = findIndex(bucket.key_);
-        if (idx != table_.size()) {
-          table_[idx] = std::move(bucket);
-          num_elements_++;
+      if (old_table[i].state_ == BucketState::OCCUPIED) {
+        size_t hash = hash_func_(old_table[i].key_) % table_.size();
+        size_t attempt = 0;
+        size_t idx;
+
+        while (attempt < table_.size()) {
+          idx = probe(hash, attempt);
+          if (table_[idx].state_ == BucketState::EMPTY) {
+            table_[idx] = std::move(old_table[i]);
+            num_elements_++;
+            break;
+          }
+          ++attempt;
         }
       }
     }
