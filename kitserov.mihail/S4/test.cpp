@@ -35,6 +35,7 @@ BOOST_AUTO_TEST_CASE(bitree_push_multiple)
   t.push(1, 10);
   t.push(9, 90);
   
+  BOOST_CHECK_EQUAL(t.height(), 3);
   BOOST_CHECK_EQUAL(t.size(), 5);
   BOOST_CHECK_EQUAL(t.get(5), 50);
   BOOST_CHECK_EQUAL(t.get(3), 30);

@@ -22,9 +22,14 @@ namespace kitserov
     size_t height_;
     Compare cmp_;
     size_t size_;
+    bool is_fake_root_;
 
     BSTree(const Key& k, const Value& v, BSTree* p, const Compare& comp)
-        : data_(k, v), left_(nullptr), right_(nullptr), parent_(p), height_(1), cmp_(comp), size_(1) {}
+        : data_(k, v), left_(nullptr), right_(nullptr), parent_(p), height_(1), cmp_(comp), size_(1), is_fake_root_(false) {}
+
+    // Приватный конструктор для создания fake-root
+    BSTree(const Compare& comp)
+        : data_(), left_(nullptr), right_(nullptr), parent_(nullptr), height_(0), cmp_(comp), size_(0), is_fake_root_(true) {}
 
     static BSTree* clone(const BSTree* other, BSTree* parent)
     {
@@ -41,7 +46,15 @@ namespace kitserov
 
     void update() noexcept
     {
-      if (this) {
+      if (is_fake_root_) {
+        if (left_) {
+          height_ = left_ -> height_;
+          size_ = left_ -> size_;
+        } else {
+          height_ = 0;
+          size_ = 0;
+        }
+      } else {
         if (left_ && right_) {
           height_ = 1 + std::max(left_ -> height_, right_ -> height_);
           size_ = 1 + (left_ -> size_ + right_ -> size_);
@@ -78,9 +91,12 @@ namespace kitserov
       }
       parent -> update();
       child -> update();
-      grand -> update();
+      if (grand) {
+        grand -> update();
+      }
       return child;
     }
+
     BSTree* rotateRight(BSTree* child)
     {
       BSTree* parent = child -> parent_;
@@ -101,13 +117,15 @@ namespace kitserov
       }
       parent -> update();
       child -> update();
-      grand -> update();
+      if (grand) {
+        grand -> update();
+      }
       return child;
     }
 
     BSTree* find_root(const Key& k)
     {
-      BSTree* cur = this;
+      BSTree* cur = left_;
       while (cur) {
         if (cmp_(k, cur -> data_.first)) {
           cur = cur -> left_;
@@ -119,6 +137,7 @@ namespace kitserov
       }
       return nullptr;
     }
+
     const BSTree* find_root(const Key& k) const
     {
       return const_cast< BSTree* >(this) -> find_root(k);
@@ -152,7 +171,8 @@ namespace kitserov
     using const_iterator = BSTConstIterator< Key, Value, Compare >;
     friend class BSTIterator< Key, Value, Compare >;
     friend class BSTConstIterator< Key, Value, Compare >;
-    BSTree() : data_(), left_(nullptr), right_(nullptr), parent_(nullptr), height_(0), cmp_(Compare()), size_(0) {}
+
+    BSTree() : data_(), left_(nullptr), right_(nullptr), parent_(nullptr), height_(0), cmp_(Compare()), size_(0), is_fake_root_(true) {}
     ~BSTree()
     {
       clear();
@@ -194,46 +214,28 @@ namespace kitserov
     }
     void copy(const BSTree& other)
     {
-      if (this == &other)
-      {
+      if (this == &other) {
         return;
       }
       clear();
-      const_cast< Key& >(data_.first) = other.data_.first;
-      data_.second = other.data_.second;
       left_ = clone(other.left_, this);
       right_ = clone(other.right_, this);
-      parent_ = nullptr;
       height_ = other.height_;
       size_ = other.size_;
       cmp_ = other.cmp_;
     }
-    size_t height() noexcept
+    size_t height() const noexcept
     {
-      if (parent_ == nullptr) {
-        if (!left_ && !right_) {
-          return 0;
-        }
-        if (left_ && right_) {
-          return std::max(left_->height(), right_->height());
-        } else if (left_) {
-          return left_->height();
-        } else {
-          return right_->height();
-        }
-      }
       return height_;
     }
-    size_t height(const_iterator it) const {
-      return const_cast< BSTree* >(it.node)->height();
+
+    size_t height(const_iterator it) const
+    {
+      return it.node -> height();
     }
-    size_t size() noexcept {
-      if (parent_ == nullptr) {
-        size_t s = 0;
-        if (left_) s += left_->size();
-        if (right_) s += right_->size();
-        return s;
-      }
+
+    size_t size() const noexcept
+    {
       return size_;
     }
     bool empty() const
@@ -242,9 +244,16 @@ namespace kitserov
     }
     void push(const Key& k, const Value& v)
     {
-      BSTree* cur = this;
-      BSTree* parent = parent_;
-      bool left_child;
+      if (!left_) {
+        left_ = new BSTree(k, v, this, cmp_);
+        update();
+        return;
+      }
+
+      BSTree* cur = left_;
+      BSTree* parent = nullptr;
+      bool left_child = false;
+
       while (cur) {
         parent = cur;
         if (cmp_(k, cur -> data_.first)) {
@@ -254,18 +263,18 @@ namespace kitserov
           cur = cur -> right_;
           left_child = false;
         } else {
-          cur->data_.second = v;
+          const_cast< Value& >(cur -> data_.second) = v;
           return;
         }
       }
+
       BSTree* newNode = new BSTree(k, v, parent, cmp_);
-      if (parent) {
-        if (left_child) {
-          parent -> left_ = newNode;
-        } else {
-          parent -> right_ = newNode;
-        }
+      if (left_child) {
+        parent -> left_ = newNode;
+      } else {
+        parent -> right_ = newNode;
       }
+
       while (parent) {
         parent -> update();
         parent = parent -> parent_;
@@ -279,17 +288,19 @@ namespace kitserov
       }
       return n -> data_.second;
     }
-    const Value& get(const Key& k) const {
+    const Value& get(const Key& k) const
+    {
         return const_cast< BSTree* >(this) -> get(k);
     }
-    bool contains(const Key& k) const {
-        return find_root(k) != nullptr;
+    bool contains(const Key& k) const
+    {
+      return find_root(k) != nullptr;
     }
     Value drop(const Key& k)
     {
       BSTree* n = find_root(k);
       if (!n) {
-        throw std::out_of_range("BSTree::get: key not found");
+        throw std::out_of_range("BSTree::drop: key not found");
       }
       Value removed = n -> data_.second;
       BSTree* child = nullptr;
@@ -318,31 +329,28 @@ namespace kitserov
             succ -> right_ -> parent_ = succ -> parent_;
             succ -> parent_ -> left_ = succ -> right_;
           } else {
-            n -> right_ = succ -> right_;
-            if (succ -> right_) {
-              succ -> right_ -> parent_ = n;
-            }
+            succ -> parent_ -> left_ = nullptr;
           }
-          succ -> left_ = n -> left_;
-          if (n -> left_) {
-            n -> left_ -> parent_ = succ;
+          succ -> right_ = n -> right_;
+          if (n -> right_) {
+            n -> right_ -> parent_ = succ;
           }
-          if (n -> right_ != succ) {
-            succ -> right_ = n -> right_;
-            if (n -> right_) {
-              n -> right_ -> parent_ = succ;
-            }
-          }
-          succ -> parent_ = n -> parent_;
-          if (n -> parent_ -> left_ == n) {
-            n -> parent_ -> left_ = succ;
-          } else {
-            n -> parent_ -> right_ = succ;
-          }
-          child = succ;
-          parent = succ -> parent_ ? succ->parent_ : succ;
         }
+
+        succ -> left_ = n -> left_;
+        if (n -> left_) {
+          n -> left_ -> parent_ = succ;
+        }
+        succ -> parent_ = n -> parent_;
+        if (n -> parent_ -> left_ == n) {
+          n -> parent_ -> left_ = succ;
+        } else {
+          n -> parent_ -> right_ = succ;
+        }
+        child = succ;
+        parent = succ -> parent_;
       }
+
       BSTree* update_node = parent;
       while (update_node) {
         update_node -> update();
@@ -356,17 +364,9 @@ namespace kitserov
       if (size() == 0) {
         return end();
       }
-      BSTree* n = this;
-      if (left_) {
-        n = left_;
-        while (n -> left_) {
-          n = n -> left_;
-        }
-      } else if (right_) {
-        n = right_;
-        while (n -> left_) {
-          n = n -> left_;
-        }
+      BSTree* n = left_;
+      while (n -> left_) {
+        n = n -> left_;
       }
       return iterator(n, this);
     }
@@ -387,17 +387,9 @@ namespace kitserov
       if (size() == 0) {
         return cend();
       }
-      const BSTree* n = this;
-      if (left_) {
-        n = left_;
-        while (n -> left_) {
-          n = n -> left_;
-        }
-      } else if (right_) {
-        n = right_;
-        while (n -> left_) {
-          n = n -> left_;
-        }
+      const BSTree* n = left_;
+      while (n -> left_) {
+        n = n -> left_;
       }
       return const_iterator(n, this);
     }
@@ -405,10 +397,12 @@ namespace kitserov
     {
       return const_iterator(this, this);
     }
-    iterator find(const Key& k) {
+    iterator find(const Key& k)
+    {
       BSTree* n = find_root(k);
       return n ? iterator(n, this) : end();
     }
+
     const_iterator find(const Key& k) const
     {
       const BSTree* n = find_root(k);
@@ -416,7 +410,7 @@ namespace kitserov
     }
     const_iterator rotateLeft(const_iterator it)
     {
-      if (!it.node || it.node == this || !it.node -> parent_ || it.node != it.node -> parent_ -> right_) {
+      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_ || it.node -> parent_ -> is_fake_root_ || it.node != it.node -> parent_ -> right_) {
         throw std::invalid_argument("rotateLeft: bad argument");
       }
       BSTree* child = const_cast< BSTree* >(it.node);
@@ -425,7 +419,7 @@ namespace kitserov
     }
     const_iterator rotateRight(const_iterator it)
     {
-      if (!it.node || it.node == this || !it.node -> parent_ || it.node != it.node -> parent_ -> left_) {
+      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_ || it.node -> parent_ -> is_fake_root_ || it.node != it.node -> parent_ -> left_) {
         throw std::invalid_argument("rotateRight: bad argument");
       }
       BSTree* child = const_cast< BSTree* >(it.node);
@@ -434,21 +428,18 @@ namespace kitserov
     }
     const_iterator rotateLargeLeft(const_iterator it)
     {
-      if (!it.node || it.node == this || !it.node -> parent_ || !it.node -> parent_ -> parent_ ||
-        it.node != it.node -> parent_ -> left_ || it.node -> parent_ != it.node -> parent_ -> parent_ -> right_)
-      {
+      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_ || !it.node -> parent_ -> parent_ ||
+          it.node != it.node -> parent_ -> left_ || it.node -> parent_ != it.node -> parent_ -> parent_ -> right_) {
         throw std::invalid_argument("rotateLargeLeft: bad argument");
       }
-
       rotateRight(it);
       return rotateLeft(it);
     }
     const_iterator rotateLargeRight(const_iterator it)
     {
-      if (!it.node || it.node == this || !it.node -> parent_ || !it.node -> parent_ -> parent_ ||
-        it.node != it.node -> parent_ -> right_ || it.node -> parent_ != it.node -> parent_ -> parent_ -> left_)
-      {
-        throw std::invalid_argument("rotateLargeLeft: bad argument");
+      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_ || !it.node -> parent_ -> parent_ ||
+          it.node != it.node -> parent_ -> right_ || it.node -> parent_ != it.node -> parent_ -> parent_ -> left_) {
+        throw std::invalid_argument("rotateLargeRight: bad argument");
       }
       rotateLeft(it);
       return rotateRight(it);
@@ -460,25 +451,33 @@ namespace kitserov
     using Node = BSTree<Key, Value, Compare>;
     Node* node_;
     Node* sentinel_;
+
     explicit BSTIterator(Node* n, Node* s) : node_(n), sentinel_(s) {}
     friend class BSTConstIterator< Key, Value, Compare >;
     friend class BSTree< Key, Value, Compare >;
+
   public:
     using value_type = std::pair< const Key, Value >;
+
     BSTIterator() : node_(nullptr), sentinel_(nullptr) {}
+
     value_type& operator*() const
     {
       return node_ -> data_;
     }
+
     value_type* operator->() const
     {
       return &(node_ -> data_);
     }
+
     BSTIterator& operator++()
     {
       if (node_ -> right_) {
         node_ = node_ -> right_;
-        while (node_ -> left_) node_ = node_ -> left_;
+        while (node_ -> left_) {
+          node_ = node_ -> left_;
+        }
       } else {
         Node* p = node_ -> parent_;
         while (p != sentinel_ && node_ == p -> right_) {
@@ -489,16 +488,19 @@ namespace kitserov
       }
       return *this;
     }
+
     BSTIterator operator++(int)
     {
       BSTIterator tmp(*this);
       ++(*this);
       return tmp;
     }
+
     bool operator==(const BSTIterator& other) const
     {
       return node_ == other.node_;
     }
+
     bool operator!=(const BSTIterator& other) const
     {
       return node_ != other.node_;
@@ -510,27 +512,36 @@ namespace kitserov
     using Node = BSTree<Key, Value, Compare>;
     const Node* node_;
     const Node* sentinel_;
+
     explicit BSTConstIterator(const Node* n, const Node* s) : node_(n), sentinel_(s) {}
     friend class BSTree< Key, Value, Compare >;
+
   public:
     using value_type = const std::pair< const Key, Value >;
+
     BSTConstIterator() : node_(nullptr), sentinel_(nullptr) {}
+
     BSTConstIterator(const BSTIterator< Key, Value, Compare >& it) : node_(it.node_), sentinel_(it.sentinel_) {}
+
     value_type& operator*() const
     {
       return node_ -> data_;
     }
+
     value_type* operator->() const
     {
       return &(node_ -> data_);
     }
+
     BSTConstIterator& operator++()
     {
       if (node_ -> right_) {
         node_ = node_ -> right_;
-        while (node_ -> left_) node_ = node_ -> left_;
+        while (node_ -> left_) {
+          node_ = node_ -> left_;
+        }
       } else {
-        Node* p = node_ -> parent_;
+        const Node* p = node_ -> parent_;
         while (p != sentinel_ && node_ == p -> right_) {
           node_ = p;
           p = p -> parent_;
@@ -539,16 +550,19 @@ namespace kitserov
       }
       return *this;
     }
+
     BSTConstIterator operator++(int)
     {
       BSTConstIterator tmp(*this);
       ++(*this);
       return tmp;
     }
+
     bool operator==(const BSTConstIterator& other) const
     {
       return node_ == other.node_;
     }
+
     bool operator!=(const BSTConstIterator& other) const
     {
       return node_ != other.node_;
