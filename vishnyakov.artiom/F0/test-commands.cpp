@@ -306,6 +306,117 @@ namespace vishnyakov
     BOOST_TEST(out.str() == "<INVALID COMMAND>\n");
   }
 
+  BOOST_AUTO_TEST_CASE(FindByType)
+  {
+    World world;
+    std::istringstream in(
+      "create-map Overworld\n"
+      "add-point Overworld home 100 64 house\n"
+      "add-point Overworld mine 250 30 cave\n"
+      "add-point Overworld lake 300 50 water\n"
+      "add-point Overworld castle 500 200 house\n"
+      "find-by-type Overworld house\nexit\n"
+    );
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string result = out.str();
+    BOOST_TEST(result.find("home 100 64 house") != std::string::npos);
+    BOOST_TEST(result.find("castle 500 200 house") != std::string::npos);
+    BOOST_TEST(result.find("mine") == std::string::npos);
+  }
+
+  BOOST_AUTO_TEST_CASE(FindByTypeEmpty)
+  {
+    World world;
+    std::istringstream in(
+      "create-map Overworld\n"
+      "find-by-type Overworld house\nexit\n"
+    );
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    BOOST_TEST(out.str() == "OK\n<EMPTY>\n");
+  }
+
+  BOOST_AUTO_TEST_CASE(CopyPoint)
+  {
+    World world;
+    std::istringstream in(
+      "create-map First\n"
+      "create-map Second\n"
+      "add-point First home 100 64 house\n"
+      "copy-point First Second home\n"
+      "show-points Second\nexit\n"
+    );
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    BOOST_TEST(out.str() == "OK\nOK\nOK\nOK\nhome 100 64 house\n");
+  }
+
+  BOOST_AUTO_TEST_CASE(CopyPointAlreadyExists)
+  {
+    World world;
+    std::istringstream in(
+      "create-map First\n"
+      "create-map Second\n"
+      "add-point First home 100 64 house\n"
+      "add-point Second home 200 30 cave\n"
+      "copy-point First Second home\nexit\n"
+    );
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string expected = "OK\nOK\nOK\nOK\n<INVALID COMMAND>\n";
+    BOOST_TEST(out.str() == expected);
+  }
+
+  BOOST_AUTO_TEST_CASE(MovePoint)
+  {
+    World world;
+    std::istringstream in(
+      "create-map First\n"
+      "create-map Second\n"
+      "add-point First home 100 64 house\n"
+      "move-point First Second home\n"
+      "show-points First\n"
+      "show-points Second\nexit\n"
+    );
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string expected = "OK\nOK\nOK\nOK\n<EMPTY>\nhome 100 64 house\n";
+    BOOST_TEST(out.str() == expected);
+  }
+
+  BOOST_AUTO_TEST_CASE(MergeMapsCommand)
+  {
+    World world;
+    std::istringstream in(
+      "create-map First\n"
+      "create-map Second\n"
+      "add-point First home 100 64 house\n"
+      "add-point First mine 250 30 cave\n"
+      "add-point Second lake 300 50 water\n"
+      "merge-maps Merged First Second\n"
+      "show-points Merged\nexit\n"
+    );
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string result = out.str();
+    BOOST_TEST(result.find("home 100 64 house") != std::string::npos);
+    BOOST_TEST(result.find("mine 250 30 cave") != std::string::npos);
+    BOOST_TEST(result.find("lake 300 50 water") != std::string::npos);
+  }
+
   BOOST_AUTO_TEST_CASE(InvalidCommand)
   {
     World world;

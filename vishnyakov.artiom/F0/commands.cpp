@@ -166,9 +166,9 @@ namespace vishnyakov
 
         if (newName != "-" && !newName.empty() && newName != pointName)
         {
-        Waypoint newWp(wp->x, wp->z, wp->type);
-        map->removeWaypoint(pointName);
-        map->addWaypoint(newName, newWp);
+          Waypoint newWp(wp->x, wp->z, wp->type);
+          map->removeWaypoint(pointName);
+          map->addWaypoint(newName, newWp);
         }
 
         out << "OK\n";
@@ -254,35 +254,146 @@ namespace vishnyakov
         double minDist = results[0].distance;
         for (size_t i = 0; i < results.size() && i < static_cast<size_t>(k); ++i)
         {
-        if (minDist > 0.0)
-        {
+          if (minDist > 0.0)
+          {
             results[i].coefficient = (results[i].distance / minDist) * 100.0;
-        }
-        else
-        {
+          }
+          else
+          {
             results[i].coefficient = (results[i].distance == 0.0) ? 100.0 : 0.0;
-        }
+          }
 
-        out << i + 1 << ". " << results[i].name << " ("
-            << results[i].x << ", " << results[i].z << ") dist: "
-            << results[i].distance << " coef: " << results[i].coefficient << "%\n";
+          out << i + 1 << ". " << results[i].name << " ("
+              << results[i].x << ", " << results[i].z << ") dist: "
+              << results[i].distance << " coef: " << results[i].coefficient << "%\n";
         }
       }
       else if (cmd == "find-by-type")
       {
-        out << "Not implemented yet\n";
+        std::string mapName, type;
+        iss >> mapName >> type;
+
+        if (mapName.empty() || type.empty())
+        {
+          out << "<INVALID COMMAND>\n";
+          continue;
+        }
+
+        const Map* map = world.getMap(mapName);
+        if (!map)
+        {
+          out << "<INVALID COMMAND>\n";
+          continue;
+        }
+
+        bool found = false;
+        for (auto it = map->begin(); it != map->end(); ++it)
+        {
+          if (it->second.type == type)
+          {
+            out << it->first << " " << it->second.x << " " << it->second.z
+                << " " << it->second.type << "\n";
+            found = true;
+          }
+        }
+
+        if (!found)
+        {
+          out << "<EMPTY>\n";
+        }
       }
       else if (cmd == "copy-point")
       {
-        out << "Not implemented yet\n";
+        std::string srcMap, dstMap, pointName;
+        iss >> srcMap >> dstMap >> pointName;
+
+        if (srcMap.empty() || dstMap.empty() || pointName.empty())
+        {
+          out << "<INVALID COMMAND>\n";
+          continue;
+        }
+
+        Map* src = world.getMap(srcMap);
+        Map* dst = world.getMap(dstMap);
+
+        if (!src || !dst)
+        {
+          out << "<INVALID COMMAND>\n";
+          continue;
+        }
+
+        const Waypoint* wp = src->findWaypoint(pointName);
+        if (!wp)
+        {
+          out << "<INVALID COMMAND>\n";
+          continue;
+        }
+
+        if (dst->findWaypoint(pointName))
+        {
+          out << "<INVALID COMMAND>\n";
+          continue;
+        }
+
+        dst->addWaypoint(pointName, *wp);
+        out << "OK\n";
       }
       else if (cmd == "move-point")
       {
-        out << "Not implemented yet\n";
+        std::string srcMap, dstMap, pointName;
+        iss >> srcMap >> dstMap >> pointName;
+
+        if (srcMap.empty() || dstMap.empty() || pointName.empty())
+        {
+          out << "<INVALID COMMAND>\n";
+          continue;
+        }
+
+        Map* src = world.getMap(srcMap);
+        Map* dst = world.getMap(dstMap);
+
+        if (!src || !dst)
+        {
+          out << "<INVALID COMMAND>\n";
+          continue;
+        }
+
+        const Waypoint* wp = src->findWaypoint(pointName);
+        if (!wp)
+        {
+          out << "<INVALID COMMAND>\n";
+          continue;
+        }
+
+        if (dst->findWaypoint(pointName))
+        {
+          out << "<INVALID COMMAND>\n";
+          continue;
+        }
+
+        dst->addWaypoint(pointName, *wp);
+        src->removeWaypoint(pointName);
+        out << "OK\n";
       }
       else if (cmd == "merge-maps")
       {
-        out << "Not implemented yet\n";
+        std::string newName, name1, name2;
+        iss >> newName >> name1 >> name2;
+
+        if (newName.empty() || name1.empty() || name2.empty())
+        {
+          out << "<INVALID COMMAND>\n";
+          continue;
+        }
+
+        if (world.mergeMaps(newName, name1, name2))
+        {
+          out << "OK\n";
+        }
+        else
+        {
+          out << "<INVALID COMMAND>\n";
+        }
       }
       else if (cmd == "clear-map")
       {
