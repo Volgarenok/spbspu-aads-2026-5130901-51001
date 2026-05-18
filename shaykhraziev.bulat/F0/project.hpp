@@ -1,0 +1,78 @@
+#ifndef F0_PROJECT_HPP
+#define F0_PROJECT_HPP
+
+#include <hash-functions.hpp>
+#include <hash-table.hpp>
+#include <list.hpp>
+
+#include <cstddef>
+#include <string>
+
+namespace shaykhraziev
+{
+  struct Task
+  {
+    std::string id;
+    std::string title;
+    std::size_t duration;
+    List< std::string > dependencies;
+    List< std::string > dependents;
+
+    Task();
+    Task(const std::string& newId, std::size_t newDuration, const std::string& newTitle);
+  };
+
+  class Project
+  {
+  public:
+    Project();
+    Project(const std::string& name, std::size_t startDay, std::size_t workersCount);
+
+    const std::string& getName() const noexcept;
+    std::size_t getStartDay() const noexcept;
+    std::size_t getWorkersCount() const noexcept;
+    std::size_t countTasks() const noexcept;
+    bool isPlanBuilt() const noexcept;
+    void resetPlan() noexcept;
+
+    bool addTask(const std::string& taskId, std::size_t duration, const std::string& title);
+    bool dropTask(const std::string& taskId);
+    Task* findTask(const std::string& taskId);
+    const Task* findTask(const std::string& taskId) const;
+    const List< std::string >& getTaskOrder() const noexcept;
+
+  private:
+    using TaskTable = HashTable< std::string, Task, HmacHash, StringEqual >;
+
+    std::string name_;
+    std::size_t startDay_;
+    std::size_t workersCount_;
+    TaskTable tasks_;
+    List< std::string > taskOrder_;
+    bool planBuilt_;
+
+    void ensureTaskSpace();
+    void removeTaskFromOrder(const std::string& taskId);
+  };
+
+  class ProjectStorage
+  {
+  public:
+    ProjectStorage();
+
+    bool makeProject(const std::string& name, std::size_t startDay, std::size_t workersCount);
+    bool dropProject(const std::string& name);
+    Project* findProject(const std::string& name);
+    const Project* findProject(const std::string& name) const;
+    std::size_t countProjects() const noexcept;
+
+  private:
+    using ProjectTable = HashTable< std::string, Project, HmacHash, StringEqual >;
+
+    ProjectTable projects_;
+
+    void ensureProjectSpace();
+  };
+}
+
+#endif
