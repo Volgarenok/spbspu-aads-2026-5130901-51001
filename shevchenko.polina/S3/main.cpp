@@ -10,7 +10,7 @@
 int main(int argc, char* argv[])
 {
   using namespace shevchenko;
-  
+
   try
   {
     if (argc != 2)
@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
       std::cerr << "error: filename required\n";
       return 1;
     }
-    
+
     GraphTable graphs;
 
     {
@@ -28,29 +28,29 @@ int main(int argc, char* argv[])
         std::cerr << "error: cannot open file\n";
         return 1;
       }
-      
+
       std::string graph_name;
       size_t edge_count;
-      
+
       while (file >> graph_name >> edge_count)
       {
         Graph g;
-        
+
         for (size_t i = 0; i < edge_count; ++i)
         {
           std::string from, to;
           size_t weight;
-          
+
           file >> from >> to >> weight;
           g.bind(from, to, weight);
         }
-        
+
         graphs.insert(graph_name, g);
       }
     }
 
     std::string cmd;
-    
+
     while (std::cin >> cmd)
     {
       try
@@ -107,6 +107,6 @@ int main(int argc, char* argv[])
     std::cerr << "error: " << e.what() << '\n';
     return 1;
   }
-  
+
   return 0;
 }

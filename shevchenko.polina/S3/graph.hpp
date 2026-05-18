@@ -15,10 +15,10 @@ struct Edge
 {
   std::string to;
   size_t weight;
-  
+
   Edge();
   Edge(const std::string& dest, size_t w);
-  
+
   bool operator==(const Edge& other) const;
 };
 
@@ -27,14 +27,14 @@ class Graph
 public:
   using EdgeList = List<Edge>;
   using Table = HashTable<std::string, EdgeList, SHA1Hasher>;
-  
+
   Graph();
-  
+
   Graph(const Graph& other) = default;
   Graph(Graph&& other) noexcept = default;
   Graph& operator=(const Graph& other) = default;
   Graph& operator=(Graph&& other) noexcept = default;
-  
+
   bool empty() const;
   bool hasVertex(const std::string& vertex) const;
   void addVertex(const std::string& vertex);
@@ -45,7 +45,7 @@ public:
   void merge(const Graph& other);
   Graph extract(const List<std::string>& vertices) const;
   const Table& data() const;
-  
+
 private:
   Table adjacency_;
 };
