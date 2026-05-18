@@ -1,4 +1,5 @@
 #include "calc.hpp"
+#include <climits>
 
 namespace krivoshapov
 {
@@ -22,13 +23,13 @@ namespace krivoshapov
       return 1;
     }
 
-    size_t to_number(const std::string &t)
+    long long to_number(const std::string &t)
     {
       if (t.empty())
       {
         throw std::invalid_argument("operand is not a number");
       }
-      size_t value = 0;
+      long long value = 0;
       for (size_t i = 0; i < t.size(); ++i)
       {
         char c = t[i];
@@ -36,8 +37,8 @@ namespace krivoshapov
         {
           throw std::invalid_argument("operand is not a number");
         }
-        size_t d = static_cast<size_t>(c - '0');
-        if (value > (static_cast<size_t>(-1) - d) / 10)
+        long long d = c - '0';
+        if (value > (LLONG_MAX - d) / 10)
         {
           throw std::invalid_argument("number overflow");
         }
@@ -46,11 +47,15 @@ namespace krivoshapov
       return value;
     }
 
-    size_t apply(const std::string &op, size_t a, size_t b)
+    long long apply(const std::string &op, long long a, long long b)
     {
       if (op == "+")
       {
-        if (a > static_cast<size_t>(-1) - b)
+        if (b > 0 && a > LLONG_MAX - b)
+        {
+          throw std::invalid_argument("addition overflow");
+        }
+        if (b < 0 && a < LLONG_MIN - b)
         {
           throw std::invalid_argument("addition overflow");
         }
@@ -58,7 +63,11 @@ namespace krivoshapov
       }
       if (op == "-")
       {
-        if (a < b)
+        if (b < 0 && a > LLONG_MAX + b)
+        {
+          throw std::invalid_argument("subtraction overflow");
+        }
+        if (b > 0 && a < LLONG_MIN + b)
         {
           throw std::invalid_argument("subtraction underflow");
         }
@@ -66,17 +75,41 @@ namespace krivoshapov
       }
       if (op == "*")
       {
-        if (a != 0 && b > static_cast<size_t>(-1) / a)
+        if (a == 0 || b == 0)
+        {
+          return 0;
+        }
+        if (a == LLONG_MIN || b == LLONG_MIN)
+        {
+          if (a == LLONG_MIN && b == 1)
+          {
+            return a;
+          }
+          if (b == LLONG_MIN && a == 1)
+          {
+            return b;
+          }
+          throw std::invalid_argument("multiplication overflow");
+        }
+        bool neg = (a < 0) ^ (b < 0);
+        long long abs_a = a < 0 ? -a : a;
+        long long abs_b = b < 0 ? -b : b;
+        if (abs_a > LLONG_MAX / abs_b)
         {
           throw std::invalid_argument("multiplication overflow");
         }
-        return a * b;
+        long long abs_r = abs_a * abs_b;
+        return neg ? -abs_r : abs_r;
       }
       if (op == "/")
       {
         if (b == 0)
         {
           throw std::invalid_argument("division by zero");
+        }
+        if (a == LLONG_MIN && b == -1)
+        {
+          throw std::invalid_argument("division overflow");
         }
         return a / b;
       }
@@ -86,7 +119,16 @@ namespace krivoshapov
         {
           throw std::invalid_argument("modulo by zero");
         }
-        return a % b;
+        if (a == LLONG_MIN && b == -1)
+        {
+          return 0;
+        }
+        long long r = a % b;
+        if (r != 0 && (r < 0) != (b < 0))
+        {
+          r += b;
+        }
+        return r;
       }
       return a | b;
     }
@@ -205,11 +247,11 @@ namespace krivoshapov
     return true;
   }
 
-  size_t evaluate(const std::string &line)
+  long long evaluate(const std::string &line)
   {
     Queue<std::string> postfix = to_postfix(line);
 
-    Stack<size_t> calc;
+    Stack<long long> calc;
     while (!postfix.empty())
     {
       std::string tok = postfix.front();
@@ -220,9 +262,9 @@ namespace krivoshapov
         {
           throw std::invalid_argument("invalid expression");
         }
-        size_t b = calc.top();
+        long long b = calc.top();
         calc.pop();
-        size_t a = calc.top();
+        long long a = calc.top();
         calc.pop();
         calc.push(apply(tok, a, b));
       }

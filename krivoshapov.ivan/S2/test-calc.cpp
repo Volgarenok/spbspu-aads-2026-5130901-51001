@@ -124,7 +124,7 @@ namespace
     assert(threw);
   }
 
-  void ok(const std::string &e, size_t v)
+  void ok(const std::string &e, long long v)
   {
     assert(krivoshapov::evaluate(e) == v);
   }
@@ -155,7 +155,7 @@ namespace
     ok("42", 42);
     ok("0 | 0", 0);
 
-    bad("3 - 4");
+    ok("3 - 4", -1LL);
     bad("5 / 0");
     bad("5 % 0");
     bad("2 + x");

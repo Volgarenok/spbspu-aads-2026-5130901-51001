@@ -2,22 +2,36 @@
 #include <iostream>
 #include <fstream>
 #include <exception>
+#include <climits>
 
 namespace krivoshapov
 {
   namespace
   {
-    std::string num_to_str(size_t v)
+    std::string num_to_str(long long v)
     {
       if (v == 0)
       {
         return "0";
+      }
+      if (v == LLONG_MIN)
+      {
+        return "-9223372036854775808";
+      }
+      bool neg = v < 0;
+      if (neg)
+      {
+        v = -v;
       }
       std::string s;
       while (v != 0)
       {
         s += static_cast<char>('0' + static_cast<char>(v % 10));
         v /= 10;
+      }
+      if (neg)
+      {
+        s += '-';
       }
       std::string r;
       for (size_t i = s.size(); i > 0; --i)
@@ -29,7 +43,7 @@ namespace krivoshapov
 
     int run(std::istream &in)
     {
-      Stack<size_t> results;
+      Stack<long long> results;
       std::string line;
       while (std::getline(in, line))
       {

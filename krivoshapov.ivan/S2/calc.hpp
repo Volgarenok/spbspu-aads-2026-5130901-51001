@@ -9,7 +9,7 @@
 
 namespace krivoshapov
 {
-  size_t evaluate(const std::string &line);
+  long long evaluate(const std::string &line);
 
   bool is_blank(const std::string &line);
 }
