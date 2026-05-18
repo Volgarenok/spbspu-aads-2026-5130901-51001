@@ -152,6 +152,16 @@ std::size_t shaykhraziev::Project::countTasks() const noexcept
   return tasks_.size();
 }
 
+std::size_t shaykhraziev::Project::getTotalDuration() const noexcept
+{
+  std::size_t total = 0;
+  for (TaskTable::const_iterator it = tasks_.cbegin(); it != tasks_.cend(); ++it)
+  {
+    total += it->value.duration;
+  }
+  return total;
+}
+
 bool shaykhraziev::Project::isPlanBuilt() const noexcept
 {
   return planBuilt_;

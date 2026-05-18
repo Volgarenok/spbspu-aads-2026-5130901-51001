@@ -29,6 +29,8 @@ BOOST_AUTO_TEST_CASE(commands_registry_contains_initial_commands)
   BOOST_CHECK(commands.has("drop-dependency"));
   BOOST_CHECK(commands.has("check-cycles"));
   BOOST_CHECK(commands.has("build-plan"));
+  BOOST_CHECK(commands.has("show-worker"));
+  BOOST_CHECK(commands.has("stats"));
   BOOST_CHECK(!commands.has("missing"));
 }
 
@@ -108,4 +110,23 @@ BOOST_AUTO_TEST_CASE(commands_build_plan)
   BOOST_REQUIRE(storage.findProject("site"));
   BOOST_CHECK(storage.findProject("site")->isPlanBuilt());
   BOOST_TEST(run(storage, "build-plan missing") == "<INVALID COMMAND>\n");
+}
+
+BOOST_AUTO_TEST_CASE(commands_show_worker_and_stats)
+{
+  shaykhraziev::ProjectStorage storage;
+  storage.makeProject("site", 1, 2);
+  storage.findProject("site")->addTask("design", 3, "Design");
+  storage.findProject("site")->addTask("backend", 4, "Backend");
+
+  BOOST_TEST(run(storage, "stats site") ==
+      "<PROJECT: site, START: 1, END: NOT-BUILT, TASKS: 2, WORKERS: 2, TOTAL-DURATION: 7>\n");
+  BOOST_TEST(run(storage, "show-worker site 1") == "<INVALID COMMAND>\n");
+  BOOST_TEST(run(storage, "build-plan site") == "<PLAN BUILT>\n");
+  BOOST_TEST(run(storage, "show-worker site 1") ==
+      "<WORKER 1>\n"
+      "design: START 1, END 3\n");
+  BOOST_TEST(run(storage, "show-worker site 3") == "<INVALID COMMAND>\n");
+  BOOST_TEST(run(storage, "stats site") ==
+      "<PROJECT: site, START: 1, END: 4, TASKS: 2, WORKERS: 2, TOTAL-DURATION: 7>\n");
 }

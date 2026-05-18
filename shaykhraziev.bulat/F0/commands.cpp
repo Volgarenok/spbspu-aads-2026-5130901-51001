@@ -204,6 +204,64 @@ namespace
     out << "<PLAN BUILT>\n";
     return true;
   }
+
+  bool showWorkerCommand(
+      shaykhraziev::ProjectStorage& storage,
+      const shaykhraziev::List< std::string >& tokens,
+      const std::string&,
+      std::ostream& out)
+  {
+    shaykhraziev::Project* project = storage.findProject(tokenAt(tokens, 1));
+    std::size_t workerId = 0;
+    if (!project || !project->isPlanBuilt() ||
+        !shaykhraziev::parsePositiveSize(tokenAt(tokens, 2), workerId) ||
+        workerId > project->getWorkersCount())
+    {
+      return false;
+    }
+
+    out << "<WORKER " << workerId << ">\n";
+    const shaykhraziev::Plan& plan = project->getPlan();
+    for (shaykhraziev::List< std::string >::const_iterator it = project->getTaskOrder().cbegin();
+        it != project->getTaskOrder().cend();
+        ++it)
+    {
+      const shaykhraziev::PlannedTask* planned = plan.findTask(*it);
+      if (planned && planned->workerId == workerId)
+      {
+        out << planned->taskId << ": START " << planned->startDay << ", END " << planned->endDay << '\n';
+      }
+    }
+    return true;
+  }
+
+  bool statsCommand(
+      shaykhraziev::ProjectStorage& storage,
+      const shaykhraziev::List< std::string >& tokens,
+      const std::string&,
+      std::ostream& out)
+  {
+    const shaykhraziev::Project* project = storage.findProject(tokenAt(tokens, 1));
+    if (!project)
+    {
+      return false;
+    }
+    out << "<PROJECT: " << project->getName() <<
+        ", START: " << project->getStartDay() <<
+        ", END: ";
+    if (project->isPlanBuilt())
+    {
+      out << project->getPlan().getProjectEndDay();
+    }
+    else
+    {
+      out << "NOT-BUILT";
+    }
+    out << ", TASKS: " << project->countTasks() <<
+        ", WORKERS: " << project->getWorkersCount() <<
+        ", TOTAL-DURATION: " << project->getTotalDuration() << ">\n";
+    return true;
+  }
 }
 
 shaykhraziev::CommandRegistry shaykhraziev::makeCommandRegistry()
@@ -219,6 +277,8 @@ shaykhraziev::CommandRegistry shaykhraziev::makeCommandRegistry()
   commands.add("drop-dependency", CommandHandler{3, 3, dropDependencyCommand});
   commands.add("check-cycles", CommandHandler{1, 1, checkCyclesCommand});
   commands.add("build-plan", CommandHandler{1, 1, buildPlanCommand});
+  commands.add("show-worker", CommandHandler{2, 2, showWorkerCommand});
+  commands.add("stats", CommandHandler{1, 1, statsCommand});
   return commands;
 }
 

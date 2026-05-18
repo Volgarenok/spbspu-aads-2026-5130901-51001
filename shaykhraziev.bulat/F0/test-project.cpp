@@ -48,6 +48,7 @@ BOOST_AUTO_TEST_CASE(project_adds_tasks_in_stable_order)
   BOOST_CHECK(project.addTask("design", 3, "Design"));
   BOOST_CHECK(project.addTask("backend", 4, "Backend"));
   BOOST_TEST(project.countTasks() == 2);
+  BOOST_TEST(project.getTotalDuration() == 7);
 
   const shaykhraziev::Task* task = project.findTask("design");
   BOOST_REQUIRE(task);

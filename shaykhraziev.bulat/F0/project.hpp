@@ -34,6 +34,7 @@ namespace shaykhraziev
     std::size_t getStartDay() const noexcept;
     std::size_t getWorkersCount() const noexcept;
     std::size_t countTasks() const noexcept;
+    std::size_t getTotalDuration() const noexcept;
     bool isPlanBuilt() const noexcept;
     void resetPlan() noexcept;
     void setPlan(const Plan& plan);
