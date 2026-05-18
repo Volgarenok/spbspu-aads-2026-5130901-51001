@@ -42,6 +42,15 @@ namespace krivoshapov
       }
     }
 
+    Stack(Stack &&rhs) noexcept : data_(rhs.data_),
+                                  size_(rhs.size_),
+                                  cap_(rhs.cap_)
+    {
+      rhs.data_ = nullptr;
+      rhs.size_ = 0;
+      rhs.cap_ = 0;
+    }
+
     ~Stack()
     {
       deallocate(data_);
@@ -53,6 +62,21 @@ namespace krivoshapov
       {
         Stack tmp(rhs);
         swap(tmp);
+      }
+      return *this;
+    }
+
+    Stack &operator=(Stack &&rhs) noexcept
+    {
+      if (this != &rhs)
+      {
+        deallocate(data_);
+        data_ = rhs.data_;
+        size_ = rhs.size_;
+        cap_ = rhs.cap_;
+        rhs.data_ = nullptr;
+        rhs.size_ = 0;
+        rhs.cap_ = 0;
       }
       return *this;
     }
