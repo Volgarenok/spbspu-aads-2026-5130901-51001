@@ -66,6 +66,26 @@ namespace krivoshapov
       return data_[head_];
     }
 
+    bool empty() const noexcept { return count_ == 0; }
+    size_t size() const noexcept { return count_; }
+
+    void clear() noexcept
+    {
+      deallocate(data_);
+      data_ = nullptr;
+      head_ = 0;
+      count_ = 0;
+      cap_ = 0;
+    }
+
+    void swap(Queue &rhs) noexcept
+    {
+      std::swap(data_, rhs.data_);
+      std::swap(head_, rhs.head_);
+      std::swap(count_, rhs.count_);
+      std::swap(cap_, rhs.cap_);
+    }
+
   private:
     T *data_;
     size_t head_;
