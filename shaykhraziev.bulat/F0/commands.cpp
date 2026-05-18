@@ -320,6 +320,50 @@ namespace
     out << "<DURATION: " << path.duration << ">\n";
     return true;
   }
+
+  bool tryTaskCommand(
+      shaykhraziev::ProjectStorage& storage,
+      const shaykhraziev::List< std::string >& tokens,
+      const std::string& line,
+      std::ostream& out)
+  {
+    const shaykhraziev::Project* project = storage.findProject(tokenAt(tokens, 1));
+    std::size_t duration = 0;
+    std::size_t deadline = 0;
+    if (!project ||
+        project->findTask(tokenAt(tokens, 2)) ||
+        !shaykhraziev::parsePositiveSize(tokenAt(tokens, 3), duration) ||
+        !shaykhraziev::parsePositiveSize(tokenAt(tokens, 4), deadline) ||
+        deadline < project->getStartDay())
+    {
+      return false;
+    }
+
+    shaykhraziev::Project trial = *project;
+    const std::string taskId = tokenAt(tokens, 2);
+    const std::string title = getTailAfterTokens(line, 5);
+    if (!trial.addTask(taskId, duration, title) || !shaykhraziev::buildProjectPlan(trial))
+    {
+      return false;
+    }
+    const shaykhraziev::PlannedTask* planned = trial.getPlan().findTask(taskId);
+    if (!planned)
+    {
+      return false;
+    }
+    if (planned->endDay <= deadline)
+    {
+      out << "<POSSIBLE>\n";
+      out << taskId << ": WORKER " << planned->workerId <<
+          ", START " << planned->startDay <<
+          ", END " << planned->endDay << '\n';
+    }
+    else
+    {
+      out << "<IMPOSSIBLE>\n";
+    }
+    return true;
+  }
 }
 
 shaykhraziev::CommandRegistry shaykhraziev::makeCommandRegistry()
@@ -339,6 +383,7 @@ shaykhraziev::CommandRegistry shaykhraziev::makeCommandRegistry()
   commands.add("stats", CommandHandler{1, 1, statsCommand});
   commands.add("show-gantt", CommandHandler{1, 1, showGanttCommand});
   commands.add("critical-path", CommandHandler{1, 1, criticalPathCommand});
+  commands.add("try-task", CommandHandler{5, UNLIMITED_ARGUMENTS, tryTaskCommand});
   return commands;
 }
 

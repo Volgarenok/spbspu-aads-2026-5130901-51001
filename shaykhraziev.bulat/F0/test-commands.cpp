@@ -33,6 +33,7 @@ BOOST_AUTO_TEST_CASE(commands_registry_contains_initial_commands)
   BOOST_CHECK(commands.has("stats"));
   BOOST_CHECK(commands.has("show-gantt"));
   BOOST_CHECK(commands.has("critical-path"));
+  BOOST_CHECK(commands.has("try-task"));
   BOOST_CHECK(!commands.has("missing"));
 }
 
@@ -161,4 +162,33 @@ BOOST_AUTO_TEST_CASE(commands_print_critical_path)
       "design -> backend\n"
       "<DURATION: 7>\n");
   BOOST_TEST(run(storage, "critical-path missing") == "<INVALID COMMAND>\n");
+}
+
+BOOST_AUTO_TEST_CASE(commands_try_task_reports_possible_and_impossible)
+{
+  shaykhraziev::ProjectStorage storage;
+  storage.makeProject("site", 1, 1);
+  storage.findProject("site")->addTask("design", 3, "Design");
+
+  BOOST_TEST(run(storage, "try-task site test 2 5 Test task") ==
+      "<POSSIBLE>\n"
+      "test: WORKER 1, START 4, END 5\n");
+  BOOST_TEST(run(storage, "try-task site test 2 4 Test task") == "<IMPOSSIBLE>\n");
+  BOOST_CHECK(!storage.findProject("site")->findTask("test"));
+}
+
+BOOST_AUTO_TEST_CASE(commands_try_task_rejects_invalid_input_and_keeps_plan)
+{
+  shaykhraziev::ProjectStorage storage;
+  storage.makeProject("site", 1, 1);
+  storage.findProject("site")->addTask("design", 3, "Design");
+  shaykhraziev::buildProjectPlan(*storage.findProject("site"));
+  const std::size_t oldEnd = storage.findProject("site")->getPlan().getProjectEndDay();
+
+  BOOST_TEST(run(storage, "try-task site design 2 5 Duplicate") == "<INVALID COMMAND>\n");
+  BOOST_TEST(run(storage, "try-task site test 0 5 Bad") == "<INVALID COMMAND>\n");
+  BOOST_TEST(run(storage, "try-task site test 2 0 Bad") == "<INVALID COMMAND>\n");
+  BOOST_TEST(run(storage, "try-task missing test 2 5 Bad") == "<INVALID COMMAND>\n");
+  BOOST_CHECK(storage.findProject("site")->isPlanBuilt());
+  BOOST_TEST(storage.findProject("site")->getPlan().getProjectEndDay() == oldEnd);
 }
