@@ -50,7 +50,7 @@ void graphsCommand(const GraphTable& graphs, std::ostream& out)
   
   for (auto it = graphs.cbegin(); it != graphs.cend(); ++it)
   {
-    names[index] = it->first;
+    names[index] = (*it).first;
     ++index;
   }
   
@@ -84,7 +84,7 @@ void vertexesCommand(const GraphTable& graphs, std::istream& in, std::ostream& o
     
     for (auto it = graph.data().cbegin(); it != graph.data().cend(); ++it)
     {
-      vertexes[index] = it->first;
+      vertexes[index] = (*it).first;
       ++index;
     }
     
@@ -125,11 +125,11 @@ void outboundCommand(const GraphTable& graphs, std::istream& in, std::ostream& o
     
     for (auto it = edges.begin(); it != edges.end(); ++it)
     {
-      if (!targets.contains(it->to))
+      if (!targets.contains((*it).to))
       {
-        targets.insert(it->to, List<size_t>());
+        targets.insert((*it).to, List<size_t>());
       }
-      targets.at(it->to).pushBack(it->weight);
+      targets.at((*it).to).pushBack((*it).weight);
     }
     
     size_t target_count = 0;
@@ -142,7 +142,7 @@ void outboundCommand(const GraphTable& graphs, std::istream& in, std::ostream& o
     size_t index = 0;
     for (auto it = targets.cbegin(); it != targets.cend(); ++it)
     {
-      target_names[index] = it->first;
+      target_names[index] = (*it).first;
       ++index;
     }
     
@@ -209,11 +209,11 @@ void inboundCommand(const GraphTable& graphs, std::istream& in, std::ostream& ou
     
     for (auto it = edges.begin(); it != edges.end(); ++it)
     {
-      if (!sources.contains(it->to))
+      if (!sources.contains((*it).to))
       {
-        sources.insert(it->to, List<size_t>());
+        sources.insert((*it).to, List<size_t>());
       }
-      sources.at(it->to).pushBack(it->weight);
+      sources.at((*it).to).pushBack((*it).weight);
     }
     
     size_t source_count = 0;
@@ -226,7 +226,7 @@ void inboundCommand(const GraphTable& graphs, std::istream& in, std::ostream& ou
     size_t index = 0;
     for (auto it = sources.cbegin(); it != sources.cend(); ++it)
     {
-      source_names[index] = it->first;
+      source_names[index] = (*it).first;
       ++index;
     }
     
