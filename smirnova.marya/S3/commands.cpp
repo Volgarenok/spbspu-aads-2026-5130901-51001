@@ -181,10 +181,15 @@ void cut(std::istream& in, std::ostream& out, GraphTable& graphs,
   Graph& g = graphs.get(graphName);
   if (!g.adj.has(a)) { out << "<INVALID COMMAND>\n"; return; }
   Vector<Graph::Edge>& edges = g.adj.get(a);
+  Vector<Graph::Edge> updated;
   bool foundEdge = false;
   for (auto eit = edges.begin(); eit != edges.end(); ++eit)
   {
-    if (eit->to != b) continue;
+    if (eit->to != b)
+    {
+      updated.pushBack(*eit);
+      continue;
+    }
     Vector<int>& weights = eit->weights;
     Vector<int> newWeights;
     bool removed = false;
@@ -200,10 +205,16 @@ void cut(std::istream& in, std::ostream& out, GraphTable& graphs,
       newWeights.pushBack(*wIt);
     }
     if (!removed) { out << "<INVALID COMMAND>\n"; return; }
-    eit->weights = newWeights;
+    if (newWeights.size() > 0)
+    {
+      Graph::Edge edge = *eit;
+      edge.weights = newWeights;
+      updated.pushBack(edge);
+    }
     foundEdge = true;
     break;
   }
+  edges = updated;
   if (!foundEdge) { out << "<INVALID COMMAND>\n"; }
 }
 
