@@ -56,3 +56,26 @@ namespace krivoshapov
     }
   }
 }
+
+int main(int argc, char **argv)
+{
+  try
+  {
+    if (argc > 1)
+    {
+      std::ifstream file(argv[1]);
+      if (!file.is_open())
+      {
+        std::cerr << "cannot open file\n";
+        return 1;
+      }
+      return krivoshapov::run(file);
+    }
+    return krivoshapov::run(std::cin);
+  }
+  catch (const std::exception &e)
+  {
+    std::cerr << e.what() << "\n";
+    return 1;
+  }
+}
