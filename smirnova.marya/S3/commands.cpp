@@ -193,8 +193,11 @@ void cut(std::istream& in, std::ostream& out, GraphTable& graphs,
   std::string a, b;
   int w;
   in >> a >> b >> w;
-  if (!graphs.has(graphName) || !graphVertices.has(graphName)) { out << "<INVALID COMMAND>\n"; return; }
-  Vector<std::string>& verts = graphVertices.get(graphName);
+  if (!graphs.has(graphName) || !graphVertices.has(graphName)) {
+    out << "<INVALID COMMAND>\n";
+    return;
+  }
+  Vector< std::string >& verts = graphVertices.get(graphName);
   bool hasA = false, hasB = false;
   for (auto it = verts.begin(); it != verts.end(); ++it)
   {
@@ -252,7 +255,9 @@ void cut(std::istream& in, std::ostream& out, GraphTable& graphs,
     break;
   }
   edges = updated;
-  if (!foundEdge) { out << "<INVALID COMMAND>\n"; }
+  if (!foundEdge) {
+    out << "<INVALID COMMAND>\n";
+  }
 }
 
 void outbound(std::istream& in, std::ostream& out, GraphTable& graphs,
@@ -404,7 +409,7 @@ void inbound(std::istream& in, std::ostream& out, GraphTable& graphs,
   {
     for (size_t j = i + 1; j < results.size(); ++j)
     {
-      if (results[j].from < results[i].from)
+      if (results[j].to < results[i].to)
       {
         Graph::Edge tmp = results[i];
         results[i] = results[j];
