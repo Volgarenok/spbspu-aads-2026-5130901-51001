@@ -4,6 +4,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace
 {
@@ -163,4 +164,90 @@ BOOST_AUTO_TEST_CASE(bstree_drop_missing_key_returns_false)
 
   BOOST_TEST(tree.size() == 1);
   BOOST_TEST(tree.get(1) == "one");
+}
+
+BOOST_AUTO_TEST_CASE(bstree_iterators_on_empty_tree_are_equal)
+{
+  Tree tree;
+
+  BOOST_CHECK(tree.begin() == tree.end());
+  BOOST_CHECK(tree.cbegin() == tree.cend());
+}
+
+BOOST_AUTO_TEST_CASE(bstree_iterator_visits_single_element)
+{
+  Tree tree;
+  tree.push(2, "two");
+
+  Tree::iterator it = tree.begin();
+
+  BOOST_REQUIRE(it != tree.end());
+  BOOST_TEST(it->key == 2);
+  BOOST_TEST(it->value == "two");
+  ++it;
+  BOOST_CHECK(it == tree.end());
+}
+
+BOOST_AUTO_TEST_CASE(bstree_iterator_visits_keys_in_order)
+{
+  Tree tree;
+  tree.push(4, "four");
+  tree.push(2, "two");
+  tree.push(6, "six");
+  tree.push(1, "one");
+  tree.push(3, "three");
+
+  std::vector< int > keys;
+  for (Tree::iterator it = tree.begin(); it != tree.end(); ++it)
+  {
+    keys.push_back(it->key);
+  }
+
+  std::vector< int > expected{1, 2, 3, 4, 6};
+  BOOST_TEST(keys == expected, boost::test_tools::per_element());
+}
+
+BOOST_AUTO_TEST_CASE(bstree_const_iterator_visits_keys_in_order)
+{
+  Tree tree;
+  tree.push(2, "two");
+  tree.push(1, "one");
+  tree.push(3, "three");
+  const Tree& constTree = tree;
+
+  std::vector< int > keys;
+  for (Tree::const_iterator it = constTree.cbegin(); it != constTree.cend(); ++it)
+  {
+    keys.push_back(it->key);
+  }
+
+  std::vector< int > expected{1, 2, 3};
+  BOOST_TEST(keys == expected, boost::test_tools::per_element());
+}
+
+BOOST_AUTO_TEST_CASE(bstree_decrement_end_returns_largest_element)
+{
+  Tree tree;
+  tree.push(2, "two");
+  tree.push(1, "one");
+  tree.push(3, "three");
+
+  Tree::iterator it = tree.end();
+  --it;
+
+  BOOST_TEST(it->key == 3);
+  BOOST_TEST(it->value == "three");
+}
+
+BOOST_AUTO_TEST_CASE(bstree_iterator_stays_on_same_node_after_unrelated_insert)
+{
+  Tree tree;
+  tree.push(2, "two");
+  tree.push(1, "one");
+
+  Tree::iterator it = tree.begin();
+  tree.push(3, "three");
+
+  BOOST_TEST(it->key == 1);
+  BOOST_TEST(it->value == "one");
 }
