@@ -31,6 +31,7 @@ BOOST_AUTO_TEST_CASE(commands_registry_contains_initial_commands)
   BOOST_CHECK(commands.has("build-plan"));
   BOOST_CHECK(commands.has("show-worker"));
   BOOST_CHECK(commands.has("stats"));
+  BOOST_CHECK(commands.has("show-gantt"));
   BOOST_CHECK(!commands.has("missing"));
 }
 
@@ -129,4 +130,19 @@ BOOST_AUTO_TEST_CASE(commands_show_worker_and_stats)
   BOOST_TEST(run(storage, "show-worker site 3") == "<INVALID COMMAND>\n");
   BOOST_TEST(run(storage, "stats site") ==
       "<PROJECT: site, START: 1, END: 4, TASKS: 2, WORKERS: 2, TOTAL-DURATION: 7>\n");
+}
+
+BOOST_AUTO_TEST_CASE(commands_show_gantt_requires_built_plan)
+{
+  shaykhraziev::ProjectStorage storage;
+  storage.makeProject("site", 1, 1);
+  storage.findProject("site")->addTask("task", 2, "Task");
+
+  BOOST_TEST(run(storage, "show-gantt site") == "<INVALID COMMAND>\n");
+  BOOST_TEST(run(storage, "build-plan site") == "<PLAN BUILT>\n");
+  BOOST_TEST(run(storage, "show-gantt site") ==
+      "<GANTT site>\n"
+      "DAYS:     1 2\n"
+      "task  W1 # #\n"
+      "<PROJECT-END: 2>\n");
 }

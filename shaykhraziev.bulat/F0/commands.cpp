@@ -6,6 +6,7 @@
 
 #include <string-utils.hpp>
 
+#include "gantt.hpp"
 #include "io.hpp"
 #include "planner.hpp"
 
@@ -262,6 +263,21 @@ namespace
         ", TOTAL-DURATION: " << project->getTotalDuration() << ">\n";
     return true;
   }
+
+  bool showGanttCommand(
+      shaykhraziev::ProjectStorage& storage,
+      const shaykhraziev::List< std::string >& tokens,
+      const std::string&,
+      std::ostream& out)
+  {
+    const shaykhraziev::Project* project = storage.findProject(tokenAt(tokens, 1));
+    if (!project || !project->isPlanBuilt())
+    {
+      return false;
+    }
+    shaykhraziev::renderGantt(*project, out);
+    return true;
+  }
 }
 
 shaykhraziev::CommandRegistry shaykhraziev::makeCommandRegistry()
@@ -279,6 +295,7 @@ shaykhraziev::CommandRegistry shaykhraziev::makeCommandRegistry()
   commands.add("build-plan", CommandHandler{1, 1, buildPlanCommand});
   commands.add("show-worker", CommandHandler{2, 2, showWorkerCommand});
   commands.add("stats", CommandHandler{1, 1, statsCommand});
+  commands.add("show-gantt", CommandHandler{1, 1, showGanttCommand});
   return commands;
 }
 
