@@ -86,8 +86,8 @@ namespace
     {
       return false;
     }
-    const shaykhraziev::Project* project = storage.findProject(tokenAt(tokens, 1));
-    return project && project->findTask(tokenAt(tokens, 2)) && project->findTask(tokenAt(tokens, 3));
+    shaykhraziev::Project* project = storage.findProject(tokenAt(tokens, 1));
+    return project && project->addDependency(tokenAt(tokens, 2), tokenAt(tokens, 3));
   }
 }
 

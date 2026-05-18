@@ -153,6 +153,26 @@ namespace
     printDependencies(*task, out);
     return true;
   }
+
+  bool addDependencyCommand(
+      shaykhraziev::ProjectStorage& storage,
+      const shaykhraziev::List< std::string >& tokens,
+      const std::string&,
+      std::ostream&)
+  {
+    shaykhraziev::Project* project = storage.findProject(tokenAt(tokens, 1));
+    return project && project->addDependency(tokenAt(tokens, 2), tokenAt(tokens, 3));
+  }
+
+  bool dropDependencyCommand(
+      shaykhraziev::ProjectStorage& storage,
+      const shaykhraziev::List< std::string >& tokens,
+      const std::string&,
+      std::ostream&)
+  {
+    shaykhraziev::Project* project = storage.findProject(tokenAt(tokens, 1));
+    return project && project->dropDependency(tokenAt(tokens, 2), tokenAt(tokens, 3));
+  }
 }
 
 shaykhraziev::CommandRegistry shaykhraziev::makeCommandRegistry()
@@ -164,6 +184,8 @@ shaykhraziev::CommandRegistry shaykhraziev::makeCommandRegistry()
   commands.add("add-task", CommandHandler{4, UNLIMITED_ARGUMENTS, addTaskCommand});
   commands.add("drop-task", CommandHandler{2, 2, dropTaskCommand});
   commands.add("show-task", CommandHandler{2, 2, showTaskCommand});
+  commands.add("add-dependency", CommandHandler{3, 3, addDependencyCommand});
+  commands.add("drop-dependency", CommandHandler{3, 3, dropDependencyCommand});
   return commands;
 }
 

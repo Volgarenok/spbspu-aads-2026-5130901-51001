@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE(io_reads_projects_and_tasks)
   BOOST_TEST(project->findTask("design")->title == "Design page");
 }
 
-BOOST_AUTO_TEST_CASE(io_accepts_valid_dependency_line_before_dependency_model)
+BOOST_AUTO_TEST_CASE(io_reads_dependency_lines)
 {
   std::istringstream input(
       "project site 1 2\n"
@@ -35,6 +35,7 @@ BOOST_AUTO_TEST_CASE(io_accepts_valid_dependency_line_before_dependency_model)
   const shaykhraziev::Project* project = storage.findProject("site");
   BOOST_REQUIRE(project);
   BOOST_TEST(project->countTasks() == 2);
+  BOOST_CHECK(project->hasDependency("backend", "design"));
 }
 
 BOOST_AUTO_TEST_CASE(io_rejects_invalid_project_file)

@@ -25,6 +25,8 @@ BOOST_AUTO_TEST_CASE(commands_registry_contains_initial_commands)
   BOOST_CHECK(commands.has("add-task"));
   BOOST_CHECK(commands.has("drop-task"));
   BOOST_CHECK(commands.has("show-task"));
+  BOOST_CHECK(commands.has("add-dependency"));
+  BOOST_CHECK(commands.has("drop-dependency"));
   BOOST_CHECK(!commands.has("missing"));
 }
 
@@ -60,4 +62,22 @@ BOOST_AUTO_TEST_CASE(commands_reject_unknown_and_wrong_argument_count)
   BOOST_TEST(run(storage, "unknown") == "<INVALID COMMAND>\n");
   BOOST_TEST(run(storage, "make-project site 1") == "<INVALID COMMAND>\n");
   BOOST_TEST(run(storage, "add-task site task 1") == "<INVALID COMMAND>\n");
+}
+
+BOOST_AUTO_TEST_CASE(commands_add_and_drop_dependencies)
+{
+  shaykhraziev::ProjectStorage storage;
+  storage.makeProject("site", 1, 2);
+  storage.findProject("site")->addTask("design", 3, "Design");
+  storage.findProject("site")->addTask("backend", 4, "Backend");
+
+  BOOST_TEST(run(storage, "add-dependency site backend design") == "");
+  BOOST_TEST(run(storage, "show-task site backend") ==
+      "<TASK: backend, TITLE: Backend, DURATION: 4, DEPENDENCIES: 1>\n"
+      "design\n");
+  BOOST_TEST(run(storage, "add-dependency site backend design") == "<INVALID COMMAND>\n");
+  BOOST_TEST(run(storage, "add-dependency site backend missing") == "<INVALID COMMAND>\n");
+  BOOST_TEST(run(storage, "add-dependency site backend backend") == "<INVALID COMMAND>\n");
+  BOOST_TEST(run(storage, "drop-dependency site backend design") == "");
+  BOOST_TEST(run(storage, "drop-dependency site backend design") == "<INVALID COMMAND>\n");
 }

@@ -37,6 +37,9 @@ namespace shaykhraziev
 
     bool addTask(const std::string& taskId, std::size_t duration, const std::string& title);
     bool dropTask(const std::string& taskId);
+    bool addDependency(const std::string& taskId, const std::string& dependencyId);
+    bool dropDependency(const std::string& taskId, const std::string& dependencyId);
+    bool hasDependency(const std::string& taskId, const std::string& dependencyId) const;
     Task* findTask(const std::string& taskId);
     const Task* findTask(const std::string& taskId) const;
     const List< std::string >& getTaskOrder() const noexcept;
@@ -53,6 +56,7 @@ namespace shaykhraziev
 
     void ensureTaskSpace();
     void removeTaskFromOrder(const std::string& taskId);
+    void removeTaskFromDependencies(const std::string& taskId);
   };
 
   class ProjectStorage

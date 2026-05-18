@@ -11,6 +11,31 @@ namespace
   {
     return value >= 1;
   }
+
+  bool containsString(const shaykhraziev::List< std::string >& values, const std::string& value)
+  {
+    for (shaykhraziev::List< std::string >::const_iterator it = values.cbegin(); it != values.cend(); ++it)
+    {
+      if (*it == value)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void removeString(shaykhraziev::List< std::string >& values, const std::string& value)
+  {
+    shaykhraziev::List< std::string > kept;
+    for (shaykhraziev::List< std::string >::const_iterator it = values.cbegin(); it != values.cend(); ++it)
+    {
+      if (*it != value)
+      {
+        kept.pushBack(*it);
+      }
+    }
+    values.swap(kept);
+  }
 }
 
 shaykhraziev::Task::Task():
@@ -103,8 +128,47 @@ bool shaykhraziev::Project::dropTask(const std::string& taskId)
     return false;
   }
   removeTaskFromOrder(taskId);
+  removeTaskFromDependencies(taskId);
   resetPlan();
   return true;
+}
+
+bool shaykhraziev::Project::addDependency(const std::string& taskId, const std::string& dependencyId)
+{
+  if (taskId == dependencyId)
+  {
+    return false;
+  }
+  Task* task = findTask(taskId);
+  Task* dependency = findTask(dependencyId);
+  if (!task || !dependency || containsString(task->dependencies, dependencyId))
+  {
+    return false;
+  }
+  task->dependencies.pushBack(dependencyId);
+  dependency->dependents.pushBack(taskId);
+  resetPlan();
+  return true;
+}
+
+bool shaykhraziev::Project::dropDependency(const std::string& taskId, const std::string& dependencyId)
+{
+  Task* task = findTask(taskId);
+  Task* dependency = findTask(dependencyId);
+  if (!task || !dependency || !containsString(task->dependencies, dependencyId))
+  {
+    return false;
+  }
+  removeString(task->dependencies, dependencyId);
+  removeString(dependency->dependents, taskId);
+  resetPlan();
+  return true;
+}
+
+bool shaykhraziev::Project::hasDependency(const std::string& taskId, const std::string& dependencyId) const
+{
+  const Task* task = findTask(taskId);
+  return task && containsString(task->dependencies, dependencyId);
 }
 
 shaykhraziev::Task* shaykhraziev::Project::findTask(const std::string& taskId)
@@ -132,15 +196,16 @@ void shaykhraziev::Project::ensureTaskSpace()
 
 void shaykhraziev::Project::removeTaskFromOrder(const std::string& taskId)
 {
-  List< std::string > kept;
-  for (List< std::string >::const_iterator it = taskOrder_.cbegin(); it != taskOrder_.cend(); ++it)
+  removeString(taskOrder_, taskId);
+}
+
+void shaykhraziev::Project::removeTaskFromDependencies(const std::string& taskId)
+{
+  for (TaskTable::iterator it = tasks_.begin(); it != tasks_.end(); ++it)
   {
-    if (*it != taskId)
-    {
-      kept.pushBack(*it);
-    }
+    removeString(it->value.dependencies, taskId);
+    removeString(it->value.dependents, taskId);
   }
-  taskOrder_.swap(kept);
 }
 
 shaykhraziev::ProjectStorage::ProjectStorage():

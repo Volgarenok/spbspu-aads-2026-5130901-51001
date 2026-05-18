@@ -95,3 +95,35 @@ BOOST_AUTO_TEST_CASE(project_drops_tasks_and_keeps_order)
   BOOST_TEST(order == expected, boost::test_tools::per_element());
   BOOST_CHECK(!project.dropTask("missing"));
 }
+
+BOOST_AUTO_TEST_CASE(project_adds_and_drops_dependencies)
+{
+  shaykhraziev::Project project("site", 1, 2);
+  project.addTask("design", 3, "Design");
+  project.addTask("backend", 4, "Backend");
+
+  BOOST_CHECK(project.addDependency("backend", "design"));
+  BOOST_CHECK(project.hasDependency("backend", "design"));
+  BOOST_CHECK(!project.addDependency("backend", "design"));
+  BOOST_CHECK(!project.addDependency("backend", "backend"));
+  BOOST_CHECK(!project.addDependency("backend", "missing"));
+
+  const shaykhraziev::Task* backend = project.findTask("backend");
+  BOOST_REQUIRE(backend);
+  BOOST_TEST(backend->dependencies.size() == 1);
+
+  BOOST_CHECK(project.dropDependency("backend", "design"));
+  BOOST_CHECK(!project.hasDependency("backend", "design"));
+  BOOST_CHECK(!project.dropDependency("backend", "design"));
+}
+
+BOOST_AUTO_TEST_CASE(project_drop_task_removes_dependencies)
+{
+  shaykhraziev::Project project("site", 1, 2);
+  project.addTask("design", 3, "Design");
+  project.addTask("backend", 4, "Backend");
+  project.addDependency("backend", "design");
+
+  BOOST_CHECK(project.dropTask("design"));
+  BOOST_CHECK(!project.hasDependency("backend", "design"));
+}
