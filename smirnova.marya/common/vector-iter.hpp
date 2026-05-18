@@ -11,6 +11,7 @@ namespace smirnova
     VectorIterator(T* p = 0);
 
     T& operator*();
+    T* operator->();
     VectorIterator& operator++();
     bool operator!=(const VectorIterator& other) const;
   };
@@ -23,6 +24,7 @@ namespace smirnova
     ConstVectorIterator(const T* p = 0);
 
     const T& operator*() const;
+    const T* operator->() const;
     ConstVectorIterator& operator++();
     bool operator!=(const ConstVectorIterator& other) const;
   };
@@ -38,6 +40,12 @@ template < typename T >
 T& smirnova::VectorIterator< T >::operator*()
 {
   return *ptr;
+}
+
+template < typename T >
+T* smirnova::VectorIterator< T >::operator->()
+{
+  return ptr;
 }
 
 template < typename T >
@@ -62,6 +70,12 @@ template < typename T >
 const T& smirnova::ConstVectorIterator< T >::operator*() const
 {
   return *ptr;
+}
+
+template < typename T >
+const T* smirnova::ConstVectorIterator< T >::operator->() const
+{
+  return ptr;
 }
 
 template < typename T >

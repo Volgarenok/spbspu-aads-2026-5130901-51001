@@ -10,11 +10,9 @@ namespace smirnova
 
   bool containsString(const Vector< std::string >& values, const std::string& value)
   {
-    for (size_t i = 0; i < values.size(); ++i)
+    for (auto it = values.begin(); it != values.end(); ++it)
     {
-      if (values[i] == value) {
-        return true;
-      }
+      if (*it == value) return true;
     }
     return false;
   }
@@ -54,15 +52,10 @@ namespace smirnova
   void graphs(std::istream&, std::ostream& out, GraphTable& graphs, VertTable&, std::string)
   {
     Vector< std::string > names;
-    for (size_t i = 0; i < graphs.bucketCount(); ++i)
+    for (auto it = graphs.begin(); it != graphs.end(); ++it)
     {
-      List< Pair >& b = graphs.bucket(i);
-      LIter< Pair > it = b.begin();
-      while (it.valid())
-      {
-        names.pushBack(it.value().key);
-        it.next();
-      }
+      const Pair& p = *it;
+      names.pushBack(p.key);
     }
     sortStrings(names);
     if (names.size() == 0)
@@ -71,9 +64,9 @@ namespace smirnova
     }
     else
     {
-      for (size_t i = 0; i < names.size(); ++i)
+      for (auto it = names.begin(); it != names.end(); ++it)
       {
-        out << names[i] << "\n";
+        out << *it << "\n";
       }
     }
   }
@@ -88,19 +81,23 @@ namespace smirnova
     Vector< std::string > verts = graphVertices.get(graphName);
     sortStrings(verts);
     bool hasOutput = false;
-    for (size_t i = 0; i < verts.size(); ++i)
+    const std::string* prev = nullptr;
+    for (auto it = verts.begin(); it != verts.end(); ++it)
     {
-      if (i == 0 || verts[i] != verts[i - 1])
+      const std::string& cur = *it;
+      if (!prev || cur != *prev)
       {
-        out << verts[i] << "\n";
+        out << cur << "\n";
         hasOutput = true;
       }
+      prev = &cur;
     }
     if (!hasOutput)
     {
       out << "\n";
     }
   }
+
   void create(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& graphVertices, std::string graphName)
   {
     size_t k = 0;
@@ -146,21 +143,13 @@ namespace smirnova
     }
     Vector< std::string >& verts = graphVertices.get(graphName);
     bool hasA = false, hasB = false;
-    for (size_t i = 0; i < verts.size(); ++i)
+    for (auto it = verts.begin(); it != verts.end(); ++it)
     {
-      if (verts[i] == a) {
-        hasA = true;
-      }
-      if (verts[i] == b) {
-        hasB = true;
-      }
+      if (*it == a) hasA = true;
+      if (*it == b) hasB = true;
     }
-    if (!hasA) {
-      verts.pushBack(a);
-    }
-    if (!hasB) {
-      verts.pushBack(b);
-    }
+    if (!hasA) verts.pushBack(a);
+    if (!hasB) verts.pushBack(b);
     graphs.get(graphName).addEdge(a, b, w);
   }
 
@@ -176,14 +165,10 @@ namespace smirnova
     }
     Vector< std::string >& verts = graphVertices.get(graphName);
     bool hasA = false, hasB = false;
-    for (size_t i = 0; i < verts.size(); ++i)
+    for (auto it = verts.begin(); it != verts.end(); ++it)
     {
-      if (verts[i] == a) {
-        hasA = true;
-      }
-      if (verts[i] == b) {
-        hasB = true;
-      }
+      if (*it == a) hasA = true;
+      if (*it == b) hasB = true;
     }
     if (!hasA || !hasB)
     {
@@ -198,22 +183,21 @@ namespace smirnova
     }
     Vector< Graph::Edge >& edges = g.adj.get(a);
     bool foundEdge = false;
-    for (size_t ei = 0; ei < edges.size(); ++ei)
+    for (auto eit = edges.begin(); eit != edges.end(); ++eit)
     {
-      if (edges[ei].to == b)
+      Graph::Edge& edge = *eit;
+      if (edge.to == b)
       {
-        Vector< int >& weights = edges[ei].weights;
+        Vector< int >& weights = edge.weights;
         bool removed = false;
-        for (size_t wi = 0; wi < weights.size(); ++wi)
+        for (auto wit = weights.begin(); wit != weights.end(); ++wit)
         {
-          if (weights[wi] == w)
+          if (*wit == w)
           {
             Vector< int > newWeights;
-            for (size_t j = 0; j < weights.size(); ++j)
+            for (auto w2 = weights.begin(); w2 != weights.end(); ++w2)
             {
-              if (j != wi) {
-                newWeights.pushBack(weights[j]);
-              }
+              if (&*w2 != &*wit) newWeights.pushBack(*w2);
             }
             weights = newWeights;
             removed = true;
@@ -228,23 +212,15 @@ namespace smirnova
         if (weights.size() == 0)
         {
           Vector< Graph::Edge > newEdges;
-          for (size_t j = 0; j < edges.size(); ++j)
+          for (auto e2 = edges.begin(); e2 != edges.end(); ++e2)
           {
-            if (j != ei) {
-              newEdges.pushBack(edges[j]);
-            }
+            if (&*e2 != &*eit) newEdges.pushBack(*e2);
           }
           edges = newEdges;
         }
         if (edges.size() == 0)
         {
-          try
-          {
-            g.adj.drop(a);
-          }
-          catch (...)
-          {
-          }
+          try { g.adj.drop(a); } catch (...) {}
         }
         foundEdge = true;
         break;
@@ -269,12 +245,9 @@ namespace smirnova
     }
     Vector< std::string >& verts = graphVertices.get(graphName);
     bool hasV = false;
-    for (size_t i = 0; i < verts.size(); ++i)
+    for (auto it = verts.begin(); it != verts.end(); ++it)
     {
-      if (verts[i] == v) {
-        hasV = true;
-        break;
-      }
+      if (*it == v) { hasV = true; break; }
     }
     if (!hasV)
     {
@@ -288,24 +261,19 @@ namespace smirnova
       return;
     }
 
-    struct OutRes
-    {
-      std::string to;
-      Vector< int > weights;
-    };
+    struct OutRes { std::string to; Vector< int > weights; };
     Vector< OutRes > results;
     Vector< Graph::Edge >& edges = g.adj.get(v);
-    for (size_t i = 0; i < edges.size(); ++i)
+    for (auto eit = edges.begin(); eit != edges.end(); ++eit)
     {
+      Graph::Edge& edge = *eit;
       bool found = false;
-      for (size_t j = 0; j < results.size(); ++j)
+      for (auto r = results.begin(); r != results.end(); ++r)
       {
-        if (results[j].to == edges[i].to)
+        if ((*r).to == edge.to)
         {
-          for (size_t k = 0; k < edges[i].weights.size(); ++k)
-          {
-            results[j].weights.pushBack(edges[i].weights[k]);
-          }
+          for (auto w = edge.weights.begin(); w != edge.weights.end(); ++w)
+            (*r).weights.pushBack(*w);
           found = true;
           break;
         }
@@ -314,15 +282,14 @@ namespace smirnova
       if (!found)
       {
         OutRes row;
-        row.to = edges[i].to;
-        row.weights = edges[i].weights;
+        row.to = edge.to;
+        row.weights = edge.weights;
         results.pushBack(row);
       }
     }
-    for (size_t i = 0; i < results.size(); ++i)
-    {
-      sortInts(results[i].weights);
-    }
+    for (auto r = results.begin(); r != results.end(); ++r)
+      sortInts((*r).weights);
+
     for (size_t i = 0; i < results.size(); ++i)
     {
       for (size_t j = i + 1; j < results.size(); ++j)
@@ -335,12 +302,12 @@ namespace smirnova
         }
       }
     }
-    for (size_t i = 0; i < results.size(); ++i)
+    for (auto r = results.begin(); r != results.end(); ++r)
     {
-      out << results[i].to;
-      for (size_t j = 0; j < results[i].weights.size(); ++j)
+      out << (*r).to;
+      for (auto w = (*r).weights.begin(); w != (*r).weights.end(); ++w)
       {
-        out << " " << results[i].weights[j];
+        out << " " << *w;
       }
       out << "\n";
     }
@@ -357,12 +324,9 @@ namespace smirnova
     }
     Vector< std::string >& verts = graphVertices.get(graphName);
     bool hasV = false;
-    for (size_t i = 0; i < verts.size(); ++i)
+    for (auto it = verts.begin(); it != verts.end(); ++it)
     {
-      if (verts[i] == v) {
-        hasV = true;
-        break;
-      }
+      if (*it == v) { hasV = true; break; }
     }
     if (!hasV)
     {
@@ -370,53 +334,42 @@ namespace smirnova
       return;
     }
     Graph& g = graphs.get(graphName);
-    struct InRes
-    {
-      std::string from;
-      Vector< int > weights;
-    };
+    struct InRes { std::string from; Vector< int > weights; };
     Vector< InRes > results;
-    for (size_t i = 0; i < g.adj.bucketCount(); ++i)
+    for (auto ait = g.adj.begin(); ait != g.adj.end(); ++ait)
     {
-      List< AdjPair >& b = g.adj.bucket(i);
-      LIter< AdjPair > it = b.begin();
-
-      while (it.valid())
+      const AdjPair& ap = *ait;
+      const std::string& from = ap.key;
+      Vector< Graph::Edge >& edges = const_cast< Vector< Graph::Edge >& >(ap.value);
+      for (auto eit = edges.begin(); eit != edges.end(); ++eit)
       {
-        Vector< Graph::Edge >& edges = it.value().value;
-        for (size_t j = 0; j < edges.size(); ++j)
+        Graph::Edge& edge = *eit;
+        if (edge.to == v)
         {
-          if (edges[j].to == v)
+          bool found = false;
+          for (auto r = results.begin(); r != results.end(); ++r)
           {
-            bool found = false;
-            for (size_t r = 0; r < results.size(); ++r)
+            if ((*r).from == from)
             {
-              if (results[r].from == it.value().key)
-              {
-                for (size_t k = 0; k < edges[j].weights.size(); ++k)
-                {
-                  results[r].weights.pushBack(edges[j].weights[k]);
-                }
-                found = true;
-                break;
-              }
-            }
-            if (!found)
-            {
-              InRes row;
-              row.from = it.value().key;
-              row.weights = edges[j].weights;
-              results.pushBack(row);
+              for (auto w = edge.weights.begin(); w != edge.weights.end(); ++w)
+                (*r).weights.pushBack(*w);
+              found = true;
+              break;
             }
           }
+          if (!found)
+          {
+            InRes row;
+            row.from = from;
+            row.weights = edge.weights;
+            results.pushBack(row);
+          }
         }
-        it.next();
       }
     }
-    for (size_t i = 0; i < results.size(); ++i)
-    {
-      sortInts(results[i].weights);
-    }
+    for (auto r = results.begin(); r != results.end(); ++r)
+      sortInts((*r).weights);
+
     for (size_t i = 0; i < results.size(); ++i)
     {
       for (size_t j = i + 1; j < results.size(); ++j)
@@ -428,13 +381,11 @@ namespace smirnova
         }
       }
     }
-    for (size_t i = 0; i < results.size(); ++i)
+    for (auto r = results.begin(); r != results.end(); ++r)
     {
-      out << results[i].from;
-      for (size_t j = 0; j < results[i].weights.size(); ++j)
-      {
-        out << " " << results[i].weights[j];
-      }
+      out << (*r).from;
+      for (auto w = (*r).weights.begin(); w != (*r).weights.end(); ++w)
+        out << " " << *w;
       out << "\n";
     }
   }
@@ -453,58 +404,42 @@ namespace smirnova
     Graph& a = graphs.get(g1);
     Graph& b = graphs.get(g2);
 
-    for (size_t i = 0; i < a.adj.bucketCount(); ++i)
+    for (auto ait = a.adj.begin(); ait != a.adj.end(); ++ait)
     {
-      List< AdjPair >& buck = a.adj.bucket(i);
-      LIter< AdjPair > it = buck.begin();
-      while (it.valid())
+      const AdjPair& ap = *ait;
+      const std::string& from = ap.key;
+      Vector< Graph::Edge >& srcEdges = const_cast< Vector< Graph::Edge >& >(ap.value);
+      for (auto e = srcEdges.begin(); e != srcEdges.end(); ++e)
       {
-        const std::string& from = it.value().key;
-        Vector< Graph::Edge >& srcEdges = it.value().value;
-        for (size_t j = 0; j < srcEdges.size(); ++j)
-        {
-          for (size_t k = 0; k < srcEdges[j].weights.size(); ++k)
-          {
-            result.addEdge(from, srcEdges[j].to, srcEdges[j].weights[k]);
-          }
-        }
-        it.next();
+        Graph::Edge& edge = *e;
+        for (auto w = edge.weights.begin(); w != edge.weights.end(); ++w)
+          result.addEdge(from, edge.to, *w);
       }
     }
 
-    for (size_t i = 0; i < b.adj.bucketCount(); ++i)
+    for (auto bit = b.adj.begin(); bit != b.adj.end(); ++bit)
     {
-      List< AdjPair >& buck = b.adj.bucket(i);
-      LIter< AdjPair > it = buck.begin();
-      while (it.valid())
+      const AdjPair& ap = *bit;
+      const std::string& from = ap.key;
+      Vector< Graph::Edge >& srcEdges = const_cast< Vector< Graph::Edge >& >(ap.value);
+      for (auto e = srcEdges.begin(); e != srcEdges.end(); ++e)
       {
-        const std::string& from = it.value().key;
-        Vector< Graph::Edge >& srcEdges = it.value().value;
-        for (size_t j = 0; j < srcEdges.size(); ++j)
-        {
-          for (size_t k = 0; k < srcEdges[j].weights.size(); ++k)
-          {
-            result.addEdge(from, srcEdges[j].to, srcEdges[j].weights[k]);
-          }
-        }
-        it.next();
+        Graph::Edge& edge = *e;
+        for (auto w = edge.weights.begin(); w != edge.weights.end(); ++w)
+          result.addEdge(from, edge.to, *w);
       }
     }
     graphs.add(graphName, result);
     Vector< std::string > verts;
     Vector< std::string >& va = graphVertices.get(g1);
     Vector< std::string >& vb = graphVertices.get(g2);
-    for (size_t i = 0; i < va.size(); ++i)
+    for (auto it = va.begin(); it != va.end(); ++it)
     {
-      if (!containsString(verts, va[i])) {
-        verts.pushBack(va[i]);
-      }
+      if (!containsString(verts, *it)) verts.pushBack(*it);
     }
-    for (size_t i = 0; i < vb.size(); ++i)
+    for (auto it = vb.begin(); it != vb.end(); ++it)
     {
-      if (!containsString(verts, vb[i])) {
-        verts.pushBack(vb[i]);
-      }
+      if (!containsString(verts, *it)) verts.pushBack(*it);
     }
     graphVertices.add(graphName, verts);
   }
@@ -529,12 +464,9 @@ namespace smirnova
       std::string v;
       in >> v;
       bool found = false;
-      for (size_t j = 0; j < srcVerts.size(); ++j)
+      for (auto it = srcVerts.begin(); it != srcVerts.end(); ++it)
       {
-        if (srcVerts[j] == v) {
-          found = true;
-          break;
-        }
+        if (*it == v) { found = true; break; }
       }
       if (!found)
       {
@@ -542,35 +474,30 @@ namespace smirnova
         return;
       }
 
-      if (!containsString(chosen, v)) {
-        chosen.pushBack(v);
-      }
+      if (!containsString(chosen, v)) chosen.pushBack(v);
     }
-    for (size_t i = 0; i < chosen.size(); ++i)
+    for (auto it = chosen.begin(); it != chosen.end(); ++it)
     {
-      resVerts.pushBack(chosen[i]);
-      res.addVertex(chosen[i]);
+      resVerts.pushBack(*it);
+      res.addVertex(*it);
     }
-    for (size_t i = 0; i < chosen.size(); ++i)
+    for (auto it = chosen.begin(); it != chosen.end(); ++it)
     {
-      const std::string& from = chosen[i];
-      if (!src.adj.has(from)) {
-        continue;
-      }
+      const std::string& from = *it;
+      if (!src.adj.has(from)) continue;
       Vector< Graph::Edge >& edges = src.adj.get(from);
-      for (size_t j = 0; j < edges.size(); ++j)
+      for (auto e = edges.begin(); e != edges.end(); ++e)
       {
-        if (!containsString(chosen, edges[j].to)) {
-          continue;
-        }
-        for (size_t w = 0; w < edges[j].weights.size(); ++w)
+        Graph::Edge& edge = *e;
+        if (!containsString(chosen, edge.to)) continue;
+        for (auto w = edge.weights.begin(); w != edge.weights.end(); ++w)
         {
-          res.addEdge(from, edges[j].to, edges[j].weights[w]);
+          res.addEdge(from, edge.to, *w);
         }
       }
     }
     graphs.add(graphName, res);
     graphVertices.add(graphName, resVerts);
   }
-}
 
+}

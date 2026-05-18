@@ -51,9 +51,19 @@ namespace smirnova
       return it.value();
     }
 
+    Pair* operator->()
+    {
+      return &it.value();
+    }
+
     const Pair& operator*() const
     {
       return it.value();
+    }
+
+    const Pair* operator->() const
+    {
+      return &it.value();
     }
 
     HashTableIterator& operator++()
