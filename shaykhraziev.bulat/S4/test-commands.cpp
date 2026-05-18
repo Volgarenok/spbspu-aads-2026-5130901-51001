@@ -64,11 +64,12 @@ BOOST_AUTO_TEST_CASE(commands_create_complement_intersect_union)
   BOOST_TEST(run(datasets, "print all") == "all 1 one 2 two 3 three\n");
 }
 
-BOOST_AUTO_TEST_CASE(commands_reject_existing_new_dataset)
+BOOST_AUTO_TEST_CASE(commands_replace_existing_new_dataset)
 {
   shaykhraziev::DatasetTable datasets = makeDatasets();
 
-  BOOST_TEST(run(datasets, "union first first second") == "<INVALID COMMAND>\n");
+  BOOST_TEST(run(datasets, "union first second first") == "");
+  BOOST_TEST(run(datasets, "print first") == "first 1 one 2 two-second 3 three\n");
 }
 
 BOOST_AUTO_TEST_CASE(commands_reject_missing_operand_dataset)

@@ -73,10 +73,6 @@ namespace
       const std::string& newName,
       const shaykhraziev::Dictionary& result)
   {
-    if (datasets.has(newName))
-    {
-      return false;
-    }
     datasets.push(newName, result);
     return true;
   }
@@ -94,7 +90,7 @@ namespace
     const std::string newName = tokenAt(tokens, 1);
     const std::string leftName = tokenAt(tokens, 2);
     const std::string rightName = tokenAt(tokens, 3);
-    if (datasets.has(newName) || !datasets.has(leftName) || !datasets.has(rightName))
+    if (!datasets.has(leftName) || !datasets.has(rightName))
     {
       return false;
     }
