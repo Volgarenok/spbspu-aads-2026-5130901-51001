@@ -8,29 +8,26 @@
 #include "bitree.hpp"
 
 using TreesTable = kitserov::HashTable< std::string,
-																			 kitserov::BSTree< int, std::string >,
-																			 kitserov::SipHash< std::string >,
-																			 std::equal_to< std::string > >;
+  kitserov::BSTree< int, std::string >,
+  kitserov::SipHash< std::string >,
+  std::equal_to< std::string > >;
 
 void printHandler(std::ostream& out, std::istream& in, TreesTable& trees)
 {
 	std::string name;
-	if (!(in >> name))
-	{
+	if (!(in >> name)) {
 		out << "<INVALID COMMAND>\n";
 		return;
 	}
 
 	auto treePtr = trees.find(name);
-	if (!treePtr || treePtr -> empty())
-	{
+	if (!treePtr || treePtr -> empty()) {
 		out << "<EMPTY>\n";
 		return;
 	}
 
 	out << name;
-	for (auto it = treePtr -> begin(); it != treePtr -> end(); ++it)
-	{
+	for (auto it = treePtr -> begin(); it != treePtr -> end(); ++it) {
 		out << ' ' << it -> first << ' ' << it -> second;
 	}
 	out << '\n';
@@ -39,8 +36,7 @@ void printHandler(std::ostream& out, std::istream& in, TreesTable& trees)
 void complementHandler(std::ostream& out, std::istream& in, TreesTable& trees)
 {
 	std::string newName, aName, bName;
-	if (!(in >> newName >> aName >> bName))
-	{
+	if (!(in >> newName >> aName >> bName)) {
 		out << "<INVALID COMMAND>\n";
 		return;
 	}
@@ -49,13 +45,10 @@ void complementHandler(std::ostream& out, std::istream& in, TreesTable& trees)
 	auto bPtr = trees.find(bName);
 
 	kitserov::BSTree< int, std::string > result;
-	if (aPtr)
-	{
-		for (auto it = aPtr -> begin(); it != aPtr -> end(); ++it)
-		{
+	if (aPtr) {
+		for (auto it = aPtr -> begin(); it != aPtr -> end(); ++it) {
 			int key = it -> first;
-			if (!bPtr || !bPtr -> contains(key))
-			{
+			if (!bPtr || !bPtr -> contains(key)) {
 				result.push(key, it -> second);
 			}
 		}
@@ -67,8 +60,7 @@ void complementHandler(std::ostream& out, std::istream& in, TreesTable& trees)
 void intersectHandler(std::ostream& out, std::istream& in, TreesTable& trees)
 {
 	std::string newName, aName, bName;
-	if (!(in >> newName >> aName >> bName))
-	{
+	if (!(in >> newName >> aName >> bName)) {
 		out << "<INVALID COMMAND>\n";
 		return;
 	}
@@ -77,26 +69,21 @@ void intersectHandler(std::ostream& out, std::istream& in, TreesTable& trees)
 	auto bPtr = trees.find(bName);
 
 	kitserov::BSTree< int, std::string > result;
-	if (aPtr && bPtr)
-	{
-		for (auto it = aPtr -> begin(); it != aPtr -> end(); ++it)
-		{
+	if (aPtr && bPtr) {
+		for (auto it = aPtr -> begin(); it != aPtr -> end(); ++it) {
 			int key = it -> first;
-			if (bPtr -> contains(key))
-			{
+			if (bPtr -> contains(key)) {
 				result.push(key, it -> second);
 			}
 		}
 	}
-
 	trees.add(newName, result);
 }
 
 void unionHandler(std::ostream& out, std::istream& in, TreesTable& trees)
 {
 	std::string newName, aName, bName;
-	if (!(in >> newName >> aName >> bName))
-	{
+	if (!(in >> newName >> aName >> bName)) {
 		out << "<INVALID COMMAND>\n";
 		return;
 	}
@@ -105,19 +92,14 @@ void unionHandler(std::ostream& out, std::istream& in, TreesTable& trees)
 	auto bPtr = trees.find(bName);
 
 	kitserov::BSTree< int, std::string > result;
-	if (aPtr)
-	{
-		for (auto it = aPtr -> begin(); it != aPtr -> end(); ++it)
-		{
+	if (aPtr) {
+		for (auto it = aPtr -> begin(); it != aPtr -> end(); ++it) {
 			result.push(it -> first, it -> second);
 		}
 	}
-	if (bPtr)
-	{
-		for (auto it = bPtr -> begin(); it != bPtr -> end(); ++it)
-		{
-			if (!result.contains(it -> first))
-			{
+	if (bPtr) {
+		for (auto it = bPtr -> begin(); it != bPtr -> end(); ++it) {
+			if (!result.contains(it -> first)) {
 				result.push(it -> first, it -> second);
 			}
 		}

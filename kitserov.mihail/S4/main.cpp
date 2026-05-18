@@ -13,11 +13,11 @@ int main(int argc, char* argv[])
 {
   using namespace kitserov;
   using TreesTable = HashTable< std::string,
-                                BSTree< int, std::string >,
-                                SipHash< std::string >,
-                                std::equal_to< std::string > >;
+    BSTree< int, std::string >,
+    SipHash< std::string >,
+    std::equal_to< std::string > >;
   using CommandHandler = void (*)(std::ostream& out, std::istream& in,
-                                  TreesTable&);
+    TreesTable&);
 
   if (argc != 2)
   {

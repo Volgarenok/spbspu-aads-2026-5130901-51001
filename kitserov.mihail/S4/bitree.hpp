@@ -25,18 +25,20 @@ namespace kitserov
     bool is_fake_root_;
 
     BSTree(const Key& k, const Value& v, BSTree* p, const Compare& comp)
-        : data_(k, v), left_(nullptr), right_(nullptr), parent_(p), height_(1), cmp_(comp), size_(1), is_fake_root_(false) {}
+        : data_(k, v), left_(nullptr), right_(nullptr), parent_(p), height_(1),
+        cmp_(comp), size_(1), is_fake_root_(false) {}
 
-    // Приватный конструктор для создания fake-root
     BSTree(const Compare& comp)
-        : data_(), left_(nullptr), right_(nullptr), parent_(nullptr), height_(0), cmp_(comp), size_(0), is_fake_root_(true) {}
+        : data_(), left_(nullptr), right_(nullptr), parent_(nullptr), height_(0),
+        cmp_(comp), size_(0), is_fake_root_(true) {}
 
     static BSTree* clone(const BSTree* other, BSTree* parent)
     {
       if (!other) {
         return nullptr;
       }
-      BSTree* node = new BSTree(other -> data_.first, other -> data_.second, parent, other -> cmp_);
+      BSTree* node = new BSTree(other -> data_.first, other -> data_.second, parent,
+        other -> cmp_);
       node -> height_ = other -> height_;
       node -> size_ = other -> size_;
       node -> left_ = clone(other -> left_, node);
@@ -172,7 +174,8 @@ namespace kitserov
     friend class BSTIterator< Key, Value, Compare >;
     friend class BSTConstIterator< Key, Value, Compare >;
 
-    BSTree() : data_(), left_(nullptr), right_(nullptr), parent_(nullptr), height_(0), cmp_(Compare()), size_(0), is_fake_root_(true) {}
+    BSTree() : data_(), left_(nullptr), right_(nullptr), parent_(nullptr), height_(0),
+      cmp_(Compare()), size_(0), is_fake_root_(true) {}
     ~BSTree()
     {
       clear();
@@ -410,7 +413,8 @@ namespace kitserov
     }
     const_iterator rotateLeft(const_iterator it)
     {
-      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_ || it.node -> parent_ -> is_fake_root_ || it.node != it.node -> parent_ -> right_) {
+      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_ ||
+          it.node -> parent_ -> is_fake_root_ || it.node != it.node -> parent_ -> right_) {
         throw std::invalid_argument("rotateLeft: bad argument");
       }
       BSTree* child = const_cast< BSTree* >(it.node);
@@ -419,7 +423,8 @@ namespace kitserov
     }
     const_iterator rotateRight(const_iterator it)
     {
-      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_ || it.node -> parent_ -> is_fake_root_ || it.node != it.node -> parent_ -> left_) {
+      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_ 
+         || it.node -> parent_ -> is_fake_root_ || it.node != it.node -> parent_ -> left_) {
         throw std::invalid_argument("rotateRight: bad argument");
       }
       BSTree* child = const_cast< BSTree* >(it.node);
@@ -428,8 +433,10 @@ namespace kitserov
     }
     const_iterator rotateLargeLeft(const_iterator it)
     {
-      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_ || !it.node -> parent_ -> parent_ ||
-          it.node != it.node -> parent_ -> left_ || it.node -> parent_ != it.node -> parent_ -> parent_ -> right_) {
+      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_ 
+          || !it.node -> parent_ -> parent_ ||
+          it.node != it.node -> parent_ -> left_ 
+          || it.node -> parent_ != it.node -> parent_ -> parent_ -> right_) {
         throw std::invalid_argument("rotateLargeLeft: bad argument");
       }
       rotateRight(it);
@@ -437,8 +444,10 @@ namespace kitserov
     }
     const_iterator rotateLargeRight(const_iterator it)
     {
-      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_ || !it.node -> parent_ -> parent_ ||
-          it.node != it.node -> parent_ -> right_ || it.node -> parent_ != it.node -> parent_ -> parent_ -> left_) {
+      if (!it.node || it.node == this || it.node -> is_fake_root_ || !it.node -> parent_ 
+          || !it.node -> parent_ -> parent_ ||
+          it.node != it.node -> parent_ -> right_ 
+          || it.node -> parent_ != it.node -> parent_ -> parent_ -> left_) {
         throw std::invalid_argument("rotateLargeRight: bad argument");
       }
       rotateLeft(it);
@@ -521,7 +530,8 @@ namespace kitserov
 
     BSTConstIterator() : node_(nullptr), sentinel_(nullptr) {}
 
-    BSTConstIterator(const BSTIterator< Key, Value, Compare >& it) : node_(it.node_), sentinel_(it.sentinel_) {}
+    BSTConstIterator(const BSTIterator< Key, Value, Compare >& it)
+      : node_(it.node_), sentinel_(it.sentinel_) {}
 
     value_type& operator*() const
     {
