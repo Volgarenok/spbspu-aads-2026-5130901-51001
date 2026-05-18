@@ -8,6 +8,28 @@ namespace
 {
   const std::size_t BUCKET_SIZE = 4;
 
+  struct PathInfo
+  {
+    std::size_t duration;
+    std::string previous;
+
+    PathInfo():
+      duration(0),
+      previous()
+    {}
+
+    PathInfo(std::size_t newDuration, const std::string& newPrevious):
+      duration(newDuration),
+      previous(newPrevious)
+    {}
+  };
+
+  using PathInfoTable = shaykhraziev::HashTable<
+      std::string,
+      PathInfo,
+      shaykhraziev::HmacHash,
+      shaykhraziev::StringEqual >;
+
   bool isPlanned(const shaykhraziev::Plan& plan, const std::string& taskId)
   {
     return plan.findTask(taskId) != nullptr;
@@ -71,6 +93,38 @@ namespace
     workerAvailable[bestWorker] = endDay + 1;
     return shaykhraziev::PlannedTask(task.id, bestWorker, bestStart, endDay);
   }
+
+  PathInfo calculatePathInfo(const shaykhraziev::Task& task, const PathInfoTable& infos)
+  {
+    std::size_t bestDuration = task.duration;
+    std::string previous;
+    for (shaykhraziev::List< std::string >::const_iterator it = task.dependencies.cbegin();
+        it != task.dependencies.cend();
+        ++it)
+    {
+      const PathInfo* dependency = infos.find(*it);
+      if (dependency && dependency->duration + task.duration > bestDuration)
+      {
+        bestDuration = dependency->duration + task.duration;
+        previous = *it;
+      }
+    }
+    return PathInfo(bestDuration, previous);
+  }
+
+  void restoreCriticalPath(
+      const PathInfoTable& infos,
+      const std::string& lastTask,
+      shaykhraziev::CriticalPath& path)
+  {
+    std::string current = lastTask;
+    while (!current.empty())
+    {
+      path.taskIds.pushFront(current);
+      const PathInfo* info = infos.find(current);
+      current = info ? info->previous : "";
+    }
+  }
 }
 
 shaykhraziev::PlannedTask::PlannedTask():
@@ -133,6 +187,11 @@ std::size_t shaykhraziev::Plan::countTasks() const noexcept
   return tasks_.size();
 }
 
+shaykhraziev::CriticalPath::CriticalPath():
+  taskIds(),
+  duration(0)
+{}
+
 bool shaykhraziev::buildProjectPlan(Project& project)
 {
   if (project.hasCycle())
@@ -166,5 +225,42 @@ bool shaykhraziev::buildProjectPlan(Project& project)
     }
   }
   project.setPlan(plan);
+  return true;
+}
+
+bool shaykhraziev::calculateCriticalPath(const Project& project, CriticalPath& path)
+{
+  path = CriticalPath();
+  List< std::string > topologicalOrder;
+  if (!project.getTopologicalOrder(topologicalOrder))
+  {
+    return false;
+  }
+  if (project.countTasks() == 0)
+  {
+    return true;
+  }
+
+  PathInfoTable infos(project.countTasks() + 1, BUCKET_SIZE);
+  for (List< std::string >::const_iterator it = topologicalOrder.cbegin(); it != topologicalOrder.cend(); ++it)
+  {
+    const Task* task = project.findTask(*it);
+    if (task)
+    {
+      infos.add(*it, calculatePathInfo(*task, infos));
+    }
+  }
+
+  std::string lastTask;
+  for (List< std::string >::const_iterator it = project.getTaskOrder().cbegin(); it != project.getTaskOrder().cend(); ++it)
+  {
+    const PathInfo* info = infos.find(*it);
+    if (info && info->duration > path.duration)
+    {
+      path.duration = info->duration;
+      lastTask = *it;
+    }
+  }
+  restoreCriticalPath(infos, lastTask, path);
   return true;
 }

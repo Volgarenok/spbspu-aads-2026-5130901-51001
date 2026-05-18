@@ -32,6 +32,7 @@ BOOST_AUTO_TEST_CASE(commands_registry_contains_initial_commands)
   BOOST_CHECK(commands.has("show-worker"));
   BOOST_CHECK(commands.has("stats"));
   BOOST_CHECK(commands.has("show-gantt"));
+  BOOST_CHECK(commands.has("critical-path"));
   BOOST_CHECK(!commands.has("missing"));
 }
 
@@ -145,4 +146,19 @@ BOOST_AUTO_TEST_CASE(commands_show_gantt_requires_built_plan)
       "DAYS:     1 2\n"
       "task  W1 # #\n"
       "<PROJECT-END: 2>\n");
+}
+
+BOOST_AUTO_TEST_CASE(commands_print_critical_path)
+{
+  shaykhraziev::ProjectStorage storage;
+  storage.makeProject("site", 1, 2);
+  storage.findProject("site")->addTask("design", 3, "Design");
+  storage.findProject("site")->addTask("backend", 4, "Backend");
+  storage.findProject("site")->addDependency("backend", "design");
+
+  BOOST_TEST(run(storage, "critical-path site") ==
+      "<CRITICAL-PATH site>\n"
+      "design -> backend\n"
+      "<DURATION: 7>\n");
+  BOOST_TEST(run(storage, "critical-path missing") == "<INVALID COMMAND>\n");
 }

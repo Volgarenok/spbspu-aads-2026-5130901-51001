@@ -76,3 +76,62 @@ BOOST_AUTO_TEST_CASE(planner_respects_single_worker_limit)
   BOOST_TEST(project.getPlan().findTask("backend")->startDay == 4);
   BOOST_TEST(project.getPlan().getProjectEndDay() == 7);
 }
+
+BOOST_AUTO_TEST_CASE(planner_calculates_critical_path_for_chain)
+{
+  shaykhraziev::Project project("site", 1, 2);
+  project.addTask("design", 3, "Design");
+  project.addTask("backend", 4, "Backend");
+  project.addTask("test", 2, "Test");
+  project.addDependency("backend", "design");
+  project.addDependency("test", "backend");
+  shaykhraziev::CriticalPath path;
+
+  BOOST_CHECK(shaykhraziev::calculateCriticalPath(project, path));
+
+  BOOST_TEST(path.duration == 9);
+  BOOST_TEST(path.taskIds.front() == "design");
+  BOOST_TEST(path.taskIds.back() == "test");
+}
+
+BOOST_AUTO_TEST_CASE(planner_calculates_critical_path_for_different_chains)
+{
+  shaykhraziev::Project project("site", 1, 2);
+  project.addTask("a", 2, "A");
+  project.addTask("b", 2, "B");
+  project.addTask("c", 7, "C");
+  project.addTask("d", 1, "D");
+  project.addDependency("b", "a");
+  project.addDependency("d", "c");
+  shaykhraziev::CriticalPath path;
+
+  BOOST_CHECK(shaykhraziev::calculateCriticalPath(project, path));
+
+  BOOST_TEST(path.duration == 8);
+  BOOST_TEST(path.taskIds.front() == "c");
+  BOOST_TEST(path.taskIds.back() == "d");
+}
+
+BOOST_AUTO_TEST_CASE(planner_critical_path_keeps_stable_tie)
+{
+  shaykhraziev::Project project("site", 1, 2);
+  project.addTask("a", 3, "A");
+  project.addTask("b", 3, "B");
+  shaykhraziev::CriticalPath path;
+
+  BOOST_CHECK(shaykhraziev::calculateCriticalPath(project, path));
+
+  BOOST_TEST(path.duration == 3);
+  BOOST_TEST(path.taskIds.front() == "a");
+}
+
+BOOST_AUTO_TEST_CASE(planner_critical_path_supports_empty_project)
+{
+  shaykhraziev::Project project("site", 1, 2);
+  shaykhraziev::CriticalPath path;
+
+  BOOST_CHECK(shaykhraziev::calculateCriticalPath(project, path));
+
+  BOOST_CHECK(path.taskIds.empty());
+  BOOST_TEST(path.duration == 0);
+}

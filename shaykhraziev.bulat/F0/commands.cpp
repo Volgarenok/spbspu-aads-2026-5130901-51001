@@ -278,6 +278,48 @@ namespace
     shaykhraziev::renderGantt(*project, out);
     return true;
   }
+
+  void printCriticalPath(const shaykhraziev::CriticalPath& path, std::ostream& out)
+  {
+    bool first = true;
+    for (shaykhraziev::List< std::string >::const_iterator it = path.taskIds.cbegin();
+        it != path.taskIds.cend();
+        ++it)
+    {
+      if (!first)
+      {
+        out << " -> ";
+      }
+      out << *it;
+      first = false;
+    }
+    if (!path.taskIds.empty())
+    {
+      out << '\n';
+    }
+  }
+
+  bool criticalPathCommand(
+      shaykhraziev::ProjectStorage& storage,
+      const shaykhraziev::List< std::string >& tokens,
+      const std::string&,
+      std::ostream& out)
+  {
+    const shaykhraziev::Project* project = storage.findProject(tokenAt(tokens, 1));
+    if (!project)
+    {
+      return false;
+    }
+    shaykhraziev::CriticalPath path;
+    if (!shaykhraziev::calculateCriticalPath(*project, path))
+    {
+      return false;
+    }
+    out << "<CRITICAL-PATH " << project->getName() << ">\n";
+    printCriticalPath(path, out);
+    out << "<DURATION: " << path.duration << ">\n";
+    return true;
+  }
 }
 
 shaykhraziev::CommandRegistry shaykhraziev::makeCommandRegistry()
@@ -296,6 +338,7 @@ shaykhraziev::CommandRegistry shaykhraziev::makeCommandRegistry()
   commands.add("show-worker", CommandHandler{2, 2, showWorkerCommand});
   commands.add("stats", CommandHandler{1, 1, statsCommand});
   commands.add("show-gantt", CommandHandler{1, 1, showGanttCommand});
+  commands.add("critical-path", CommandHandler{1, 1, criticalPathCommand});
   return commands;
 }
 

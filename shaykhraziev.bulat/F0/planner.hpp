@@ -47,7 +47,16 @@ namespace shaykhraziev
     std::size_t projectEndDay_;
   };
 
+  struct CriticalPath
+  {
+    List< std::string > taskIds;
+    std::size_t duration;
+
+    CriticalPath();
+  };
+
   bool buildProjectPlan(Project& project);
+  bool calculateCriticalPath(const Project& project, CriticalPath& path);
 }
 
 #endif
