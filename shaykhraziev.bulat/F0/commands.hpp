@@ -1,0 +1,34 @@
+#ifndef F0_COMMANDS_HPP
+#define F0_COMMANDS_HPP
+
+#include "project.hpp"
+
+#include <hash-functions.hpp>
+#include <hash-table.hpp>
+#include <list.hpp>
+
+#include <cstddef>
+#include <iosfwd>
+#include <string>
+
+namespace shaykhraziev
+{
+  using CommandFunction = bool (*)(ProjectStorage&, const List< std::string >&, const std::string&, std::ostream&);
+
+  struct CommandHandler
+  {
+    std::size_t minArguments;
+    std::size_t maxArguments;
+    CommandFunction function;
+  };
+
+  using CommandRegistry = HashTable< std::string, CommandHandler, HmacHash, StringEqual >;
+
+  CommandRegistry makeCommandRegistry();
+  bool executeCommandLine(ProjectStorage& storage, const CommandRegistry& commands,
+      const std::string& line, std::ostream& out);
+  void processCommands(ProjectStorage& storage, const CommandRegistry& commands,
+      std::istream& in, std::ostream& out);
+}
+
+#endif

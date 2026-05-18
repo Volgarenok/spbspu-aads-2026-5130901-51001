@@ -1,46 +1,19 @@
 #include "app.hpp"
 
-#include "io.hpp"
-
 #include <istream>
 #include <ostream>
 #include <stdexcept>
-#include <string>
 
-namespace
-{
-  bool isEmptyLine(const std::string& line)
-  {
-    for (std::size_t i = 0; i < line.size(); ++i)
-    {
-      if (line[i] != ' ' && line[i] != '\t' && line[i] != '\r')
-      {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  void processInput(std::istream& in, std::ostream& out)
-  {
-    std::string line;
-    while (std::getline(in, line))
-    {
-      if (!isEmptyLine(line))
-      {
-        out << "<INVALID COMMAND>\n";
-      }
-    }
-  }
-}
+#include "commands.hpp"
+#include "io.hpp"
 
 int shaykhraziev::runF0(const char* filename, std::istream& in, std::ostream& out, std::ostream& err)
 {
   try
   {
     ProjectStorage storage = readProjectsFromFile(filename);
-    static_cast< void >(storage);
-    processInput(in, out);
+    CommandRegistry commands = makeCommandRegistry();
+    processCommands(storage, commands, in, out);
   }
   catch (const std::runtime_error& e)
   {
