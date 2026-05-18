@@ -11,6 +11,9 @@ using AdjPair = HashTable<std::string, Vector<Graph::Edge>>::Pair;
 bool containsString(const Vector<std::string>& values,
                     const std::string& value);
 
+void sortInts(Vector<int>& v);
+void sortStrings(Vector<std::string>& v);
+
 bool containsString(const Vector<std::string>& values,
                     const std::string& value)
 {
@@ -42,6 +45,16 @@ void sortValues(Vector<T>& v)
   }
 }
 
+void sortInts(Vector<int>& v)
+{
+  sortValues(v);
+}
+
+void sortStrings(Vector<std::string>& v)
+{
+  sortValues(v);
+}
+
 void appendUnique(Vector<std::string>& values, const std::string& value)
 {
   if (!containsString(values, value))
@@ -64,7 +77,8 @@ void appendEdges(Graph& result, Graph& src)
   }
 }
 
-void graphs(std::istream&, std::ostream& out, GraphTable& graphs, VertTable&, std::string)
+void graphs(std::istream&, std::ostream& out, GraphTable& graphs,
+            VertTable&, std::string)
 {
   Vector<std::string> names;
   for (auto it = graphs.begin(); it != graphs.end(); ++it)
@@ -79,7 +93,8 @@ void graphs(std::istream&, std::ostream& out, GraphTable& graphs, VertTable&, st
   }
 }
 
-void vertexes(std::istream&, std::ostream& out, GraphTable&, VertTable& graphVertices, std::string graphName)
+void vertexes(std::istream&, std::ostream& out, GraphTable&, 
+              VertTable& graphVertices, std::string graphName)
 {
   if (!graphVertices.has(graphName)) { out << "<INVALID COMMAND>\n"; return; }
   Vector<std::string> verts = graphVertices.get(graphName);
@@ -100,7 +115,8 @@ void vertexes(std::istream&, std::ostream& out, GraphTable&, VertTable& graphVer
   if (!printed) out << "\n";
 }
 
-void create(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& graphVertices, std::string graphName)
+void create(std::istream& in, std::ostream& out, GraphTable& graphs,
+            VertTable& graphVertices, std::string graphName)
 {
   if (graphs.has(graphName)) { out << "<INVALID COMMAND>\n"; return; }
   size_t k = 0;
@@ -123,7 +139,8 @@ void create(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& 
   graphVertices.add(graphName, verts);
 }
 
-void bind(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& graphVertices, std::string graphName)
+void bind(std::istream& in, std::ostream& out, GraphTable& graphs,
+          VertTable& graphVertices, std::string graphName)
 {
   std::string a, b;
   int w;
@@ -146,7 +163,8 @@ void bind(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& gr
   graphs.get(graphName).addEdge(a, b, w);
 }
 
-void cut(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& graphVertices, std::string graphName)
+void cut(std::istream& in, std::ostream& out, GraphTable& graphs,
+         VertTable& graphVertices, std::string graphName)
 {
   std::string a, b;
   int w;
@@ -189,7 +207,8 @@ void cut(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& gra
   if (!foundEdge) { out << "<INVALID COMMAND>\n"; }
 }
 
-void outbound(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& graphVertices, std::string graphName)
+void outbound(std::istream& in, std::ostream& out, GraphTable& graphs,
+              VertTable& graphVertices, std::string graphName)
 {
   std::string v;
   in >> v;
@@ -254,7 +273,8 @@ void outbound(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable
   }
 }
 
-void inbound(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& graphVertices, std::string graphName)
+void inbound(std::istream& in, std::ostream& out, GraphTable& graphs,
+             VertTable& graphVertices, std::string graphName)
 {
   std::string v;
   in >> v;
@@ -323,7 +343,8 @@ void inbound(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable&
   }
 }
 
-void merge(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& graphVertices, std::string graphName)
+void merge(std::istream& in, std::ostream& out, GraphTable& graphs,
+           VertTable& graphVertices, std::string graphName)
 {
   std::string g1, g2;
   in >> g1 >> g2;
@@ -353,7 +374,8 @@ void merge(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& g
   graphVertices.add(graphName, verts);
 }
 
-void extract(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& graphVertices, std::string graphName)
+void extract(std::istream& in, std::ostream& out, GraphTable& graphs,
+             VertTable& graphVertices, std::string graphName)
 {
   std::string oldG;
   size_t k;
@@ -409,4 +431,6 @@ void extract(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable&
   }
   graphs.add(graphName, res);
   graphVertices.add(graphName, resVerts);
+}
+
 }
