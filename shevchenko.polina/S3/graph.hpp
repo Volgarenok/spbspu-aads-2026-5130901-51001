@@ -4,7 +4,7 @@
 #include <string>
 #include <stdexcept>
 
-#include "common/list.hpp"
+#include "../common/list.hpp"
 #include "hash_table.hpp"
 #include "sha1.hpp"
 
@@ -30,6 +30,11 @@ public:
   
   Graph();
   
+  Graph(const Graph& other) = default;
+  Graph(Graph&& other) noexcept = default;
+  Graph& operator=(const Graph& other) = default;
+  Graph& operator=(Graph&& other) noexcept = default;
+  
   bool empty() const;
   bool hasVertex(const std::string& vertex) const;
   void addVertex(const std::string& vertex);
@@ -38,7 +43,7 @@ public:
   const EdgeList& outbound(const std::string& vertex) const;
   EdgeList inbound(const std::string& vertex) const;
   void merge(const Graph& other);
-  Graph extract(const std::string& vertex) const;
+  Graph extract(const List<std::string>& vertices) const;
   const Table& data() const;
   
 private:

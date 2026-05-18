@@ -60,17 +60,25 @@ void Graph::cut(const std::string& from, const std::string& to, size_t weight)
   }
   
   EdgeList& edges = adjacency_.at(from);
+  bool found = false;
   
   for (auto it = edges.begin(); it != edges.end();)
   {
     if ((*it).to == to && (*it).weight == weight)
     {
       it = edges.erase(it);
+      found = true;
+      break;
     }
     else
     {
       ++it;
     }
+  }
+  
+  if (!found)
+  {
+    throw std::out_of_range("edge not found");
   }
 }
 
@@ -105,32 +113,57 @@ void Graph::merge(const Graph& other)
   for (auto it = other.adjacency_.cbegin(); it != other.adjacency_.cend(); ++it)
   {
     addVertex((*it).first);
-    
+    EdgeList& current_edges = adjacency_.at((*it).first);
+
     for (auto e = (*it).second.begin(); e != (*it).second.end(); ++e)
     {
-      adjacency_.at((*it).first).pushBack(*e);
+      current_edges.pushBack(*e);
     }
   }
 }
 
-Graph Graph::extract(const std::string& vertex) const
+Graph Graph::extract(const List<std::string>& vertices) const
 {
   Graph result;
   
-  if (!hasVertex(vertex))
+  for (auto v_it = vertices.begin(); v_it != vertices.end(); ++v_it)
   {
-    return result;
+    if (!hasVertex(*v_it))
+    {
+      return result;
+    }
+    result.addVertex(*v_it);
   }
-  
-  result.addVertex(vertex);
   
   for (auto it = adjacency_.cbegin(); it != adjacency_.cend(); ++it)
   {
     const std::string& from = (*it).first;
     
+    bool from_in_set = false;
+    for (auto v_it = vertices.begin(); v_it != vertices.end(); ++v_it)
+    {
+      if (*v_it == from)
+      {
+        from_in_set = true;
+        break;
+      }
+    }
+    
+    if (!from_in_set) continue;
+    
     for (auto e = (*it).second.begin(); e != (*it).second.end(); ++e)
     {
-      if (from == vertex || (*e).to == vertex)
+      bool to_in_set = false;
+      for (auto v_it = vertices.begin(); v_it != vertices.end(); ++v_it)
+      {
+        if (*v_it == (*e).to)
+        {
+          to_in_set = true;
+          break;
+        }
+      }
+      
+      if (to_in_set)
       {
         result.addVertex(from);
         result.addVertex((*e).to);

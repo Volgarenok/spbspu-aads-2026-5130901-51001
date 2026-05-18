@@ -312,9 +312,7 @@ void cutCommand(GraphTable& graphs, std::istream& in, std::ostream& out)
 void createCommand(GraphTable& graphs, std::istream& in, std::ostream& out)
 {
   std::string graph_name;
-  size_t vertex_count;
-  
-  in >> graph_name >> vertex_count;
+  in >> graph_name;
   
   try
   {
@@ -326,11 +324,23 @@ void createCommand(GraphTable& graphs, std::istream& in, std::ostream& out)
     
     Graph new_graph;
     
-    for (size_t i = 0; i < vertex_count; ++i)
+    size_t vertex_count;
+    if (in >> vertex_count)
     {
-      std::string vertex;
-      in >> vertex;
-      new_graph.addVertex(vertex);
+      for (size_t i = 0; i < vertex_count; ++i)
+      {
+        std::string vertex;
+        if (!(in >> vertex))
+        {
+          out << "<INVALID COMMAND>\n";
+          return;
+        }
+        new_graph.addVertex(vertex);
+      }
+    }
+    else
+    {
+      in.clear();
     }
     
     graphs.insert(graph_name, new_graph);
@@ -396,23 +406,16 @@ void extractCommand(GraphTable& graphs, std::istream& in, std::ostream& out)
     }
     
     const Graph& source = graphs.at(source_name);
-    Graph result;
     
+    List<std::string> vertices;
     for (size_t i = 0; i < vertex_count; ++i)
     {
       std::string vertex;
       in >> vertex;
-      
-      if (!source.hasVertex(vertex))
-      {
-        out << "<INVALID COMMAND>\n";
-        return;
-      }
-      
-      Graph subgraph = source.extract(vertex);
-      result.merge(subgraph);
+      vertices.pushBack(vertex);
     }
     
+    Graph result = source.extract(vertices);
     graphs.insert(result_name, result);
   }
   catch (const std::exception&)

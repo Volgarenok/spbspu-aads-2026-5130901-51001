@@ -7,7 +7,7 @@
 #include "graph.hpp"
 #include "hash_table.hpp"
 #include "sha1.hpp"
-#include "common/list.hpp"
+#include "../common/list.hpp"
 
 namespace shevchenko
 {

@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <utility>
 
-#include "common/list.hpp"
+#include "../common/list.hpp"
 
 namespace shevchenko
 {
@@ -172,7 +172,7 @@ public:
           return *this;
         }
         
-        bucket_iterator_ = table_->buckets_[bucket_index_].begin();
+        bucket_iterator_ = table_->buckets_[bucket_index_].cbegin();
       }
       
       return *this;
@@ -210,7 +210,7 @@ public:
     typename bucket_type::const_iterator bucket_iterator_;
   };
   
-  explicit HashTable(size_t bucket_count = 17, size_t bucket_size = 8)
+  explicit HashTable(size_t bucket_count = 64, size_t bucket_size = 32)
   : bucket_count_(bucket_count)
   , bucket_size_(bucket_size)
   , size_(0)
@@ -230,8 +230,8 @@ public:
   {
     for (size_t i = 0; i < bucket_count_; ++i)
     {
-      for (auto it = other.buckets_[i].begin();
-           it != other.buckets_[i].end();
+      for (auto it = other.buckets_[i].cbegin();
+           it != other.buckets_[i].cend();
            ++it)
       {
         buckets_[i].pushBack(*it);
@@ -403,7 +403,7 @@ public:
     size_t index = getIndex(key);
     const bucket_type& bucket = buckets_[index];
     
-    for (auto it = bucket.begin(); it != bucket.end(); ++it)
+    for (auto it = bucket.cbegin(); it != bucket.cend(); ++it)
     {
       if (equal_((*it).first, key))
       {
@@ -437,7 +437,7 @@ public:
     {
       if (!buckets_[i].empty())
       {
-        return const_iterator(this, i, buckets_[i].begin());
+        return const_iterator(this, i, buckets_[i].cbegin());
       }
     }
     return cend();
@@ -468,7 +468,7 @@ public:
     HashTable tmp(new_bucket_count, bucket_size_);
     for (const_iterator it = cbegin(); it != cend(); ++it)
     {
-      tmp.insert(it->first, it->second);
+      tmp.insert((*it).first, (*it).second);
     }
     swap(tmp);
   }

@@ -10,6 +10,12 @@ template< class T >
 class List;
 
 template< class T >
+class LIter;
+
+template< class T >
+class LCIter;
+
+template< class T >
 struct Node
 {
   T data;
@@ -28,6 +34,7 @@ template< class T >
 class LCIter
 {
   friend class List< T >;
+  friend class LIter< T >;
 
 public:
   LCIter() :
@@ -96,6 +103,7 @@ template< class T >
 class LIter
 {
   friend class List< T >;
+  friend class LCIter< T >;
 
 public:
   LIter() :
