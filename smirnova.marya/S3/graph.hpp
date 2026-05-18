@@ -14,15 +14,11 @@ class Graph
     struct Edge
     {
       std::string to;
-      Vector<int> weights;
+      Vector< int > weights;
     };
-
-    HashTable<std::string, Vector<Edge>> adj;
-
+    HashTable< std::string, Vector< Edge > > adj;
     void addVertex(const std::string& v);
-
     void addEdge(const std::string& a,const std::string& b, int w);
-
     void cut(const std::string& a, const std::string& b, int w);
   };
 

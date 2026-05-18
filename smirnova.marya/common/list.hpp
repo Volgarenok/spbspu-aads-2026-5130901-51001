@@ -17,13 +17,17 @@ namespace smirnova
     Node* next;
     Node* prev;
 
-    Node() : next(nullptr), prev(nullptr) {}  // sentinel
+    Node():
+      next(nullptr), prev(nullptr)
+    {}
 
-    Node(const T& d)
-      : data(d), next(nullptr), prev(nullptr) {}
+    Node(const T& d):
+      data(d), next(nullptr), prev(nullptr)
+    {}
 
-    Node(T&& d)
-      : data(std::move(d)), next(nullptr), prev(nullptr) {}
+    Node(T&& d):
+      data(std::move(d)), next(nullptr), prev(nullptr)
+    {}
   };
 
   template < typename T >
@@ -68,16 +72,16 @@ namespace smirnova
     }
 
     List(const List& other):
-      List() {
-        for (LCIter< T > it = other.cbegin(); it.valid(); it.next())
+      List()
+      {
+        for (LCIter< T > it = other.cbegin();it.valid(); it.next())
         {
           pushBack(it.value());
         }
-    }
+      }
 
     List(List&& other) noexcept:
-      sentinel(other.sentinel),
-      count(other.count)
+      sentinel(other.sentinel), count(other.count)
     {
       other.sentinel = new Node< T >(T());
       other.sentinel->next = other.sentinel;
@@ -138,25 +142,33 @@ namespace smirnova
 
     T& front()
     {
-      if (empty()) throw std::out_of_range("empty");
+      if (empty()) {
+        throw std::out_of_range("empty");
+      }
       return sentinel->next->data;
     }
 
     const T& front() const
     {
-      if (empty()) throw std::out_of_range("empty");
+      if (empty()) {
+        throw std::out_of_range("empty");
+      }
       return sentinel->next->data;
     }
 
     T& back()
     {
-      if (empty()) throw std::out_of_range("empty");
+      if (empty()) {
+        throw std::out_of_range("empty");
+      }
       return sentinel->prev->data;
     }
 
     const T& back() const
     {
-      if (empty()) throw std::out_of_range("empty");
+      if (empty()) {
+        throw std::out_of_range("empty");
+      }
       return sentinel->prev->data;
     }
 
@@ -258,8 +270,8 @@ namespace smirnova
     Node< T >* sentinel;
 
   public:
-    LIter(Node< T >* n = nullptr, Node< T >* s = nullptr)
-      : node(n), sentinel(s)
+    LIter(Node< T >* n = nullptr, Node< T >* s = nullptr):
+      node(n), sentinel(s)
     {}
 
     bool valid() const
@@ -300,8 +312,8 @@ namespace smirnova
     const Node< T >* sentinel;
 
   public:
-    LCIter(const Node< T >* n = nullptr, const Node< T >* s = nullptr)
-      : node(n), sentinel(s)
+    LCIter(const Node< T >* n = nullptr, const Node< T >* s = nullptr):
+      node(n), sentinel(s)
     {}
 
     bool valid() const

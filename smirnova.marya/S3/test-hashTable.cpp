@@ -9,7 +9,7 @@ BOOST_AUTO_TEST_SUITE(HashTableTests)
 
 BOOST_AUTO_TEST_CASE(DefaultConstruct)
 {
-  HashTable<std::string, int> ht;
+  HashTable< std::string, int > ht;
 
   BOOST_CHECK_EQUAL(ht.bucketCount(), 16);
   BOOST_CHECK_EQUAL(ht.size(), 0);
@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(DefaultConstruct)
 
 BOOST_AUTO_TEST_CASE(AddAndGet)
 {
-  HashTable<std::string, int> ht;
+  HashTable< std::string, int > ht;
 
   BOOST_CHECK(!ht.has("key1"));
 
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(AddAndGet)
 
 BOOST_AUTO_TEST_CASE(UpdateValue)
 {
-  HashTable<std::string, int> ht;
+  HashTable< std::string, int > ht;
 
   ht.add("key1", 10);
   BOOST_CHECK_EQUAL(ht.get("key1"), 10);
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(UpdateValue)
 
 BOOST_AUTO_TEST_CASE(AddMultiple)
 {
-  HashTable<std::string, int> ht;
+  HashTable< std::string, int > ht;
 
   ht.add("key1", 1);
   ht.add("key2", 2);
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(AddMultiple)
 
 BOOST_AUTO_TEST_CASE(Drop)
 {
-  HashTable<std::string, int> ht;
+  HashTable< std::string, int > ht;
 
   ht.add("key1", 50);
   ht.add("key2", 60);
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(Drop)
 
 BOOST_AUTO_TEST_CASE(HasReturnsFalseForMissing)
 {
-  HashTable<std::string, int> ht;
+  HashTable< std::string, int > ht;
 
   ht.add("key1", 1);
   ht.add("key2", 2);
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(HasReturnsFalseForMissing)
 
 BOOST_AUTO_TEST_CASE(Rehash)
 {
-  HashTable<std::string, int> ht;
+  HashTable< std::string, int > ht;
 
   ht.add("key1", 1);
   ht.add("key2", 2);
