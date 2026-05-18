@@ -71,6 +71,14 @@ BOOST_AUTO_TEST_CASE(commands_reject_existing_new_dataset)
   BOOST_TEST(run(datasets, "union first first second") == "<INVALID COMMAND>\n");
 }
 
+BOOST_AUTO_TEST_CASE(commands_reject_missing_operand_dataset)
+{
+  shaykhraziev::DatasetTable datasets = makeDatasets();
+
+  BOOST_TEST(run(datasets, "union new first missing") == "<INVALID COMMAND>\n");
+  BOOST_TEST(run(datasets, "intersect new missing first") == "<INVALID COMMAND>\n");
+}
+
 BOOST_AUTO_TEST_CASE(commands_reject_unknown_command)
 {
   shaykhraziev::DatasetTable datasets = makeDatasets();

@@ -53,6 +53,13 @@ BOOST_AUTO_TEST_CASE(io_rejects_invalid_key)
   BOOST_CHECK_THROW(shaykhraziev::readDatasets(input), std::logic_error);
 }
 
+BOOST_AUTO_TEST_CASE(io_rejects_duplicate_dataset_name)
+{
+  std::istringstream input("same 1 one\nsame 2 two\n");
+
+  BOOST_CHECK_THROW(shaykhraziev::readDatasets(input), std::logic_error);
+}
+
 BOOST_AUTO_TEST_CASE(io_rejects_missing_file)
 {
   BOOST_CHECK_THROW(shaykhraziev::readDatasetsFromFile("__missing_s4_file__"), std::runtime_error);
