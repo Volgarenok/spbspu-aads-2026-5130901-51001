@@ -63,7 +63,7 @@ void Graph::cut(const std::string& from, const std::string& to, size_t weight)
   
   for (auto it = edges.begin(); it != edges.end();)
   {
-    if (it->to == to && it->weight == weight)
+    if ((*it).to == to && (*it).weight == weight)
     {
       it = edges.erase(it);
     }
@@ -85,8 +85,8 @@ Graph::EdgeList Graph::inbound(const std::string& vertex) const
   
   for (auto it = adjacency_.cbegin(); it != adjacency_.cend(); ++it)
   {
-    const std::string& from = it->first;
-    const EdgeList& edges = it->second;
+    const std::string& from = (*it).first;
+    const EdgeList& edges = (*it).second;
     
     for (auto edge_it = edges.begin(); edge_it != edges.end(); ++edge_it)
     {
@@ -104,11 +104,11 @@ void Graph::merge(const Graph& other)
 {
   for (auto it = other.adjacency_.cbegin(); it != other.adjacency_.cend(); ++it)
   {
-    addVertex(it->first);
+    addVertex((*it).first);
     
-    for (auto e = it->second.begin(); e != it->second.end(); ++e)
+    for (auto e = (*it).second.begin(); e != (*it).second.end(); ++e)
     {
-      adjacency_.at(it->first).pushBack(*e);
+      adjacency_.at((*it).first).pushBack(*e);
     }
   }
 }
@@ -126,15 +126,15 @@ Graph Graph::extract(const std::string& vertex) const
   
   for (auto it = adjacency_.cbegin(); it != adjacency_.cend(); ++it)
   {
-    const std::string& from = it->first;
+    const std::string& from = (*it).first;
     
-    for (auto e = it->second.begin(); e != it->second.end(); ++e)
+    for (auto e = (*it).second.begin(); e != (*it).second.end(); ++e)
     {
-      if (from == vertex || e->to == vertex)
+      if (from == vertex || (*e).to == vertex)
       {
         result.addVertex(from);
-        result.addVertex(e->to);
-        result.bind(from, e->to, e->weight);
+        result.addVertex((*e).to);
+        result.bind(from, (*e).to, (*e).weight);
       }
     }
   }

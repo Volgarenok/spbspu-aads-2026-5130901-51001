@@ -4,8 +4,8 @@
 #include <string>
 #include <stdexcept>
 
-#include "list.hpp"
-#include "hash-table.hpp"
+#include "common/list.hpp"
+#include "hash_table.hpp"
 #include "sha1.hpp"
 
 namespace shevchenko

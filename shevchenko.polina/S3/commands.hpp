@@ -5,9 +5,9 @@
 #include <string>
 
 #include "graph.hpp"
-#include "hash-table.hpp"
+#include "hash_table.hpp"
 #include "sha1.hpp"
-#include "list.hpp"
+#include "common/list.hpp"
 
 namespace shevchenko
 {
