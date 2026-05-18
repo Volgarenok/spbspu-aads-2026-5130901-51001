@@ -16,12 +16,13 @@ template<class Key, class Value, class Hash, class Equal>
 class HashTable {
 private:
   struct Bucket {
-    Key key;
-    Value value;
-    int state;
+    Key key_;
+    Value value_;
+    int state_;
 
-    Bucket() : state(BucketState::EMPTY) {}
-    Bucket(const Key& k, const Value& v) : key(k), value(v), state(BucketState::OCCUPIED) {}
+    Bucket() : state_(BucketState::EMPTY) {}
+    Bucket(const Key& k, const Value& v)
+      : key_(k), value_(v), state_(BucketState::OCCUPIED) {}
   };
 
   std::vector<Bucket> table_;
@@ -46,11 +47,11 @@ private:
     while (attempt < table_.size()) {
       size_t idx = probe(hash, attempt);
 
-      if (table_[idx].state == BucketState::EMPTY) {
+      if (table_[idx].state_ == BucketState::EMPTY) {
         return (first_tombstone != table_.size()) ? first_tombstone : idx;
       }
 
-      if (table_[idx].state == BucketState::TOMBSTONE) {
+      if (table_[idx].state_ == BucketState::TOMBSTONE) {
         if (first_tombstone == table_.size()) {
           first_tombstone = idx;
         }
@@ -58,7 +59,8 @@ private:
         continue;
       }
 
-      if (table_[idx].state == BucketState::OCCUPIED && equal_func_(table_[idx].key, key)) {
+      if (table_[idx].state_ == BucketState::OCCUPIED &&
+          equal_func_(table_[idx].key_, key)) {
         return idx;
       }
 
@@ -79,11 +81,12 @@ private:
     while (attempt < table_.size()) {
       size_t idx = probe(hash, attempt);
 
-      if (table_[idx].state == BucketState::EMPTY) {
+      if (table_[idx].state_ == BucketState::EMPTY) {
         return table_.size();
       }
 
-      if (table_[idx].state == BucketState::OCCUPIED && equal_func_(table_[idx].key, key)) {
+      if (table_[idx].state_ == BucketState::OCCUPIED &&
+          equal_func_(table_[idx].key_, key)) {
         return idx;
       }
 
@@ -97,7 +100,8 @@ private:
     if (table_.empty()) {
       return 1.0;
     }
-    return static_cast<double>(num_elements_ + num_tombstones_) / table_.size();
+    double total = static_cast<double>(num_elements_ + num_tombstones_);
+    return total / table_.size();
   }
 
 public:
@@ -107,18 +111,19 @@ public:
     size_t index_;
 
   public:
-    Iterator(const HashTable* table, size_t index) : table_(table), index_(index) {}
+    Iterator(const HashTable* table, size_t index)
+      : table_(table), index_(index) {}
 
     Iterator& operator++() {
       do {
         ++index_;
       } while (index_ < table_->table_.size() &&
-               table_->table_[index_].state != BucketState::OCCUPIED);
+               table_->table_[index_].state_ != BucketState::OCCUPIED);
       return *this;
     }
 
     std::pair<Key, Value> operator*() const {
-      return {table_->table_[index_].key, table_->table_[index_].value};
+      return {table_->table_[index_].key_, table_->table_[index_].value_};
     }
 
     bool operator!=(const Iterator& other) const {
@@ -126,7 +131,8 @@ public:
     }
   };
 
-  HashTable(size_t initial_capacity = 16) : num_elements_(0), num_tombstones_(0) {
+  HashTable(size_t initial_capacity = 16)
+    : num_elements_(0), num_tombstones_(0) {
     if (initial_capacity < 4) {
       initial_capacity = 4;
     }
@@ -145,11 +151,11 @@ public:
 
     size_t existing_idx = findExistingIndex(key);
     if (existing_idx != table_.size()) {
-      table_[existing_idx].value = value;
+      table_[existing_idx].value_ = value;
       return;
     }
 
-    if (table_[idx].state == BucketState::TOMBSTONE) {
+    if (table_[idx].state_ == BucketState::TOMBSTONE) {
       num_tombstones_--;
     }
 
@@ -163,8 +169,8 @@ public:
       return false;
     }
 
-    out_value = table_[idx].value;
-    table_[idx].state = BucketState::TOMBSTONE;
+    out_value = table_[idx].value_;
+    table_[idx].state_ = BucketState::TOMBSTONE;
     num_elements_--;
     num_tombstones_++;
     return true;
@@ -180,8 +186,7 @@ public:
     if (idx == table_.size()) {
       return false;
     }
-
-    out_value = table_[idx].value;
+    out_value = table_[idx].value_;
     return true;
   }
 
@@ -199,9 +204,10 @@ public:
     num_elements_ = 0;
     num_tombstones_ = 0;
 
-    for (auto& bucket : old_table) {
-      if (bucket.state == BucketState::OCCUPIED) {
-        size_t idx = findIndex(bucket.key);
+    for (size_t i = 0; i < old_table.size(); ++i) {
+      Bucket& bucket = old_table[i];
+      if (bucket.state_ == BucketState::OCCUPIED) {
+        size_t idx = findIndex(bucket.key_);
         if (idx != table_.size()) {
           table_[idx] = std::move(bucket);
           num_elements_++;
@@ -210,7 +216,7 @@ public:
     }
   }
 
-  void cleanup() {
+  void cleanUp() {
     if (num_tombstones_ == 0) {
       return;
     }
@@ -221,9 +227,10 @@ public:
     num_elements_ = 0;
     num_tombstones_ = 0;
 
-    for (auto& bucket : old_table) {
-      if (bucket.state == BucketState::OCCUPIED) {
-        size_t idx = findIndex(bucket.key);
+    for (size_t i = 0; i < old_table.size(); ++i) {
+      Bucket& bucket = old_table[i];
+      if (bucket.state_ == BucketState::OCCUPIED) {
+        size_t idx = findIndex(bucket.key_);
         if (idx != table_.size()) {
           table_[idx] = std::move(bucket);
           num_elements_++;
@@ -234,7 +241,7 @@ public:
 
   Iterator begin() const {
     for (size_t i = 0; i < table_.size(); ++i) {
-      if (table_[i].state == BucketState::OCCUPIED) {
+      if (table_[i].state_ == BucketState::OCCUPIED) {
         return Iterator(this, i);
       }
     }
