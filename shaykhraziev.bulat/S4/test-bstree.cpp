@@ -17,6 +17,28 @@ namespace
   };
 
   using Tree = shaykhraziev::BSTree< int, std::string, IntLess >;
+
+  Tree::iterator findKey(Tree& tree, int key)
+  {
+    for (Tree::iterator it = tree.begin(); it != tree.end(); ++it)
+    {
+      if (it->key == key)
+      {
+        return it;
+      }
+    }
+    return tree.end();
+  }
+
+  std::vector< int > keysOf(Tree& tree)
+  {
+    std::vector< int > keys;
+    for (Tree::iterator it = tree.begin(); it != tree.end(); ++it)
+    {
+      keys.push_back(it->key);
+    }
+    return keys;
+  }
 }
 
 BOOST_AUTO_TEST_CASE(bstree_default_constructor_creates_empty_tree)
@@ -250,4 +272,109 @@ BOOST_AUTO_TEST_CASE(bstree_iterator_stays_on_same_node_after_unrelated_insert)
 
   BOOST_TEST(it->key == 1);
   BOOST_TEST(it->value == "one");
+}
+
+BOOST_AUTO_TEST_CASE(bstree_height_for_tree_and_subtree)
+{
+  Tree tree;
+  tree.push(4, "four");
+  tree.push(2, "two");
+  tree.push(1, "one");
+  tree.push(3, "three");
+  tree.push(6, "six");
+
+  BOOST_TEST(tree.height() == 3);
+  BOOST_TEST(tree.height(findKey(tree, 2)) == 2);
+  BOOST_TEST(tree.height(tree.end()) == 0);
+}
+
+BOOST_AUTO_TEST_CASE(bstree_rotate_left_lifts_right_child)
+{
+  Tree tree;
+  tree.push(1, "one");
+  tree.push(2, "two");
+
+  Tree::iterator lifted = tree.rotateLeft(findKey(tree, 2));
+
+  BOOST_TEST(lifted->key == 2);
+  BOOST_TEST(tree.height() == 2);
+  std::vector< int > expected{1, 2};
+  BOOST_TEST(keysOf(tree) == expected, boost::test_tools::per_element());
+}
+
+BOOST_AUTO_TEST_CASE(bstree_rotate_right_lifts_left_child)
+{
+  Tree tree;
+  tree.push(2, "two");
+  tree.push(1, "one");
+
+  Tree::iterator lifted = tree.rotateRight(findKey(tree, 1));
+
+  BOOST_TEST(lifted->key == 1);
+  BOOST_TEST(tree.height() == 2);
+  std::vector< int > expected{1, 2};
+  BOOST_TEST(keysOf(tree) == expected, boost::test_tools::per_element());
+}
+
+BOOST_AUTO_TEST_CASE(bstree_rotate_large_left_lifts_inner_child)
+{
+  Tree tree;
+  tree.push(1, "one");
+  tree.push(3, "three");
+  tree.push(2, "two");
+
+  Tree::iterator lifted = tree.rotateLargeLeft(findKey(tree, 2));
+
+  BOOST_TEST(lifted->key == 2);
+  BOOST_TEST(tree.height() == 2);
+  std::vector< int > expected{1, 2, 3};
+  BOOST_TEST(keysOf(tree) == expected, boost::test_tools::per_element());
+}
+
+BOOST_AUTO_TEST_CASE(bstree_rotate_large_right_lifts_inner_child)
+{
+  Tree tree;
+  tree.push(3, "three");
+  tree.push(1, "one");
+  tree.push(2, "two");
+
+  Tree::iterator lifted = tree.rotateLargeRight(findKey(tree, 2));
+
+  BOOST_TEST(lifted->key == 2);
+  BOOST_TEST(tree.height() == 2);
+  std::vector< int > expected{1, 2, 3};
+  BOOST_TEST(keysOf(tree) == expected, boost::test_tools::per_element());
+}
+
+BOOST_AUTO_TEST_CASE(bstree_rotate_internal_node_keeps_order)
+{
+  Tree tree;
+  tree.push(4, "four");
+  tree.push(2, "two");
+  tree.push(6, "six");
+  tree.push(5, "five");
+  tree.push(7, "seven");
+
+  tree.rotateLeft(findKey(tree, 6));
+
+  BOOST_TEST(tree.height() == 3);
+  std::vector< int > expected{2, 4, 5, 6, 7};
+  BOOST_TEST(keysOf(tree) == expected, boost::test_tools::per_element());
+}
+
+BOOST_AUTO_TEST_CASE(bstree_rotate_preserves_iterators_to_nodes)
+{
+  Tree tree;
+  tree.push(1, "one");
+  tree.push(2, "two");
+
+  Tree::iterator one = findKey(tree, 1);
+  Tree::iterator two = findKey(tree, 2);
+
+  tree.rotateLeft(two);
+
+  BOOST_TEST(one->key == 1);
+  BOOST_TEST(one->value == "one");
+  BOOST_TEST(two->key == 2);
+  BOOST_TEST(two->value == "two");
 }

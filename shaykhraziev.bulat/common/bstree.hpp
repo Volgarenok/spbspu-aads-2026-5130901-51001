@@ -544,6 +544,85 @@ namespace shaykhraziev
       return const_iterator(fakeLeaf_, fakeLeaf_);
     }
 
+    std::size_t height() const noexcept
+    {
+      return heightNode(root_);
+    }
+
+    std::size_t height(const_iterator it) const
+    {
+      Node* node = mutableNode(it);
+      if (node == fakeLeaf_)
+      {
+        return 0;
+      }
+      return heightNode(node);
+    }
+
+    iterator rotateLeft(const_iterator it)
+    {
+      Node* child = mutableNode(it);
+      if (child == fakeLeaf_ || child->parent == fakeLeaf_ || child != child->parent->right)
+      {
+        throw std::logic_error("invalid left rotation");
+      }
+      Node* parent = child->parent;
+      parent->right = child->left;
+      if (child->left != fakeLeaf_)
+      {
+        child->left->parent = parent;
+      }
+      linkToGrandparent(parent, child);
+      child->left = parent;
+      parent->parent = child;
+      refreshFakeLinks();
+      return iterator(child, fakeLeaf_);
+    }
+
+    iterator rotateRight(const_iterator it)
+    {
+      Node* child = mutableNode(it);
+      if (child == fakeLeaf_ || child->parent == fakeLeaf_ || child != child->parent->left)
+      {
+        throw std::logic_error("invalid right rotation");
+      }
+      Node* parent = child->parent;
+      parent->left = child->right;
+      if (child->right != fakeLeaf_)
+      {
+        child->right->parent = parent;
+      }
+      linkToGrandparent(parent, child);
+      child->right = parent;
+      parent->parent = child;
+      refreshFakeLinks();
+      return iterator(child, fakeLeaf_);
+    }
+
+    iterator rotateLargeLeft(const_iterator it)
+    {
+      Node* child = mutableNode(it);
+      if (child == fakeLeaf_ || child->parent == fakeLeaf_ || child->parent->parent == fakeLeaf_ ||
+          child != child->parent->left || child->parent != child->parent->parent->right)
+      {
+        throw std::logic_error("invalid large left rotation");
+      }
+      rotateRight(const_iterator(child, fakeLeaf_));
+      return rotateLeft(const_iterator(child, fakeLeaf_));
+    }
+
+    iterator rotateLargeRight(const_iterator it)
+    {
+      Node* child = mutableNode(it);
+      if (child == fakeLeaf_ || child->parent == fakeLeaf_ || child->parent->parent == fakeLeaf_ ||
+          child != child->parent->right || child->parent != child->parent->parent->left)
+      {
+        throw std::logic_error("invalid large right rotation");
+      }
+      rotateLeft(const_iterator(child, fakeLeaf_));
+      return rotateRight(const_iterator(child, fakeLeaf_));
+    }
+
     void swap(BSTree& other) noexcept
     {
       Node* tmpFake = fakeLeaf_;
@@ -645,6 +724,26 @@ namespace shaykhraziev
       copyFrom(node->right, otherFakeLeaf);
     }
 
+    std::size_t heightNode(const Node* node) const noexcept
+    {
+      if (node == fakeLeaf_)
+      {
+        return 0;
+      }
+      const std::size_t leftHeight = heightNode(node->left);
+      const std::size_t rightHeight = heightNode(node->right);
+      return (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
+    }
+
+    Node* mutableNode(const_iterator it) const
+    {
+      if (it.fakeLeaf_ != fakeLeaf_)
+      {
+        throw std::logic_error("foreign iterator");
+      }
+      return const_cast< Node* >(it.node_);
+    }
+
     void transplantNode(Node* oldNode, Node* newNode) noexcept
     {
       if (oldNode->parent == fakeLeaf_)
@@ -662,6 +761,24 @@ namespace shaykhraziev
       if (newNode != fakeLeaf_)
       {
         newNode->parent = oldNode->parent;
+      }
+    }
+
+    void linkToGrandparent(Node* oldChild, Node* newChild) noexcept
+    {
+      Node* grandparent = oldChild->parent;
+      newChild->parent = grandparent;
+      if (grandparent == fakeLeaf_)
+      {
+        root_ = newChild;
+      }
+      else if (oldChild == grandparent->left)
+      {
+        grandparent->left = newChild;
+      }
+      else
+      {
+        grandparent->right = newChild;
       }
     }
 
