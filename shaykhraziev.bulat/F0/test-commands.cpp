@@ -192,3 +192,41 @@ BOOST_AUTO_TEST_CASE(commands_try_task_rejects_invalid_input_and_keeps_plan)
   BOOST_CHECK(storage.findProject("site")->isPlanBuilt());
   BOOST_TEST(storage.findProject("site")->getPlan().getProjectEndDay() == oldEnd);
 }
+
+BOOST_AUTO_TEST_CASE(commands_mutations_reset_built_plan)
+{
+  shaykhraziev::ProjectStorage storage;
+  storage.makeProject("site", 1, 2);
+  storage.findProject("site")->addTask("design", 3, "Design");
+  storage.findProject("site")->addTask("backend", 4, "Backend");
+
+  BOOST_TEST(run(storage, "build-plan site") == "<PLAN BUILT>\n");
+  BOOST_CHECK(storage.findProject("site")->isPlanBuilt());
+  BOOST_TEST(run(storage, "add-dependency site backend design") == "");
+  BOOST_CHECK(!storage.findProject("site")->isPlanBuilt());
+  BOOST_TEST(run(storage, "show-gantt site") == "<INVALID COMMAND>\n");
+
+  BOOST_TEST(run(storage, "build-plan site") == "<PLAN BUILT>\n");
+  BOOST_TEST(run(storage, "drop-dependency site backend design") == "");
+  BOOST_CHECK(!storage.findProject("site")->isPlanBuilt());
+
+  BOOST_TEST(run(storage, "build-plan site") == "<PLAN BUILT>\n");
+  BOOST_TEST(run(storage, "add-task site test 2 Test") == "");
+  BOOST_CHECK(!storage.findProject("site")->isPlanBuilt());
+
+  BOOST_TEST(run(storage, "build-plan site") == "<PLAN BUILT>\n");
+  BOOST_TEST(run(storage, "drop-task site test") == "");
+  BOOST_CHECK(!storage.findProject("site")->isPlanBuilt());
+}
+
+BOOST_AUTO_TEST_CASE(commands_empty_project_reports_stats_and_critical_path)
+{
+  shaykhraziev::ProjectStorage storage;
+  storage.makeProject("site", 1, 2);
+
+  BOOST_TEST(run(storage, "stats site") ==
+      "<PROJECT: site, START: 1, END: NOT-BUILT, TASKS: 0, WORKERS: 2, TOTAL-DURATION: 0>\n");
+  BOOST_TEST(run(storage, "critical-path site") ==
+      "<CRITICAL-PATH site>\n"
+      "<DURATION: 0>\n");
+}
