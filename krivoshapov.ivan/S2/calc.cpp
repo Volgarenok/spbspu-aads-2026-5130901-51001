@@ -183,7 +183,34 @@ namespace krivoshapov
   size_t evaluate(const std::string &line)
   {
     Queue<std::string> postfix = to_postfix(line);
-    (void)postfix;
-    return 0;
+
+    Stack<size_t> calc;
+    while (!postfix.empty())
+    {
+      std::string tok = postfix.front();
+      postfix.pop();
+      if (is_op(tok))
+      {
+        if (calc.size() < 2)
+        {
+          throw std::invalid_argument("invalid expression");
+        }
+        size_t b = calc.top();
+        calc.pop();
+        size_t a = calc.top();
+        calc.pop();
+        calc.push(apply(tok, a, b));
+      }
+      else
+      {
+        calc.push(to_number(tok));
+      }
+    }
+
+    if (calc.size() != 1)
+    {
+      throw std::invalid_argument("invalid expression");
+    }
+    return calc.top();
   }
 }
