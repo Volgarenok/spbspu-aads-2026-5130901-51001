@@ -434,3 +434,4 @@ void extract(std::istream& in, std::ostream& out, GraphTable& graphs,
 }
 
 }
+
