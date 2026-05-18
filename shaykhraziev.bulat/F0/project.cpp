@@ -115,7 +115,8 @@ shaykhraziev::Project::Project():
   workersCount_(0),
   tasks_(INITIAL_SLOTS, BUCKET_SIZE),
   taskOrder_(),
-  planBuilt_(false)
+  planBuilt_(false),
+  lastPlan_()
 {}
 
 shaykhraziev::Project::Project(
@@ -127,7 +128,8 @@ shaykhraziev::Project::Project(
   workersCount_(workersCount),
   tasks_(INITIAL_SLOTS, BUCKET_SIZE),
   taskOrder_(),
-  planBuilt_(false)
+  planBuilt_(false),
+  lastPlan_()
 {}
 
 const std::string& shaykhraziev::Project::getName() const noexcept
@@ -158,6 +160,17 @@ bool shaykhraziev::Project::isPlanBuilt() const noexcept
 void shaykhraziev::Project::resetPlan() noexcept
 {
   planBuilt_ = false;
+}
+
+void shaykhraziev::Project::setPlan(const Plan& plan)
+{
+  lastPlan_ = plan;
+  planBuilt_ = true;
+}
+
+const shaykhraziev::Plan& shaykhraziev::Project::getPlan() const noexcept
+{
+  return lastPlan_;
 }
 
 bool shaykhraziev::Project::addTask(

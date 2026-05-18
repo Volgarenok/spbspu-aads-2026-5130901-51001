@@ -28,6 +28,7 @@ BOOST_AUTO_TEST_CASE(commands_registry_contains_initial_commands)
   BOOST_CHECK(commands.has("add-dependency"));
   BOOST_CHECK(commands.has("drop-dependency"));
   BOOST_CHECK(commands.has("check-cycles"));
+  BOOST_CHECK(commands.has("build-plan"));
   BOOST_CHECK(!commands.has("missing"));
 }
 
@@ -95,4 +96,16 @@ BOOST_AUTO_TEST_CASE(commands_check_cycles)
   BOOST_TEST(run(storage, "add-dependency site a b") == "<INVALID COMMAND>\n");
   BOOST_TEST(run(storage, "check-cycles site") == "<NO CYCLES>\n");
   BOOST_TEST(run(storage, "check-cycles missing") == "<INVALID COMMAND>\n");
+}
+
+BOOST_AUTO_TEST_CASE(commands_build_plan)
+{
+  shaykhraziev::ProjectStorage storage;
+  storage.makeProject("site", 1, 2);
+  storage.findProject("site")->addTask("design", 3, "Design");
+
+  BOOST_TEST(run(storage, "build-plan site") == "<PLAN BUILT>\n");
+  BOOST_REQUIRE(storage.findProject("site"));
+  BOOST_CHECK(storage.findProject("site")->isPlanBuilt());
+  BOOST_TEST(run(storage, "build-plan missing") == "<INVALID COMMAND>\n");
 }

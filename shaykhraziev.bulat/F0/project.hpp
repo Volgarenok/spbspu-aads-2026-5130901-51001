@@ -8,6 +8,8 @@
 #include <cstddef>
 #include <string>
 
+#include "planner.hpp"
+
 namespace shaykhraziev
 {
   struct Task
@@ -34,6 +36,8 @@ namespace shaykhraziev
     std::size_t countTasks() const noexcept;
     bool isPlanBuilt() const noexcept;
     void resetPlan() noexcept;
+    void setPlan(const Plan& plan);
+    const Plan& getPlan() const noexcept;
 
     bool addTask(const std::string& taskId, std::size_t duration, const std::string& title);
     bool dropTask(const std::string& taskId);
@@ -55,6 +59,7 @@ namespace shaykhraziev
     TaskTable tasks_;
     List< std::string > taskOrder_;
     bool planBuilt_;
+    Plan lastPlan_;
 
     void ensureTaskSpace();
     void removeTaskFromOrder(const std::string& taskId);

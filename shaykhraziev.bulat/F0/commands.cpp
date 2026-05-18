@@ -7,6 +7,7 @@
 #include <string-utils.hpp>
 
 #include "io.hpp"
+#include "planner.hpp"
 
 namespace
 {
@@ -188,6 +189,21 @@ namespace
     out << (project->hasCycle() ? "<CYCLE>\n" : "<NO CYCLES>\n");
     return true;
   }
+
+  bool buildPlanCommand(
+      shaykhraziev::ProjectStorage& storage,
+      const shaykhraziev::List< std::string >& tokens,
+      const std::string&,
+      std::ostream& out)
+  {
+    shaykhraziev::Project* project = storage.findProject(tokenAt(tokens, 1));
+    if (!project || !shaykhraziev::buildProjectPlan(*project))
+    {
+      return false;
+    }
+    out << "<PLAN BUILT>\n";
+    return true;
+  }
 }
 
 shaykhraziev::CommandRegistry shaykhraziev::makeCommandRegistry()
@@ -202,6 +218,7 @@ shaykhraziev::CommandRegistry shaykhraziev::makeCommandRegistry()
   commands.add("add-dependency", CommandHandler{3, 3, addDependencyCommand});
   commands.add("drop-dependency", CommandHandler{3, 3, dropDependencyCommand});
   commands.add("check-cycles", CommandHandler{1, 1, checkCyclesCommand});
+  commands.add("build-plan", CommandHandler{1, 1, buildPlanCommand});
   return commands;
 }
 
