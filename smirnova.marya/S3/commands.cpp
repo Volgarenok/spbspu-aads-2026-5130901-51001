@@ -1,5 +1,6 @@
 #include "commands.hpp"
 #include <iostream>
+#include <limits>
 #include <string>
 
 namespace smirnova
@@ -118,7 +119,12 @@ void vertexes(std::istream&, std::ostream& out, GraphTable&,
 void create(std::istream& in, std::ostream& out, GraphTable& graphs,
             VertTable& graphVertices, std::string graphName)
 {
-  if (graphs.has(graphName)) { out << "<INVALID COMMAND>\n"; return; }
+  if (graphs.has(graphName))
+  {
+    out << "<INVALID COMMAND>\n";
+    in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    return;
+  }
   size_t k = 0;
   Vector<std::string> verts;
   if (!(in >> k))
