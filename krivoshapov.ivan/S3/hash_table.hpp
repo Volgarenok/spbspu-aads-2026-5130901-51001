@@ -35,6 +35,74 @@ namespace krivoshapov
 
     ~HashTable() { delete[] slots_; }
 
+    bool has(const Key &k) const
+    {
+      return findIndex(k) != cap_;
+    }
+
+    void add(const Key &k, const Value &v)
+    {
+      size_t fi = findIndex(k);
+      if (fi != cap_)
+      {
+        slots_[fi].val = v;
+        return;
+      }
+      size_t h = Hash()(k) % cap_;
+      for (size_t step = 0; step < cap_; ++step)
+      {
+        size_t i = (h + step) % cap_;
+        if (slots_[i].st != OCCUPIED)
+        {
+          bool wasTomb = slots_[i].st == TOMB;
+          slots_[i].key = k;
+          slots_[i].val = v;
+          slots_[i].st = OCCUPIED;
+          ++size_;
+          if (wasTomb)
+          {
+            --tomb_;
+          }
+          return;
+        }
+      }
+      throw std::length_error("hash table is full");
+    }
+
+    Value drop(const Key &k)
+    {
+      size_t i = findIndex(k);
+      if (i == cap_)
+      {
+        throw std::out_of_range("key not found");
+      }
+      Value out = slots_[i].val;
+      slots_[i].st = TOMB;
+      --size_;
+      ++tomb_;
+      return out;
+    }
+
+    Value &at(const Key &k)
+    {
+      size_t i = findIndex(k);
+      if (i == cap_)
+      {
+        throw std::out_of_range("key not found");
+      }
+      return slots_[i].val;
+    }
+
+    const Value &at(const Key &k) const
+    {
+      size_t i = findIndex(k);
+      if (i == cap_)
+      {
+        throw std::out_of_range("key not found");
+      }
+      return slots_[i].val;
+    }
+
     size_t size() const noexcept { return size_; }
     size_t slotCount() const noexcept { return cap_; }
 
