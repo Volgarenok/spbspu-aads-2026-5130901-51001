@@ -20,7 +20,7 @@ namespace smirnova
     void ensureCapacity();
 
   public:
-    Vector():
+    Vector(): 
       data(0), sz(0), cap(0)
     {}
 
