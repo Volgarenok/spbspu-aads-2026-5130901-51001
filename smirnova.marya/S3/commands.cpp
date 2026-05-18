@@ -400,21 +400,27 @@ void merge(std::istream& in, std::ostream& out, GraphTable& graphs, VertTable& g
   Graph& a = graphs.get(g1);
   Graph& b = graphs.get(g2);
 
-  auto appendEdges = [&](Graph& src) {
-    for (auto it = src.adj.begin(); it != src.adj.end(); ++it)
+  for (auto it = a.adj.begin(); it != a.adj.end(); ++it)
+  {
+    const std::string& from = it->key;
+    Vector< Graph::Edge >& srcEdges = it->value;
+    for (auto eIt = srcEdges.begin(); eIt != srcEdges.end(); ++eIt)
     {
-      const std::string& from = it->key;
-      Vector< Graph::Edge >& srcEdges = it->value;
-      for (auto eIt = srcEdges.begin(); eIt != srcEdges.end(); ++eIt)
-      {
-        for (auto wIt = eIt->weights.begin(); wIt != eIt->weights.end(); ++wIt)
-          result.addEdge(from, eIt->to, *wIt);
-      }
+      for (auto wIt = eIt->weights.begin(); wIt != eIt->weights.end(); ++wIt)
+        result.addEdge(from, eIt->to, *wIt);
     }
-  };
+  }
 
-  appendEdges(a);
-  appendEdges(b);
+  for (auto it = b.adj.begin(); it != b.adj.end(); ++it)
+  {
+    const std::string& from = it->key;
+    Vector< Graph::Edge >& srcEdges = it->value;
+    for (auto eIt = srcEdges.begin(); eIt != srcEdges.end(); ++eIt)
+    {
+      for (auto wIt = eIt->weights.begin(); wIt != eIt->weights.end(); ++wIt)
+        result.addEdge(from, eIt->to, *wIt);
+    }
+  }
 
   graphs.add(graphName, result);
 
