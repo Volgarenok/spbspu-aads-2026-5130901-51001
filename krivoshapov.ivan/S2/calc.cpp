@@ -90,6 +90,82 @@ namespace krivoshapov
       }
       return a | b;
     }
+
+    Queue<std::string> to_postfix(const std::string &line)
+    {
+      Queue<std::string> output;
+      Stack<std::string> ops;
+
+      size_t i = 0;
+      while (i < line.size())
+      {
+        while (i < line.size() && (line[i] == ' ' || line[i] == '\t' || line[i] == '\r'))
+        {
+          ++i;
+        }
+        if (i >= line.size())
+        {
+          break;
+        }
+        size_t j = i;
+        while (j < line.size() && line[j] != ' ' && line[j] != '\t' && line[j] != '\r')
+        {
+          ++j;
+        }
+        std::string tok = line.substr(i, j - i);
+        i = j;
+
+        if (tok == "(")
+        {
+          ops.push(tok);
+        }
+        else if (tok == ")")
+        {
+          bool found = false;
+          while (!ops.empty())
+          {
+            if (ops.top() == "(")
+            {
+              found = true;
+              ops.pop();
+              break;
+            }
+            output.push(ops.top());
+            ops.pop();
+          }
+          if (!found)
+          {
+            throw std::invalid_argument("mismatched parentheses");
+          }
+        }
+        else if (is_op(tok))
+        {
+          while (!ops.empty() && ops.top() != "(" && prio(ops.top()) >= prio(tok))
+          {
+            output.push(ops.top());
+            ops.pop();
+          }
+          ops.push(tok);
+        }
+        else
+        {
+          to_number(tok);
+          output.push(tok);
+        }
+      }
+
+      while (!ops.empty())
+      {
+        if (ops.top() == "(")
+        {
+          throw std::invalid_argument("mismatched parentheses");
+        }
+        output.push(ops.top());
+        ops.pop();
+      }
+
+      return output;
+    }
   }
 
   bool is_blank(const std::string &line)
@@ -104,8 +180,10 @@ namespace krivoshapov
     return true;
   }
 
-  size_t evaluate(const std::string & /*line*/)
+  size_t evaluate(const std::string &line)
   {
+    Queue<std::string> postfix = to_postfix(line);
+    (void)postfix;
     return 0;
   }
 }
