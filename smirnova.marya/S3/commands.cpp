@@ -64,6 +64,11 @@ namespace smirnova
     }
   }
 
+  [[noreturn]] void invalidCommand()
+  {
+    throw std::logic_error("invalid command");
+  }
+
   void appendEdges(Graph& result, Graph& src)
   {
     for (auto it = src.adj.begin(); it != src.adj.end(); ++it)
@@ -136,8 +141,7 @@ namespace smirnova
                 VertTable& graphVertices, std::string graphName)
   {
     if (!graphVertices.has(graphName)) {
-      out << "<INVALID COMMAND>\n";
-      return;
+      invalidCommand();
     }
     Vector< std::string > verts = graphVertices.get(graphName);
     sortStrings(verts);
@@ -159,12 +163,12 @@ namespace smirnova
     }
   }
 
-  void create(std::istream& in, std::ostream& out, GraphTable& graphs,
+  void create(std::istream& in, std::ostream&, GraphTable& graphs,
               VertTable& graphVertices, std::string graphName)
   {
     if (graphs.has(graphName))
     {
-      out << "<INVALID COMMAND>\n";
+      invalidCommand();
       in.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
       return;
     }
@@ -188,15 +192,14 @@ namespace smirnova
     graphVertices.add(graphName, verts);
   }
 
-  void bind(std::istream& in, std::ostream& out, GraphTable& graphs,
+  void bind(std::istream& in, std::ostream&, GraphTable& graphs,
             VertTable& graphVertices, std::string graphName)
   {
     std::string a, b;
     int w;
     in >> a >> b >> w;
     if (!graphs.has(graphName)) {
-      out << "<INVALID COMMAND>\n";
-      return;
+      invalidCommand();
     }
     if (!graphVertices.has(graphName))
     {
@@ -223,35 +226,22 @@ namespace smirnova
     graphs.get(graphName).addEdge(a, b, w);
   }
 
-  void cut(std::istream& in, std::ostream& out, GraphTable& graphs,
+  void cut(std::istream& in, std::ostream&, GraphTable& graphs,
           VertTable& graphVertices, std::string graphName)
   {
     std::string a, b;
     int w;
     in >> a >> b >> w;
     if (!graphs.has(graphName) || !graphVertices.has(graphName)) {
-      out << "<INVALID COMMAND>\n";
-      return;
+      invalidCommand();
     }
     Vector< std::string >& verts = graphVertices.get(graphName);
-    bool hasA = false, hasB = false;
-    for (auto it = verts.begin(); it != verts.end(); ++it)
-    {
-      if (*it == a) {
-        hasA = true;
-      }
-      if (*it == b) {
-        hasB = true;
-      }
-    }
-    if (!hasA || !hasB) {
-      out << "<INVALID COMMAND>\n";
-      return;
+    if (!containsString(verts, a) || !containsString(verts, b)) {
+      invalidCommand();
     }
     Graph& g = graphs.get(graphName);
     if (!g.adj.has(a)) {
-      out << "<INVALID COMMAND>\n";
-      return;
+      invalidCommand();
     }
     Vector< Graph::Edge >& edges = g.adj.get(a);
     Vector< Graph::Edge > updated;
@@ -278,8 +268,7 @@ namespace smirnova
         newWeights.pushBack(*wIt);
       }
       if (!removed) {
-        out << "<INVALID COMMAND>\n";
-        return;
+        invalidCommand();
       }
       if (newWeights.size() > 0)
       {
@@ -292,7 +281,7 @@ namespace smirnova
     }
     edges = updated;
     if (!foundEdge) {
-      out << "<INVALID COMMAND>\n";
+      invalidCommand();
     }
   }
 
@@ -303,8 +292,7 @@ namespace smirnova
     in >> v;
     if (!graphs.has(graphName) || !graphVertices.has(graphName) ||
         !containsString(graphVertices.get(graphName), v)) {
-      out << "<INVALID COMMAND>\n";
-      return;
+      invalidCommand();
     }
     Graph& g = graphs.get(graphName);
     if (!g.adj.has(v)) {
@@ -346,22 +334,25 @@ namespace smirnova
     in >> v;
     if (!graphs.has(graphName) || !graphVertices.has(graphName) ||
         !containsString(graphVertices.get(graphName), v)) {
-      out << "<INVALID COMMAND>\n";
-      return;
+      invalidCommand();
     }
     Graph& g = graphs.get(graphName);
     Vector< Graph::Edge > results;
     for (auto it = g.adj.begin(); it != g.adj.end(); ++it)
     {
       const std::string& from = it->key;
-      Vector<Graph::Edge>& edges = it->value;
+      Vector< Graph::Edge >& edges = it->value;
       for (auto eit = edges.begin(); eit != edges.end(); ++eit)
       {
-        if (eit->to != v) continue;
+        if (eit->to != v) {
+          continue;
+        }
         bool found = false;
         for (auto rIt = results.begin(); rIt != results.end(); ++rIt)
         {
-          if (rIt->to != from) continue;
+          if (rIt->to != from) {
+            continue;
+          }
           for (auto wIt = eit->weights.begin(); wIt != eit->weights.end(); ++wIt)
           {
             rIt->weights.pushBack(*wIt);
@@ -381,7 +372,7 @@ namespace smirnova
     printSortedEdges(out, results);
   }
 
-  void merge(std::istream& in, std::ostream& out, GraphTable& graphs,
+  void merge(std::istream& in, std::ostream&, GraphTable& graphs,
             VertTable& graphVertices, std::string graphName)
   {
     std::string g1, g2;
@@ -389,8 +380,7 @@ namespace smirnova
     if (graphs.has(graphName) || !graphs.has(g1) || !graphs.has(g2) ||
         !graphVertices.has(g1) || !graphVertices.has(g2))
     {
-      out << "<INVALID COMMAND>\n";
-      return;
+      invalidCommand();
     }
     Graph result;
     Graph& a = graphs.get(g1);
@@ -412,7 +402,7 @@ namespace smirnova
     graphVertices.add(graphName, verts);
   }
 
-  void extract(std::istream& in, std::ostream& out, GraphTable& graphs,
+  void extract(std::istream& in, std::ostream&, GraphTable& graphs,
               VertTable& graphVertices, std::string graphName)
   {
     std::string oldG;
@@ -420,8 +410,7 @@ namespace smirnova
     in >> oldG >> k;
     if (graphs.has(graphName) || !graphs.has(oldG) || !graphVertices.has(oldG))
     {
-      out << "<INVALID COMMAND>\n";
-      return;
+      invalidCommand();
     }
     Graph& src = graphs.get(oldG);
     Vector< std::string >& srcVerts = graphVertices.get(oldG);
@@ -432,8 +421,7 @@ namespace smirnova
       in >> v;
       if (!containsString(srcVerts, v))
       {
-        out << "<INVALID COMMAND>\n";
-        return;
+        invalidCommand();
       }
       appendUnique(chosen, v);
     }
@@ -447,11 +435,15 @@ namespace smirnova
     for (auto it = chosen.begin(); it != chosen.end(); ++it)
     {
       const std::string& from = *it;
-      if (!src.adj.has(from)) continue;
+      if (!src.adj.has(from)) {
+        continue;
+      }
       Vector< Graph::Edge >& edges = src.adj.get(from);
       for (auto eIt = edges.begin(); eIt != edges.end(); ++eIt)
       {
-        if (!containsString(chosen, eIt->to)) continue;
+        if (!containsString(chosen, eIt->to)) {
+          continue;
+        }
         for (auto wIt = eIt->weights.begin(); wIt != eIt->weights.end(); ++wIt)
         {
           res.addEdge(from, eIt->to, *wIt);
