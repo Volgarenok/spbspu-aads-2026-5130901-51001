@@ -4,6 +4,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <cctype>
 #include "queue.hpp"
 #include "stack.hpp"
 
@@ -129,20 +130,13 @@ namespace kitserov
         if (start == token.size()) {
           isNumber = false;
         }
-        if (token[0] == '0') {
+        if (isNumber && token[start] == '0' && (start + 1) < token.size()) {
           isNumber = false;
         }
       }
 
       if (isNumber) {
-        T value;
-        if (std::is_same< T, int >::value) {
-          value = std::stoi(token);
-        } else if (std::is_same< T, double >::value) {
-          value = std::stod(token);
-        } else {
-          throw std::invalid_argument("Unsupported type");
-        }
+        T value = static_cast< T >(std::stoll(token));
         stack.push(value);
       } else if (isOperation(token)) {
         if (stack.isEmpty()) {
@@ -169,7 +163,7 @@ namespace kitserov
           if (r == 0) {
             throw std::logic_error("Modulo by zero");
           }
-          result = l % r;
+          result = ((l % r) + r) % r;
         } else if (token == "##") {
           std::string concat = std::to_string(l) + std::to_string(r);
           result = static_cast< T >(std::stoll(concat));
