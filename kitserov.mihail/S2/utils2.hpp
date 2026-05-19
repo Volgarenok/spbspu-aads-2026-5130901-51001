@@ -136,9 +136,9 @@ namespace kitserov
 
       if (isNumber) {
         T value;
-        if constexpr (std::is_same_v< T, int >) {
+        if (std::is_same< T, int >::value) {
           value = std::stoi(token);
-        } else if constexpr (std::is_same_v< T, double >) {
+        } else if (std::is_same< T, double >::value) {
           value = std::stod(token);
         } else {
           throw std::invalid_argument("Unsupported type");
