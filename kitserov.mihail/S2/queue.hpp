@@ -33,7 +33,7 @@ namespace kitserov
     Queue& operator=(Queue&& other) noexcept
     {
       if (this != &other) {
-        swap(other);
+        data_ = std::move(other.data_);
       }
       return *this;
     }
