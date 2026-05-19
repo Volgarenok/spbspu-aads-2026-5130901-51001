@@ -17,7 +17,10 @@ namespace kitserov
       clear();
     }
     Queue(const Queue& other) : data_(other.data_) {}
-    Queue(Queue&& other) noexcept : data_(std::move(other.data_)) {}
+    Queue(Queue&& other) noexcept
+    {
+      swap(other);
+    }
     Queue& operator=(const Queue& other)
     {
       if (this != &other) {
@@ -30,7 +33,7 @@ namespace kitserov
     Queue& operator=(Queue&& other) noexcept
     {
       if (this != &other) {
-        data_ = std::move(other.data_);
+        swap(other);
       }
       return *this;
     }
@@ -62,7 +65,7 @@ namespace kitserov
 
     void swap(Queue& other) noexcept
     {
-      std::swap(data_, other.data_);
+      data_.swap(other.data_);
     }
 
     void clear()
