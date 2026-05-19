@@ -2,8 +2,8 @@
 #define ROUTE_HPP
 
 #include "waypoint.hpp"
+#include "../common/list.hpp"
 #include <string>
-#include <vector>
 #include <utility>
 
 namespace vishnyakov
@@ -29,7 +29,7 @@ namespace vishnyakov
 
   struct SegmentResult
   {
-    std::vector< RouteStop > stops;
+    List< RouteStop > stops;
     double endTime;
     double totalNightTime;
   };
@@ -53,7 +53,7 @@ namespace vishnyakov
 
   struct RouteResult
   {
-    std::vector< RouteStop > allStops;
+    List< RouteStop > allStops;
     double totalTime;
     double totalDistance;
     double totalHunger;
@@ -62,7 +62,7 @@ namespace vishnyakov
   };
 
   RouteResult buildGreedyRoute(
-    const std::vector< std::pair< std::string, Waypoint > >& points,
+    const List< std::pair< std::string, Waypoint > >& points,
     int startX, int startZ,
     double startTime
   );

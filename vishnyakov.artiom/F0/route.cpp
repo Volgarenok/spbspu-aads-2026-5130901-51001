@@ -127,7 +127,7 @@ namespace vishnyakov
   }
 
   RouteResult buildGreedyRoute(
-    const std::vector< std::pair< std::string, Waypoint > >& points,
+    const List< std::pair< std::string, Waypoint > >& points,
     int startX, int startZ,
     double startTime)
   {
@@ -141,13 +141,18 @@ namespace vishnyakov
       return result;
     }
 
-    std::vector< bool > visited(points.size(), false);
+    List< bool > visited;
+    for (size_t i = 0; i < points.size(); ++i)
+    {
+      visited.push_back(false);
+    }
+
     int currentX = startX;
     int currentZ = startZ;
     double currentTime = startTime;
     bool isAtPoint = false;
     std::string currentPointName = "start";
-    std::vector< RouteStop > allStops;
+    List< RouteStop > allStops;
 
     RouteStop startStop;
     startStop.isPoint = false;
@@ -166,19 +171,29 @@ namespace vishnyakov
       int bestIndex = -1;
       double bestDist = std::numeric_limits< double >::max();
 
-      for (size_t i = 0; i < points.size(); ++i)
+      int idx = 0;
+      for (auto it = points.cbegin(); it != points.cend(); ++it, ++idx)
       {
-        if (!visited[i])
+        int vIdx = 0;
+        for (auto vIt = visited.cbegin(); vIt != visited.cend(); ++vIt, ++vIdx)
         {
-          const auto& wp = points[i].second;
-          double dx = static_cast< double >(wp.x - currentX);
-          double dz = static_cast< double >(wp.z - currentZ);
-          double dist = std::sqrt(dx * dx + dz * dz);
-
-          if (dist < bestDist)
+          if (vIdx == idx)
           {
-            bestDist = dist;
-            bestIndex = static_cast< int >(i);
+            if (*vIt)
+            {
+              break;
+            }
+            const auto& wp = it->second;
+            double dx = static_cast< double >(wp.x - currentX);
+            double dz = static_cast< double >(wp.z - currentZ);
+            double dist = std::sqrt(dx * dx + dz * dz);
+
+            if (dist < bestDist)
+            {
+              bestDist = dist;
+              bestIndex = idx;
+            }
+            break;
           }
         }
       }
@@ -188,7 +203,23 @@ namespace vishnyakov
         break;
       }
 
-      const auto& point = points[bestIndex];
+      int pointIdx = 0;
+      const std::pair< std::string, Waypoint >* selectedPoint = nullptr;
+      for (auto it = points.cbegin(); it != points.cend(); ++it, ++pointIdx)
+      {
+        if (pointIdx == bestIndex)
+        {
+          selectedPoint = &(*it);
+          break;
+        }
+      }
+
+      if (!selectedPoint)
+      {
+        break;
+      }
+
+      const auto& point = *selectedPoint;
       const Waypoint& wp = point.second;
 
       SegmentResult seg = traverseSegment(
@@ -210,7 +241,16 @@ namespace vishnyakov
       isAtPoint = true;
       result.totalDistance += bestDist;
       result.totalNightTime += seg.totalNightTime;
-      visited[bestIndex] = true;
+
+      int vIdx = 0;
+      for (auto vIt = visited.begin(); vIt != visited.end(); ++vIt, ++vIdx)
+      {
+        if (vIdx == bestIndex)
+        {
+          *vIt = true;
+          break;
+        }
+      }
       ++visitedCount;
     }
 

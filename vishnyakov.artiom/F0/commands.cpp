@@ -1,7 +1,6 @@
 #include "commands.hpp"
 #include "route.hpp"
 #include <sstream>
-#include <vector>
 #include <algorithm>
 #include <cmath>
 #include <fstream>
@@ -102,33 +101,36 @@ namespace vishnyakov
   {
     out << "Маршрут (" << algorithmName << "):\n";
     int stepNumber = 1;
-    for (size_t i = 0; i < route.allStops.size(); ++i)
+    int idx = 0;
+    for (auto it = route.allStops.cbegin(); it != route.allStops.cend(); ++it, ++idx)
     {
-      const auto& stop = route.allStops[i];
+      const auto& stop = *it;
       double roundedTime = std::round(stop.time * 100.0) / 100.0;
       double roundedTravel = std::round(stop.travelTime * 100.0) / 100.0;
       double roundedDist = std::round(stop.distanceFromPrev * 100.0) / 100.0;
 
+      auto nextIt = it;
+      ++nextIt;
       if (!stop.isPoint && !stop.isNightStop && stop.name == "field")
       {
-        if (i + 1 < route.allStops.size() &&
-            route.allStops[i + 1].isNightStop &&
-            route.allStops[i + 1].x == stop.x &&
-            route.allStops[i + 1].z == stop.z)
+        if (nextIt != route.allStops.cend() &&
+            nextIt->isNightStop &&
+            nextIt->x == stop.x &&
+            nextIt->z == stop.z)
         {
-          const auto& nightStop = route.allStops[i + 1];
+          const auto& nightStop = *nextIt;
           double roundedNightTime = std::round(nightStop.time * 100.0) / 100.0;
 
           out << "  " << stepNumber << ". Остановка на ночь (" << stop.x << ", " << stop.z << ")\n";
-          if (i > 0)
+          if (idx > 0)
           {
             out << "      - Затраченное время: " << roundedTravel << " мин.\n";
             out << "      - Пройденная дистанция: " << roundedDist << " м.\n";
           }
           out << "      - Текущее время: " << roundedNightTime << " мин.\n";
 
-          i++;
-          stepNumber++;
+          ++idx;
+          ++stepNumber;
           continue;
         }
       }
@@ -142,7 +144,7 @@ namespace vishnyakov
       else if (stop.isNightStop)
       {
         out << "  " << stepNumber << ". Остановка на ночь (" << stop.x << ", " << stop.z << ")\n";
-        if (i > 0)
+        if (idx > 0)
         {
           out << "      - Затраченное время: " << roundedTravel << " мин.\n";
           out << "      - Пройденная дистанция: " << roundedDist << " м.\n";
@@ -153,7 +155,7 @@ namespace vishnyakov
       else if (stop.isPoint)
       {
         out << "  " << stepNumber << ". " << stop.name << " (" << stop.x << ", " << stop.z << ")\n";
-        if (i > 0)
+        if (idx > 0)
         {
           out << "      - Затраченное время: " << roundedTravel << " мин.\n";
           out << "      - Пройденная дистанция: " << roundedDist << " м.\n";
@@ -164,7 +166,7 @@ namespace vishnyakov
       else
       {
         out << "  " << stepNumber << ". Поле (" << stop.x << ", " << stop.z << ")\n";
-        if (i > 0)
+        if (idx > 0)
         {
           out << "      - Затраченное время: " << roundedTravel << " мин.\n";
           out << "      - Пройденная дистанция: " << roundedDist << " м.\n";
@@ -412,7 +414,7 @@ namespace vishnyakov
           continue;
         }
 
-        std::vector< NearestResult > results;
+        List< NearestResult > results;
 
         for (auto it = map->begin(); it != map->end(); ++it)
         {
@@ -425,7 +427,14 @@ namespace vishnyakov
           }
 
           double dist = wp.distanceTo(x, z);
-          results.push_back({name, wp.x, wp.z, wp.type, dist, 0.0});
+          NearestResult nr;
+          nr.name = name;
+          nr.x = wp.x;
+          nr.z = wp.z;
+          nr.type = wp.type;
+          nr.distance = dist;
+          nr.coefficient = 0.0;
+          results.push_back(nr);
         }
 
         if (results.empty())
@@ -434,27 +443,38 @@ namespace vishnyakov
           continue;
         }
 
-        std::sort(results.begin(), results.end(),
-          [](const NearestResult& a, const NearestResult& b)
-          {
-            return a.distance < b.distance;
-          });
-
-        double minDist = results[0].distance;
-        for (size_t i = 0; i < results.size() && i < static_cast< size_t >(k); ++i)
+        List< NearestResult > sortedResults;
+        while (!results.empty())
         {
+          auto minIt = results.begin();
+          for (auto it = results.begin(); it != results.end(); ++it)
+          {
+            if (it->distance < minIt->distance)
+            {
+              minIt = it;
+            }
+          }
+          sortedResults.push_back(*minIt);
+          results.erase(minIt);
+        }
+
+        double minDist = sortedResults.cbegin()->distance;
+        int count = 0;
+        for (auto it = sortedResults.cbegin(); it != sortedResults.cend() && count < k; ++it, ++count)
+        {
+          NearestResult res = *it;
           if (minDist > 0.0)
           {
-            results[i].coefficient = (results[i].distance / minDist) * 100.0;
+            res.coefficient = (res.distance / minDist) * 100.0;
           }
           else
           {
-            results[i].coefficient = (results[i].distance == 0.0) ? 100.0 : 0.0;
+            res.coefficient = (res.distance == 0.0) ? 100.0 : 0.0;
           }
 
-          out << i + 1 << ". " << results[i].name << " ("
-              << results[i].x << ", " << results[i].z << ") dist: "
-              << results[i].distance << " coef: " << results[i].coefficient << "%\n";
+          out << count + 1 << ". " << res.name << " ("
+              << res.x << ", " << res.z << ") dist: "
+              << res.distance << " coef: " << res.coefficient << "%\n";
         }
       }
       else if (cmd == "find-by-type")
@@ -725,7 +745,7 @@ namespace vishnyakov
           continue;
         }
 
-        std::vector< std::string > ignorePoints;
+        List< std::string > ignorePoints;
         for (int i = 0; i < ignoreCount; ++i)
         {
           std::string pointName;
@@ -744,13 +764,13 @@ namespace vishnyakov
           continue;
         }
 
-        std::vector< std::pair< std::string, Waypoint > > points;
+        List< std::pair< std::string, Waypoint > > points;
         for (auto it = map->begin(); it != map->end(); ++it)
         {
           bool ignored = false;
-          for (const auto& ign : ignorePoints)
+          for (auto ignIt = ignorePoints.cbegin(); ignIt != ignorePoints.cend(); ++ignIt)
           {
-            if (it->first == ign)
+            if (it->first == *ignIt)
             {
               ignored = true;
               break;
@@ -758,7 +778,7 @@ namespace vishnyakov
           }
           if (!ignored)
           {
-            points.emplace_back(it->first, it->second);
+            points.push_back(std::make_pair(it->first, it->second));
           }
         }
 

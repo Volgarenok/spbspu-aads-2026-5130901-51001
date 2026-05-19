@@ -26,8 +26,8 @@ namespace vishnyakov
     BOOST_TEST(result.endTime < 5.30);
     BOOST_TEST(result.totalNightTime == 0.0);
     BOOST_TEST(result.stops.size() == 1);
-    BOOST_TEST(result.stops[0].name == "B");
-    BOOST_TEST(!result.stops[0].isNightStop);
+    BOOST_TEST(result.stops.cbegin()->name == "B");
+    BOOST_TEST(!result.stops.cbegin()->isNightStop);
   }
 
   BOOST_AUTO_TEST_CASE(TraverseSegmentWithNight)
@@ -48,29 +48,39 @@ namespace vishnyakov
 
     BOOST_TEST(result.totalNightTime == 5.0);
     BOOST_TEST(result.stops.size() >= 1);
-    BOOST_TEST(result.stops[0].isNightStop);
+    BOOST_TEST(result.stops.cbegin()->isNightStop);
   }
 
   BOOST_AUTO_TEST_CASE(BuildGreedyRouteSimple)
   {
-    std::vector< std::pair< std::string, Waypoint > > points;
-    points.emplace_back("home", Waypoint(100, 0, "house"));
-    points.emplace_back("mine", Waypoint(200, 0, "cave"));
+    List< std::pair< std::string, Waypoint > > points;
+    points.push_back(std::make_pair("home", Waypoint(100, 0, "house")));
+    points.push_back(std::make_pair("mine", Waypoint(200, 0, "cave")));
 
     auto result = buildGreedyRoute(points, 0, 0, 5.0);
 
     BOOST_TEST(result.totalDistance == 200.0);
     BOOST_TEST(result.totalTime >= 5.0 + 200.0 / 336.0);
     BOOST_TEST(result.totalTime < 5.0 + 200.0 / 336.0 + 0.01);
-    BOOST_TEST(result.allStops.size() == 3);
-    BOOST_TEST(result.allStops[0].name == "start");
-    BOOST_TEST(result.allStops[1].name == "home");
-    BOOST_TEST(result.allStops[2].name == "mine");
+
+    int stopCount = 0;
+    for (auto it = result.allStops.cbegin(); it != result.allStops.cend(); ++it)
+    {
+      ++stopCount;
+    }
+    BOOST_TEST(stopCount == 3);
+
+    auto it = result.allStops.cbegin();
+    BOOST_TEST(it->name == "start");
+    ++it;
+    BOOST_TEST(it->name == "home");
+    ++it;
+    BOOST_TEST(it->name == "mine");
   }
 
   BOOST_AUTO_TEST_CASE(BuildGreedyRouteEmpty)
   {
-    std::vector< std::pair< std::string, Waypoint > > points;
+    List< std::pair< std::string, Waypoint > > points;
     auto result = buildGreedyRoute(points, 0, 0, 5.0);
     BOOST_TEST(result.totalDistance == 0.0);
     BOOST_TEST(result.totalTime == 0.0);
@@ -79,22 +89,26 @@ namespace vishnyakov
 
   BOOST_AUTO_TEST_CASE(GreedyRouteOrder)
   {
-    std::vector< std::pair< std::string, Waypoint > > points;
-    points.emplace_back("far", Waypoint(500, 0, "far"));
-    points.emplace_back("near", Waypoint(100, 0, "near"));
-    points.emplace_back("mid", Waypoint(250, 0, "mid"));
+    List< std::pair< std::string, Waypoint > > points;
+    points.push_back(std::make_pair("far", Waypoint(500, 0, "far")));
+    points.push_back(std::make_pair("near", Waypoint(100, 0, "near")));
+    points.push_back(std::make_pair("mid", Waypoint(250, 0, "mid")));
 
     auto result = buildGreedyRoute(points, 0, 0, 5.0);
 
-    BOOST_TEST(result.allStops[1].name == "near");
-    BOOST_TEST(result.allStops[2].name == "mid");
-    BOOST_TEST(result.allStops[3].name == "far");
+    auto it = result.allStops.cbegin();
+    ++it;
+    BOOST_TEST(it->name == "near");
+    ++it;
+    BOOST_TEST(it->name == "mid");
+    ++it;
+    BOOST_TEST(it->name == "far");
   }
 
   BOOST_AUTO_TEST_CASE(HungerAndBread)
   {
-    std::vector< std::pair< std::string, Waypoint > > points;
-    points.emplace_back("home", Waypoint(200, 0, "house"));
+    List< std::pair< std::string, Waypoint > > points;
+    points.push_back(std::make_pair("home", Waypoint(200, 0, "house")));
 
     auto result = buildGreedyRoute(points, 0, 0, 5.0);
 
@@ -104,8 +118,8 @@ namespace vishnyakov
 
   BOOST_AUTO_TEST_CASE(HungerAndBreadRoundUp)
   {
-    std::vector< std::pair< std::string, Waypoint > > points;
-    points.emplace_back("home", Waypoint(210, 0, "house"));
+    List< std::pair< std::string, Waypoint > > points;
+    points.push_back(std::make_pair("home", Waypoint(210, 0, "house")));
 
     auto result = buildGreedyRoute(points, 0, 0, 5.0);
 
