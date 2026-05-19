@@ -1,4 +1,5 @@
 #include <boost/test/unit_test.hpp>
+#include <cmath>
 #include "waypoint.hpp"
 
 namespace vishnyakov

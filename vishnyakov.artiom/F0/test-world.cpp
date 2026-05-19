@@ -89,7 +89,8 @@ namespace vishnyakov
 
     std::ostringstream out;
     world.listMaps(out);
-    std::string expected = "Alpha\nBeta\nZoo\n";
+
+    std::string expected = "Zoo\nAlpha\nBeta\n";
     BOOST_TEST(out.str() == expected);
   }
 
@@ -170,7 +171,7 @@ namespace vishnyakov
       names.push_back(it->getName());
     }
 
-    std::vector< std::string > expected = {"A", "B", "C"};
+    std::vector< std::string > expected = {"C", "A", "B"};
     BOOST_TEST(names == expected);
   }
 

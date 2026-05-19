@@ -127,39 +127,39 @@ namespace vishnyakov
     }
   }
 
-bool World::mergeMaps(const std::string& newName,
-                      const std::string& name1,
-                      const std::string& name2)
-{
-  const Map* map1 = getMap(name1);
-  const Map* map2 = getMap(name2);
-  if (!map1 || !map2)
+  bool World::mergeMaps(const std::string& newName,
+                        const std::string& name1,
+                        const std::string& name2)
   {
-    return false;
-  }
-  if (hasMap(newName))
-  {
-    return false;
-  }
+    const Map* map1 = getMap(name1);
+    const Map* map2 = getMap(name2);
+    if (!map1 || !map2)
+    {
+      return false;
+    }
+    if (hasMap(newName))
+    {
+      return false;
+    }
 
-  Map newMap(newName);
+    Map newMap(newName);
 
-  for (auto it = map1->begin(); it != map1->end(); ++it)
-  {
-    newMap.addWaypoint(it->first, it->second);
-  }
-
-  for (auto it = map2->begin(); it != map2->end(); ++it)
-  {
-    if (!newMap.findWaypoint(it->first))
+    for (auto it = map1->begin(); it != map1->end(); ++it)
     {
       newMap.addWaypoint(it->first, it->second);
     }
-  }
 
-  maps_.push_back(std::move(newMap));
-  return true;
-}
+    for (auto it = map2->begin(); it != map2->end(); ++it)
+    {
+      if (!newMap.findWaypoint(it->first))
+      {
+        newMap.addWaypoint(it->first, it->second);
+      }
+    }
+
+    maps_.push_back(std::move(newMap));
+    return true;
+  }
 
   World::iterator World::begin() noexcept
   {

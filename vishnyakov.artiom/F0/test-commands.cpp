@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <sstream>
+#include <fstream>
 #include "commands.hpp"
 
 namespace vishnyakov
@@ -14,7 +15,7 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    BOOST_TEST(out.str() == "OK\nOverworld\n");
+    BOOST_TEST(out.str() == "# Карта \"Overworld\" создана\nOverworld\n");
   }
 
   BOOST_AUTO_TEST_CASE(CreateDuplicateMap)
@@ -29,7 +30,10 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    std::string expected = "OK\n<INVALID COMMAND>\nOverworld\n";
+    std::string expected = "# Карта \"Overworld\" создана\n"
+                           "Wrong usage. Use:\n"
+                           "  create-map <map-name>\n"
+                           "Overworld\n";
     BOOST_TEST(out.str() == expected);
   }
 
@@ -46,7 +50,11 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    BOOST_TEST(out.str() == "OK\nOK\nOK\nNether\n");
+    std::string expected = "# Карта \"Overworld\" создана\n"
+                           "# Карта \"Nether\" создана\n"
+                           "# Карта \"Overworld\" удалена\n"
+                           "Nether\n";
+    BOOST_TEST(out.str() == expected);
   }
 
   BOOST_AUTO_TEST_CASE(DeleteNonExistentMap)
@@ -57,7 +65,9 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    BOOST_TEST(out.str() == "<INVALID COMMAND>\n");
+    std::string expected = "Wrong usage. Use:\n"
+                           "  delete-map <map-name>\n";
+    BOOST_TEST(out.str() == expected);
   }
 
   BOOST_AUTO_TEST_CASE(AddPoint)
@@ -72,7 +82,9 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    std::string expected = "OK\nOK\nhome 100 64 house\n";
+    std::string expected = "# Карта \"Overworld\" создана\n"
+                           "# Точка \"home\" добавлена на карту \"Overworld\"\n"
+                           "home 100 64 house\n";
     BOOST_TEST(out.str() == expected);
   }
 
@@ -84,7 +96,9 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    BOOST_TEST(out.str() == "<INVALID COMMAND>\n");
+    std::string expected = "Wrong usage. Use:\n"
+                           "  add-point <map-name> <point-name> <x> <z> <type>\n";
+    BOOST_TEST(out.str() == expected);
   }
 
   BOOST_AUTO_TEST_CASE(AddDuplicatePoint)
@@ -100,7 +114,11 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    std::string expected = "OK\nOK\n<INVALID COMMAND>\nhome 100 64 house\n";
+    std::string expected = "# Карта \"Overworld\" создана\n"
+                           "# Точка \"home\" добавлена на карту \"Overworld\"\n"
+                           "Wrong usage. Use:\n"
+                           "  add-point <map-name> <point-name> <x> <z> <type>\n"
+                           "home 100 64 house\n";
     BOOST_TEST(out.str() == expected);
   }
 
@@ -118,7 +136,11 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    std::string expected = "OK\nOK\nOK\nOK\nmine 250 30 cave\n";
+    std::string expected = "# Карта \"Overworld\" создана\n"
+                           "# Точка \"home\" добавлена на карту \"Overworld\"\n"
+                           "# Точка \"mine\" добавлена на карту \"Overworld\"\n"
+                           "# Точка \"home\" удалена с карты \"Overworld\"\n"
+                           "mine 250 30 cave\n";
     BOOST_TEST(out.str() == expected);
   }
 
@@ -133,7 +155,10 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    BOOST_TEST(out.str() == "OK\n<INVALID COMMAND>\n");
+    std::string expected = "# Карта \"Overworld\" создана\n"
+                           "Wrong usage. Use:\n"
+                           "  remove-point <map-name> <point-name>\n";
+    BOOST_TEST(out.str() == expected);
   }
 
   BOOST_AUTO_TEST_CASE(ShowPointsEmpty)
@@ -147,7 +172,9 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    BOOST_TEST(out.str() == "OK\n<EMPTY>\n");
+    std::string expected = "# Карта \"Overworld\" создана\n"
+                           "<EMPTY>\n";
+    BOOST_TEST(out.str() == expected);
   }
 
   BOOST_AUTO_TEST_CASE(ShowPointsNonExistentMap)
@@ -158,7 +185,9 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    BOOST_TEST(out.str() == "<INVALID COMMAND>\n");
+    std::string expected = "Wrong usage. Use:\n"
+                           "  show-points <map-name>\n";
+    BOOST_TEST(out.str() == expected);
   }
 
   BOOST_AUTO_TEST_CASE(EditPointCoordinates)
@@ -174,7 +203,10 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    std::string expected = "OK\nOK\nOK\nhome 200 80 house\n";
+    std::string expected = "# Карта \"Overworld\" создана\n"
+                           "# Точка \"home\" добавлена на карту \"Overworld\"\n"
+                           "# Точка \"home\" изменена на карте \"Overworld\"\n"
+                           "home 200 80 house\n";
     BOOST_TEST(out.str() == expected);
   }
 
@@ -191,7 +223,10 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    std::string expected = "OK\nOK\nOK\nhome 100 64 castle\n";
+    std::string expected = "# Карта \"Overworld\" создана\n"
+                           "# Точка \"home\" добавлена на карту \"Overworld\"\n"
+                           "# Точка \"home\" изменена на карте \"Overworld\"\n"
+                           "home 100 64 castle\n";
     BOOST_TEST(out.str() == expected);
   }
 
@@ -208,7 +243,10 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    std::string expected = "OK\nOK\nOK\ncastle 100 64 house\n";
+    std::string expected = "# Карта \"Overworld\" создана\n"
+                           "# Точка \"home\" добавлена на карту \"Overworld\"\n"
+                           "# Точка \"home\" изменена на карте \"Overworld\"\n"
+                           "castle 100 64 house\n";
     BOOST_TEST(out.str() == expected);
   }
 
@@ -226,7 +264,11 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    std::string expected = "OK\nOK\nOK\nOK\n<EMPTY>\n";
+    std::string expected = "# Карта \"Overworld\" создана\n"
+                           "# Точка \"home\" добавлена на карту \"Overworld\"\n"
+                           "# Точка \"mine\" добавлена на карту \"Overworld\"\n"
+                           "# Карта \"Overworld\" очищена\n"
+                           "<EMPTY>\n";
     BOOST_TEST(out.str() == expected);
   }
 
@@ -238,7 +280,9 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    BOOST_TEST(out.str() == "<INVALID COMMAND>\n");
+    std::string expected = "Wrong usage. Use:\n"
+                           "  clear-map <map-name>\n";
+    BOOST_TEST(out.str() == expected);
   }
 
   BOOST_AUTO_TEST_CASE(FindNearest)
@@ -276,9 +320,15 @@ namespace vishnyakov
     processCommands(in, world, out);
 
     std::string result = out.str();
-    BOOST_TEST(result.find("home") != std::string::npos);
-    BOOST_TEST(result.find("mine") == std::string::npos);
-    BOOST_TEST(result.find("lake") == std::string::npos);
+    // Ищем строку с результатами поиска (начинается с "1. ")
+    size_t resultPos = result.find("1. ");
+    BOOST_REQUIRE(resultPos != std::string::npos);
+    std::string afterResult = result.substr(resultPos);
+    
+    BOOST_TEST(afterResult.find("home") != std::string::npos);
+    // В результатах поиска не должно быть mine и lake
+    BOOST_TEST(afterResult.find("mine") == std::string::npos);
+    BOOST_TEST(afterResult.find("lake") == std::string::npos);
   }
 
   BOOST_AUTO_TEST_CASE(FindNearestEmpty)
@@ -292,7 +342,9 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    BOOST_TEST(out.str() == "OK\n<EMPTY>\n");
+    std::string expected = "# Карта \"Overworld\" создана\n"
+                           "<EMPTY>\n";
+    BOOST_TEST(out.str() == expected);
   }
 
   BOOST_AUTO_TEST_CASE(FindNearestInvalidMap)
@@ -303,29 +355,42 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    BOOST_TEST(out.str() == "<INVALID COMMAND>\n");
+    std::string expected = "Wrong usage. Use:\n"
+                           "  find-nearest <map-name> <x> <z> <k> [type]\n";
+    BOOST_TEST(out.str() == expected);
   }
 
-  BOOST_AUTO_TEST_CASE(FindByType)
+BOOST_AUTO_TEST_CASE(FindByType)
+{
+  World world;
+  std::istringstream in(
+    "create-map Overworld\n"
+    "add-point Overworld home 100 64 house\n"
+    "add-point Overworld mine 250 30 cave\n"
+    "add-point Overworld lake 300 50 water\n"
+    "add-point Overworld castle 500 200 house\n"
+    "find-by-type Overworld house\nexit\n"
+  );
+  std::ostringstream out;
+
+  processCommands(in, world, out);
+
+  std::string result = out.str();
+  // Ищем первую строку с точкой (формат: "name x z type")
+  size_t resultPos = result.find("castle 500 200 house");
+  if (resultPos == std::string::npos)
   {
-    World world;
-    std::istringstream in(
-      "create-map Overworld\n"
-      "add-point Overworld home 100 64 house\n"
-      "add-point Overworld mine 250 30 cave\n"
-      "add-point Overworld lake 300 50 water\n"
-      "add-point Overworld castle 500 200 house\n"
-      "find-by-type Overworld house\nexit\n"
-    );
-    std::ostringstream out;
-
-    processCommands(in, world, out);
-
-    std::string result = out.str();
-    BOOST_TEST(result.find("home 100 64 house") != std::string::npos);
-    BOOST_TEST(result.find("castle 500 200 house") != std::string::npos);
-    BOOST_TEST(result.find("mine") == std::string::npos);
+    resultPos = result.find("home 100 64 house");
   }
+  BOOST_REQUIRE(resultPos != std::string::npos);
+  std::string afterResult = result.substr(resultPos);
+  
+  BOOST_TEST(afterResult.find("home 100 64 house") != std::string::npos);
+  BOOST_TEST(afterResult.find("castle 500 200 house") != std::string::npos);
+  // В результатах поиска не должно быть mine и lake
+  BOOST_TEST(afterResult.find("mine") == std::string::npos);
+  BOOST_TEST(afterResult.find("lake") == std::string::npos);
+}
 
   BOOST_AUTO_TEST_CASE(FindByTypeEmpty)
   {
@@ -338,7 +403,9 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    BOOST_TEST(out.str() == "OK\n<EMPTY>\n");
+    std::string expected = "# Карта \"Overworld\" создана\n"
+                           "<EMPTY>\n";
+    BOOST_TEST(out.str() == expected);
   }
 
   BOOST_AUTO_TEST_CASE(CopyPoint)
@@ -355,7 +422,12 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    BOOST_TEST(out.str() == "OK\nOK\nOK\nOK\nhome 100 64 house\n");
+    std::string expected = "# Карта \"First\" создана\n"
+                           "# Карта \"Second\" создана\n"
+                           "# Точка \"home\" добавлена на карту \"First\"\n"
+                           "# Точка \"home\" скопирована с карты \"First\" на карту \"Second\"\n"
+                           "home 100 64 house\n";
+    BOOST_TEST(out.str() == expected);
   }
 
   BOOST_AUTO_TEST_CASE(CopyPointAlreadyExists)
@@ -372,7 +444,12 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    std::string expected = "OK\nOK\nOK\nOK\n<INVALID COMMAND>\n";
+    std::string expected = "# Карта \"First\" создана\n"
+                           "# Карта \"Second\" создана\n"
+                           "# Точка \"home\" добавлена на карту \"First\"\n"
+                           "# Точка \"home\" добавлена на карту \"Second\"\n"
+                           "Wrong usage. Use:\n"
+                           "  copy-point <src-map> <dst-map> <point-name>\n";
     BOOST_TEST(out.str() == expected);
   }
 
@@ -391,7 +468,12 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    std::string expected = "OK\nOK\nOK\nOK\n<EMPTY>\nhome 100 64 house\n";
+    std::string expected = "# Карта \"First\" создана\n"
+                           "# Карта \"Second\" создана\n"
+                           "# Точка \"home\" добавлена на карту \"First\"\n"
+                           "# Точка \"home\" перемещена с карты \"First\" на карту \"Second\"\n"
+                           "<EMPTY>\n"
+                           "home 100 64 house\n";
     BOOST_TEST(out.str() == expected);
   }
 
@@ -412,12 +494,170 @@ namespace vishnyakov
     processCommands(in, world, out);
 
     std::string result = out.str();
+    BOOST_TEST(result.find("# Карты \"First\" и \"Second\" объединены в \"Merged\"") != std::string::npos);
     BOOST_TEST(result.find("home 100 64 house") != std::string::npos);
     BOOST_TEST(result.find("mine 250 30 cave") != std::string::npos);
     BOOST_TEST(result.find("lake 300 50 water") != std::string::npos);
   }
 
-  BOOST_AUTO_TEST_CASE(InvalidCommand)
+  BOOST_AUTO_TEST_CASE(MergeMapsInvalid)
+  {
+    World world;
+    std::istringstream in(
+      "create-map First\n"
+      "merge-maps Merged First Nonexistent\nexit\n"
+    );
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string expected = "# Карта \"First\" создана\n"
+                           "Wrong usage. Use:\n"
+                           "  merge-maps <new-map-name> <map-name-1> <map-name-2>\n";
+    BOOST_TEST(out.str() == expected);
+  }
+
+  BOOST_AUTO_TEST_CASE(SaveAndLoad)
+  {
+    World world;
+    std::istringstream in(
+      "create-map First\n"
+      "add-point First home 100 64 house\n"
+      "add-point First mine 250 30 cave\n"
+      "save test_save.txt\n"
+      "create-map Second\n"
+      "load test_save.txt\n"
+      "list-maps\nexit\n"
+    );
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string result = out.str();
+    BOOST_TEST(result.find("# Карта \"First\" создана") != std::string::npos);
+    BOOST_TEST(result.find("# Данные сохранены в файл \"test_save.txt\"") != std::string::npos);
+    BOOST_TEST(result.find("# Карта \"Second\" создана") != std::string::npos);
+    BOOST_TEST(result.find("# Данные загружены из файла \"test_save.txt\"") != std::string::npos);
+    BOOST_TEST(result.find("First") != std::string::npos);
+    BOOST_TEST(result.find("Second\n") == std::string::npos);
+
+    std::remove("test_save.txt");
+  }
+
+  BOOST_AUTO_TEST_CASE(LoadNonExistentFile)
+  {
+    World world;
+    std::istringstream in("load nonexistent.txt\nexit\n");
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string expected = "Wrong usage. Use:\n"
+                           "  load <filename>\n";
+    BOOST_TEST(out.str() == expected);
+  }
+
+  BOOST_AUTO_TEST_CASE(GreedyRoute)
+  {
+    World world;
+    std::istringstream in(
+      "create-map Test\n"
+      "add-point Test home 100 64 house\n"
+      "add-point Test mine 250 30 cave\n"
+      "add-point Test lake 500 200 water\n"
+      "plan-route-greedy Test 0 0 5 0\nexit\n"
+    );
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string result = out.str();
+    BOOST_TEST(result.find("Маршрут (greedy):") != std::string::npos);
+    BOOST_TEST(result.find("Старт") != std::string::npos);
+    BOOST_TEST(result.find("home") != std::string::npos);
+    BOOST_TEST(result.find("mine") != std::string::npos);
+    BOOST_TEST(result.find("lake") != std::string::npos);
+    BOOST_TEST(result.find("Затраченное время:") != std::string::npos);
+    BOOST_TEST(result.find("Пройденная дистанция:") != std::string::npos);
+    BOOST_TEST(result.find("Текущее время:") != std::string::npos);
+    BOOST_TEST(result.find("Общая длина:") != std::string::npos);
+    BOOST_TEST(result.find("Общее время:") != std::string::npos);
+    BOOST_TEST(result.find("Потрачено голода:") != std::string::npos);
+    BOOST_TEST(result.find("Хлеба нужно:") != std::string::npos);
+  }
+
+  BOOST_AUTO_TEST_CASE(GreedyRouteWithIgnore)
+  {
+    World world;
+    std::istringstream in(
+      "create-map Test\n"
+      "add-point Test home 100 64 house\n"
+      "add-point Test mine 250 30 cave\n"
+      "add-point Test lake 500 200 water\n"
+      "plan-route-greedy Test 0 0 5 1 mine\nexit\n"
+    );
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string result = out.str();
+    // Ищем начало маршрута
+    size_t resultPos = result.find("Маршрут (greedy):");
+    BOOST_REQUIRE(resultPos != std::string::npos);
+    std::string afterResult = result.substr(resultPos);
+    
+    BOOST_TEST(afterResult.find("home") != std::string::npos);
+    BOOST_TEST(afterResult.find("lake") != std::string::npos);
+    // В маршруте не должно быть mine
+    BOOST_TEST(afterResult.find("mine") == std::string::npos);
+  }
+
+  BOOST_AUTO_TEST_CASE(GreedyRouteInvalidMap)
+  {
+    World world;
+    std::istringstream in("plan-route-greedy Nonexistent 0 0 5 0\nexit\n");
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string expected = "Wrong usage. Use:\n"
+                           "  plan-route-greedy <map-name> <x> <z> <time> <ignore-count> [ignore-points...]\n";
+    BOOST_TEST(out.str() == expected);
+  }
+
+  BOOST_AUTO_TEST_CASE(GreedyRouteInvalidTime)
+  {
+    World world;
+    std::istringstream in(
+      "create-map Test\n"
+      "plan-route-greedy Test 0 0 25 0\nexit\n"
+    );
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string expected = "# Карта \"Test\" создана\n"
+                           "Wrong usage. Use:\n"
+                           "  plan-route-greedy <map-name> <x> <z> <time> <ignore-count> [ignore-points...]\n";
+    BOOST_TEST(out.str() == expected);
+  }
+
+  BOOST_AUTO_TEST_CASE(HelpCommand)
+  {
+    World world;
+    std::istringstream in("help\nexit\n");
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string result = out.str();
+    BOOST_TEST(result.find("Доступные команды:") != std::string::npos);
+    BOOST_TEST(result.find("create-map") != std::string::npos);
+    BOOST_TEST(result.find("plan-route-greedy") != std::string::npos);
+    BOOST_TEST(result.find("exit") != std::string::npos);
+  }
+
+  BOOST_AUTO_TEST_CASE(UnknownCommand)
   {
     World world;
     std::istringstream in("unknown-command\nexit\n");
@@ -425,7 +665,7 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    BOOST_TEST(out.str() == "<INVALID COMMAND>\n");
+    BOOST_TEST(out.str() == "Unknown command. Use 'help' to see available commands.\n");
   }
 
   BOOST_AUTO_TEST_CASE(EmptyLines)
@@ -436,7 +676,8 @@ namespace vishnyakov
 
     processCommands(in, world, out);
 
-    BOOST_TEST(out.str() == "OK\nOverworld\n");
+    std::string expected = "# Карта \"Overworld\" создана\nOverworld\n";
+    BOOST_TEST(out.str() == expected);
   }
 
   BOOST_AUTO_TEST_SUITE_END()

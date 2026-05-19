@@ -1,8 +1,10 @@
 #include "commands.hpp"
+#include "route.hpp"
 #include <sstream>
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 
 namespace vishnyakov
 {
@@ -15,6 +17,176 @@ namespace vishnyakov
     double distance;
     double coefficient;
   };
+
+  void printCommandUsage(std::ostream& out, const std::string& cmd)
+  {
+    if (cmd == "create-map")
+    {
+      out << "  create-map <map-name>\n";
+    }
+    else if (cmd == "delete-map")
+    {
+      out << "  delete-map <map-name>\n";
+    }
+    else if (cmd == "list-maps")
+    {
+      out << "  list-maps\n";
+    }
+    else if (cmd == "add-point")
+    {
+      out << "  add-point <map-name> <point-name> <x> <z> <type>\n";
+    }
+    else if (cmd == "remove-point")
+    {
+      out << "  remove-point <map-name> <point-name>\n";
+    }
+    else if (cmd == "edit-point")
+    {
+      out << "  edit-point <map-name> <point-name> <new-name> <x> <z> <type>\n";
+    }
+    else if (cmd == "show-points")
+    {
+      out << "  show-points <map-name>\n";
+    }
+    else if (cmd == "find-nearest")
+    {
+      out << "  find-nearest <map-name> <x> <z> <k> [type]\n";
+    }
+    else if (cmd == "find-by-type")
+    {
+      out << "  find-by-type <map-name> <type>\n";
+    }
+    else if (cmd == "copy-point")
+    {
+      out << "  copy-point <src-map> <dst-map> <point-name>\n";
+    }
+    else if (cmd == "move-point")
+    {
+      out << "  move-point <src-map> <dst-map> <point-name>\n";
+    }
+    else if (cmd == "merge-maps")
+    {
+      out << "  merge-maps <new-map-name> <map-name-1> <map-name-2>\n";
+    }
+    else if (cmd == "clear-map")
+    {
+      out << "  clear-map <map-name>\n";
+    }
+    else if (cmd == "save")
+    {
+      out << "  save <filename>\n";
+    }
+    else if (cmd == "load")
+    {
+      out << "  load <filename>\n";
+    }
+    else if (cmd == "plan-route-greedy" || cmd == "plan-route-2opt" || cmd == "plan-route-mst")
+    {
+      out << "  plan-route-greedy <map-name> <x> <z> <time> <ignore-count> [ignore-points...]\n";
+    }
+    else if (cmd == "help")
+    {
+      out << "  help\n";
+    }
+    else if (cmd == "exit")
+    {
+      out << "  exit\n";
+    }
+    else
+    {
+      out << "<UNKNOWN COMMAND>\n";
+    }
+  }
+
+  void printRouteResult(std::ostream& out, const RouteResult& route, const std::string& algorithmName)
+  {
+    out << "Маршрут (" << algorithmName << "):\n";
+    int stepNumber = 1;
+    for (size_t i = 0; i < route.allStops.size(); ++i)
+    {
+      const auto& stop = route.allStops[i];
+      double roundedTime = std::round(stop.time * 100.0) / 100.0;
+      double roundedTravel = std::round(stop.travelTime * 100.0) / 100.0;
+      double roundedDist = std::round(stop.distanceFromPrev * 100.0) / 100.0;
+
+      if (!stop.isPoint && !stop.isNightStop && stop.name == "field")
+      {
+        if (i + 1 < route.allStops.size() &&
+            route.allStops[i + 1].isNightStop &&
+            route.allStops[i + 1].x == stop.x &&
+            route.allStops[i + 1].z == stop.z)
+        {
+          const auto& nightStop = route.allStops[i + 1];
+          double roundedNightTime = std::round(nightStop.time * 100.0) / 100.0;
+
+          out << "  " << stepNumber << ". Остановка на ночь (" << stop.x << ", " << stop.z << ")\n";
+          if (i > 0)
+          {
+            out << "      - Затраченное время: " << roundedTravel << " мин.\n";
+            out << "      - Пройденная дистанция: " << roundedDist << " м.\n";
+          }
+          out << "      - Текущее время: " << roundedNightTime << " мин.\n";
+
+          i++;
+          stepNumber++;
+          continue;
+        }
+      }
+
+      if (stop.name == "start")
+      {
+        out << "  " << stepNumber << ". Старт (" << stop.x << ", " << stop.z << ")\n";
+        out << "      - Текущее время: " << roundedTime << " мин.\n";
+        stepNumber++;
+      }
+      else if (stop.isNightStop)
+      {
+        out << "  " << stepNumber << ". Остановка на ночь (" << stop.x << ", " << stop.z << ")\n";
+        if (i > 0)
+        {
+          out << "      - Затраченное время: " << roundedTravel << " мин.\n";
+          out << "      - Пройденная дистанция: " << roundedDist << " м.\n";
+        }
+        out << "      - Текущее время: " << roundedTime << " мин.\n";
+        stepNumber++;
+      }
+      else if (stop.isPoint)
+      {
+        out << "  " << stepNumber << ". " << stop.name << " (" << stop.x << ", " << stop.z << ")\n";
+        if (i > 0)
+        {
+          out << "      - Затраченное время: " << roundedTravel << " мин.\n";
+          out << "      - Пройденная дистанция: " << roundedDist << " м.\n";
+        }
+        out << "      - Текущее время: " << roundedTime << " мин.\n";
+        stepNumber++;
+      }
+      else
+      {
+        out << "  " << stepNumber << ". Поле (" << stop.x << ", " << stop.z << ")\n";
+        if (i > 0)
+        {
+          out << "      - Затраченное время: " << roundedTravel << " мин.\n";
+          out << "      - Пройденная дистанция: " << roundedDist << " м.\n";
+        }
+        out << "      - Текущее время: " << roundedTime << " мин.\n";
+        stepNumber++;
+      }
+    }
+
+    double roundedDistance = std::round(route.totalDistance * 100.0) / 100.0;
+    double roundedTotalTime = std::round(route.totalTime * 100.0) / 100.0;
+    double roundedHunger = std::round(route.totalHunger * 100.0) / 100.0;
+
+    int days = static_cast< int >(route.totalTime / CYCLE_LENGTH);
+    double minutesInCurrentDay = route.totalTime - (days * CYCLE_LENGTH);
+    minutesInCurrentDay = std::round(minutesInCurrentDay * 100.0) / 100.0;
+
+    out << "Общая длина: " << roundedDistance << " блоков\n";
+    out << "Общее время: " << roundedTotalTime << " мин. (" << days << " д. " << minutesInCurrentDay << " мин.)\n";
+    out << "Потрачено голода: " << roundedHunger << " ед.\n";
+    out << "Хлеба нужно: " << route.breadNeeded << " шт.\n";
+  }
 
   void processCommands(std::istream& in, World& world, std::ostream& out)
   {
@@ -38,15 +210,17 @@ namespace vishnyakov
 
         if (name.empty())
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "create-map");
         }
         else if (world.createMap(name))
         {
-          out << "OK\n";
+          out << "# Карта \"" << name << "\" создана\n";
         }
         else
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "create-map");
         }
       }
       else if (cmd == "delete-map")
@@ -56,15 +230,17 @@ namespace vishnyakov
 
         if (name.empty())
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "delete-map");
         }
         else if (world.deleteMap(name))
         {
-          out << "OK\n";
+          out << "# Карта \"" << name << "\" удалена\n";
         }
         else
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "delete-map");
         }
       }
       else if (cmd == "list-maps")
@@ -79,25 +255,28 @@ namespace vishnyakov
 
         if (mapName.empty() || pointName.empty() || type.empty())
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "add-point");
           continue;
         }
 
         Map* map = world.getMap(mapName);
         if (!map)
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "add-point");
           continue;
         }
 
         if (map->findWaypoint(pointName))
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "add-point");
           continue;
         }
 
         map->addWaypoint(pointName, x, z, type);
-        out << "OK\n";
+        out << "# Точка \"" << pointName << "\" добавлена на карту \"" << mapName << "\"\n";
       }
       else if (cmd == "remove-point")
       {
@@ -106,24 +285,27 @@ namespace vishnyakov
 
         if (mapName.empty() || pointName.empty())
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "remove-point");
           continue;
         }
 
         Map* map = world.getMap(mapName);
         if (!map)
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "remove-point");
           continue;
         }
 
         if (!map->removeWaypoint(pointName))
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "remove-point");
         }
         else
         {
-          out << "OK\n";
+          out << "# Точка \"" << pointName << "\" удалена с карты \"" << mapName << "\"\n";
         }
       }
       else if (cmd == "edit-point")
@@ -133,21 +315,24 @@ namespace vishnyakov
 
         if (mapName.empty() || pointName.empty())
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "edit-point");
           continue;
         }
 
         Map* map = world.getMap(mapName);
         if (!map)
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "edit-point");
           continue;
         }
 
         Waypoint* wp = map->findWaypoint(pointName);
         if (!wp)
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "edit-point");
           continue;
         }
 
@@ -171,7 +356,7 @@ namespace vishnyakov
           map->addWaypoint(newName, newWp);
         }
 
-        out << "OK\n";
+        out << "# Точка \"" << pointName << "\" изменена на карте \"" << mapName << "\"\n";
       }
       else if (cmd == "show-points")
       {
@@ -180,14 +365,16 @@ namespace vishnyakov
 
         if (mapName.empty())
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "show-points");
           continue;
         }
 
         const Map* map = world.getMap(mapName);
         if (!map)
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "show-points");
           continue;
         }
 
@@ -212,18 +399,20 @@ namespace vishnyakov
 
         if (mapName.empty() || k <= 0)
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "find-nearest");
           continue;
         }
 
         const Map* map = world.getMap(mapName);
         if (!map)
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "find-nearest");
           continue;
         }
 
-        std::vector<NearestResult> results;
+        std::vector< NearestResult > results;
 
         for (auto it = map->begin(); it != map->end(); ++it)
         {
@@ -252,7 +441,7 @@ namespace vishnyakov
           });
 
         double minDist = results[0].distance;
-        for (size_t i = 0; i < results.size() && i < static_cast<size_t>(k); ++i)
+        for (size_t i = 0; i < results.size() && i < static_cast< size_t >(k); ++i)
         {
           if (minDist > 0.0)
           {
@@ -275,14 +464,16 @@ namespace vishnyakov
 
         if (mapName.empty() || type.empty())
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "find-by-type");
           continue;
         }
 
         const Map* map = world.getMap(mapName);
         if (!map)
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "find-by-type");
           continue;
         }
 
@@ -309,7 +500,8 @@ namespace vishnyakov
 
         if (srcMap.empty() || dstMap.empty() || pointName.empty())
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "copy-point");
           continue;
         }
 
@@ -318,25 +510,29 @@ namespace vishnyakov
 
         if (!src || !dst)
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "copy-point");
           continue;
         }
 
         const Waypoint* wp = src->findWaypoint(pointName);
         if (!wp)
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "copy-point");
           continue;
         }
 
         if (dst->findWaypoint(pointName))
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "copy-point");
           continue;
         }
 
         dst->addWaypoint(pointName, *wp);
-        out << "OK\n";
+        out << "# Точка \"" << pointName << "\" скопирована с карты \""
+            << srcMap << "\" на карту \"" << dstMap << "\"\n";
       }
       else if (cmd == "move-point")
       {
@@ -345,7 +541,8 @@ namespace vishnyakov
 
         if (srcMap.empty() || dstMap.empty() || pointName.empty())
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "move-point");
           continue;
         }
 
@@ -354,26 +551,30 @@ namespace vishnyakov
 
         if (!src || !dst)
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "move-point");
           continue;
         }
 
         const Waypoint* wp = src->findWaypoint(pointName);
         if (!wp)
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "move-point");
           continue;
         }
 
         if (dst->findWaypoint(pointName))
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "move-point");
           continue;
         }
 
         dst->addWaypoint(pointName, *wp);
         src->removeWaypoint(pointName);
-        out << "OK\n";
+        out << "# Точка \"" << pointName << "\" перемещена с карты \""
+            << srcMap << "\" на карту \"" << dstMap << "\"\n";
       }
       else if (cmd == "merge-maps")
       {
@@ -382,17 +583,20 @@ namespace vishnyakov
 
         if (newName.empty() || name1.empty() || name2.empty())
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "merge-maps");
           continue;
         }
 
         if (world.mergeMaps(newName, name1, name2))
         {
-          out << "OK\n";
+          out << "# Карты \"" << name1 << "\" и \"" << name2
+              << "\" объединены в \"" << newName << "\"\n";
         }
         else
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "merge-maps");
         }
       }
       else if (cmd == "clear-map")
@@ -402,39 +606,199 @@ namespace vishnyakov
 
         if (mapName.empty())
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "clear-map");
           continue;
         }
 
         Map* map = world.getMap(mapName);
         if (!map)
         {
-          out << "<INVALID COMMAND>\n";
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "clear-map");
           continue;
         }
 
         map->clear();
-        out << "OK\n";
-      }
-      else if (cmd == "plan-route-greedy")
-      {
-        out << "Not implemented yet\n";
-      }
-      else if (cmd == "plan-route-2opt")
-      {
-        out << "Not implemented yet\n";
-      }
-      else if (cmd == "plan-route-mst")
-      {
-        out << "Not implemented yet\n";
+        out << "# Карта \"" << mapName << "\" очищена\n";
       }
       else if (cmd == "save")
       {
-        out << "Not implemented yet\n";
+        std::string filename;
+        iss >> filename;
+
+        if (filename.empty())
+        {
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "save");
+          continue;
+        }
+
+        std::ofstream file(filename);
+        if (!file.is_open())
+        {
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "save");
+          continue;
+        }
+
+        for (auto mapIt = world.begin(); mapIt != world.end(); ++mapIt)
+        {
+          file << mapIt->getName() << "\n";
+          for (auto pointIt = mapIt->begin(); pointIt != mapIt->end(); ++pointIt)
+          {
+            file << pointIt->first << " "
+                 << pointIt->second.x << " "
+                 << pointIt->second.z << " "
+                 << pointIt->second.type << "\n";
+          }
+        }
+
+        out << "# Данные сохранены в файл \"" << filename << "\"\n";
       }
       else if (cmd == "load")
       {
-        out << "Not implemented yet\n";
+        std::string filename;
+        iss >> filename;
+
+        if (filename.empty())
+        {
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "load");
+          continue;
+        }
+
+        std::ifstream file(filename);
+        if (!file.is_open())
+        {
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "load");
+          continue;
+        }
+
+        World newWorld;
+        std::string mapLine;
+        std::string currentMapName;
+
+        while (std::getline(file, mapLine))
+        {
+          if (mapLine.empty())
+          {
+            continue;
+          }
+
+          if (mapLine.find(' ') == std::string::npos)
+          {
+            currentMapName = mapLine;
+            newWorld.createMap(currentMapName);
+          }
+          else
+          {
+            std::istringstream pointIss(mapLine);
+            std::string pointName, type;
+            int x, z;
+            pointIss >> pointName >> x >> z >> type;
+
+            Map* map = newWorld.getMap(currentMapName);
+            if (map)
+            {
+              map->addWaypoint(pointName, x, z, type);
+            }
+          }
+        }
+
+        world = std::move(newWorld);
+        out << "# Данные загружены из файла \"" << filename << "\"\n";
+      }
+      else if (cmd == "plan-route-greedy")
+      {
+        std::string mapName;
+        int startX, startZ;
+        double startTime;
+        int ignoreCount;
+        iss >> mapName >> startX >> startZ >> startTime >> ignoreCount;
+
+        if (mapName.empty() || startTime < 0.0 || startTime >= CYCLE_LENGTH || ignoreCount < 0)
+        {
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "plan-route-greedy");
+          continue;
+        }
+
+        std::vector< std::string > ignorePoints;
+        for (int i = 0; i < ignoreCount; ++i)
+        {
+          std::string pointName;
+          iss >> pointName;
+          if (!pointName.empty())
+          {
+            ignorePoints.push_back(pointName);
+          }
+        }
+
+        const Map* map = world.getMap(mapName);
+        if (!map)
+        {
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "plan-route-greedy");
+          continue;
+        }
+
+        std::vector< std::pair< std::string, Waypoint > > points;
+        for (auto it = map->begin(); it != map->end(); ++it)
+        {
+          bool ignored = false;
+          for (const auto& ign : ignorePoints)
+          {
+            if (it->first == ign)
+            {
+              ignored = true;
+              break;
+            }
+          }
+          if (!ignored)
+          {
+            points.emplace_back(it->first, it->second);
+          }
+        }
+
+        if (points.empty())
+        {
+          out << "<EMPTY>\n";
+          continue;
+        }
+
+        RouteResult route = buildGreedyRoute(points, startX, startZ, startTime);
+        printRouteResult(out, route, "greedy");
+      }
+      else if (cmd == "help")
+      {
+        out << "Доступные команды:\n\n"
+            << "Управление картами:\n"
+            << "  create-map <name>                     - создать новую карту\n"
+            << "  delete-map <name>                     - удалить карту\n"
+            << "  list-maps                             - показать все карты\n\n"
+            << "Управление точками:\n"
+            << "  add-point <map> <name> <x> <z> <type> - добавить точку на карту\n"
+            << "  remove-point <map> <name>             - удалить точку\n"
+            << "  edit-point <map> <name> <new-name> <x> <z> <type> - изменить точку (\"-\" = без изменений)\n"
+            << "  show-points <map>                     - показать все точки карты\n\n"
+            << "Поиск и навигация:\n"
+            << "  find-nearest <map> <x> <z> <k> [type] - найти K ближайших точек\n"
+            << "  find-by-type <map> <type>             - найти точки по типу\n"
+            << "  copy-point <src> <dst> <name>         - скопировать точку между картами\n"
+            << "  move-point <src> <dst> <name>         - переместить точку между картами\n\n"
+            << "Операции с картами:\n"
+            << "  merge-maps <new> <map1> <map2>        - объединить две карты\n"
+            << "  clear-map <map>                       - очистить карту\n\n"
+            << "Маршрутизация:\n"
+            << "  plan-route-greedy <map> <x> <z> <time> <ignore-count> [points...] - жадный алгоритм\n\n"
+            << "Сохранение и загрузка:\n"
+            << "  save <filename>                       - сохранить все данные в файл\n"
+            << "  load <filename>                       - загрузить данные из файла\n\n"
+            << "Прочее:\n"
+            << "  help                                  - показать эту справку\n"
+            << "  exit                                  - выйти из программы\n";
       }
       else if (cmd == "exit")
       {
@@ -442,7 +806,7 @@ namespace vishnyakov
       }
       else
       {
-        out << "<INVALID COMMAND>\n";
+        out << "Unknown command. Use 'help' to see available commands.\n";
       }
     }
   }
