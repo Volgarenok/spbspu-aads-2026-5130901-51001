@@ -41,13 +41,7 @@ namespace vishnyakov
       }
     };
 
-    AVLTree():
-      root_(nullptr),
-      size_(0),
-      comp_()
-    {
-    }
-
+    AVLTree();
     AVLTree(const AVLTree& other);
     AVLTree(AVLTree&& other) noexcept;
     ~AVLTree();
@@ -61,7 +55,6 @@ namespace vishnyakov
     void push(const Key& key, const Value& value);
     void push(Key&& key, Value&& value);
     bool has(const Key& key) const;
-    Value drop(const Key& key);
 
     void clear();
     void swap(AVLTree& other) noexcept;
@@ -87,13 +80,382 @@ namespace vishnyakov
 
     Node* insert_node(Node* node, const Key& key, const Value& value);
     Node* insert_node(Node* node, Key&& key, Value&& value);
-    Node* erase_node(Node* node, const Key& key);
     Node* min_node(Node* node) const;
-    Node* max_node(Node* node) const;
   };
 
   template< class Key, class Value, class Compare >
-  void swap(AVLTree< Key, Value, Compare >& lhs, AVLTree< Key, Value, Compare >& rhs) noexcept;
+  AVLTree< Key, Value, Compare >::AVLTree():
+    root_(nullptr),
+    size_(0),
+    comp_()
+  {
+  }
+
+  template< class Key, class Value, class Compare >
+  AVLTree< Key, Value, Compare >::AVLTree(const AVLTree& other):
+    root_(nullptr),
+    size_(other.size_),
+    comp_(other.comp_)
+  {
+    root_ = copy_tree(other.root_, nullptr);
+  }
+
+  template< class Key, class Value, class Compare >
+  AVLTree< Key, Value, Compare >::AVLTree(AVLTree&& other) noexcept:
+    root_(other.root_),
+    size_(other.size_),
+    comp_(std::move(other.comp_))
+  {
+    other.root_ = nullptr;
+    other.size_ = 0;
+  }
+
+  template< class Key, class Value, class Compare >
+  AVLTree< Key, Value, Compare >::~AVLTree()
+  {
+    clear();
+  }
+
+  template< class Key, class Value, class Compare >
+  AVLTree< Key, Value, Compare >& AVLTree< Key, Value, Compare >::operator=(const AVLTree& other)
+  {
+    if (this != &other)
+    {
+      AVLTree tmp(other);
+      swap(tmp);
+    }
+    return *this;
+  }
+
+  template< class Key, class Value, class Compare >
+  AVLTree< Key, Value, Compare >& AVLTree< Key, Value, Compare >::operator=(AVLTree&& other) noexcept
+  {
+    if (this != &other)
+    {
+      swap(other);
+      other.clear();
+    }
+    return *this;
+  }
+
+  template< class Key, class Value, class Compare >
+  bool AVLTree< Key, Value, Compare >::empty() const noexcept
+  {
+    return size_ == 0;
+  }
+
+  template< class Key, class Value, class Compare >
+  std::size_t AVLTree< Key, Value, Compare >::size() const noexcept
+  {
+    return size_;
+  }
+
+  template< class Key, class Value, class Compare >
+  void AVLTree< Key, Value, Compare >::push(const Key& key, const Value& value)
+  {
+    root_ = insert_node(root_, key, value);
+    if (root_)
+    {
+      root_->parent_ = nullptr;
+    }
+    ++size_;
+  }
+
+  template< class Key, class Value, class Compare >
+  void AVLTree< Key, Value, Compare >::push(Key&& key, Value&& value)
+  {
+    root_ = insert_node(root_, std::move(key), std::move(value));
+    if (root_)
+    {
+      root_->parent_ = nullptr;
+    }
+    ++size_;
+  }
+
+  template< class Key, class Value, class Compare >
+  bool AVLTree< Key, Value, Compare >::has(const Key& key) const
+  {
+    return find_node(key) != nullptr;
+  }
+
+  template< class Key, class Value, class Compare >
+  void AVLTree< Key, Value, Compare >::clear()
+  {
+    delete_tree(root_);
+    root_ = nullptr;
+    size_ = 0;
+  }
+
+  template< class Key, class Value, class Compare >
+  void AVLTree< Key, Value, Compare >::swap(AVLTree& other) noexcept
+  {
+    std::swap(root_, other.root_);
+    std::swap(size_, other.size_);
+    std::swap(comp_, other.comp_);
+  }
+
+  template< class Key, class Value, class Compare >
+  Compare AVLTree< Key, Value, Compare >::key_comp() const
+  {
+    return comp_;
+  }
+
+  template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::Node* AVLTree< Key, Value, Compare >::find_node(const Key& key) const
+  {
+    Node* current = root_;
+    while (current)
+    {
+      if (comp_(key, current->data_.first))
+      {
+        current = current->left_;
+      }
+      else if (comp_(current->data_.first, key))
+      {
+        current = current->right_;
+      }
+      else
+      {
+        return current;
+      }
+    }
+    return nullptr;
+  }
+
+  template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::Node* AVLTree< Key, Value, Compare >::copy_tree(Node* node, Node* parent)
+  {
+    if (!node)
+    {
+      return nullptr;
+    }
+    Node* new_node = new Node(node->data_.first, node->data_.second, parent);
+    new_node->height_ = node->height_;
+    new_node->left_ = copy_tree(node->left_, new_node);
+    new_node->right_ = copy_tree(node->right_, new_node);
+    return new_node;
+  }
+
+  template< class Key, class Value, class Compare >
+  void AVLTree< Key, Value, Compare >::delete_tree(Node* node)
+  {
+    if (!node)
+    {
+      return;
+    }
+    delete_tree(node->left_);
+    delete_tree(node->right_);
+    delete node;
+  }
+
+  template< class Key, class Value, class Compare >
+  int AVLTree< Key, Value, Compare >::get_height(Node* node) const
+  {
+    return node ? node->height_ : 0;
+  }
+
+  template< class Key, class Value, class Compare >
+  int AVLTree< Key, Value, Compare >::get_balance(Node* node) const
+  {
+    return node ? get_height(node->left_) - get_height(node->right_) : 0;
+  }
+
+  template< class Key, class Value, class Compare >
+  void AVLTree< Key, Value, Compare >::update_height(Node* node)
+  {
+    if (node)
+    {
+      node->height_ = 1 + std::max(get_height(node->left_), get_height(node->right_));
+    }
+  }
+
+  template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::Node* AVLTree< Key, Value, Compare >::rotate_left(Node* node)
+  {
+    Node* right = node->right_;
+    Node* parent = node->parent_;
+
+    node->right_ = right->left_;
+    if (right->left_)
+    {
+      right->left_->parent_ = node;
+    }
+
+    right->left_ = node;
+    node->parent_ = right;
+    right->parent_ = parent;
+
+    if (parent)
+    {
+      if (parent->left_ == node)
+      {
+        parent->left_ = right;
+      }
+      else
+      {
+        parent->right_ = right;
+      }
+    }
+
+    update_height(node);
+    update_height(right);
+
+    return right;
+  }
+
+  template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::Node* AVLTree< Key, Value, Compare >::rotate_right(Node* node)
+  {
+    Node* left = node->left_;
+    Node* parent = node->parent_;
+
+    node->left_ = left->right_;
+    if (left->right_)
+    {
+      left->right_->parent_ = node;
+    }
+
+    left->right_ = node;
+    node->parent_ = left;
+    left->parent_ = parent;
+
+    if (parent)
+    {
+      if (parent->left_ == node)
+      {
+        parent->left_ = left;
+      }
+      else
+      {
+        parent->right_ = left;
+      }
+    }
+
+    update_height(node);
+    update_height(left);
+
+    return left;
+  }
+
+  template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::Node* AVLTree< Key, Value, Compare >::balance(Node* node)
+  {
+    if (!node)
+    {
+      return nullptr;
+    }
+
+    update_height(node);
+    int balance = get_balance(node);
+
+    if (balance > 1)
+    {
+      if (get_balance(node->left_) < 0)
+      {
+        node->left_ = rotate_left(node->left_);
+        if (node->left_)
+        {
+          node->left_->parent_ = node;
+        }
+      }
+      return rotate_right(node);
+    }
+
+    if (balance < -1)
+    {
+      if (get_balance(node->right_) > 0)
+      {
+        node->right_ = rotate_right(node->right_);
+        if (node->right_)
+        {
+          node->right_->parent_ = node;
+        }
+      }
+      return rotate_left(node);
+    }
+
+    return node;
+  }
+
+  template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::Node* AVLTree< Key, Value, Compare >::insert_node(Node* node, const Key& key, const Value& value)
+  {
+    if (!node)
+    {
+      return new Node(key, value);
+    }
+
+    if (comp_(key, node->data_.first))
+    {
+      node->left_ = insert_node(node->left_, key, value);
+      if (node->left_)
+      {
+        node->left_->parent_ = node;
+      }
+    }
+    else if (comp_(node->data_.first, key))
+    {
+      node->right_ = insert_node(node->right_, key, value);
+      if (node->right_)
+      {
+        node->right_->parent_ = node;
+      }
+    }
+    else
+    {
+      return node;
+    }
+
+    return balance(node);
+  }
+
+  template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::Node* AVLTree< Key, Value, Compare >::insert_node(Node* node, Key&& key, Value&& value)
+  {
+    if (!node)
+    {
+      return new Node(std::move(key), std::move(value));
+    }
+
+    if (comp_(key, node->data_.first))
+    {
+      node->left_ = insert_node(node->left_, std::move(key), std::move(value));
+      if (node->left_)
+      {
+        node->left_->parent_ = node;
+      }
+    }
+    else if (comp_(node->data_.first, key))
+    {
+      node->right_ = insert_node(node->right_, std::move(key), std::move(value));
+      if (node->right_)
+      {
+        node->right_->parent_ = node;
+      }
+    }
+    else
+    {
+      return node;
+    }
+
+    return balance(node);
+  }
+
+  template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::Node* AVLTree< Key, Value, Compare >::min_node(Node* node) const
+  {
+    while (node && node->left_)
+    {
+      node = node->left_;
+    }
+    return node;
+  }
+
+  template< class Key, class Value, class Compare >
+  void swap(AVLTree< Key, Value, Compare >& lhs, AVLTree< Key, Value, Compare >& rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 }
 
 #endif
