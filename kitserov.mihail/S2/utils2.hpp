@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <string>
 #include <cctype>
+#include <limits>
 #include "queue.hpp"
 #include "stack.hpp"
 
@@ -149,19 +150,31 @@ namespace kitserov
         T l = stack.drop();
         T result = 0;
         if (token == "+") {
-          result = l + r;
+          if (__builtin_add_overflow(l, r, &result)) {
+            throw std::overflow_error("Overflow in addition");
+          }
         } else if (token == "-") {
-          result = l - r;
+          if (__builtin_sub_overflow(l, r, &result)) {
+            throw std::overflow_error("Overflow in subtraction");
+          }
         } else if (token == "*") {
-          result = l * r;
+          if (__builtin_mul_overflow(l, r, &result)) {
+            throw std::overflow_error("Overflow in multiplication");
+          }
         } else if (token == "/") {
           if (r == 0) {
             throw std::logic_error("Division by zero");
+          }
+          if (l == std::numeric_limits< T >::min() && r == -1) {
+            throw std::overflow_error("Overflow in division");
           }
           result = l / r;
         } else if (token == "%") {
           if (r == 0) {
             throw std::logic_error("Modulo by zero");
+          }
+          if (l == std::numeric_limits< T >::min() && r == -1) {
+            throw std::overflow_error("Overflow in modulo");
           }
           result = ((l % r) + r) % r;
         } else if (token == "##") {
