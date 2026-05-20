@@ -822,6 +822,67 @@ namespace vishnyakov
         RouteResult route = improve2Opt(points, startX, startZ, startTime);
         printRouteResult(out, route, "2-opt");
       }
+      else if (cmd == "plan-route-mst")
+      {
+        std::string mapName;
+        int startX, startZ;
+        double startTime;
+        int ignoreCount;
+        iss >> mapName >> startX >> startZ >> startTime >> ignoreCount;
+
+        if (mapName.empty() || startTime < 0.0 || startTime >= CYCLE_LENGTH || ignoreCount < 0)
+        {
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "plan-route-mst");
+          continue;
+        }
+
+        List< std::string > ignorePoints;
+        for (int i = 0; i < ignoreCount; ++i)
+        {
+          std::string pointName;
+          iss >> pointName;
+          if (!pointName.empty())
+          {
+            ignorePoints.push_back(pointName);
+          }
+        }
+
+        const Map* map = world.getMap(mapName);
+        if (!map)
+        {
+          out << "Wrong usage. Use:\n";
+          printCommandUsage(out, "plan-route-mst");
+          continue;
+        }
+
+        List< std::pair< std::string, Waypoint > > points;
+        for (auto it = map->begin(); it != map->end(); ++it)
+        {
+          bool ignored = false;
+          for (auto ignIt = ignorePoints.cbegin(); ignIt != ignorePoints.cend(); ++ignIt)
+          {
+            if (it->first == *ignIt)
+            {
+              ignored = true;
+              break;
+            }
+          }
+          if (!ignored)
+          {
+            points.push_back(std::make_pair(it->first, it->second));
+          }
+        }
+
+        if (points.empty())
+        {
+          out << "<EMPTY>\n";
+          continue;
+        }
+
+        RouteResult route = buildMSTRoute(points, startX, startZ, startTime);
+        printRouteResult(out, route, "MST");
+      }
       else if (cmd == "help")
       {
         out << "Доступные команды:\n\n"
@@ -844,7 +905,8 @@ namespace vishnyakov
             << "  clear-map <map>                       - очистить карту\n\n"
             << "Маршрутизация:\n"
             << "  plan-route-greedy <map> <x> <z> <time> <ignore-count> [points...] - жадный алгоритм\n"
-            << "  plan-route-2opt <map> <x> <z> <time> <ignore-count> [points...]   - 2-opt улучшение\n\n"
+            << "  plan-route-2opt <map> <x> <z> <time> <ignore-count> [points...]   - 2-opt улучшение\n"
+            << "  plan-route-mst <map> <x> <z> <time> <ignore-count> [points...]     - MST (Prim)\n\n"
             << "Сохранение и загрузка:\n"
             << "  save <filename>                       - сохранить все данные в файл\n"
             << "  load <filename>                       - загрузить данные из файла\n\n"

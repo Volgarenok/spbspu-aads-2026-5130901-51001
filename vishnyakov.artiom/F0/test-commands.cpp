@@ -604,6 +604,28 @@ namespace vishnyakov
     BOOST_TEST(result.find("lake") != std::string::npos);
   }
 
+  BOOST_AUTO_TEST_CASE(GreedyRouteMST)
+  {
+    World world;
+    std::istringstream in(
+      "create-map Test\n"
+      "add-point Test home 100 64 house\n"
+      "add-point Test mine 250 30 cave\n"
+      "add-point Test lake 500 200 water\n"
+      "plan-route-mst Test 0 0 5 0\nexit\n"
+    );
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string result = out.str();
+    BOOST_TEST(result.find("Маршрут (MST):") != std::string::npos);
+    BOOST_TEST(result.find("Старт") != std::string::npos);
+    BOOST_TEST(result.find("home") != std::string::npos);
+    BOOST_TEST(result.find("mine") != std::string::npos);
+    BOOST_TEST(result.find("lake") != std::string::npos);
+  }
+
   BOOST_AUTO_TEST_CASE(GreedyRouteWithIgnore)
   {
     World world;

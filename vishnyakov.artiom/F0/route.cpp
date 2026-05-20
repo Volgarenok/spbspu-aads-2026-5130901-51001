@@ -370,5 +370,106 @@ namespace vishnyakov
 
     return buildRouteFromOrder(optimizedPoints, startX, startZ, startTime);
   }
+
+  RouteResult buildMSTRoute(
+    const List< std::pair< std::string, Waypoint > >& points,
+    int startX, int startZ,
+    double startTime)
+  {
+    if (points.empty())
+    {
+      RouteResult empty;
+      empty.totalDistance = 0.0;
+      empty.totalTime = 0.0;
+      empty.totalNightTime = 0.0;
+      return empty;
+    }
+
+    size_t n = points.size();
+    std::vector< std::pair< std::string, Waypoint > > pointVec;
+    for (auto it = points.cbegin(); it != points.cend(); ++it)
+    {
+      pointVec.push_back(*it);
+    }
+
+    std::vector< bool > inMST(n, false);
+    std::vector< double > minDist(n, std::numeric_limits< double >::max());
+    std::vector< int > parent(n, -1);
+
+    minDist[0] = 0.0;
+
+    for (size_t i = 0; i < n; ++i)
+    {
+      int u = -1;
+      for (size_t j = 0; j < n; ++j)
+      {
+        if (!inMST[j] && (u == -1 || minDist[j] < minDist[u]))
+        {
+          u = j;
+        }
+      }
+
+      if (u == -1)
+      {
+        break;
+      }
+
+      inMST[u] = true;
+
+      for (size_t v = 0; v < n; ++v)
+      {
+        if (!inMST[v])
+        {
+          double dist = distanceBetween(pointVec[u].second, pointVec[v].second);
+          if (dist < minDist[v])
+          {
+            minDist[v] = dist;
+            parent[v] = u;
+          }
+        }
+      }
+    }
+
+    std::vector< std::vector< int > > tree(n);
+    for (size_t i = 1; i < n; ++i)
+    {
+      if (parent[i] != -1)
+      {
+        tree[parent[i]].push_back(i);
+        tree[i].push_back(parent[i]);
+      }
+    }
+
+    std::vector< int > order;
+    std::vector< bool > visited(n, false);
+
+    std::vector< int > stack;
+    stack.push_back(0);
+    visited[0] = true;
+
+    while (!stack.empty())
+    {
+      int u = stack.back();
+      stack.pop_back();
+      order.push_back(u);
+
+      for (int v : tree[u])
+      {
+        if (!visited[v])
+        {
+          visited[v] = true;
+          stack.push_back(v);
+        }
+      }
+    }
+
+    List< std::pair< std::string, Waypoint > > mstOrder;
+    for (int idx : order)
+    {
+      mstOrder.push_back(pointVec[idx]);
+    }
+
+    return buildRouteFromOrder(mstOrder, startX, startZ, startTime);
+  }
 }
 
