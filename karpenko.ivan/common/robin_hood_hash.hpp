@@ -156,6 +156,77 @@ public:
         std::swap(hasher_, other.hasher_);
         std::swap(equal_, other.equal_);
     }
+
+    void insert(const Key& key, const Value& value)
+    {
+        checkGrow();
+        size_t idx = hasher_(key) & (capacity_ - 1);
+        Entry newEntry(key, value);
+        newEntry.dist = 0;
+
+        while (true)
+        {
+            if (!table_[idx].occupied)
+            {
+                table_[idx] = std::move(newEntry);
+                ++size_;
+                return;
+            }
+            if (equal_(table_[idx].key, key))
+            {
+                table_[idx].value = value;
+                return;
+            }
+            if (newEntry.dist > table_[idx].dist)
+                std::swap(newEntry, table_[idx]);
+            ++idx;
+            ++newEntry.dist;
+            idx &= (capacity_ - 1);
+        }
+    }
+
+    void insert(Key&& key, Value&& value)
+    {
+        checkGrow();
+        size_t idx = hasher_(key) & (capacity_ - 1);
+        Entry newEntry(std::move(key), std::move(value));
+        newEntry.dist = 0;
+
+        while (true)
+        {
+            if (!table_[idx].occupied)
+            {
+                table_[idx] = std::move(newEntry);
+                ++size_;
+                return;
+            }
+            if (equal_(table_[idx].key, key))
+            {
+                table_[idx].value = std::move(value);
+                return;
+            }
+            if (newEntry.dist > table_[idx].dist)
+                std::swap(newEntry, table_[idx]);
+            ++idx;
+            ++newEntry.dist;
+            idx &= (capacity_ - 1);
+        }
+    }
+
+    bool contains(const Key& key) const
+    {
+        size_t idx = hasher_(key) & (capacity_ - 1);
+        size_t dist = 0;
+        while (table_[idx].occupied && table_[idx].dist >= dist)
+        {
+            if (equal_(table_[idx].key, key))
+                return true;
+            ++idx;
+            ++dist;
+            idx &= (capacity_ - 1);
+        }
+        return false;
+    }
 };
 
 }
