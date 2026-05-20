@@ -279,6 +279,41 @@ public:
 
     size_t size() const { return size_; }
     bool empty() const { return size_ == 0; }
+
+    class iterator
+    {
+        Entry* ptr;
+        Entry* end;
+        void skip() { while (ptr != end && !ptr->occupied) ++ptr; }
+    public:
+        iterator(Entry* p, Entry* e) : ptr(p), end(e) { skip(); }
+        std::pair<Key&, Value&> operator*() { return {ptr->key, ptr->value}; }
+        std::pair<Key&, Value&> operator->() { return {ptr->key, ptr->value}; }
+        iterator& operator++() { ++ptr; skip(); return *this; }
+        iterator operator++(int) { iterator tmp = *this; ++ptr; skip(); return tmp; }
+        bool operator==(const iterator& other) const { return ptr == other.ptr; }
+        bool operator!=(const iterator& other) const { return !(*this == other); }
+    };
+
+    class const_iterator
+    {
+        const Entry* ptr;
+        const Entry* end;
+        void skip() { while (ptr != end && !ptr->occupied) ++ptr; }
+    public:
+        const_iterator(const Entry* p, const Entry* e) : ptr(p), end(e) { skip(); }
+        std::pair<const Key&, const Value&> operator*() const { return {ptr->key, ptr->value}; }
+        std::pair<const Key&, const Value&> operator->() const { return {ptr->key, ptr->value}; }
+        const_iterator& operator++() { ++ptr; skip(); return *this; }
+        const_iterator operator++(int) { const_iterator tmp = *this; ++ptr; skip(); return tmp; }
+        bool operator==(const const_iterator& other) const { return ptr == other.ptr; }
+        bool operator!=(const const_iterator& other) const { return !(*this == other); }
+    };
+
+    iterator begin() { return iterator(table_, table_ + capacity_); }
+    iterator end() { return iterator(table_ + capacity_, table_ + capacity_); }
+    const_iterator begin() const { return const_iterator(table_, table_ + capacity_); }
+    const_iterator end() const { return const_iterator(table_ + capacity_, table_ + capacity_); }
 };
 
 }
