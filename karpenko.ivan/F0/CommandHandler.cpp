@@ -86,11 +86,135 @@ void CommandHandler::handleProfileDelete(const std::string* args, int count) {
     printSuccess("Profile \"" + name + "\" deleted (diary entries removed: " + std::to_string(removed) + ")");
 }
 
+void CommandHandler::handleBaseCreate(const std::string* args, int count) {
+    if (count != 1) {
+        printError("base-create requires <name>");
+        return;
+    }
+    std::string name = args[0];
+    if (name.empty()) {
+        printError("Base name cannot be empty");
+        return;
+    }
+    if (bases_.hasBase(name)) {
+        printError("Base already exists");
+        return;
+    }
+    bases_.addBase(FoodBase(name));
+    printSuccess("Base \"" + name + "\" created");
+}
+
+void CommandHandler::handleBaseList() {
+    List<const FoodBase*> all = bases_.getAllBases();
+    if (all.size() == 0) {
+        printInfo("No bases found");
+        return;
+    }
+    int n = all.size();
+    std::string* names = new std::string[n];
+    int idx = 0;
+    for (auto it = all.begin(); it != all.end(); ++it) {
+        names[idx++] = (*it)->getName();
+    }
+    for (int i = 0; i < n-1; ++i) {
+        for (int j = 0; j < n-i-1; ++j) {
+            if (names[j] > names[j+1]) {
+                std::swap(names[j], names[j+1]);
+            }
+        }
+    }
+    std::cout << "=== BASES ===\n";
+    for (int i = 0; i < n; ++i) {
+        const FoodBase* base = bases_.getBase(names[i]);
+        std::cout << (i+1) << ". " << base->getName() << " (" << base->size() << " products)\n";
+    }
+    delete[] names;
+    std::cout << "Total: " << n << " bases\n";
+}
+
+void CommandHandler::handleBaseAdd(const std::string* args, int count) {
+    if (count != 6) {
+        printError("base-add requires: <base> <product> <proteins> <fats> <carbs> <calories>");
+        return;
+    }
+    std::string baseName = args[0];
+    std::string prodName = args[1];
+    double p = std::atof(args[2].c_str());
+    double f = std::atof(args[3].c_str());
+    double c = std::atof(args[4].c_str());
+    double cal = std::atof(args[5].c_str());
+    if (p <= 0 || f < 0 || c < 0 || cal <= 0) {
+        printError("Nutrition values must be positive (fats/carbs can be zero)");
+        return;
+    }
+    FoodBase* base = bases_.getBase(baseName);
+    if (!base) {
+        printError("Base not found");
+        return;
+    }
+    if (base->containsProduct(prodName)) {
+        printError("Product already exists in base");
+        return;
+    }
+    Product product(prodName, p, f, c, cal);
+    base->addProduct(product);
+    printSuccess("Product \"" + prodName + "\" added to base \"" + baseName + "\"");
+}
+
+void CommandHandler::handleBaseRemove(const std::string* args, int count) {
+    if (count != 2) {
+        printError("base-remove requires: <base> <product>");
+        return;
+    }
+    std::string baseName = args[0];
+    std::string prodName = args[1];
+    FoodBase* base = bases_.getBase(baseName);
+    if (!base) {
+        printError("Base not found");
+        return;
+    }
+    if (!base->containsProduct(prodName)) {
+        printError("Product not found in base");
+        return;
+    }
+    base->removeProduct(prodName);
+    printSuccess("Product \"" + prodName + "\" removed from base \"" + baseName + "\"");
+}
+
+void CommandHandler::handleBaseShow(const std::string* args, int count) {
+    if (count != 1) {
+        printError("base-show requires <base>");
+        return;
+    }
+    std::string baseName = args[0];
+    const FoodBase* base = bases_.getBase(baseName);
+    if (!base) {
+        printError("Base not found");
+        return;
+    }
+    List<Product> prods = base->getAllProducts();
+    std::cout << "=== BASE: " << baseName << " ===\n";
+    if (prods.size() == 0) {
+        std::cout << "No products\n";
+    } else {
+        int idx = 1;
+        for (auto it = prods.begin(); it != prods.end(); ++it) {
+            std::cout << idx++ << ". " << it->toString() << "\n";
+        }
+    }
+    std::cout << "Total: " << prods.size() << " products\n";
+}
+
 void CommandHandler::handle(const ParsedCommand& cmd) {
     switch (cmd.type) {
         case CMD_PROFILE_CREATE: handleProfileCreate(cmd.args, cmd.argCount); break;
         case CMD_PROFILE_LIST: handleProfileList(); break;
         case CMD_PROFILE_DELETE: handleProfileDelete(cmd.args, cmd.argCount); break;
+        case CMD_BASE_CREATE: handleBaseCreate(cmd.args, cmd.argCount); break;
+        case CMD_BASE_LIST: handleBaseList(); break;
+        case CMD_BASE_ADD: handleBaseAdd(cmd.args, cmd.argCount); break;
+        case CMD_BASE_REMOVE: handleBaseRemove(cmd.args, cmd.argCount); break;
+        case CMD_BASE_SHOW: handleBaseShow(cmd.args, cmd.argCount); break;
         default: printError("Unknown command"); break;
     }
 }
