@@ -260,5 +260,106 @@ namespace vishnyakov
 
     return result;
   }
+
+  double distanceBetween(const Waypoint& a, const Waypoint& b)
+  {
+    double dx = static_cast< double >(a.x - b.x);
+    double dz = static_cast< double >(a.z - b.z);
+    return std::sqrt(dx * dx + dz * dz);
+  }
+
+  RouteResult improve2Opt(
+    const List< std::pair< std::string, Waypoint > >& points,
+    int startX, int startZ,
+    double startTime)
+  {
+    if (points.size() < 2)
+    {
+      return buildGreedyRoute(points, startX, startZ, startTime);
+    }
+
+    List< std::pair< std::string, Waypoint > > pointList = points;
+    bool improved = true;
+
+    while (improved)
+    {
+      improved = false;
+
+      int idx1 = 0;
+      for (auto it1 = pointList.cbegin(); it1 != pointList.cend(); ++it1, ++idx1)
+      {
+        int idx2 = 0;
+        for (auto it2 = pointList.cbegin(); it2 != pointList.cend(); ++it2, ++idx2)
+        {
+          if (idx2 <= idx1 + 1)
+          {
+            continue;
+          }
+
+          auto it1Next = it1;
+          ++it1Next;
+
+          auto it2Next = it2;
+          ++it2Next;
+
+          if (it1Next == pointList.cend() || it2Next == pointList.cend())
+          {
+            continue;
+          }
+
+          const Waypoint& a = it1->second;
+          const Waypoint& b = it1Next->second;
+          const Waypoint& c = it2->second;
+          const Waypoint& d = it2Next->second;
+
+          double currentDist = distanceBetween(a, b) + distanceBetween(c, d);
+          double newDist = distanceBetween(a, c) + distanceBetween(b, d);
+
+          if (newDist < currentDist - 1e-6)
+          {
+            List< std::pair< std::string, Waypoint > > newList;
+            int pos = 0;
+            for (auto it = pointList.cbegin(); it != pointList.cend(); ++it, ++pos)
+            {
+              if (pos <= idx1 || pos > idx2)
+              {
+                newList.push_back(*it);
+              }
+              else
+              {
+                List< std::pair< std::string, Waypoint > > reversed;
+                for (int r = idx2; r > idx1; --r)
+                {
+                  int rpos = 0;
+                  for (auto rit = pointList.cbegin(); rit != pointList.cend(); ++rit, ++rpos)
+                  {
+                    if (rpos == r)
+                    {
+                      reversed.push_back(*rit);
+                      break;
+                    }
+                  }
+                }
+                for (const auto& rev : reversed)
+                {
+                  newList.push_back(rev);
+                }
+                pos = idx2;
+              }
+            }
+            pointList = newList;
+            improved = true;
+            break;
+          }
+        }
+        if (improved)
+        {
+          break;
+        }
+      }
+    }
+
+    return buildGreedyRoute(pointList, startX, startZ, startTime);
+  }
 }
 

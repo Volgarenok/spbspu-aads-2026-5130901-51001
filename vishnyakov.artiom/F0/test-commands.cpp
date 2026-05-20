@@ -320,13 +320,11 @@ namespace vishnyakov
     processCommands(in, world, out);
 
     std::string result = out.str();
-    // Ищем строку с результатами поиска (начинается с "1. ")
     size_t resultPos = result.find("1. ");
     BOOST_REQUIRE(resultPos != std::string::npos);
     std::string afterResult = result.substr(resultPos);
     
     BOOST_TEST(afterResult.find("home") != std::string::npos);
-    // В результатах поиска не должно быть mine и lake
     BOOST_TEST(afterResult.find("mine") == std::string::npos);
     BOOST_TEST(afterResult.find("lake") == std::string::npos);
   }
@@ -360,37 +358,35 @@ namespace vishnyakov
     BOOST_TEST(out.str() == expected);
   }
 
-BOOST_AUTO_TEST_CASE(FindByType)
-{
-  World world;
-  std::istringstream in(
-    "create-map Overworld\n"
-    "add-point Overworld home 100 64 house\n"
-    "add-point Overworld mine 250 30 cave\n"
-    "add-point Overworld lake 300 50 water\n"
-    "add-point Overworld castle 500 200 house\n"
-    "find-by-type Overworld house\nexit\n"
-  );
-  std::ostringstream out;
-
-  processCommands(in, world, out);
-
-  std::string result = out.str();
-  // Ищем первую строку с точкой (формат: "name x z type")
-  size_t resultPos = result.find("castle 500 200 house");
-  if (resultPos == std::string::npos)
+  BOOST_AUTO_TEST_CASE(FindByType)
   {
-    resultPos = result.find("home 100 64 house");
+    World world;
+    std::istringstream in(
+      "create-map Overworld\n"
+      "add-point Overworld home 100 64 house\n"
+      "add-point Overworld mine 250 30 cave\n"
+      "add-point Overworld lake 300 50 water\n"
+      "add-point Overworld castle 500 200 house\n"
+      "find-by-type Overworld house\nexit\n"
+    );
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string result = out.str();
+    size_t resultPos = result.find("castle 500 200 house");
+    if (resultPos == std::string::npos)
+    {
+      resultPos = result.find("home 100 64 house");
+    }
+    BOOST_REQUIRE(resultPos != std::string::npos);
+    std::string afterResult = result.substr(resultPos);
+    
+    BOOST_TEST(afterResult.find("home 100 64 house") != std::string::npos);
+    BOOST_TEST(afterResult.find("castle 500 200 house") != std::string::npos);
+    BOOST_TEST(afterResult.find("mine") == std::string::npos);
+    BOOST_TEST(afterResult.find("lake") == std::string::npos);
   }
-  BOOST_REQUIRE(resultPos != std::string::npos);
-  std::string afterResult = result.substr(resultPos);
-  
-  BOOST_TEST(afterResult.find("home 100 64 house") != std::string::npos);
-  BOOST_TEST(afterResult.find("castle 500 200 house") != std::string::npos);
-  // В результатах поиска не должно быть mine и lake
-  BOOST_TEST(afterResult.find("mine") == std::string::npos);
-  BOOST_TEST(afterResult.find("lake") == std::string::npos);
-}
 
   BOOST_AUTO_TEST_CASE(FindByTypeEmpty)
   {
@@ -586,6 +582,28 @@ BOOST_AUTO_TEST_CASE(FindByType)
     BOOST_TEST(result.find("Хлеба нужно:") != std::string::npos);
   }
 
+  BOOST_AUTO_TEST_CASE(GreedyRoute2Opt)
+  {
+    World world;
+    std::istringstream in(
+      "create-map Test\n"
+      "add-point Test home 100 64 house\n"
+      "add-point Test mine 250 30 cave\n"
+      "add-point Test lake 500 200 water\n"
+      "plan-route-2opt Test 0 0 5 0\nexit\n"
+    );
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string result = out.str();
+    BOOST_TEST(result.find("Маршрут (2-opt):") != std::string::npos);
+    BOOST_TEST(result.find("Старт") != std::string::npos);
+    BOOST_TEST(result.find("home") != std::string::npos);
+    BOOST_TEST(result.find("mine") != std::string::npos);
+    BOOST_TEST(result.find("lake") != std::string::npos);
+  }
+
   BOOST_AUTO_TEST_CASE(GreedyRouteWithIgnore)
   {
     World world;
@@ -601,14 +619,12 @@ BOOST_AUTO_TEST_CASE(FindByType)
     processCommands(in, world, out);
 
     std::string result = out.str();
-    // Ищем начало маршрута
     size_t resultPos = result.find("Маршрут (greedy):");
     BOOST_REQUIRE(resultPos != std::string::npos);
     std::string afterResult = result.substr(resultPos);
     
     BOOST_TEST(afterResult.find("home") != std::string::npos);
     BOOST_TEST(afterResult.find("lake") != std::string::npos);
-    // В маршруте не должно быть mine
     BOOST_TEST(afterResult.find("mine") == std::string::npos);
   }
 

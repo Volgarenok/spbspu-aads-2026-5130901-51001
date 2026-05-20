@@ -66,6 +66,12 @@ namespace vishnyakov
     int startX, int startZ,
     double startTime
   );
+
+  RouteResult improve2Opt(
+    const List< std::pair< std::string, Waypoint > >& points,
+    int startX, int startZ,
+    double startTime
+  );
 }
 
 #endif
