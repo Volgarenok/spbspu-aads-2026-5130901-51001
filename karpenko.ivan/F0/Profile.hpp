@@ -34,6 +34,6 @@ public:
     static Profile deserialize(const std::string& line);
 };
 
-} // namespace karpenko
+}
 
 #endif
