@@ -149,6 +149,88 @@ namespace vishnyakov
     BOOST_TEST(tree.has(15));
   }
 
+  BOOST_AUTO_TEST_CASE(IteratorBeginEnd)
+  {
+    AVLTree< int, std::string, std::less< int > > tree;
+    BOOST_TEST(tree.begin() == tree.end());
+  }
+
+  BOOST_AUTO_TEST_CASE(IteratorInOrderTraversal)
+  {
+    AVLTree< int, std::string, std::less< int > > tree;
+    tree.push(5, "five");
+    tree.push(3, "three");
+    tree.push(7, "seven");
+    tree.push(2, "two");
+    tree.push(4, "four");
+    tree.push(6, "six");
+    tree.push(8, "eight");
+
+    std::vector< int > expected = {2, 3, 4, 5, 6, 7, 8};
+    std::vector< int > actual;
+
+    for (auto it = tree.begin(); it != tree.end(); ++it)
+    {
+      actual.push_back(it->first);
+    }
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(),
+                                  expected.begin(), expected.end());
+  }
+
+  BOOST_AUTO_TEST_CASE(ConstIterator)
+  {
+    AVLTree< int, std::string, std::less< int > > tree;
+    tree.push(1, "one");
+    tree.push(2, "two");
+
+    const auto& const_tree = tree;
+    std::vector< int > actual;
+
+    for (auto it = const_tree.begin(); it != const_tree.end(); ++it)
+    {
+      actual.push_back(it->first);
+    }
+
+    std::vector< int > expected = {1, 2};
+    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(),
+                                  expected.begin(), expected.end());
+  }
+
+  BOOST_AUTO_TEST_CASE(RangeBasedForLoop)
+  {
+    AVLTree< int, std::string, std::less< int > > tree;
+    tree.push(3, "three");
+    tree.push(1, "one");
+    tree.push(2, "two");
+
+    std::vector< int > actual;
+    for (const auto& pair : tree)
+    {
+      actual.push_back(pair.first);
+    }
+
+    std::vector< int > expected = {1, 2, 3};
+    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(),
+                                  expected.begin(), expected.end());
+  }
+
+  BOOST_AUTO_TEST_CASE(Find)
+  {
+    AVLTree< int, std::string, std::less< int > > tree;
+    tree.push(1, "one");
+    tree.push(2, "two");
+    tree.push(3, "three");
+
+    auto it = tree.find(2);
+    BOOST_TEST(it != tree.end());
+    BOOST_TEST(it->first == 2);
+    BOOST_TEST(it->second == "two");
+
+    it = tree.find(4);
+    BOOST_TEST(it == tree.end());
+  }
+
   BOOST_AUTO_TEST_CASE(CopyConstructor)
   {
     AVLTree< int, std::string, std::less< int > > tree1;

@@ -5,14 +5,26 @@
 #include <utility>
 #include <stdexcept>
 #include <algorithm>
+#include "../common/stack.hpp"
 
 namespace vishnyakov
 {
+  template< class Key, class Value, class Compare >
+  class AVLTree;
+
+  template< class Key, class Value, class Compare >
+  class AVLIter;
+
+  template< class Key, class Value, class Compare >
+  class AVLCIter;
+
   template< class Key, class Value, class Compare = std::less< Key > >
   class AVLTree
   {
   public:
     using value_type = std::pair< const Key, Value >;
+    using iterator = AVLIter< Key, Value, Compare >;
+    using const_iterator = AVLCIter< Key, Value, Compare >;
 
     struct Node
     {
@@ -49,6 +61,13 @@ namespace vishnyakov
     AVLTree& operator=(const AVLTree& other);
     AVLTree& operator=(AVLTree&& other) noexcept;
 
+    iterator begin() noexcept;
+    iterator end() noexcept;
+    const_iterator begin() const noexcept;
+    const_iterator end() const noexcept;
+    const_iterator cbegin() const noexcept;
+    const_iterator cend() const noexcept;
+
     bool empty() const noexcept;
     std::size_t size() const noexcept;
 
@@ -56,6 +75,9 @@ namespace vishnyakov
     void push(Key&& key, Value&& value);
     bool has(const Key& key) const;
     Value drop(const Key& key);
+
+    iterator find(const Key& key);
+    const_iterator find(const Key& key) const;
 
     void clear();
     void swap(AVLTree& other) noexcept;
@@ -83,6 +105,65 @@ namespace vishnyakov
     Node* insert_node(Node* node, Key&& key, Value&& value);
     Node* erase_node(Node* node, const Key& key);
     Node* min_node(Node* node) const;
+  };
+
+  template< class Key, class Value, class Compare >
+  class AVLIter
+  {
+    friend class AVLTree< Key, Value, Compare >;
+    friend class AVLCIter< Key, Value, Compare >;
+
+  public:
+    AVLIter();
+    AVLIter(const AVLIter&) = default;
+    AVLIter& operator=(const AVLIter&) = default;
+    ~AVLIter() = default;
+
+    std::pair< const Key, Value >& operator*();
+    std::pair< const Key, Value >* operator->();
+
+    AVLIter& operator++();
+    AVLIter operator++(int);
+
+    bool operator==(const AVLIter& other) const;
+    bool operator!=(const AVLIter& other) const;
+
+  private:
+    using Node = typename AVLTree< Key, Value, Compare >::Node;
+    Node* node_;
+    Stack< Node* > stack_;
+
+    AVLIter(Node* node, const Stack< Node* >& stack = Stack< Node* >());
+  };
+
+  template< class Key, class Value, class Compare >
+  class AVLCIter
+  {
+    friend class AVLTree< Key, Value, Compare >;
+
+  public:
+    AVLCIter();
+    AVLCIter(const AVLCIter&) = default;
+    AVLCIter(const AVLIter< Key, Value, Compare >& other);
+    ~AVLCIter() = default;
+
+    AVLCIter& operator=(const AVLCIter&) = default;
+
+    const std::pair< const Key, Value >& operator*() const;
+    const std::pair< const Key, Value >* operator->() const;
+
+    AVLCIter& operator++();
+    AVLCIter operator++(int);
+
+    bool operator==(const AVLCIter& other) const;
+    bool operator!=(const AVLCIter& other) const;
+
+  private:
+    using Node = typename AVLTree< Key, Value, Compare >::Node;
+    const Node* node_;
+    Stack< const Node* > stack_;
+
+    AVLCIter(const Node* node, const Stack< const Node* >& stack = Stack< const Node* >());
   };
 
   template< class Key, class Value, class Compare >
@@ -141,6 +222,66 @@ namespace vishnyakov
   }
 
   template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::iterator AVLTree< Key, Value, Compare >::begin() noexcept
+  {
+    if (!root_)
+    {
+      return end();
+    }
+
+    Node* current = root_;
+    Stack< Node* > stack;
+    while (current->left_)
+    {
+      stack.push(current);
+      current = current->left_;
+    }
+    return iterator(current, stack);
+  }
+
+  template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::iterator AVLTree< Key, Value, Compare >::end() noexcept
+  {
+    return iterator(nullptr);
+  }
+
+  template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::const_iterator AVLTree< Key, Value, Compare >::begin() const noexcept
+  {
+    if (!root_)
+    {
+      return end();
+    }
+
+    const Node* current = root_;
+    Stack< const Node* > stack;
+    while (current->left_)
+    {
+      stack.push(current);
+      current = current->left_;
+    }
+    return const_iterator(current, stack);
+  }
+
+  template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::const_iterator AVLTree< Key, Value, Compare >::end() const noexcept
+  {
+    return const_iterator(nullptr);
+  }
+
+  template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::const_iterator AVLTree< Key, Value, Compare >::cbegin() const noexcept
+  {
+    return begin();
+  }
+
+  template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::const_iterator AVLTree< Key, Value, Compare >::cend() const noexcept
+  {
+    return end();
+  }
+
+  template< class Key, class Value, class Compare >
   bool AVLTree< Key, Value, Compare >::empty() const noexcept
   {
     return size_ == 0;
@@ -196,6 +337,20 @@ namespace vishnyakov
     }
     --size_;
     return result;
+  }
+
+  template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::iterator AVLTree< Key, Value, Compare >::find(const Key& key)
+  {
+    Node* node = find_node(key);
+    return iterator(node);
+  }
+
+  template< class Key, class Value, class Compare >
+  typename AVLTree< Key, Value, Compare >::const_iterator AVLTree< Key, Value, Compare >::find(const Key& key) const
+  {
+    Node* node = find_node(key);
+    return const_iterator(node);
   }
 
   template< class Key, class Value, class Compare >
@@ -521,6 +676,151 @@ namespace vishnyakov
       node = node->left_;
     }
     return node;
+  }
+
+  template< class Key, class Value, class Compare >
+  AVLIter< Key, Value, Compare >::AVLIter():
+    node_(nullptr),
+    stack_()
+  {
+  }
+
+  template< class Key, class Value, class Compare >
+  AVLIter< Key, Value, Compare >::AVLIter(Node* node, const Stack< Node* >& stack):
+    node_(node),
+    stack_(stack)
+  {
+  }
+
+  template< class Key, class Value, class Compare >
+  std::pair< const Key, Value >& AVLIter< Key, Value, Compare >::operator*()
+  {
+    return node_->data_;
+  }
+
+  template< class Key, class Value, class Compare >
+  std::pair< const Key, Value >* AVLIter< Key, Value, Compare >::operator->()
+  {
+    return &node_->data_;
+  }
+
+  template< class Key, class Value, class Compare >
+  AVLIter< Key, Value, Compare >& AVLIter< Key, Value, Compare >::operator++()
+  {
+    if (node_->right_)
+    {
+      node_ = node_->right_;
+      while (node_->left_)
+      {
+        stack_.push(node_);
+        node_ = node_->left_;
+      }
+    }
+    else if (!stack_.empty())
+    {
+      node_ = stack_.pop();
+    }
+    else
+    {
+      node_ = nullptr;
+    }
+    return *this;
+  }
+
+  template< class Key, class Value, class Compare >
+  AVLIter< Key, Value, Compare > AVLIter< Key, Value, Compare >::operator++(int)
+  {
+    AVLIter tmp = *this;
+    ++(*this);
+    return tmp;
+  }
+
+  template< class Key, class Value, class Compare >
+  bool AVLIter< Key, Value, Compare >::operator==(const AVLIter& other) const
+  {
+    return node_ == other.node_;
+  }
+
+  template< class Key, class Value, class Compare >
+  bool AVLIter< Key, Value, Compare >::operator!=(const AVLIter& other) const
+  {
+    return !(*this == other);
+  }
+
+  template< class Key, class Value, class Compare >
+  AVLCIter< Key, Value, Compare >::AVLCIter():
+    node_(nullptr),
+    stack_()
+  {
+  }
+
+  template< class Key, class Value, class Compare >
+  AVLCIter< Key, Value, Compare >::AVLCIter(const Node* node, const Stack< const Node* >& stack):
+    node_(node),
+    stack_(stack)
+  {
+  }
+
+  template< class Key, class Value, class Compare >
+  AVLCIter< Key, Value, Compare >::AVLCIter(const AVLIter< Key, Value, Compare >& other):
+    node_(other.node_),
+    stack_()
+  {
+  }
+
+  template< class Key, class Value, class Compare >
+  const std::pair< const Key, Value >& AVLCIter< Key, Value, Compare >::operator*() const
+  {
+    return node_->data_;
+  }
+
+  template< class Key, class Value, class Compare >
+  const std::pair< const Key, Value >* AVLCIter< Key, Value, Compare >::operator->() const
+  {
+    return &node_->data_;
+  }
+
+  template< class Key, class Value, class Compare >
+  AVLCIter< Key, Value, Compare >& AVLCIter< Key, Value, Compare >::operator++()
+  {
+    if (node_->right_)
+    {
+      node_ = node_->right_;
+      while (node_->left_)
+      {
+        stack_.push(node_);
+        node_ = node_->left_;
+      }
+    }
+    else if (!stack_.empty())
+    {
+      node_ = stack_.pop();
+    }
+    else
+    {
+      node_ = nullptr;
+    }
+    return *this;
+  }
+
+  template< class Key, class Value, class Compare >
+  AVLCIter< Key, Value, Compare > AVLCIter< Key, Value, Compare >::operator++(int)
+  {
+    AVLCIter tmp = *this;
+    ++(*this);
+    return tmp;
+  }
+
+  template< class Key, class Value, class Compare >
+  bool AVLCIter< Key, Value, Compare >::operator==(const AVLCIter& other) const
+  {
+    return node_ == other.node_;
+  }
+
+  template< class Key, class Value, class Compare >
+  bool AVLCIter< Key, Value, Compare >::operator!=(const AVLCIter& other) const
+  {
+    return !(*this == other);
   }
 
   template< class Key, class Value, class Compare >
