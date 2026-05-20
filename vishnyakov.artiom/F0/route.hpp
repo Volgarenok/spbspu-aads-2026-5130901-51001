@@ -2,9 +2,11 @@
 #define ROUTE_HPP
 
 #include "waypoint.hpp"
+#include "map.hpp"
 #include "../common/list.hpp"
 #include <string>
 #include <utility>
+#include <sstream>
 
 namespace vishnyakov
 {
@@ -85,6 +87,27 @@ namespace vishnyakov
     double startTime,
     int iterations = 100,
     int antsCount = 10
+  );
+
+  void printCommandUsage(std::ostream& out, const std::string& cmd);
+
+  void printRouteResult(std::ostream& out, const RouteResult& route, const std::string& algorithmName, bool shortOutput);
+
+  List< std::string > parseIgnorePoints(std::istringstream& iss, int ignoreCount);
+
+  bool parseShortFlag(std::istringstream& iss);
+
+  bool validateRouteParams(
+    const std::string& mapName,
+    double startTime,
+    int ignoreCount,
+    std::ostream& out,
+    const std::string& cmdName
+  );
+
+  List< std::pair< std::string, Waypoint > > collectPoints(
+    const Map* map,
+    const List< std::string >& ignorePoints
   );
 }
 

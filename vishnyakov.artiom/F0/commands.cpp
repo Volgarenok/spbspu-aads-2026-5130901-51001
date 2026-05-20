@@ -5,6 +5,7 @@
 #include <cmath>
 #include <fstream>
 #include <functional>
+#include <iomanip>
 
 namespace vishnyakov
 {
@@ -95,6 +96,10 @@ namespace vishnyakov
     else if (cmd == "plan-route-ant")
     {
       out << "  plan-route-ant <map-name> <x> <z> <time> <ignore-count> [ignore-points...] [-short]\n";
+    }
+    else if (cmd == "best-route")
+    {
+      out << "  best-route <map-name> <x> <z> <time> <ignore-count> [ignore-points...]\n";
     }
     else if (cmd == "help")
     {
@@ -706,31 +711,13 @@ namespace vishnyakov
       int ignoreCount;
       iss >> mapName >> startX >> startZ >> startTime >> ignoreCount;
 
-      if (mapName.empty() || startTime < 0.0 || startTime >= CYCLE_LENGTH || ignoreCount < 0)
+      if (!validateRouteParams(mapName, startTime, ignoreCount, out, "plan-route-greedy"))
       {
-        out << "Wrong usage. Use:\n";
-        printCommandUsage(out, "plan-route-greedy");
         return;
       }
 
-      List< std::string > ignorePoints;
-      for (int i = 0; i < ignoreCount; ++i)
-      {
-        std::string pointName;
-        iss >> pointName;
-        if (!pointName.empty() && pointName != "-short" && pointName != "--only-results")
-        {
-          ignorePoints.push_back(pointName);
-        }
-      }
-
-      bool shortOutput = false;
-      std::string flag;
-      iss >> flag;
-      if (flag == "-short" || flag == "--only-results")
-      {
-        shortOutput = true;
-      }
+      List< std::string > ignorePoints = parseIgnorePoints(iss, ignoreCount);
+      bool shortOutput = parseShortFlag(iss);
 
       const Map* map = world.getMap(mapName);
       if (!map)
@@ -740,23 +727,7 @@ namespace vishnyakov
         return;
       }
 
-      List< std::pair< std::string, Waypoint > > points;
-      for (auto it = map->begin(); it != map->end(); ++it)
-      {
-        bool ignored = false;
-        for (auto ignIt = ignorePoints.cbegin(); ignIt != ignorePoints.cend(); ++ignIt)
-        {
-          if (it->first == *ignIt)
-          {
-            ignored = true;
-            break;
-          }
-        }
-        if (!ignored)
-        {
-          points.push_back(std::make_pair(it->first, it->second));
-        }
-      }
+      List< std::pair< std::string, Waypoint > > points = collectPoints(map, ignorePoints);
 
       if (points.empty())
       {
@@ -776,31 +747,13 @@ namespace vishnyakov
       int ignoreCount;
       iss >> mapName >> startX >> startZ >> startTime >> ignoreCount;
 
-      if (mapName.empty() || startTime < 0.0 || startTime >= CYCLE_LENGTH || ignoreCount < 0)
+      if (!validateRouteParams(mapName, startTime, ignoreCount, out, "plan-route-2opt"))
       {
-        out << "Wrong usage. Use:\n";
-        printCommandUsage(out, "plan-route-2opt");
         return;
       }
 
-      List< std::string > ignorePoints;
-      for (int i = 0; i < ignoreCount; ++i)
-      {
-        std::string pointName;
-        iss >> pointName;
-        if (!pointName.empty() && pointName != "-short" && pointName != "--only-results")
-        {
-          ignorePoints.push_back(pointName);
-        }
-      }
-
-      bool shortOutput = false;
-      std::string flag;
-      iss >> flag;
-      if (flag == "-short" || flag == "--only-results")
-      {
-        shortOutput = true;
-      }
+      List< std::string > ignorePoints = parseIgnorePoints(iss, ignoreCount);
+      bool shortOutput = parseShortFlag(iss);
 
       const Map* map = world.getMap(mapName);
       if (!map)
@@ -810,23 +763,7 @@ namespace vishnyakov
         return;
       }
 
-      List< std::pair< std::string, Waypoint > > points;
-      for (auto it = map->begin(); it != map->end(); ++it)
-      {
-        bool ignored = false;
-        for (auto ignIt = ignorePoints.cbegin(); ignIt != ignorePoints.cend(); ++ignIt)
-        {
-          if (it->first == *ignIt)
-          {
-            ignored = true;
-            break;
-          }
-        }
-        if (!ignored)
-        {
-          points.push_back(std::make_pair(it->first, it->second));
-        }
-      }
+      List< std::pair< std::string, Waypoint > > points = collectPoints(map, ignorePoints);
 
       if (points.empty())
       {
@@ -846,31 +783,13 @@ namespace vishnyakov
       int ignoreCount;
       iss >> mapName >> startX >> startZ >> startTime >> ignoreCount;
 
-      if (mapName.empty() || startTime < 0.0 || startTime >= CYCLE_LENGTH || ignoreCount < 0)
+      if (!validateRouteParams(mapName, startTime, ignoreCount, out, "plan-route-mst"))
       {
-        out << "Wrong usage. Use:\n";
-        printCommandUsage(out, "plan-route-mst");
         return;
       }
 
-      List< std::string > ignorePoints;
-      for (int i = 0; i < ignoreCount; ++i)
-      {
-        std::string pointName;
-        iss >> pointName;
-        if (!pointName.empty() && pointName != "-short" && pointName != "--only-results")
-        {
-          ignorePoints.push_back(pointName);
-        }
-      }
-
-      bool shortOutput = false;
-      std::string flag;
-      iss >> flag;
-      if (flag == "-short" || flag == "--only-results")
-      {
-        shortOutput = true;
-      }
+      List< std::string > ignorePoints = parseIgnorePoints(iss, ignoreCount);
+      bool shortOutput = parseShortFlag(iss);
 
       const Map* map = world.getMap(mapName);
       if (!map)
@@ -880,23 +799,7 @@ namespace vishnyakov
         return;
       }
 
-      List< std::pair< std::string, Waypoint > > points;
-      for (auto it = map->begin(); it != map->end(); ++it)
-      {
-        bool ignored = false;
-        for (auto ignIt = ignorePoints.cbegin(); ignIt != ignorePoints.cend(); ++ignIt)
-        {
-          if (it->first == *ignIt)
-          {
-            ignored = true;
-            break;
-          }
-        }
-        if (!ignored)
-        {
-          points.push_back(std::make_pair(it->first, it->second));
-        }
-      }
+      List< std::pair< std::string, Waypoint > > points = collectPoints(map, ignorePoints);
 
       if (points.empty())
       {
@@ -916,31 +819,13 @@ namespace vishnyakov
       int ignoreCount;
       iss >> mapName >> startX >> startZ >> startTime >> ignoreCount;
 
-      if (mapName.empty() || startTime < 0.0 || startTime >= CYCLE_LENGTH || ignoreCount < 0)
+      if (!validateRouteParams(mapName, startTime, ignoreCount, out, "plan-route-ant"))
       {
-        out << "Wrong usage. Use:\n";
-        printCommandUsage(out, "plan-route-ant");
         return;
       }
 
-      List< std::string > ignorePoints;
-      for (int i = 0; i < ignoreCount; ++i)
-      {
-        std::string pointName;
-        iss >> pointName;
-        if (!pointName.empty() && pointName != "-short" && pointName != "--only-results")
-        {
-          ignorePoints.push_back(pointName);
-        }
-      }
-
-      bool shortOutput = false;
-      std::string flag;
-      iss >> flag;
-      if (flag == "-short" || flag == "--only-results")
-      {
-        shortOutput = true;
-      }
+      List< std::string > ignorePoints = parseIgnorePoints(iss, ignoreCount);
+      bool shortOutput = parseShortFlag(iss);
 
       const Map* map = world.getMap(mapName);
       if (!map)
@@ -950,23 +835,7 @@ namespace vishnyakov
         return;
       }
 
-      List< std::pair< std::string, Waypoint > > points;
-      for (auto it = map->begin(); it != map->end(); ++it)
-      {
-        bool ignored = false;
-        for (auto ignIt = ignorePoints.cbegin(); ignIt != ignorePoints.cend(); ++ignIt)
-        {
-          if (it->first == *ignIt)
-          {
-            ignored = true;
-            break;
-          }
-        }
-        if (!ignored)
-        {
-          points.push_back(std::make_pair(it->first, it->second));
-        }
-      }
+      List< std::pair< std::string, Waypoint > > points = collectPoints(map, ignorePoints);
 
       if (points.empty())
       {
@@ -976,6 +845,124 @@ namespace vishnyakov
 
       RouteResult route = buildAntRoute(points, startX, startZ, startTime, 100, 10);
       printRouteResult(out, route, "ant", shortOutput);
+    });
+
+    commands.add("best-route", [&](std::istringstream& iss, std::ostream& out)
+    {
+      std::string mapName;
+      int startX, startZ;
+      double startTime;
+      int ignoreCount;
+      iss >> mapName >> startX >> startZ >> startTime >> ignoreCount;
+
+      if (!validateRouteParams(mapName, startTime, ignoreCount, out, "best-route"))
+      {
+        return;
+      }
+
+      List< std::string > ignorePoints = parseIgnorePoints(iss, ignoreCount);
+
+      const Map* map = world.getMap(mapName);
+      if (!map)
+      {
+        out << "Wrong usage. Use:\n";
+        printCommandUsage(out, "best-route");
+        return;
+      }
+
+      List< std::pair< std::string, Waypoint > > points = collectPoints(map, ignorePoints);
+
+      if (points.empty())
+      {
+        out << "<EMPTY>\n";
+        return;
+      }
+
+      out << "Сравнение алгоритмов для карты \"" << mapName << "\" (старт " << startX << "," << startZ << ", время " << startTime << "):\n\n";
+
+      struct AlgorithmResult
+      {
+        std::string name;
+        double distance;
+        double time;
+        double hunger;
+        int bread;
+        RouteResult route;
+      };
+
+      List< AlgorithmResult > results;
+
+      RouteResult greedyRoute = buildGreedyRoute(points, startX, startZ, startTime);
+      AlgorithmResult gr;
+      gr.name = "Greedy";
+      gr.distance = greedyRoute.totalDistance;
+      gr.time = greedyRoute.totalTime;
+      gr.hunger = greedyRoute.totalHunger;
+      gr.bread = greedyRoute.breadNeeded;
+      gr.route = greedyRoute;
+      results.push_back(gr);
+
+      RouteResult opt2Route = improve2Opt(points, startX, startZ, startTime);
+      AlgorithmResult opt2;
+      opt2.name = "2-opt";
+      opt2.distance = opt2Route.totalDistance;
+      opt2.time = opt2Route.totalTime;
+      opt2.hunger = opt2Route.totalHunger;
+      opt2.bread = opt2Route.breadNeeded;
+      opt2.route = opt2Route;
+      results.push_back(opt2);
+
+      RouteResult mstRoute = buildMSTRoute(points, startX, startZ, startTime);
+      AlgorithmResult mst;
+      mst.name = "MST";
+      mst.distance = mstRoute.totalDistance;
+      mst.time = mstRoute.totalTime;
+      mst.hunger = mstRoute.totalHunger;
+      mst.bread = mstRoute.breadNeeded;
+      mst.route = mstRoute;
+      results.push_back(mst);
+
+      RouteResult antRoute = buildAntRoute(points, startX, startZ, startTime, 100, 10);
+      AlgorithmResult ant;
+      ant.name = "ACO";
+      ant.distance = antRoute.totalDistance;
+      ant.time = antRoute.totalTime;
+      ant.hunger = antRoute.totalHunger;
+      ant.bread = antRoute.breadNeeded;
+      ant.route = antRoute;
+      results.push_back(ant);
+
+      out << "Алгоритм      Длина (блоков)    Время (мин)    Голод (ед)    Хлеба (шт)\n";
+      out << "------------------------------------------------------------------------\n";
+
+      const AlgorithmResult* best = nullptr;
+      double bestDistance = std::numeric_limits< double >::max();
+
+      for (auto it = results.cbegin(); it != results.cend(); ++it)
+      {
+        const AlgorithmResult& r = *it;
+        out << r.name;
+        for (int i = r.name.size(); i < 14; ++i) out << " ";
+        out << std::fixed << std::setprecision(2) << r.distance;
+        out << "             " << r.time;
+        out << "             " << r.hunger;
+        out << "             " << r.bread << "\n";
+
+        if (r.distance < bestDistance)
+        {
+          bestDistance = r.distance;
+          best = &r;
+        }
+      }
+
+      if (best)
+      {
+        out << "\nЛучший алгоритм: " << best->name << "\n";
+        out << "  Длина: " << std::fixed << std::setprecision(2) << best->distance << " блоков\n";
+        out << "  Время: " << best->time << " мин.\n";
+        out << "  Голод: " << best->hunger << " ед.\n";
+        out << "  Хлеб:  " << best->bread << " шт.\n";
+      }
     });
 
     commands.add("help", [&](std::istringstream&, std::ostream& out)
@@ -1003,6 +990,8 @@ namespace vishnyakov
           << "  plan-route-2opt <map> <x> <z> <time> <ignore-count> [points...] [-short]   - 2-opt улучшение\n"
           << "  plan-route-mst <map> <x> <z> <time> <ignore-count> [points...] [-short]     - MST (Prim)\n"
           << "  plan-route-ant <map> <x> <z> <time> <ignore-count> [points...] [-short]     - муравьиный алгоритм\n\n"
+          << "Сравнение:\n"
+          << "  best-route <map> <x> <z> <time> <ignore-count> [points...]                 - сравнить все алгоритмы\n\n"
           << "Сохранение и загрузка:\n"
           << "  save <filename>                       - сохранить все данные в файл\n"
           << "  load <filename>                       - загрузить данные из файла\n\n"

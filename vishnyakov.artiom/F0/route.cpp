@@ -1,4 +1,5 @@
 #include "route.hpp"
+#include "commands.hpp"
 #include <cmath>
 #include <algorithm>
 #include <limits>
@@ -616,6 +617,70 @@ namespace vishnyakov
     }
 
     return buildRouteFromOrder(orderedPoints, startX, startZ, startTime);
+  }
+
+  // ========== Вспомогательные функции для парсинга ==========
+
+  List< std::string > parseIgnorePoints(std::istringstream& iss, int ignoreCount)
+  {
+    List< std::string > ignorePoints;
+    for (int i = 0; i < ignoreCount; ++i)
+    {
+      std::string pointName;
+      iss >> pointName;
+      if (!pointName.empty() && pointName != "-short" && pointName != "--only-results")
+      {
+        ignorePoints.push_back(pointName);
+      }
+    }
+    return ignorePoints;
+  }
+
+  bool parseShortFlag(std::istringstream& iss)
+  {
+    std::string flag;
+    iss >> flag;
+    return (flag == "-short" || flag == "--only-results");
+  }
+
+  bool validateRouteParams(
+    const std::string& mapName,
+    double startTime,
+    int ignoreCount,
+    std::ostream& out,
+    const std::string& cmdName)
+  {
+    if (mapName.empty() || startTime < 0.0 || startTime >= CYCLE_LENGTH || ignoreCount < 0)
+    {
+      out << "Wrong usage. Use:\n";
+      printCommandUsage(out, cmdName);
+      return false;
+    }
+    return true;
+  }
+
+  List< std::pair< std::string, Waypoint > > collectPoints(
+    const Map* map,
+    const List< std::string >& ignorePoints)
+  {
+    List< std::pair< std::string, Waypoint > > points;
+    for (auto it = map->begin(); it != map->end(); ++it)
+    {
+      bool ignored = false;
+      for (auto ignIt = ignorePoints.cbegin(); ignIt != ignorePoints.cend(); ++ignIt)
+      {
+        if (it->first == *ignIt)
+        {
+          ignored = true;
+          break;
+        }
+      }
+      if (!ignored)
+      {
+        points.push_back(std::make_pair(it->first, it->second));
+      }
+    }
+    return points;
   }
 }
 

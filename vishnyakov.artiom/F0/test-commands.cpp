@@ -830,6 +830,29 @@ namespace vishnyakov
     BOOST_TEST(afterHeader.find("Общая длина:") != std::string::npos);
   }
 
+  BOOST_AUTO_TEST_CASE(BestRoute)
+  {
+    World world;
+    std::istringstream in(
+      "create-map Test\n"
+      "add-point Test home 100 64 house\n"
+      "add-point Test mine 250 30 cave\n"
+      "add-point Test lake 500 200 water\n"
+      "best-route Test 0 0 5 0\nexit\n"
+    );
+    std::ostringstream out;
+
+    processCommands(in, world, out);
+
+    std::string result = out.str();
+    BOOST_TEST(result.find("Сравнение алгоритмов") != std::string::npos);
+    BOOST_TEST(result.find("Greedy") != std::string::npos);
+    BOOST_TEST(result.find("2-opt") != std::string::npos);
+    BOOST_TEST(result.find("MST") != std::string::npos);
+    BOOST_TEST(result.find("ACO") != std::string::npos);
+    BOOST_TEST(result.find("Лучший алгоритм:") != std::string::npos);
+  }
+
   BOOST_AUTO_TEST_CASE(HelpCommand)
   {
     World world;
@@ -842,6 +865,7 @@ namespace vishnyakov
     BOOST_TEST(result.find("Доступные команды:") != std::string::npos);
     BOOST_TEST(result.find("create-map") != std::string::npos);
     BOOST_TEST(result.find("plan-route-greedy") != std::string::npos);
+    BOOST_TEST(result.find("best-route") != std::string::npos);
     BOOST_TEST(result.find("exit") != std::string::npos);
   }
 
