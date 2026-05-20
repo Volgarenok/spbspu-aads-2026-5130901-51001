@@ -91,6 +91,71 @@ public:
     }
 
     ~RobinHoodHashTable() { delete[] table_; }
+
+    RobinHoodHashTable(const RobinHoodHashTable& other)
+        : capacity_(other.capacity_), size_(other.size_), hasher_(other.hasher_), equal_(other.equal_)
+    {
+        table_ = new Entry[capacity_];
+        for (size_t i = 0; i < capacity_; ++i)
+        {
+            if (other.table_[i].occupied)
+            {
+                table_[i].key = other.table_[i].key;
+                table_[i].value = other.table_[i].value;
+                table_[i].occupied = true;
+                table_[i].dist = other.table_[i].dist;
+            }
+            else
+            {
+                table_[i].occupied = false;
+            }
+        }
+    }
+
+    RobinHoodHashTable& operator=(const RobinHoodHashTable& other)
+    {
+        if (this != &other)
+        {
+            RobinHoodHashTable tmp(other);
+            swap(tmp);
+        }
+        return *this;
+    }
+
+    RobinHoodHashTable(RobinHoodHashTable&& other) noexcept
+        : table_(other.table_), capacity_(other.capacity_), size_(other.size_),
+          hasher_(std::move(other.hasher_)), equal_(std::move(other.equal_))
+    {
+        other.table_ = nullptr;
+        other.size_ = 0;
+        other.capacity_ = 0;
+    }
+
+    RobinHoodHashTable& operator=(RobinHoodHashTable&& other) noexcept
+    {
+        if (this != &other)
+        {
+            delete[] table_;
+            table_ = other.table_;
+            capacity_ = other.capacity_;
+            size_ = other.size_;
+            hasher_ = std::move(other.hasher_);
+            equal_ = std::move(other.equal_);
+            other.table_ = nullptr;
+            other.size_ = 0;
+            other.capacity_ = 0;
+        }
+        return *this;
+    }
+
+    void swap(RobinHoodHashTable& other) noexcept
+    {
+        std::swap(table_, other.table_);
+        std::swap(capacity_, other.capacity_);
+        std::swap(size_, other.size_);
+        std::swap(hasher_, other.hasher_);
+        std::swap(equal_, other.equal_);
+    }
 };
 
 }
