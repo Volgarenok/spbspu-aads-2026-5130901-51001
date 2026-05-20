@@ -227,6 +227,58 @@ public:
         }
         return false;
     }
+
+    Value& at(const Key& key)
+    {
+        size_t idx = hasher_(key) & (capacity_ - 1);
+        size_t dist = 0;
+        while (table_[idx].occupied && table_[idx].dist >= dist)
+        {
+            if (equal_(table_[idx].key, key))
+                return table_[idx].value;
+            ++idx;
+            ++dist;
+            idx &= (capacity_ - 1);
+        }
+        throw std::out_of_range("key not found");
+    }
+
+    const Value& at(const Key& key) const
+    {
+        size_t idx = hasher_(key) & (capacity_ - 1);
+        size_t dist = 0;
+        while (table_[idx].occupied && table_[idx].dist >= dist)
+        {
+            if (equal_(table_[idx].key, key))
+                return table_[idx].value;
+            ++idx;
+            ++dist;
+            idx &= (capacity_ - 1);
+        }
+        throw std::out_of_range("key not found");
+    }
+
+    bool erase(const Key& key)
+    {
+        size_t idx = hasher_(key) & (capacity_ - 1);
+        size_t dist = 0;
+        while (table_[idx].occupied && table_[idx].dist >= dist)
+        {
+            if (equal_(table_[idx].key, key))
+            {
+                table_[idx].occupied = false;
+                --size_;
+                return true;
+            }
+            ++idx;
+            ++dist;
+            idx &= (capacity_ - 1);
+        }
+        return false;
+    }
+
+    size_t size() const { return size_; }
+    bool empty() const { return size_ == 0; }
 };
 
 }
