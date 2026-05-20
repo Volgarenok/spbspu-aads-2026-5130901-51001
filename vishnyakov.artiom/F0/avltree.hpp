@@ -5,6 +5,7 @@
 #include <utility>
 #include <stdexcept>
 #include <algorithm>
+#include <iostream>
 #include "../common/stack.hpp"
 
 namespace vishnyakov
@@ -166,6 +167,8 @@ namespace vishnyakov
     AVLCIter(const Node* node, const Stack< const Node* >& stack = Stack< const Node* >());
   };
 
+  // ========== AVLTree implementation ==========
+
   template< class Key, class Value, class Compare >
   AVLTree< Key, Value, Compare >::AVLTree():
     root_(nullptr),
@@ -296,6 +299,7 @@ namespace vishnyakov
   template< class Key, class Value, class Compare >
   void AVLTree< Key, Value, Compare >::push(const Key& key, const Value& value)
   {
+    if (has(key)) return;
     root_ = insert_node(root_, key, value);
     if (root_)
     {
@@ -307,6 +311,7 @@ namespace vishnyakov
   template< class Key, class Value, class Compare >
   void AVLTree< Key, Value, Compare >::push(Key&& key, Value&& value)
   {
+    if (has(key)) return;
     root_ = insert_node(root_, std::move(key), std::move(value));
     if (root_)
     {
@@ -678,6 +683,8 @@ namespace vishnyakov
     return node;
   }
 
+  // ========== AVLIter implementation ==========
+
   template< class Key, class Value, class Compare >
   AVLIter< Key, Value, Compare >::AVLIter():
     node_(nullptr),
@@ -746,6 +753,8 @@ namespace vishnyakov
   {
     return !(*this == other);
   }
+
+  // ========== AVLCIter implementation ==========
 
   template< class Key, class Value, class Compare >
   AVLCIter< Key, Value, Compare >::AVLCIter():
@@ -820,7 +829,7 @@ namespace vishnyakov
   template< class Key, class Value, class Compare >
   bool AVLCIter< Key, Value, Compare >::operator!=(const AVLCIter& other) const
   {
-    return !(*this == other);
+    return node_ != other.node_;
   }
 
   template< class Key, class Value, class Compare >
@@ -828,6 +837,20 @@ namespace vishnyakov
   {
     lhs.swap(rhs);
   }
+}
+
+template< class Key, class Value, class Compare >
+std::ostream& operator<<(std::ostream& out, const vishnyakov::AVLIter< Key, Value, Compare >&)
+{
+  out << "AVLIter";
+  return out;
+}
+
+template< class Key, class Value, class Compare >
+std::ostream& operator<<(std::ostream& out, const vishnyakov::AVLCIter< Key, Value, Compare >&)
+{
+  out << "AVLCIter";
+  return out;
 }
 
 #endif

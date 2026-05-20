@@ -323,7 +323,7 @@ namespace vishnyakov
     size_t resultPos = result.find("1. ");
     BOOST_REQUIRE(resultPos != std::string::npos);
     std::string afterResult = result.substr(resultPos);
-    
+
     BOOST_TEST(afterResult.find("home") != std::string::npos);
     BOOST_TEST(afterResult.find("mine") == std::string::npos);
     BOOST_TEST(afterResult.find("lake") == std::string::npos);
@@ -381,7 +381,7 @@ namespace vishnyakov
     }
     BOOST_REQUIRE(resultPos != std::string::npos);
     std::string afterResult = result.substr(resultPos);
-    
+
     BOOST_TEST(afterResult.find("home 100 64 house") != std::string::npos);
     BOOST_TEST(afterResult.find("castle 500 200 house") != std::string::npos);
     BOOST_TEST(afterResult.find("mine") == std::string::npos);
@@ -644,7 +644,7 @@ namespace vishnyakov
     size_t resultPos = result.find("Маршрут (greedy):");
     BOOST_REQUIRE(resultPos != std::string::npos);
     std::string afterResult = result.substr(resultPos);
-    
+
     BOOST_TEST(afterResult.find("home") != std::string::npos);
     BOOST_TEST(afterResult.find("lake") != std::string::npos);
     BOOST_TEST(afterResult.find("mine") == std::string::npos);
