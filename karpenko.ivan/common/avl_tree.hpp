@@ -3,284 +3,449 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <functional>
 #include <stdexcept>
 #include <utility>
 
 namespace karpenko
 {
 
-template <typename Key, typename Value>
+template < typename Key, typename Value >
 struct AVLNode
 {
-    std::pair<const Key, Value> data;
-    AVLNode* left;
-    AVLNode* right;
-    AVLNode* parent;
-    int height;
+  std::pair< const Key, Value > data_;
+  AVLNode* left_;
+  AVLNode* right_;
+  AVLNode* parent_;
+  int height_;
 
-    AVLNode(const Key& k, const Value& v)
-        : data(k, v), left(nullptr), right(nullptr), parent(nullptr), height(1)
-    {
-    }
+  AVLNode(const Key& k, const Value& v)
+    : data_(k, v),
+      left_(nullptr),
+      right_(nullptr),
+      parent_(nullptr),
+      height_(1)
+  {
+  }
 
-    AVLNode(const Key& k, Value&& v)
-        : data(k, std::move(v)), left(nullptr), right(nullptr), parent(nullptr), height(1)
-    {
-    }
+  AVLNode(const Key& k, Value&& v)
+    : data_(k, std::move(v)),
+      left_(nullptr),
+      right_(nullptr),
+      parent_(nullptr),
+      height_(1)
+  {
+  }
 };
 
-template <typename Key, typename Value, typename Compare = std::less<Key>>
+template < typename Key, typename Value, typename Compare = std::less< Key > >
 class AVLTree
 {
 public:
-    using Node = AVLNode<Key, Value>;
+  using Node = AVLNode< Key, Value >;
 
 private:
-    Node* root_;
-    Compare cmp_;
+  Node* root_;
+  Compare cmp_;
 
-    int height(Node* n) const { return n ? n->height : 0; }
-    void updateHeight(Node* n) { if (n) n->height = 1 + std::max(height(n->left), height(n->right)); }
-    int balanceFactor(Node* n) { return height(n->right) - height(n->left); }
+  static int nodeHeight(const Node* n)
+  {
+    return n ? n->height_ : 0;
+  }
 
-    Node* rotateRight(Node* y)
+  void updateHeight(Node* n)
+  {
+    if (n)
     {
-        Node* x = y->left;
-        Node* T2 = x->right;
-
-        x->right = y;
-        y->left = T2;
-
-        if (T2) T2->parent = y;
-        x->parent = y->parent;
-        y->parent = x;
-
-        updateHeight(y);
-        updateHeight(x);
-        return x;
+      n->height_ = 1 + std::max(nodeHeight(n->left_), nodeHeight(n->right_));
     }
+  }
 
-    Node* rotateLeft(Node* x)
+  int balanceFactor(const Node* n) const
+  {
+    return nodeHeight(n->right_) - nodeHeight(n->left_);
+  }
+
+  Node* rotateRight(Node* y)
+  {
+    Node* x = y->left_;
+    Node* t2 = x->right_;
+
+    x->right_ = y;
+    y->left_ = t2;
+
+    if (t2)
     {
-        Node* y = x->right;
-        Node* T2 = y->left;
-
-        y->left = x;
-        x->right = T2;
-
-        if (T2) T2->parent = x;
-        y->parent = x->parent;
-        x->parent = y;
-
-        updateHeight(x);
-        updateHeight(y);
-        return y;
+      t2->parent_ = y;
     }
+    x->parent_ = y->parent_;
+    y->parent_ = x;
 
-    Node* balance(Node* n)
+    updateHeight(y);
+    updateHeight(x);
+    return x;
+  }
+
+  Node* rotateLeft(Node* x)
+  {
+    Node* y = x->right_;
+    Node* t2 = y->left_;
+
+    y->left_ = x;
+    x->right_ = t2;
+
+    if (t2)
     {
-        if (!n) return nullptr;
-        updateHeight(n);
-        int bf = balanceFactor(n);
-        if (bf == 2)
+      t2->parent_ = x;
+    }
+    y->parent_ = x->parent_;
+    x->parent_ = y;
+
+    updateHeight(x);
+    updateHeight(y);
+    return y;
+  }
+
+  Node* balance(Node* n)
+  {
+    if (!n)
+    {
+      return nullptr;
+    }
+    updateHeight(n);
+    const int bf = balanceFactor(n);
+    if (bf == 2)
+    {
+      if (balanceFactor(n->right_) < 0)
+      {
+        n->right_ = rotateRight(n->right_);
+      }
+      return rotateLeft(n);
+    }
+    if (bf == -2)
+    {
+      if (balanceFactor(n->left_) > 0)
+      {
+        n->left_ = rotateLeft(n->left_);
+      }
+      return rotateRight(n);
+    }
+    return n;
+  }
+
+  Node* insert(Node* n, const Key& k, const Value& v, Node* parent)
+  {
+    if (!n)
+    {
+      Node* node = new Node(k, v);
+      node->parent_ = parent;
+      return node;
+    }
+    if (cmp_(k, n->data_.first))
+    {
+      n->left_ = insert(n->left_, k, v, n);
+    }
+    else if (cmp_(n->data_.first, k))
+    {
+      n->right_ = insert(n->right_, k, v, n);
+    }
+    else
+    {
+      n->data_.second = v;
+    }
+    return balance(n);
+  }
+
+  Node* findNode(Node* n, const Key& k)
+  {
+    if (!n)
+    {
+      return nullptr;
+    }
+    if (cmp_(k, n->data_.first))
+    {
+      return findNode(n->left_, k);
+    }
+    if (cmp_(n->data_.first, k))
+    {
+      return findNode(n->right_, k);
+    }
+    return n;
+  }
+
+  const Node* findNode(const Node* n, const Key& k) const
+  {
+    if (!n)
+    {
+      return nullptr;
+    }
+    if (cmp_(k, n->data_.first))
+    {
+      return findNode(n->left_, k);
+    }
+    if (cmp_(n->data_.first, k))
+    {
+      return findNode(n->right_, k);
+    }
+    return n;
+  }
+
+  Node* minimum(Node* n) const
+  {
+    while (n && n->left_)
+    {
+      n = n->left_;
+    }
+    return n;
+  }
+
+  Node* erase(Node* n, const Key& k)
+  {
+    if (!n)
+    {
+      return nullptr;
+    }
+    if (cmp_(k, n->data_.first))
+    {
+      n->left_ = erase(n->left_, k);
+    }
+    else if (cmp_(n->data_.first, k))
+    {
+      n->right_ = erase(n->right_, k);
+    }
+    else
+    {
+      if (!n->left_ || !n->right_)
+      {
+        Node* child = n->left_ ? n->left_ : n->right_;
+        if (child)
         {
-            if (balanceFactor(n->right) < 0)
-                n->right = rotateRight(n->right);
-            return rotateLeft(n);
+          child->parent_ = n->parent_;
         }
-        if (bf == -2)
-        {
-            if (balanceFactor(n->left) > 0)
-                n->left = rotateLeft(n->left);
-            return rotateRight(n);
-        }
-        return n;
-    }
-
-    Node* insert(Node* n, const Key& k, const Value& v, Node* parent)
-    {
-        if (!n)
-        {
-            Node* node = new Node(k, v);
-            node->parent = parent;
-            return node;
-        }
-        if (cmp_(k, n->data.first))
-            n->left = insert(n->left, k, v, n);
-        else if (cmp_(n->data.first, k))
-            n->right = insert(n->right, k, v, n);
-        else
-            n->data.second = v;
-        return balance(n);
-    }
-
-    Node* findNode(Node* n, const Key& k) const
-    {
-        if (!n) return nullptr;
-        if (cmp_(k, n->data.first)) return findNode(n->left, k);
-        if (cmp_(n->data.first, k)) return findNode(n->right, k);
-        return n;
-    }
-
-    Node* minimum(Node* n) const
-    {
-        while (n && n->left) n = n->left;
-        return n;
-    }
-
-    Node* erase(Node* n, const Key& k)
-    {
-        if (!n) return nullptr;
-        if (cmp_(k, n->data.first))
-            n->left = erase(n->left, k);
-        else if (cmp_(n->data.first, k))
-            n->right = erase(n->right, k);
-        else
-        {
-            if (!n->left || !n->right)
-            {
-                Node* child = n->left ? n->left : n->right;
-                if (child) child->parent = n->parent;
-                delete n;
-                return child;
-            }
-            else
-            {
-                Node* succ = minimum(n->right);
-                const_cast<Key&>(n->data.first) = succ->data.first;
-                n->data.second = std::move(succ->data.second);
-                n->right = erase(n->right, succ->data.first);
-            }
-        }
-        return balance(n);
-    }
-
-    void clear(Node* n)
-    {
-        if (!n) return;
-        clear(n->left);
-        clear(n->right);
         delete n;
+        return child;
+      }
+      else
+      {
+        Node* successor = minimum(n->right_);
+        const_cast< Key& >(n->data_.first) = successor->data_.first;
+        n->data_.second = std::move(successor->data_.second);
+        n->right_ = erase(n->right_, successor->data_.first);
+      }
     }
+    return balance(n);
+  }
 
-    Node* copyNode(Node* n, Node* parent)
+  void clear(Node* n)
+  {
+    if (!n)
     {
-        if (!n) return nullptr;
-        Node* newNode = new Node(n->data.first, n->data.second);
-        newNode->parent = parent;
-        newNode->left = copyNode(n->left, newNode);
-        newNode->right = copyNode(n->right, newNode);
-        newNode->height = n->height;
-        return newNode;
+      return;
     }
+    clear(n->left_);
+    clear(n->right_);
+    delete n;
+  }
+
+  Node* copyNode(Node* n, Node* parent)
+  {
+    if (!n)
+    {
+      return nullptr;
+    }
+    Node* newNode = new Node(n->data_.first, n->data_.second);
+    newNode->parent_ = parent;
+    newNode->left_ = copyNode(n->left_, newNode);
+    newNode->right_ = copyNode(n->right_, newNode);
+    newNode->height_ = n->height_;
+    return newNode;
+  }
 
 public:
-    AVLTree() : root_(nullptr), cmp_() {}
-    ~AVLTree() { clear(root_); }
+  AVLTree()
+    : root_(nullptr),
+      cmp_()
+  {
+  }
 
-    AVLTree(const AVLTree& other) : root_(nullptr), cmp_(other.cmp_)
+  ~AVLTree()
+  {
+    clear(root_);
+  }
+
+  AVLTree(const AVLTree& other)
+    : root_(nullptr),
+      cmp_(other.cmp_)
+  {
+    root_ = copyNode(other.root_, nullptr);
+  }
+
+  AVLTree& operator=(const AVLTree& other)
+  {
+    if (this != &other)
     {
-        root_ = copyNode(other.root_, nullptr);
+      clear(root_);
+      cmp_ = other.cmp_;
+      root_ = copyNode(other.root_, nullptr);
     }
+    return *this;
+  }
 
-    AVLTree& operator=(const AVLTree& other)
+  AVLTree(AVLTree&& other) noexcept
+    : root_(other.root_),
+      cmp_(std::move(other.cmp_))
+  {
+    other.root_ = nullptr;
+  }
+
+  AVLTree& operator=(AVLTree&& other) noexcept
+  {
+    if (this != &other)
     {
-        if (this != &other)
+      clear(root_);
+      root_ = other.root_;
+      cmp_ = std::move(other.cmp_);
+      other.root_ = nullptr;
+    }
+    return *this;
+  }
+
+  void insert(const Key& k, const Value& v)
+  {
+    root_ = insert(root_, k, v, nullptr);
+  }
+
+  Value& at(const Key& k)
+  {
+    Node* n = findNode(root_, k);
+    if (!n)
+    {
+      throw std::out_of_range("key not found");
+    }
+    return n->data_.second;
+  }
+
+  const Value& at(const Key& k) const
+  {
+    const Node* n = findNode(root_, k);
+    if (!n)
+    {
+      throw std::out_of_range("key not found");
+    }
+    return n->data_.second;
+  }
+
+  bool contains(const Key& k) const
+  {
+    return findNode(root_, k) != nullptr;
+  }
+
+  void erase(const Key& k)
+  {
+    root_ = erase(root_, k);
+  }
+
+  size_t getHeight() const
+  {
+    return nodeHeight(root_);
+  }
+
+  class const_iterator
+  {
+  private:
+    const Node* ptr_;
+    const Node* root_;
+
+    void advance()
+    {
+      if (ptr_->right_)
+      {
+        ptr_ = ptr_->right_;
+        while (ptr_->left_)
         {
-            clear(root_);
-            cmp_ = other.cmp_;
-            root_ = copyNode(other.root_, nullptr);
+          ptr_ = ptr_->left_;
         }
-        return *this;
+        return;
+      }
+      const Node* p = ptr_->parent_;
+      while (p && ptr_ == p->right_)
+      {
+        ptr_ = p;
+        p = p->parent_;
+      }
+      ptr_ = p;
     }
 
-    AVLTree(AVLTree&& other) noexcept : root_(other.root_), cmp_(std::move(other.cmp_))
+  public:
+    const_iterator(const Node* p = nullptr, const Node* r = nullptr)
+      : ptr_(p),
+        root_(r)
     {
-        other.root_ = nullptr;
     }
 
-    AVLTree& operator=(AVLTree&& other) noexcept
+    const std::pair< const Key, Value >& operator*() const
     {
-        if (this != &other)
-        {
-            clear(root_);
-            root_ = other.root_;
-            cmp_ = std::move(other.cmp_);
-            other.root_ = nullptr;
-        }
-        return *this;
+      return ptr_->data_;
     }
 
-    void insert(const Key& k, const Value& v) { root_ = insert(root_, k, v, nullptr); }
-    Value& at(const Key& k)
+    const std::pair< const Key, Value >* operator->() const
     {
-        Node* n = findNode(root_, k);
-        if (!n) throw std::out_of_range("key not found");
-        return n->data.second;
-    }
-    const Value& at(const Key& k) const
-    {
-        Node* n = findNode(root_, k);
-        if (!n) throw std::out_of_range("key not found");
-        return n->data.second;
-    }
-    bool contains(const Key& k) const { return findNode(root_, k) != nullptr; }
-    void erase(const Key& k) { root_ = erase(root_, k); }
-
-    size_t height() const { return node_height(root_); }
-
-    class const_iterator
-    {
-        const Node* ptr;
-        const Node* root;
-        void advance()
-        {
-            if (ptr->right)
-            {
-                ptr = ptr->right;
-                while (ptr->left) ptr = ptr->left;
-                return;
-            }
-            const Node* p = ptr->parent;
-            while (p && ptr == p->right)
-            {
-                ptr = p;
-                p = p->parent;
-            }
-            ptr = p;
-        }
-    public:
-        const_iterator(const Node* p = nullptr, const Node* r = nullptr) : ptr(p), root(r) {}
-        const std::pair<const Key, Value>& operator*() const { return ptr->data; }
-        const std::pair<const Key, Value>* operator->() const { return &ptr->data; }
-        const_iterator& operator++() { advance(); return *this; }
-        const_iterator operator++(int) { const_iterator tmp = *this; advance(); return tmp; }
-        bool operator==(const const_iterator& other) const { return ptr == other.ptr; }
-        bool operator!=(const const_iterator& other) const { return !(*this == other); }
-    };
-
-    const_iterator begin() const
-    {
-        Node* cur = root_;
-        while (cur && cur->left) cur = cur->left;
-        return const_iterator(cur, root_);
-    }
-    const_iterator end() const { return const_iterator(nullptr, root_); }
-
-    size_t size() const
-    {
-        size_t cnt = 0;
-        for (auto it = begin(); it != end(); ++it) ++cnt;
-        return cnt;
+      return &ptr_->data_;
     }
 
-    bool empty() const { return root_ == nullptr; }
-
-private:
-    size_t node_height(Node* n) const
+    const_iterator& operator++()
     {
-        return n ? n->height : 0;
+      advance();
+      return *this;
     }
+
+    const_iterator operator++(int)
+    {
+      const_iterator tmp = *this;
+      advance();
+      return tmp;
+    }
+
+    bool operator==(const const_iterator& other) const
+    {
+      return ptr_ == other.ptr_;
+    }
+
+    bool operator!=(const const_iterator& other) const
+    {
+      return !(*this == other);
+    }
+  };
+
+  const_iterator begin() const
+  {
+    Node* cur = root_;
+    while (cur && cur->left_)
+    {
+      cur = cur->left_;
+    }
+    return const_iterator(cur, root_);
+  }
+
+  const_iterator end() const
+  {
+    return const_iterator(nullptr, root_);
+  }
+
+  size_t size() const
+  {
+    size_t cnt = 0;
+    for (auto it = begin(); it != end(); ++it)
+    {
+      ++cnt;
+    }
+    return cnt;
+  }
+
+  bool empty() const
+  {
+    return root_ == nullptr;
+  }
 };
 
 }
