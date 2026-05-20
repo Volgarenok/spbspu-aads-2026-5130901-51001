@@ -83,23 +83,28 @@ namespace vishnyakov
     }
     else if (cmd == "plan-route-greedy")
     {
-      out << "  plan-route-greedy <map-name> <x> <z> <time> <ignore-count> [ignore-points...] [-short]\n";
+      out << "  plan-route-greedy <map-name> <x> <z> <time> <ignore-count> "
+          << "[ignore-points...] [-short]\n";
     }
     else if (cmd == "plan-route-2opt")
     {
-      out << "  plan-route-2opt <map-name> <x> <z> <time> <ignore-count> [ignore-points...] [-short]\n";
+      out << "  plan-route-2opt <map-name> <x> <z> <time> <ignore-count> "
+          << "[ignore-points...] [-short]\n";
     }
     else if (cmd == "plan-route-mst")
     {
-      out << "  plan-route-mst <map-name> <x> <z> <time> <ignore-count> [ignore-points...] [-short]\n";
+      out << "  plan-route-mst <map-name> <x> <z> <time> <ignore-count> "
+          << "[ignore-points...] [-short]\n";
     }
     else if (cmd == "plan-route-ant")
     {
-      out << "  plan-route-ant <map-name> <x> <z> <time> <ignore-count> [ignore-points...] [-short]\n";
+      out << "  plan-route-ant <map-name> <x> <z> <time> <ignore-count> "
+          << "[ignore-points...] [-short]\n";
     }
     else if (cmd == "best-route")
     {
-      out << "  best-route <map-name> <x> <z> <time> <ignore-count> [ignore-points...]\n";
+      out << "  best-route <map-name> <x> <z> <time> <ignore-count> "
+          << "[ignore-points...]\n";
     }
     else if (cmd == "help")
     {
@@ -115,7 +120,8 @@ namespace vishnyakov
     }
   }
 
-  void printRouteResult(std::ostream& out, const RouteResult& route, const std::string& algorithmName, bool shortOutput)
+  void printRouteResult(std::ostream& out, const RouteResult& route,
+                        const std::string& algorithmName, bool shortOutput)
   {
     out << "Маршрут (" << algorithmName << "):\n";
     if (!shortOutput)
@@ -136,7 +142,8 @@ namespace vishnyakov
         }
         else if (stop.isNightStop)
         {
-          out << "  " << stepNumber << ". Остановка на ночь (" << stop.x << ", " << stop.z << ")\n";
+          out << "  " << stepNumber << ". Остановка на ночь ("
+              << stop.x << ", " << stop.z << ")\n";
           if (stepNumber > 1)
           {
             out << "      - Затраченное время: " << roundedTravel << " мин.\n";
@@ -147,7 +154,8 @@ namespace vishnyakov
         }
         else if (stop.isPoint)
         {
-          out << "  " << stepNumber << ". " << stop.name << " (" << stop.x << ", " << stop.z << ")\n";
+          out << "  " << stepNumber << ". " << stop.name
+              << " (" << stop.x << ", " << stop.z << ")\n";
           if (stepNumber > 1)
           {
             out << "      - Затраченное время: " << roundedTravel << " мин.\n";
@@ -168,7 +176,8 @@ namespace vishnyakov
     minutesInCurrentDay = std::round(minutesInCurrentDay * 100.0) / 100.0;
 
     out << "Общая длина: " << roundedDistance << " блоков\n";
-    out << "Общее время: " << roundedTotalTime << " мин. (" << days << " д. " << minutesInCurrentDay << " мин.)\n";
+    out << "Общее время: " << roundedTotalTime << " мин. ("
+        << days << " д. " << minutesInCurrentDay << " мин.)\n";
     out << "Потрачено голода: " << roundedHunger << " ед.\n";
     out << "Хлеба нужно: " << route.breadNeeded << " шт.\n";
   }
@@ -975,7 +984,8 @@ namespace vishnyakov
           << "Управление точками:\n"
           << "  add-point <map> <name> <x> <z> <type> - добавить точку на карту\n"
           << "  remove-point <map> <name>             - удалить точку\n"
-          << "  edit-point <map> <name> <new-name> <x> <z> <type> - изменить точку (\"-\" = без изменений)\n"
+          << "  edit-point <map> <name> <new-name> <x> <z> <type> "
+          << "- изменить точку (\"-\" = без изменений)\n"
           << "  show-points <map>                     - показать все точки карты\n\n"
           << "Поиск и навигация:\n"
           << "  find-nearest <map> <x> <z> <k> [type] - найти K ближайших точек\n"
@@ -986,12 +996,17 @@ namespace vishnyakov
           << "  merge-maps <new> <map1> <map2>        - объединить две карты\n"
           << "  clear-map <map>                       - очистить карту\n\n"
           << "Маршрутизация:\n"
-          << "  plan-route-greedy <map> <x> <z> <time> <ignore-count> [points...] [-short] - жадный алгоритм\n"
-          << "  plan-route-2opt <map> <x> <z> <time> <ignore-count> [points...] [-short]   - 2-opt улучшение\n"
-          << "  plan-route-mst <map> <x> <z> <time> <ignore-count> [points...] [-short]     - MST (Prim)\n"
-          << "  plan-route-ant <map> <x> <z> <time> <ignore-count> [points...] [-short]     - муравьиный алгоритм\n\n"
+          << "  plan-route-greedy <map> <x> <z> <time> <ignore-count> "
+          << "[points...] [-short] - жадный алгоритм\n"
+          << "  plan-route-2opt <map> <x> <z> <time> <ignore-count> "
+          << "[points...] [-short]   - 2-opt улучшение\n"
+          << "  plan-route-mst <map> <x> <z> <time> <ignore-count> "
+          << "[points...] [-short]     - MST (Prim)\n"
+          << "  plan-route-ant <map> <x> <z> <time> <ignore-count> "
+          << "[points...] [-short]     - муравьиный алгоритм\n\n"
           << "Сравнение:\n"
-          << "  best-route <map> <x> <z> <time> <ignore-count> [points...]                 - сравнить все алгоритмы\n\n"
+          << "  best-route <map> <x> <z> <time> <ignore-count> [points...] "
+          << "- сравнить все алгоритмы\n\n"
           << "Сохранение и загрузка:\n"
           << "  save <filename>                       - сохранить все данные в файл\n"
           << "  load <filename>                       - загрузить данные из файла\n\n"
