@@ -211,6 +211,24 @@ public:
         return *this;
     }
 
+    void insert(const Key& k, const Value& v) { root_ = insert(root_, k, v, nullptr); }
+    Value& at(const Key& k)
+    {
+        Node* n = findNode(root_, k);
+        if (!n) throw std::out_of_range("key not found");
+        return n->data.second;
+    }
+    const Value& at(const Key& k) const
+    {
+        Node* n = findNode(root_, k);
+        if (!n) throw std::out_of_range("key not found");
+        return n->data.second;
+    }
+    bool contains(const Key& k) const { return findNode(root_, k) != nullptr; }
+    void erase(const Key& k) { root_ = erase(root_, k); }
+
+    size_t height() const { return node_height(root_); }
+
     class const_iterator
     {
         const Node* ptr;
@@ -249,22 +267,6 @@ public:
     }
     const_iterator end() const { return const_iterator(nullptr, root_); }
 
-    void insert(const Key& k, const Value& v) { root_ = insert(root_, k, v, nullptr); }
-    Value& at(const Key& k)
-    {
-        Node* n = findNode(root_, k);
-        if (!n) throw std::out_of_range("key not found");
-        return n->data.second;
-    }
-    const Value& at(const Key& k) const
-    {
-        Node* n = findNode(root_, k);
-        if (!n) throw std::out_of_range("key not found");
-        return n->data.second;
-    }
-    bool contains(const Key& k) const { return findNode(root_, k) != nullptr; }
-    void erase(const Key& k) { root_ = erase(root_, k); }
-
     size_t size() const
     {
         size_t cnt = 0;
@@ -273,6 +275,12 @@ public:
     }
 
     bool empty() const { return root_ == nullptr; }
+
+private:
+    size_t node_height(Node* n) const
+    {
+        return n ? n->height : 0;
+    }
 };
 
 }

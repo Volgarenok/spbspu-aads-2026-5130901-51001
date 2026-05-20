@@ -10,13 +10,17 @@ void MealDiary::addEntry(const MealEntry& entry) {
 }
 
 bool MealDiary::removeEntry(const std::string& profile, const std::string& date, const std::string& mealType) {
+    List<MealEntry> newEntries;
+    bool removed = false;
     for (auto it = entries_.begin(); it != entries_.end(); ++it) {
         if (it->getProfileName() == profile && it->getDate() == date && it->getMealType() == mealType) {
-            entries_.erase_after(it);
-            return true;
+            removed = true;
+            continue;
         }
+        newEntries.push_back(*it);
     }
-    return false;
+    if (removed) entries_ = newEntries;
+    return removed;
 }
 
 List<MealEntry> MealDiary::getEntriesByProfile(const std::string& profile) const {

@@ -43,15 +43,17 @@ const List<MealItem>& MealEntry::getItems() const { return items_; }
 
 void MealEntry::addItem(const MealItem& item) { items_.push_back(item); }
 bool MealEntry::removeItem(size_t index) {
-    size_t i = 0;
+    if (index < 1 || index > items_.size()) return false;
+    size_t i = 1;
+    List<MealItem> newItems;
     for (auto it = items_.begin(); it != items_.end(); ++it) {
-        if (i == index) {
-            items_.erase_after(it);
-            return true;
+        if (i != index) {
+            newItems.push_back(*it);
         }
         ++i;
     }
-    return false;
+    items_ = newItems;
+    return true;
 }
 void MealEntry::clearItems() { items_.clear(); }
 
