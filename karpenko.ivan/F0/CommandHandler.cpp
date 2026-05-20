@@ -219,4 +219,110 @@ void CommandHandler::handle(const ParsedCommand& cmd) {
     }
 }
 
+void CommandHandler::handlePlanMeal(const std::string* args, int count) {
+    if (count != 6) {
+        printError("plan-meal requires: <profile> <date> <meal> <base> <target-cal> <target-protein>");
+        return;
+    }
+    std::string profileName = args[0];
+    std::string date = args[1];
+    std::string mealType = Helpers::toLower(args[2]);
+    std::string baseName = args[3];
+    double targetCal = std::atof(args[4].c_str());
+    double targetProt = std::atof(args[5].c_str());
+
+    if (!Helpers::isValidDate(date)) {
+        printError("Invalid date format (YYYY-MM-DD)");
+        return;
+    }
+    if (!Helpers::isValidMealType(mealType)) {
+        printError("Invalid meal type. Use: breakfast, lunch, dinner, snack");
+        return;
+    }
+    if (targetCal <= 0 || targetProt <= 0) {
+        printError("Targets must be positive");
+        return;
+    }
+    if (!profiles_.hasProfile(profileName)) {
+        printError("Profile not found");
+        return;
+    }
+    FoodBase* base = bases_.getBase(baseName);
+    if (!base) {
+        printError("Base not found");
+        return;
+    }
+
+    List<MealSolution> solutions = KnapsackSolver::solve(*base, targetCal, targetProt);
+    if (solutions.size() == 0) {
+        printError("No suitable combination found (try adding more products)");
+        return;
+    }
+
+    int opt = 1;
+    for (auto it = solutions.begin(); it != solutions.end(); ++it) {
+        std::cout << "=== OPTION " << opt << " ===\n";
+        std::cout << "TOTAL: " << it->totalCalories << " kcal, " << it->totalProtein << "g protein\n";
+        for (auto itemIt = it->items.begin(); itemIt != it->items.end(); ++itemIt) {
+            std::cout << "- " << itemIt->productName << " (" << itemIt->grams << "g) — "
+                      << itemIt->calories << " kcal, " << itemIt->protein << "g protein\n";
+        }
+        ++opt;
+    }
+
+    int selectedIdx = 0;
+    bool editMode = false;
+    while (true) {
+        std::cout << "Select option (1-3) or edit (e): ";
+        std::string choice;
+        std::getline(std::cin, choice);
+        if (choice == "e") {
+            editMode = true;
+            break;
+        }
+        if (choice.size() == 1 && choice[0] >= '1' && choice[0] <= '3') {
+            selectedIdx = choice[0] - '0';
+            break;
+        }
+        printError("Invalid choice. Enter 1-3 or e.");
+    }
+
+    MealSolution selected;
+
+    if (!editMode) {
+        int cur = 1;
+        for (auto it = solutions.begin(); it != solutions.end(); ++it) {
+            if (cur == selectedIdx) { selected = *it; break; }
+            ++cur;
+        }
+    } else {
+        printInfo("Edit mode not yet implemented");
+        return;
+    }
+
+    MealEntry entry(profileName, date, mealType);
+    for (auto itemIt = selected.items.begin(); itemIt != selected.items.end(); ++itemIt) {
+        MealItem mitem(baseName, itemIt->productName, itemIt->grams, itemIt->calories, itemIt->protein);
+        entry.addItem(mitem);
+    }
+    diary_.addEntry(entry);
+    printSuccess("Meal added to " + profileName + "'s diary for " + date + " " + mealType);
 }
+
+void CommandHandler::handle(const ParsedCommand& cmd) {
+    switch (cmd.type) {
+        case CMD_PROFILE_CREATE: handleProfileCreate(cmd.args, cmd.argCount); break;
+        case CMD_PROFILE_LIST: handleProfileList(); break;
+        case CMD_PROFILE_DELETE: handleProfileDelete(cmd.args, cmd.argCount); break;
+        case CMD_BASE_CREATE: handleBaseCreate(cmd.args, cmd.argCount); break;
+        case CMD_BASE_LIST: handleBaseList(); break;
+        case CMD_BASE_ADD: handleBaseAdd(cmd.args, cmd.argCount); break;
+        case CMD_BASE_REMOVE: handleBaseRemove(cmd.args, cmd.argCount); break;
+        case CMD_BASE_SHOW: handleBaseShow(cmd.args, cmd.argCount); break;
+        case CMD_PLAN_MEAL: handlePlanMeal(cmd.args, cmd.argCount); break;
+        default: printError("Unknown command"); break;
+    }
+}
+
+}
+
