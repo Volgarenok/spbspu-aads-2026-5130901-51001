@@ -6,10 +6,11 @@
 #include <stdexcept>
 #include <algorithm>
 #include <functional>
+#include "../common/siphash.hpp"
 
 namespace vishnyakov
 {
-  template< class Key, class Value, class Hash = std::hash< Key >, class Equal = std::equal_to< Key > >
+  template< class Key, class Value, class Hash1 = SipHash, class Hash2 = SipHash, class Equal = std::equal_to< Key > >
   class CuckooHashTable
   {
   public:
@@ -63,19 +64,17 @@ namespace vishnyakov
     void clear() noexcept;
     void rehash(std::size_t new_capacity);
 
-    Hash hash_function() const;
-    Equal key_eq() const;
-
   private:
     static constexpr std::size_t DEFAULT_CAPACITY = 16;
     static constexpr std::size_t MAX_LOOP = 100;
+    static constexpr std::size_t GOLDEN_RATIO = 2654435761U;
 
     Node* table1_;
     Node* table2_;
     std::size_t table_size_;
     std::size_t size_;
-    Hash hash1_;
-    Hash hash2_;
+    Hash1 hash1_;
+    Hash2 hash2_;
     Equal equal_;
 
     std::size_t index1(const Key& key) const;
@@ -84,8 +83,8 @@ namespace vishnyakov
     Node* find_node(const Key& key) const;
   };
 
-  template< class Key, class Value, class Hash, class Equal >
-  CuckooHashTable< Key, Value, Hash, Equal >::CuckooHashTable():
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::CuckooHashTable():
     table1_(nullptr),
     table2_(nullptr),
     table_size_(DEFAULT_CAPACITY),
@@ -103,8 +102,8 @@ namespace vishnyakov
     }
   }
 
-  template< class Key, class Value, class Hash, class Equal >
-  CuckooHashTable< Key, Value, Hash, Equal >::CuckooHashTable(std::size_t initial_capacity):
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::CuckooHashTable(std::size_t initial_capacity):
     table1_(nullptr),
     table2_(nullptr),
     table_size_(initial_capacity > 0 ? initial_capacity : DEFAULT_CAPACITY),
@@ -122,8 +121,8 @@ namespace vishnyakov
     }
   }
 
-  template< class Key, class Value, class Hash, class Equal >
-  CuckooHashTable< Key, Value, Hash, Equal >::CuckooHashTable(const CuckooHashTable& other):
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::CuckooHashTable(const CuckooHashTable& other):
     table1_(nullptr),
     table2_(nullptr),
     table_size_(other.table_size_),
@@ -141,8 +140,8 @@ namespace vishnyakov
     }
   }
 
-  template< class Key, class Value, class Hash, class Equal >
-  CuckooHashTable< Key, Value, Hash, Equal >::CuckooHashTable(CuckooHashTable&& other) noexcept:
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::CuckooHashTable(CuckooHashTable&& other) noexcept:
     table1_(other.table1_),
     table2_(other.table2_),
     table_size_(other.table_size_),
@@ -157,8 +156,8 @@ namespace vishnyakov
     other.size_ = 0;
   }
 
-  template< class Key, class Value, class Hash, class Equal >
-  CuckooHashTable< Key, Value, Hash, Equal >::~CuckooHashTable()
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::~CuckooHashTable()
   {
     clear();
     if (table1_)
@@ -171,8 +170,8 @@ namespace vishnyakov
     }
   }
 
-  template< class Key, class Value, class Hash, class Equal >
-  CuckooHashTable< Key, Value, Hash, Equal >& CuckooHashTable< Key, Value, Hash, Equal >::operator=(const CuckooHashTable& other)
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  CuckooHashTable< Key, Value, Hash1, Hash2, Equal >& CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::operator=(const CuckooHashTable& other)
   {
     if (this != &other)
     {
@@ -182,8 +181,8 @@ namespace vishnyakov
     return *this;
   }
 
-  template< class Key, class Value, class Hash, class Equal >
-  CuckooHashTable< Key, Value, Hash, Equal >& CuckooHashTable< Key, Value, Hash, Equal >::operator=(CuckooHashTable&& other) noexcept
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  CuckooHashTable< Key, Value, Hash1, Hash2, Equal >& CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::operator=(CuckooHashTable&& other) noexcept
   {
     if (this != &other)
     {
@@ -193,26 +192,122 @@ namespace vishnyakov
     return *this;
   }
 
-  template< class Key, class Value, class Hash, class Equal >
-  bool CuckooHashTable< Key, Value, Hash, Equal >::empty() const noexcept
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  bool CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::empty() const noexcept
   {
     return size_ == 0;
   }
 
-  template< class Key, class Value, class Hash, class Equal >
-  std::size_t CuckooHashTable< Key, Value, Hash, Equal >::size() const noexcept
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  std::size_t CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::size() const noexcept
   {
     return size_;
   }
 
-  template< class Key, class Value, class Hash, class Equal >
-  std::size_t CuckooHashTable< Key, Value, Hash, Equal >::capacity() const noexcept
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  std::size_t CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::capacity() const noexcept
   {
     return table_size_;
   }
 
-  template< class Key, class Value, class Hash, class Equal >
-  void CuckooHashTable< Key, Value, Hash, Equal >::clear() noexcept
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  void CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::add(const Key& key, const Value& value)
+  {
+    if (has(key))
+    {
+      return;
+    }
+
+    if (size_ >= table_size_)
+    {
+      rehash_impl();
+    }
+
+    Node* current = new Node(key, value);
+    for (std::size_t loop = 0; loop < MAX_LOOP; ++loop)
+    {
+      std::size_t idx1 = index1(current->data_.first);
+      if (!table1_[idx1].occupied_)
+      {
+        table1_[idx1] = *current;
+        delete current;
+        ++size_;
+        return;
+      }
+      std::swap(current, &table1_[idx1]);
+
+      std::size_t idx2 = index2(current->data_.first);
+      if (!table2_[idx2].occupied_)
+      {
+        table2_[idx2] = *current;
+        delete current;
+        ++size_;
+        return;
+      }
+      std::swap(current, &table2_[idx2]);
+    }
+
+    delete current;
+    rehash_impl();
+    add(key, value);
+  }
+
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  void CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::add(Key&& key, Value&& value)
+  {
+    add(key, value);
+  }
+
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  void CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::rehash_impl()
+  {
+    std::size_t new_size = table_size_ * 2;
+    CuckooHashTable new_table(new_size);
+
+    for (std::size_t i = 0; i < table_size_; ++i)
+    {
+      if (table1_[i].occupied_)
+      {
+        new_table.add(table1_[i].data_.first, table1_[i].data_.second);
+      }
+      if (table2_[i].occupied_)
+      {
+        new_table.add(table2_[i].data_.first, table2_[i].data_.second);
+      }
+    }
+
+    swap(new_table);
+  }
+
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  void CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::rehash(std::size_t new_capacity)
+  {
+    if (new_capacity < size_)
+    {
+      new_capacity = size_ * 2;
+    }
+    if (new_capacity == 0)
+    {
+      new_capacity = DEFAULT_CAPACITY;
+    }
+
+    CuckooHashTable new_table(new_capacity);
+    for (std::size_t i = 0; i < table_size_; ++i)
+    {
+      if (table1_[i].occupied_)
+      {
+        new_table.add(table1_[i].data_.first, table1_[i].data_.second);
+      }
+      if (table2_[i].occupied_)
+      {
+        new_table.add(table2_[i].data_.first, table2_[i].data_.second);
+      }
+    }
+    swap(new_table);
+  }
+
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  void CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::clear() noexcept
   {
     for (std::size_t i = 0; i < table_size_; ++i)
     {
@@ -224,32 +319,20 @@ namespace vishnyakov
     size_ = 0;
   }
 
-  template< class Key, class Value, class Hash, class Equal >
-  Hash CuckooHashTable< Key, Value, Hash, Equal >::hash_function() const
-  {
-    return hash1_;
-  }
-
-  template< class Key, class Value, class Hash, class Equal >
-  Equal CuckooHashTable< Key, Value, Hash, Equal >::key_eq() const
-  {
-    return equal_;
-  }
-
-  template< class Key, class Value, class Hash, class Equal >
-  std::size_t CuckooHashTable< Key, Value, Hash, Equal >::index1(const Key& key) const
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  std::size_t CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::index1(const Key& key) const
   {
     return hash1_(key) % table_size_;
   }
 
-  template< class Key, class Value, class Hash, class Equal >
-  std::size_t CuckooHashTable< Key, Value, Hash, Equal >::index2(const Key& key) const
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  std::size_t CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::index2(const Key& key) const
   {
-    return hash2_(key) % table_size_;
+    return (hash2_(key) * GOLDEN_RATIO) % table_size_;
   }
 
-  template< class Key, class Value, class Hash, class Equal >
-  typename CuckooHashTable< Key, Value, Hash, Equal >::Node* CuckooHashTable< Key, Value, Hash, Equal >::find_node(const Key& key) const
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  typename CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::Node* CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::find_node(const Key& key) const
   {
     std::size_t idx1 = index1(key);
     if (table1_[idx1].occupied_ && equal_(table1_[idx1].data_.first, key))
@@ -264,6 +347,63 @@ namespace vishnyakov
     }
 
     return nullptr;
+  }
+
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  bool CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::has(const Key& key) const
+  {
+    return find_node(key) != nullptr;
+  }
+
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  Value& CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::at(const Key& key)
+  {
+    Node* node = find_node(key);
+    if (!node)
+    {
+      throw std::out_of_range("Key not found");
+    }
+    return node->data_.second;
+  }
+
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  const Value& CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::at(const Key& key) const
+  {
+    Node* node = find_node(key);
+    if (!node)
+    {
+      throw std::out_of_range("Key not found");
+    }
+    return node->data_.second;
+  }
+
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  Value& CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::operator[](const Key& key)
+  {
+    Node* node = find_node(key);
+    if (node)
+    {
+      return node->data_.second;
+    }
+    add(key, Value());
+    node = find_node(key);
+    return node->data_.second;
+  }
+
+  template< class Key, class Value, class Hash1, class Hash2, class Equal >
+  Value CuckooHashTable< Key, Value, Hash1, Hash2, Equal >::drop(const Key& key)
+  {
+    Node* node = find_node(key);
+    if (!node)
+    {
+      throw std::out_of_range("Key not found");
+    }
+    Value result = std::move(node->data_.second);
+    node->occupied_ = false;
+    node->data_.~value_type();
+    new (&node->data_) value_type(Key(), Value());
+    --size_;
+    return result;
   }
 }
 
