@@ -37,7 +37,7 @@ namespace karpenko
       List < std::string > names;
       for (auto it = gc.getMap().begin(); it != gc.getMap().end(); ++it)
       {
-        names.push_back(it->first);
+        names.pushBack(it->first);
       }
       std::size_t n = 0;
       std::string* arr = listToSortedArray(names, n);
@@ -203,7 +203,7 @@ namespace karpenko
         {
           const Vertex& to = inner_it->first;
           const edge_weights_t& ew = inner_it->second;
-          for (auto wi = ew.weights.cbegin(); wi != ew.weights.cend(); ++wi)
+          for (auto wi = ew.weights.cBegin(); wi != ew.weights.cEnd(); ++wi)
           {
             addEdgeToMap(result.out_edges_, from, to, *wi);
             addEdgeToMap(result.in_edges_, to, from, *wi);
@@ -233,7 +233,7 @@ namespace karpenko
           out << "<INVALID COMMAND>\n";
           return;
         }
-        selected.push_back(v);
+        selected.pushBack(v);
       }
       Graph result;
       for (auto it = selected.begin(); it != selected.end(); ++it)
@@ -266,7 +266,7 @@ namespace karpenko
             continue;
           }
           const edge_weights_t& ew = in_it->second;
-          for (auto wi = ew.weights.cbegin(); wi != ew.weights.cend(); ++wi)
+          for (auto wi = ew.weights.cBegin(); wi != ew.weights.cEnd(); ++wi)
           {
             addEdgeToMap(result.out_edges_, from, to, *wi);
             addEdgeToMap(result.in_edges_, to, from, *wi);

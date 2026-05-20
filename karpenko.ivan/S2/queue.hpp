@@ -28,12 +28,12 @@ public:
 
   void push(const T& value)
   {
-    list_.push_back(value);
+    list_.pushBack(value);
   }
 
   void push(T&& value)
   {
-    list_.push_back(std::move(value));
+    list_.pushBack(std::move(value));
   }
 
   void pop()
@@ -41,7 +41,7 @@ public:
     if (empty()) {
       throw std::out_of_range("Queue::pop(): empty queue");
     }
-    list_.pop_front();
+    list_.popFront();
   }
 
   T& front()

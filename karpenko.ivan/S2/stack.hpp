@@ -28,12 +28,12 @@ public:
 
   void push(const T& value)
   {
-    list_.push_front(value);
+    list_.pushFront(value);
   }
 
   void push(T&& value)
   {
-    list_.push_front(std::move(value));
+    list_.pushFront(std::move(value));
   }
 
   void pop()
@@ -41,7 +41,7 @@ public:
     if (empty()) {
       throw std::out_of_range("Stack::pop(): empty stack");
     }
-    list_.pop_front();
+    list_.popFront();
   }
 
   T& top()

@@ -24,7 +24,7 @@ namespace karpenko
       size_t value = 0;
       if (in >> value)
       {
-        numbers.push_back(value);
+        numbers.pushBack(value);
       }
       else
       {
@@ -52,7 +52,7 @@ int main()
     {
       break;
     }
-    sequences.push_back(std::make_pair(name, std::move(numbers)));
+    sequences.pushBack(std::make_pair(name, std::move(numbers)));
   }
 
   if (sequences.empty())
@@ -75,8 +75,8 @@ int main()
   std::cout << '\n';
 
   size_t max_len = 0;
-  for (List< std::pair< std::string, List< size_t > > >::const_iterator it = sequences.cbegin();
-       it != sequences.cend(); ++it)
+  for (List< std::pair< std::string, List< size_t > > >::const_iterator it = sequences.cBegin();
+       it != sequences.cEnd(); ++it)
   {
     size_t len = it->second.size();
     if (len > max_len)
@@ -92,8 +92,8 @@ int main()
   {
     List< size_t > new_seq;
 
-    for (List< std::pair< std::string, List< size_t > > >::const_iterator seq_it = sequences.cbegin();
-         seq_it != sequences.cend(); ++seq_it)
+    for (List< std::pair< std::string, List< size_t > > >::const_iterator seq_it = sequences.cBegin();
+         seq_it != sequences.cEnd(); ++seq_it)
     {
       List< size_t >::const_iterator num_it = seq_it->second.begin();
       size_t curr = 0;
@@ -106,14 +106,14 @@ int main()
 
       if (num_it != seq_it->second.end())
       {
-        new_seq.push_back(*num_it);
+        new_seq.pushBack(*num_it);
         has_numbers = true;
       }
     }
 
     if (!new_seq.empty())
     {
-      transposed.push_back(std::move(new_seq));
+      transposed.pushBack(std::move(new_seq));
     }
   }
 
@@ -142,8 +142,8 @@ int main()
 
   List< size_t > sums;
 
-  for (List< List< size_t > >::const_iterator tit = transposed.cbegin();
-       tit != transposed.cend(); ++tit)
+  for (List< List< size_t > >::const_iterator tit = transposed.cBegin();
+       tit != transposed.cEnd(); ++tit)
   {
     size_t sum = 0;
 
@@ -164,12 +164,12 @@ int main()
       return 1;
     }
 
-    sums.push_back(sum);
+    sums.pushBack(sum);
   }
 
   first = true;
-  for (List< size_t >::const_iterator sit = sums.cbegin();
-       sit != sums.cend(); ++sit)
+  for (List< size_t >::const_iterator sit = sums.cBegin();
+       sit != sums.cEnd(); ++sit)
   {
     if (!first)
     {
