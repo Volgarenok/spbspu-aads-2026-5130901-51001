@@ -1,17 +1,27 @@
-#ifndef FILE_MANAGER_HPP
-#define FILE_MANAGER_HPP
+#ifndef KARPENKO_FILE_MANAGER_HPP
+#define KARPENKO_FILE_MANAGER_HPP
 
 #include <string>
+
 #include "ProfileDB.hpp"
 #include "BaseDB.hpp"
 #include "MealDiary.hpp"
 
-namespace karpenko {
+namespace karpenko
+{
 
-class FileManager {
+class FileManager
+{
 public:
-    bool save(const std::string& filename, const ProfileDB& profiles, const BaseDB& bases, const MealDiary& diary);
-    bool load(const std::string& filename, ProfileDB& profiles, BaseDB& bases, MealDiary& diary);
+  bool save(const std::string& filename,
+            const ProfileDB& profiles,
+            const BaseDB& bases,
+            const MealDiary& diary);
+
+  bool load(const std::string& filename,
+            ProfileDB& profiles,
+            BaseDB& bases,
+            MealDiary& diary);
 };
 
 }

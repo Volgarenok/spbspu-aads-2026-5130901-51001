@@ -5,20 +5,20 @@
 
 namespace karpenko {
 
-class Product {
-private:
+  class Product {
+   private:
     std::string name_;
     double proteins_;
     double fats_;
     double carbs_;
     double calories_;
 
-public:
+   public:
     Product();
     Product(const std::string& name, double proteins, double fats, double carbs, double calories);
 
     const std::string& getName() const;
-    void setName(const std::string& newName);
+    void setName(const std::string& new_name);
 
     double getProteins() const;
     double getFats() const;
@@ -31,7 +31,7 @@ public:
     std::string toString() const;
     std::string serialize() const;
     static Product deserialize(const std::string& line);
-};
+  };
 
 }
 

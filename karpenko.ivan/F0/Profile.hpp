@@ -5,19 +5,19 @@
 
 namespace karpenko {
 
-class Profile {
-private:
+  class Profile {
+   private:
     std::string name_;
     double height_;
     double weight_;
     std::string goal_;
     int activity_;
-    double targetCalories_;
-    double targetProtein_;
+    double target_calories_;
+    double target_protein_;
 
     void calculateTargets();
 
-public:
+   public:
     Profile();
     Profile(const std::string& name, double height, double weight, const std::string& goal, int activity);
 
@@ -32,7 +32,7 @@ public:
     std::string toString() const;
     std::string serialize() const;
     static Profile deserialize(const std::string& line);
-};
+  };
 
 }
 
