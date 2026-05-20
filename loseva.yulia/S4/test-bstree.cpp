@@ -34,8 +34,8 @@ BOOST_AUTO_TEST_CASE(RotationsTest) {
   tree.push(5, "left");
   tree.push(15, "right");
 
-  auto it = tree.cbegin(); 
-  ++it; 
+  auto it = tree.cbegin();
+  ++it;
 
   auto newRoot = tree.rotateLeft(it);
   BOOST_CHECK_EQUAL(newRoot->first, 15);
@@ -46,7 +46,6 @@ BOOST_AUTO_TEST_CASE(UnionDsTest) {
   d1.push(1, "a");
   d2.push(2, "b");
   loseva::unionDs(res, d1, d2);
-  
   BOOST_CHECK_EQUAL(res.has(1), true);
   BOOST_CHECK_EQUAL(res.has(2), true);
 }
