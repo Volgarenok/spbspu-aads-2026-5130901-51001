@@ -16,12 +16,10 @@ namespace vishnyakov
     SegmentResult result;
     result.totalNightTime = 0.0;
     double currentTime = startTime;
-    double dx = static_cast< double >(xB - xA);
-    double dz = static_cast< double >(zB - zA);
-    double totalDistance = std::sqrt(dx * dx + dz * dz);
-    double remainingDistance = totalDistance;
     double currentX = static_cast< double >(xA);
     double currentZ = static_cast< double >(zA);
+    double targetX = static_cast< double >(xB);
+    double targetZ = static_cast< double >(zB);
 
     if (currentTime >= NIGHT_START)
     {
@@ -46,8 +44,17 @@ namespace vishnyakov
       currentTime = 0.0;
     }
 
-    while (remainingDistance > 1e-6)
+    while (true)
     {
+      double dx = targetX - currentX;
+      double dz = targetZ - currentZ;
+      double remainingDistance = std::sqrt(dx * dx + dz * dz);
+
+      if (remainingDistance < 1e-6)
+      {
+        break;
+      }
+
       if (currentTime >= NIGHT_START)
       {
         RouteStop nightStop;
@@ -72,7 +79,6 @@ namespace vishnyakov
       {
         double travelTime = remainingDistance / SPEED_BLOCKS_PER_MIN;
         currentTime += travelTime;
-        remainingDistance = 0.0;
 
         RouteStop arrival;
         arrival.isPoint = true;
@@ -82,39 +88,30 @@ namespace vishnyakov
         arrival.z = zB;
         arrival.time = currentTime;
         arrival.travelTime = travelTime;
-        arrival.distanceFromPrev = totalDistance;
+        arrival.distanceFromPrev = remainingDistance;
         result.stops.push_back(arrival);
+
+        currentX = targetX;
+        currentZ = targetZ;
+        break;
       }
       else
       {
-        remainingDistance -= distanceCanGo;
-        double fraction = (totalDistance - remainingDistance) / totalDistance;
-        auto coords = interpolate(xA, zA, xB, zB, fraction);
-        currentX = coords.first;
-        currentZ = coords.second;
+        double fraction = distanceCanGo / remainingDistance;
+        currentX = currentX + fraction * dx;
+        currentZ = currentZ + fraction * dz;
         double travelTime = distanceCanGo / SPEED_BLOCKS_PER_MIN;
         currentTime = NIGHT_START;
-
-        RouteStop fieldStop;
-        fieldStop.isPoint = false;
-        fieldStop.isNightStop = false;
-        fieldStop.name = "field";
-        fieldStop.x = coords.first;
-        fieldStop.z = coords.second;
-        fieldStop.time = currentTime;
-        fieldStop.travelTime = travelTime;
-        fieldStop.distanceFromPrev = distanceCanGo;
-        result.stops.push_back(fieldStop);
 
         RouteStop nightStop;
         nightStop.isPoint = false;
         nightStop.isNightStop = true;
         nightStop.name = "field";
-        nightStop.x = coords.first;
-        nightStop.z = coords.second;
+        nightStop.x = static_cast< int >(currentX);
+        nightStop.z = static_cast< int >(currentZ);
         nightStop.time = currentTime;
-        nightStop.travelTime = 0.0;
-        nightStop.distanceFromPrev = 0.0;
+        nightStop.travelTime = travelTime;
+        nightStop.distanceFromPrev = distanceCanGo;
         result.stops.push_back(nightStop);
 
         result.totalNightTime += CYCLE_LENGTH - currentTime;
@@ -229,17 +226,19 @@ namespace vishnyakov
         isAtPoint
       );
 
+      double segmentDistance = 0.0;
       for (const auto& stop : seg.stops)
       {
         allStops.push_back(stop);
+        segmentDistance += stop.distanceFromPrev;
       }
 
+      result.totalDistance += segmentDistance;
       currentTime = seg.endTime;
       currentX = wp.x;
       currentZ = wp.z;
       currentPointName = point.first;
       isAtPoint = true;
-      result.totalDistance += bestDist;
       result.totalNightTime += seg.totalNightTime;
 
       int vIdx = 0;

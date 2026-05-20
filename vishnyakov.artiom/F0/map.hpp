@@ -1,7 +1,7 @@
 #ifndef MAP_HPP
 #define MAP_HPP
 
-#include "../common/bstree.hpp"
+#include "avltree.hpp"
 #include "waypoint.hpp"
 #include <string>
 
@@ -10,7 +10,7 @@ namespace vishnyakov
   class Map
   {
   public:
-    using WaypointTree = BSTree< std::string, Waypoint, std::less< std::string > >;
+    using WaypointTree = AVLTree< std::string, Waypoint, std::less< std::string > >;
     using iterator = WaypointTree::iterator;
     using const_iterator = WaypointTree::const_iterator;
 

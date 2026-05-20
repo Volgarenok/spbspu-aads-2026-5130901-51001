@@ -101,39 +101,12 @@ namespace vishnyakov
   {
     out << "Маршрут (" << algorithmName << "):\n";
     int stepNumber = 1;
-    int idx = 0;
-    for (auto it = route.allStops.cbegin(); it != route.allStops.cend(); ++it, ++idx)
+    for (auto it = route.allStops.cbegin(); it != route.allStops.cend(); ++it)
     {
       const auto& stop = *it;
       double roundedTime = std::round(stop.time * 100.0) / 100.0;
       double roundedTravel = std::round(stop.travelTime * 100.0) / 100.0;
       double roundedDist = std::round(stop.distanceFromPrev * 100.0) / 100.0;
-
-      auto nextIt = it;
-      ++nextIt;
-      if (!stop.isPoint && !stop.isNightStop && stop.name == "field")
-      {
-        if (nextIt != route.allStops.cend() &&
-            nextIt->isNightStop &&
-            nextIt->x == stop.x &&
-            nextIt->z == stop.z)
-        {
-          const auto& nightStop = *nextIt;
-          double roundedNightTime = std::round(nightStop.time * 100.0) / 100.0;
-
-          out << "  " << stepNumber << ". Остановка на ночь (" << stop.x << ", " << stop.z << ")\n";
-          if (idx > 0)
-          {
-            out << "      - Затраченное время: " << roundedTravel << " мин.\n";
-            out << "      - Пройденная дистанция: " << roundedDist << " м.\n";
-          }
-          out << "      - Текущее время: " << roundedNightTime << " мин.\n";
-
-          ++idx;
-          ++stepNumber;
-          continue;
-        }
-      }
 
       if (stop.name == "start")
       {
@@ -144,7 +117,7 @@ namespace vishnyakov
       else if (stop.isNightStop)
       {
         out << "  " << stepNumber << ". Остановка на ночь (" << stop.x << ", " << stop.z << ")\n";
-        if (idx > 0)
+        if (stepNumber > 1)
         {
           out << "      - Затраченное время: " << roundedTravel << " мин.\n";
           out << "      - Пройденная дистанция: " << roundedDist << " м.\n";
@@ -155,7 +128,7 @@ namespace vishnyakov
       else if (stop.isPoint)
       {
         out << "  " << stepNumber << ". " << stop.name << " (" << stop.x << ", " << stop.z << ")\n";
-        if (idx > 0)
+        if (stepNumber > 1)
         {
           out << "      - Затраченное время: " << roundedTravel << " мин.\n";
           out << "      - Пройденная дистанция: " << roundedDist << " м.\n";
@@ -166,7 +139,7 @@ namespace vishnyakov
       else
       {
         out << "  " << stepNumber << ". Поле (" << stop.x << ", " << stop.z << ")\n";
-        if (idx > 0)
+        if (stepNumber > 1)
         {
           out << "      - Затраченное время: " << roundedTravel << " мин.\n";
           out << "      - Пройденная дистанция: " << roundedDist << " м.\n";
