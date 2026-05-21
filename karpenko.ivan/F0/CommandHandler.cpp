@@ -320,6 +320,31 @@ void CommandHandler::handlePlanMeal(const std::string* args, int count)
   }
 
   int selectedIndex = 1;
+  bool editMode = false;
+
+  if (Helpers::isInteractive())
+  {
+    while (true)
+    {
+      std::cout << "Select option (1-3) or edit (e): ";
+      std::string choice;
+      if (!std::getline(std::cin, choice))
+      {
+        break;
+      }
+      if (choice == "e")
+      {
+        editMode = true;
+        break;
+      }
+      if (choice.size() == 1 && choice[0] >= '1' && choice[0] <= '3')
+      {
+        selectedIndex = choice[0] - '0';
+        break;
+      }
+      printError("Invalid choice. Enter 1-3 or e.");
+    }
+  }
 
   MealSolution selected;
   int current = 1;
@@ -331,6 +356,212 @@ void CommandHandler::handlePlanMeal(const std::string* args, int count)
       break;
     }
     ++current;
+  }
+
+  if (editMode && Helpers::isInteractive())
+  {
+    int editIndex = 0;
+    while (true)
+    {
+      std::cout << "Select option to edit (1-3): ";
+      std::string choice;
+      if (!std::getline(std::cin, choice)) break;
+      if (choice.size() == 1 && choice[0] >= '1' && choice[0] <= '3')
+      {
+        editIndex = choice[0] - '0';
+        break;
+      }
+      printError("Invalid option. Enter 1-3.");
+    }
+
+    current = 1;
+    for (auto it = solutions.begin(); it != solutions.end(); ++it)
+    {
+      if (current == editIndex)
+      {
+        selected = *it;
+        break;
+      }
+      ++current;
+    }
+
+    std::cout << "\n=== EDIT MODE ===\n";
+    std::cout << "Current meal (base: " << baseName << "):\n";
+    for (auto itemIt = selected.items_.begin(); itemIt != selected.items_.end(); ++itemIt)
+    {
+      std::cout << "- " << itemIt->product_name_ << " (" << itemIt->grams_ << "g) — "
+                << itemIt->calories_ << " kcal, " << itemIt->protein_ << "g protein\n";
+    }
+    std::cout << "TOTAL: " << selected.total_calories_ << " kcal, " << selected.total_protein_ << "g protein\n";
+    std::cout << "\nCommands: add <product> <grams>, remove <product>, change <product> <grams>, done, cancel\n";
+
+    bool editing = true;
+    while (editing)
+    {
+      std::cout << "> ";
+      std::string line;
+      if (!std::getline(std::cin, line)) break;
+      line = Helpers::trim(line);
+      if (line.empty()) continue;
+
+      if (line == "done")
+      {
+        editing = false;
+        break;
+      }
+      if (line == "cancel")
+      {
+        std::cout << "Edit cancelled. Meal not added.\n";
+        return;
+      }
+
+      karpenko::List< std::string > tokens = Helpers::split(line, ' ');
+      if (tokens.empty()) continue;
+      auto tokenIt = tokens.begin();
+      std::string action = Helpers::toLower(*tokenIt);
+      ++tokenIt;
+
+      if (action == "add")
+      {
+        if (tokens.size() < 3)
+        {
+          printError("Usage: add <product> <grams>");
+          continue;
+        }
+        std::string product_name = *tokenIt;
+        ++tokenIt;
+        double grams = std::atof(tokenIt->c_str());
+        if (grams <= 0)
+        {
+          printError("Grams must be positive");
+          continue;
+        }
+        const Product* product = base->getProduct(product_name);
+        if (!product)
+        {
+          printError("Product not found in base");
+          continue;
+        }
+        double calories = product->calculateCalories(grams);
+        double protein = product->calculateProteins(grams);
+        KnapItem new_item;
+        new_item.product_name_ = product_name;
+        new_item.grams_ = grams;
+        new_item.calories_ = calories;
+        new_item.protein_ = protein;
+        selected.items_.pushBack(new_item);
+        selected.total_calories_ += calories;
+        selected.total_protein_ += protein;
+        std::cout << "Added " << product_name << " (" << grams << "g) — "
+                  << calories << " kcal, " << protein << "g protein\n";
+      }
+      else if (action == "remove")
+      {
+        if (tokens.size() < 2)
+        {
+          printError("Usage: remove <product>");
+          continue;
+        }
+        std::string product_name = *tokenIt;
+        bool removed = false;
+        List< KnapItem > new_items;
+        double new_calories = 0;
+        double new_protein = 0;
+        for (auto item = selected.items_.begin(); item != selected.items_.end(); ++item)
+        {
+          if (item->product_name_ == product_name)
+          {
+            removed = true;
+          }
+          else
+          {
+            new_items.pushBack(*item);
+            new_calories += item->calories_;
+            new_protein += item->protein_;
+          }
+        }
+        if (removed)
+        {
+          selected.items_ = new_items;
+          selected.total_calories_ = new_calories;
+          selected.total_protein_ = new_protein;
+          std::cout << "Removed " << product_name << "\n";
+        }
+        else
+        {
+          printError("Product not found in current meal");
+        }
+      }
+      else if (action == "change")
+      {
+        if (tokens.size() < 3)
+        {
+          printError("Usage: change <product> <grams>");
+          continue;
+        }
+        std::string product_name = *tokenIt;
+        ++tokenIt;
+        double new_grams = std::atof(tokenIt->c_str());
+        if (new_grams <= 0)
+        {
+          printError("Grams must be positive");
+          continue;
+        }
+        const Product* product = base->getProduct(product_name);
+        if (!product)
+        {
+          printError("Product not found in base");
+          continue;
+        }
+        bool changed = false;
+        List< KnapItem > new_items;
+        double new_calories = 0;
+        double new_protein = 0;
+        for (auto item = selected.items_.begin(); item != selected.items_.end(); ++item)
+        {
+          if (item->product_name_ == product_name)
+          {
+            KnapItem new_item = *item;
+            new_item.grams_ = new_grams;
+            new_item.calories_ = product->calculateCalories(new_grams);
+            new_item.protein_ = product->calculateProteins(new_grams);
+            new_items.pushBack(new_item);
+            new_calories += new_item.calories_;
+            new_protein += new_item.protein_;
+            changed = true;
+          }
+          else
+          {
+            new_items.pushBack(*item);
+            new_calories += item->calories_;
+            new_protein += item->protein_;
+          }
+        }
+        if (changed)
+        {
+          selected.items_ = new_items;
+          selected.total_calories_ = new_calories;
+          selected.total_protein_ = new_protein;
+          std::cout << "Changed " << product_name << " to " << new_grams << "g\n";
+        }
+        else
+        {
+          printError("Product not found in current meal");
+        }
+      }
+      else
+      {
+        printError("Unknown command. Use add/remove/change/done/cancel");
+      }
+
+      std::cout << "\nCurrent meal:\n";
+      for (auto itemIt = selected.items_.begin(); itemIt != selected.items_.end(); ++itemIt)
+      {
+        std::cout << "- " << itemIt->product_name_ << " (" << itemIt->grams_ << "g) — "
+                  << itemIt->calories_ << " kcal, " << itemIt->protein_ << "g protein\n";
+      }
+      std::cout << "TOTAL: " << selected.total_calories_ << " kcal, " << selected.total_protein_ << "g protein\n";
+    }
   }
 
   MealEntry entry(profileName, date, mealType);
