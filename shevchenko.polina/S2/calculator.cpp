@@ -97,7 +97,7 @@ void Calculator::tokenize(const std::string& line, Queue<Token>& tokens)
 <<<<<<< HEAD
 
 =======
-  
+
 >>>>>>> 4ca3688 (test)
 =======
 
@@ -110,7 +110,7 @@ void Calculator::tokenize(const std::string& line, Queue<Token>& tokens)
 <<<<<<< HEAD
 
 =======
-    
+
 >>>>>>> 4ca3688 (test)
 =======
 
@@ -225,7 +225,7 @@ ll_t Calculator::apply(char op, ll_t a, ll_t b)
     return a * b;
   }
 <<<<<<< HEAD
-  
+
 >>>>>>> a3c873f (fix)
 =======
 
@@ -349,7 +349,7 @@ ll_t Calculator::evaluate(const std::string& line)
           throw std::logic_error("invalid expression");
         }
 =======
-  
+
 =======
 
 >>>>>>> dc1dfea (content)
@@ -480,7 +480,7 @@ ll_t Calculator::evaluate(const std::string& line)
 >>>>>>> a074866 (fix calculator.cpp (errors))
     }
   }
-  
+
 =======
 >>>>>>> 6e7b36e (content..)
   if (needOperand)
@@ -507,7 +507,7 @@ ll_t Calculator::evaluate(const std::string& line)
 <<<<<<< HEAD
 
 =======
-  
+
 >>>>>>> 4ca3688 (test)
 =======
 

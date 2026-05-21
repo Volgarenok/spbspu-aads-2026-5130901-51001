@@ -17,7 +17,7 @@ public:
 <<<<<<< HEAD
 
 =======
-  
+
 >>>>>>> 4ca3688 (test)
 =======
 
@@ -33,7 +33,7 @@ private:
 <<<<<<< HEAD
 
 =======
-  
+
 >>>>>>> 4ca3688 (test)
 =======
 
@@ -49,10 +49,10 @@ private:
   ll_t parseNumber(const std::string& line, size_t& pos);
 
 =======
-  
+
   ll_t apply(char op, ll_t a, ll_t b);
   ll_t parseNumber(const std::string& line, size_t& pos);
-  
+
 >>>>>>> 4ca3688 (test)
 =======
 

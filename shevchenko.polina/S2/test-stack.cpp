@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(stack_pop)
 <<<<<<< HEAD
 
 =======
-  
+
 >>>>>>> 4ca3688 (test)
 =======
 

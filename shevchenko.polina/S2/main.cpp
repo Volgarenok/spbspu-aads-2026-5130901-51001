@@ -15,10 +15,10 @@ int main(int argc, char* argv[])
   ifstream file;
 
 =======
-  
+
   istream* input = &cin;
   ifstream file;
-  
+
 >>>>>>> 4ca3688 (test)
 =======
 
@@ -51,10 +51,10 @@ int main(int argc, char* argv[])
   string line;
 
 =======
-  
+
   Stack< ll_t > results;
   string line;
-  
+
 >>>>>>> 4ca3688 (test)
 =======
 
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
   }
 
 =======
-      
+
 =======
 
 >>>>>>> dc1dfea (content)

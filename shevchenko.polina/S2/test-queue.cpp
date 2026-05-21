@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(queue_push_front)
 <<<<<<< HEAD
 
 =======
-  
+
 >>>>>>> 4ca3688 (test)
 =======
 
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(queue_pop)
 <<<<<<< HEAD
 
 =======
-  
+
 >>>>>>> 4ca3688 (test)
 =======
 
