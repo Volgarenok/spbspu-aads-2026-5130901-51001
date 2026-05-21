@@ -23,7 +23,10 @@ int main()
   while (true)
   {
     std::cout << "> ";
-    std::getline(std::cin, input);
+    if (!std::getline(std::cin, input))
+    {
+      break;
+    }
     if (input.empty())
     {
       continue;
