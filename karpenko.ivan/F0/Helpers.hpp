@@ -16,6 +16,7 @@ bool isValidMealType(const std::string& meal);
 bool isValidGoal(const std::string& goal);
 std::string toLower(const std::string& str);
 List< std::string > split(const std::string& str, char delimiter);
+bool isInteractive();
 
 }
 }
