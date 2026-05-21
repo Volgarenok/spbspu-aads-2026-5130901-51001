@@ -14,28 +14,12 @@ public:
   {
     data_.pushFront(value);
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
-
->>>>>>> 4ca3688 (test)
-=======
-
->>>>>>> dc1dfea (content)
+  
   void push(T&& value)
   {
     data_.pushFront(std::move(value));
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
-
->>>>>>> 4ca3688 (test)
-=======
-
->>>>>>> dc1dfea (content)
+  
   T pop()
   {
     if (empty())
@@ -46,15 +30,7 @@ public:
     data_.popFront();
     return value;
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
-
->>>>>>> 4ca3688 (test)
-=======
-
->>>>>>> dc1dfea (content)
+  
   T& top()
   {
     if (empty())
@@ -63,15 +39,7 @@ public:
     }
     return data_.front();
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
-
->>>>>>> 4ca3688 (test)
-=======
-
->>>>>>> dc1dfea (content)
+  
   const T& top() const
   {
     if (empty())
@@ -80,41 +48,17 @@ public:
     }
     return data_.front();
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
-
->>>>>>> 4ca3688 (test)
-=======
-
->>>>>>> dc1dfea (content)
+  
   bool empty() const
   {
     return data_.empty();
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
-
->>>>>>> 4ca3688 (test)
-=======
-
->>>>>>> dc1dfea (content)
+  
   size_t size() const
   {
     return data_.size();
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
-
->>>>>>> 4ca3688 (test)
-=======
-
->>>>>>> dc1dfea (content)
+  
 private:
   List< T > data_;
 };

@@ -1,13 +1,5 @@
 #include <boost/test/unit_test.hpp>
-<<<<<<< HEAD
-<<<<<<< HEAD
 #include "stack.hpp"
-=======
-#include "../stack.hpp"
->>>>>>> 4ca3688 (test)
-=======
-#include "stack.hpp"
->>>>>>> a3c873f (fix)
 
 using namespace shevchenko;
 
@@ -33,15 +25,7 @@ BOOST_AUTO_TEST_CASE(stack_pop)
   s.push(1);
   s.push(2);
   s.push(3);
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
-
->>>>>>> 4ca3688 (test)
-=======
-
->>>>>>> dc1dfea (content)
+  
   BOOST_TEST(s.pop() == 3);
   BOOST_TEST(s.pop() == 2);
   BOOST_TEST(s.pop() == 1);
