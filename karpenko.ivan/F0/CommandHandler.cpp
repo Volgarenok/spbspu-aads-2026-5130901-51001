@@ -320,7 +320,6 @@ void CommandHandler::handlePlanMeal(const std::string* args, int count)
   }
 
   int selectedIndex = 1;
-  bool editMode = false;
 
   MealSolution selected;
   int current = 1;
