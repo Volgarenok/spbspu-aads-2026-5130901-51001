@@ -14,12 +14,12 @@ public:
   {
     data_.pushBack(value);
   }
-  
+
   void push(T&& value)
   {
     data_.pushBack(std::move(value));
   }
-  
+
   T pop()
   {
     if (empty())
@@ -30,7 +30,7 @@ public:
     data_.popFront();
     return value;
   }
-  
+
   T& front()
   {
     if (empty())
@@ -39,7 +39,7 @@ public:
     }
     return data_.front();
   }
-  
+
   const T& front() const
   {
     if (empty())
@@ -48,17 +48,17 @@ public:
     }
     return data_.front();
   }
-  
+
   bool empty() const
   {
     return data_.empty();
   }
-  
+
   size_t size() const
   {
     return data_.size();
   }
-  
+
 private:
   List< T > data_;
 };

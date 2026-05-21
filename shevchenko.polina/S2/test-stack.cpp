@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(stack_pop)
   s.push(1);
   s.push(2);
   s.push(3);
-  
+
   BOOST_TEST(s.pop() == 3);
   BOOST_TEST(s.pop() == 2);
   BOOST_TEST(s.pop() == 1);

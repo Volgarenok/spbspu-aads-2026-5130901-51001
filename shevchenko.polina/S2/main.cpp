@@ -8,10 +8,10 @@ using namespace std;
 int main(int argc, char* argv[])
 {
   using namespace shevchenko;
-  
+
   istream* input = &cin;
   ifstream file;
-  
+
   if (argc >= 2)
   {
     file.open(argv[1]);
@@ -22,27 +22,27 @@ int main(int argc, char* argv[])
     }
     input = &file;
   }
-  
+
   List<ll_t> results;
   string line;
-  
+
   try
   {
     Calculator calc;
     while (getline(*input, line))
     {
       if (line.empty()) continue;
-      
+
       ll_t result = calc.evaluate(line);
       results.pushBack(result);
     }
-    
+
     if (results.empty())
     {
       cout << endl;
       return 0;
     }
-    
+
     bool first = true;
     auto it = results.last();
     while (true)
@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
       }
       cout << *it;
       first = false;
-      
+
       if (it == results.begin())
       {
         break;
@@ -82,6 +82,6 @@ int main(int argc, char* argv[])
     cerr << "unknown error\n";
     return 1;
   }
-  
+
   return 0;
 }
