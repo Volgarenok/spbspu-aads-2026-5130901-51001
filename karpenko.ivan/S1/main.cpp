@@ -2,38 +2,117 @@
 #include <iostream>
 #include <string>
 #include <utility>
-#include <cstddef>
 #include <limits>
 #include <stdexcept>
 
 namespace karpenko
 {
-  bool read_sequence(
-    std::istream& in,
-    std::string& name,
-    List< size_t >& numbers)
+  using Pair = std::pair< std::string, List< size_t > >;
+  const size_t MAX_NUM = std::numeric_limits< size_t >::max();
+
+  void inputNum(std::istream& in, List< size_t >& numbers)
   {
-    if (!(in >> name))
-    {
-      return false;
-    }
     numbers.clear();
-    while (in.peek() != '\n' && in.peek() != EOF)
+    size_t num;
+    if (!(in >> num))
     {
-      size_t value = 0;
-      if (in >> value)
-      {
-        numbers.push_back(value);
-      }
-      else
-      {
-        in.clear();
-        in.ignore();
-        break;
-      }
+      in.clear();
+      return;
     }
-    in.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
-    return true;
+    numbers.pushFront(num);
+    LIter< size_t > iter = numbers.begin();
+    while (in >> num)
+    {
+      numbers.insertAfter(iter, num);
+      ++iter;
+    }
+    in.clear();
+  }
+
+  bool input(std::istream& in, List< Pair >& list)
+  {
+    std::string title;
+    if (!(in >> title))
+      return true;
+
+    List< size_t > numbers;
+    inputNum(in, numbers);
+    list.pushFront({ title, numbers });
+
+    LIter< Pair > iter = list.begin();
+    while (in >> title)
+    {
+      List< size_t > nums;
+      inputNum(in, nums);
+      list.insertAfter(iter, { title, nums });
+      ++iter;
+    }
+    return false;
+  }
+
+  List< size_t > idList(const List< Pair >& list, size_t id)
+  {
+    List< size_t > result;
+    result.pushFront(0);
+    LIter< size_t > resIter = result.begin();
+
+    for (LCIter< Pair > it = list.cbegin(); it != list.cend(); ++it)
+    {
+      const List< size_t >& nums = it->second;
+      if (nums.size() <= id)
+        continue;
+
+      LCIter< size_t > numIter = nums.cbegin();
+      for (size_t j = 0; j < id; ++j)
+        ++numIter;
+
+      result.insertAfter(resIter, *numIter);
+      ++resIter;
+    }
+    result.popFront();
+    return result;
+  }
+
+  size_t sumList(const List< size_t >& list)
+  {
+    size_t sum = 0;
+    for (LCIter< size_t > it = list.cbegin(); it != list.cend(); ++it)
+    {
+      if (MAX_NUM - sum < *it)
+        throw std::overflow_error("overflow");
+      sum += *it;
+    }
+    return sum;
+  }
+
+  void outputNames(std::ostream& out, const List< Pair >& list)
+  {
+    if (list.empty())
+      return;
+    bool first = true;
+    for (LCIter< Pair > it = list.cbegin(); it != list.cend(); ++it)
+    {
+      if (!first)
+        out << ' ';
+      out << it->first;
+      first = false;
+    }
+    out << '\n';
+  }
+
+  void outputNumbers(std::ostream& out, const List< size_t >& list)
+  {
+    if (list.empty())
+      return;
+    bool first = true;
+    for (LCIter< size_t > it = list.cbegin(); it != list.cend(); ++it)
+    {
+      if (!first)
+        out << ' ';
+      out << *it;
+      first = false;
+    }
+    out << '\n';
   }
 }
 
@@ -41,144 +120,60 @@ int main()
 {
   using namespace karpenko;
 
-  List< std::pair< std::string, List< size_t > > > sequences;
-
-  while (true)
-  {
-    std::string name;
-    List< size_t > numbers;
-    if (!read_sequence(std::cin, name, numbers))
-    {
-      break;
-    }
-    sequences.push_back(std::make_pair(name, std::move(numbers)));
-  }
-
-  if (sequences.empty())
+  List< Pair > sequences;
+  if (input(std::cin, sequences))
   {
     std::cout << "0\n";
     return 0;
   }
 
-  bool first = true;
-  for (List< std::pair< std::string, List< size_t > > >::iterator it = sequences.begin();
-       it != sequences.end(); ++it)
-  {
-    if (!first)
-    {
-      std::cout << ' ';
-    }
-    std::cout << it->first;
-    first = false;
-  }
-  std::cout << '\n';
-
-  size_t max_len = 0;
-  for (List< std::pair< std::string, List< size_t > > >::const_iterator it = sequences.cbegin();
-       it != sequences.cend(); ++it)
+  size_t maxLen = 0;
+  for (LCIter< Pair > it = sequences.cbegin(); it != sequences.cend(); ++it)
   {
     size_t len = it->second.size();
-    if (len > max_len)
-    {
-      max_len = len;
-    }
+    if (len > maxLen)
+      maxLen = len;
   }
 
-  List< List< size_t > > transposed;
-  bool has_numbers = false;
-
-  for (size_t pos = 0; pos < max_len; ++pos)
+  if (maxLen == 0)
   {
-    List< size_t > new_seq;
-
-    for (List< std::pair< std::string, List< size_t > > >::const_iterator seq_it = sequences.cbegin();
-         seq_it != sequences.cend(); ++seq_it)
-    {
-      List< size_t >::const_iterator num_it = seq_it->second.begin();
-      size_t curr = 0;
-
-      while (curr < pos && num_it != seq_it->second.end())
-      {
-        ++curr;
-        ++num_it;
-      }
-
-      if (num_it != seq_it->second.end())
-      {
-        new_seq.push_back(*num_it);
-        has_numbers = true;
-      }
-    }
-
-    if (!new_seq.empty())
-    {
-      transposed.push_back(std::move(new_seq));
-    }
-  }
-
-  if (!has_numbers)
-  {
+    outputNames(std::cout, sequences);
     std::cout << "0\n";
     return 0;
   }
 
-  for (List< List< size_t > >::iterator tit = transposed.begin();
-       tit != transposed.end(); ++tit)
+  try
   {
-    bool first_in_row = true;
-    for (List< size_t >::const_iterator nit = tit->begin();
-         nit != tit->end(); ++nit)
+    List< List< size_t > > columns;
+    columns.pushFront(List< size_t >());
+    LIter< List< size_t > > colIter = columns.begin();
+
+    outputNames(std::cout, sequences);
+    for (size_t i = 0; i < maxLen; ++i)
     {
-      if (!first_in_row)
-      {
-        std::cout << ' ';
-      }
-      std::cout << *nit;
-      first_in_row = false;
+      List< size_t > col = idList(sequences, i);
+      columns.insertAfter(colIter, col);
+      ++colIter;
+      outputNumbers(std::cout, col);
     }
-    std::cout << '\n';
+    columns.popFront();
+
+    List< size_t > sums;
+    sums.pushFront(0);
+    LIter< size_t > sumIter = sums.begin();
+    for (LCIter< List< size_t > > colIt = columns.cbegin(); colIt != columns.cend(); ++colIt)
+    {
+      sums.insertAfter(sumIter, sumList(*colIt));
+      ++sumIter;
+    }
+    sums.popFront();
+    outputNumbers(std::cout, sums);
   }
-
-  List< size_t > sums;
-
-  for (List< List< size_t > >::const_iterator tit = transposed.cbegin();
-       tit != transposed.cend(); ++tit)
+  catch (const std::overflow_error& e)
   {
-    size_t sum = 0;
-
-    try
-    {
-      for (List< size_t >::const_iterator nit = tit->begin();
-           nit != tit->end(); ++nit)
-      {
-        if (sum > MAX - *nit)
-        {
-          throw std::overflow_error("Sum overflow");
-        }
-        sum += *nit;
-      }
-    }
-    catch (const std::overflow_error& e)
-    {
-      std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-      return 1;
-    }
-
-    sums.push_back(sum);
+    std::cerr << e.what() << '\n';
+    return 1;
   }
-
-  first = true;
-  for (List< size_t >::const_iterator sit = sums.cbegin();
-       sit != sums.cend(); ++sit)
-  {
-    if (!first)
-    {
-      std::cout << ' ';
-    }
-    std::cout << *sit;
-    first = false;
-  }
-  std::cout << '\n';
 
   return 0;
 }
