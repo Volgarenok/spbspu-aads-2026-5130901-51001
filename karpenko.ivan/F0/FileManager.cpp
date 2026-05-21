@@ -1,5 +1,4 @@
 #include "FileManager.hpp"
-#include "Helpers.hpp"
 
 #include <cctype>
 #include <cstdlib>
@@ -83,7 +82,10 @@ bool FileManager::load(const std::string& filename,
   while (std::getline(profilesStream, line))
   {
     line = trim2(line);
-    if (line.empty()) continue;
+    if (line.empty())
+    {
+      continue;
+    }
     Profile profile = Profile::deserialize(line);
     const std::string& name = profile.getName();
 
@@ -95,45 +97,38 @@ bool FileManager::load(const std::string& filename,
     else
     {
       std::cout << "Profile \"" << name << "\" already exists.\n";
-      if (Helpers::isInteractive())
+      std::cout << "  Choose: (s)kip / (o)verwrite / (r)ename: ";
+      std::string choice;
+      std::getline(std::cin, choice);
+      if (choice == "o")
       {
-        std::cout << "  Choose: (s)kip / (o)verwrite / (r)ename: ";
-        std::string choice;
-        if (!std::getline(std::cin, choice)) choice = "s";
-        if (choice == "o")
+        profiles.removeProfile(name);
+        profiles.addProfile(profile);
+        std::cout << "  Overwritten.\n";
+      }
+      else if (choice == "r")
+      {
+        std::cout << "  Enter new name: ";
+        std::string newName;
+        std::getline(std::cin, newName);
+        if (!newName.empty() && !profiles.hasProfile(newName))
         {
-          profiles.removeProfile(name);
-          profiles.addProfile(profile);
-          std::cout << "  Overwritten.\n";
-        }
-        else if (choice == "r")
-        {
-          std::cout << "  Enter new name: ";
-          std::string newName;
-          if (!std::getline(std::cin, newName)) newName = "";
-          if (!newName.empty() && !profiles.hasProfile(newName))
-          {
-            Profile newProfile(newName,
-                               profile.getHeight(),
-                               profile.getWeight(),
-                               profile.getGoal(),
-                               profile.getActivity());
-            profiles.addProfile(newProfile);
-            std::cout << "  Profile added as \"" << newName << "\".\n";
-          }
-          else
-          {
-            std::cout << "  Invalid or duplicate name. Skipped.\n";
-          }
+          Profile newProfile(newName,
+                             profile.getHeight(),
+                             profile.getWeight(),
+                             profile.getGoal(),
+                             profile.getActivity());
+          profiles.addProfile(newProfile);
+          std::cout << "  Profile added as \"" << newName << "\".\n";
         }
         else
         {
-          std::cout << "  Skipped.\n";
+          std::cout << "  Invalid or duplicate name. Skipped.\n";
         }
       }
       else
       {
-        std::cout << "  Non-interactive mode: skipping.\n";
+        std::cout << "  Skipped.\n";
       }
     }
   }
@@ -142,7 +137,10 @@ bool FileManager::load(const std::string& filename,
   while (std::getline(basesStream, line))
   {
     line = trim2(line);
-    if (line.empty()) continue;
+    if (line.empty())
+    {
+      continue;
+    }
     FoodBase newBase = FoodBase::deserialize(line);
     const std::string& baseName = newBase.getName();
 
@@ -155,84 +153,70 @@ bool FileManager::load(const std::string& filename,
     else
     {
       std::cout << "Base \"" << baseName << "\" already exists.\n";
-      if (Helpers::isInteractive())
+      std::cout << "  Choose: (s)kip / (o)verwrite / (m)erge products: ";
+      std::string choice;
+      std::getline(std::cin, choice);
+      if (choice == "o")
       {
-        std::cout << "  Choose: (s)kip / (o)verwrite / (m)erge products: ";
-        std::string choice;
-        if (!std::getline(std::cin, choice)) choice = "s";
-        if (choice == "o")
+        bases.removeBase(baseName);
+        bases.addBase(newBase);
+        std::cout << "  Base overwritten.\n";
+      }
+      else if (choice == "m")
+      {
+        FoodBase* existingBase = bases.getBase(baseName);
+        if (existingBase)
         {
-          bases.removeBase(baseName);
-          bases.addBase(newBase);
-          std::cout << "  Base overwritten.\n";
-        }
-        else if (choice == "m")
-        {
-          FoodBase* existingBase = bases.getBase(baseName);
-          if (existingBase)
+          List< Product > productsFromNew = newBase.getAllProducts();
+          for (auto it = productsFromNew.begin(); it != productsFromNew.end(); ++it)
           {
-            List< Product > productsFromNew = newBase.getAllProducts();
-            for (auto it = productsFromNew.begin(); it != productsFromNew.end(); ++it)
+            const std::string& productName = it->getName();
+            if (!existingBase->containsProduct(productName))
             {
-              const std::string& productName = it->getName();
-              if (!existingBase->containsProduct(productName))
+              existingBase->addProduct(*it);
+              std::cout << "    Product \"" << productName << "\" added.\n";
+            }
+            else
+            {
+              std::cout << "    Product \"" << productName << "\" already exists.\n";
+              std::cout << "      Choose: (s)kip / (o)verwrite / (r)ename: ";
+              std::string subChoice;
+              std::getline(std::cin, subChoice);
+              if (subChoice == "o")
               {
+                existingBase->removeProduct(productName);
                 existingBase->addProduct(*it);
-                std::cout << "    Product \"" << productName << "\" added.\n";
+                std::cout << "      Overwritten.\n";
               }
-              else
+              else if (subChoice == "r")
               {
-                std::cout << "    Product \"" << productName << "\" already exists.\n";
-                if (Helpers::isInteractive())
+                std::cout << "        Enter new name: ";
+                std::string newProductName;
+                std::getline(std::cin, newProductName);
+                if (!newProductName.empty() && !existingBase->containsProduct(newProductName))
                 {
-                  std::cout << "      Choose: (s)kip / (o)verwrite / (r)ename: ";
-                  std::string subChoice;
-                  if (!std::getline(std::cin, subChoice)) subChoice = "s";
-                  if (subChoice == "o")
-                  {
-                    existingBase->removeProduct(productName);
-                    existingBase->addProduct(*it);
-                    std::cout << "      Overwritten.\n";
-                  }
-                  else if (subChoice == "r")
-                  {
-                    std::cout << "        Enter new name: ";
-                    std::string newProductName;
-                    if (!std::getline(std::cin, newProductName)) newProductName = "";
-                    if (!newProductName.empty() && !existingBase->containsProduct(newProductName))
-                    {
-                      Product renamedProduct = *it;
-                      renamedProduct.setName(newProductName);
-                      existingBase->addProduct(renamedProduct);
-                      std::cout << "      Product added as \"" << newProductName << "\".\n";
-                    }
-                    else
-                    {
-                      std::cout << "      Invalid or duplicate name. Skipped.\n";
-                    }
-                  }
-                  else
-                  {
-                    std::cout << "      Skipped.\n";
-                  }
+                  Product renamedProduct = *it;
+                  renamedProduct.setName(newProductName);
+                  existingBase->addProduct(renamedProduct);
+                  std::cout << "      Product added as \"" << newProductName << "\".\n";
                 }
                 else
                 {
-                  std::cout << "    Non-interactive mode: skipping product.\n";
+                  std::cout << "      Invalid or duplicate name. Skipped.\n";
                 }
               }
+              else
+              {
+                std::cout << "      Skipped.\n";
+              }
             }
-            std::cout << "  Merged.\n";
           }
-        }
-        else
-        {
-          std::cout << "  Skipped.\n";
+          std::cout << "  Merged.\n";
         }
       }
       else
       {
-        std::cout << "  Non-interactive mode: skipping base.\n";
+        std::cout << "  Skipped.\n";
       }
     }
   }
@@ -241,7 +225,10 @@ bool FileManager::load(const std::string& filename,
   while (std::getline(diaryStream, line))
   {
     line = trim2(line);
-    if (line.empty()) continue;
+    if (line.empty())
+    {
+      continue;
+    }
     MealEntry entry = MealEntry::deserialize(line);
     const std::string& profileName = entry.getProfileName();
     const std::string& date = entry.getDate();
@@ -268,30 +255,23 @@ bool FileManager::load(const std::string& filename,
     {
       std::cout << "Diary entry " << profileName << "|" << date << "|" << mealType
                 << " already exists.\n";
-      if (Helpers::isInteractive())
+      std::cout << "  Choose: (s)kip / (o)verwrite / (a)dd both: ";
+      std::string choice;
+      std::getline(std::cin, choice);
+      if (choice == "o")
       {
-        std::cout << "  Choose: (s)kip / (o)verwrite / (a)dd both: ";
-        std::string choice;
-        if (!std::getline(std::cin, choice)) choice = "s";
-        if (choice == "o")
-        {
-          diary.removeEntry(profileName, date, mealType);
-          diary.addEntry(entry);
-          std::cout << "  Overwritten.\n";
-        }
-        else if (choice == "a")
-        {
-          diary.addEntry(entry);
-          std::cout << "  Added both.\n";
-        }
-        else
-        {
-          std::cout << "  Skipped.\n";
-        }
+        diary.removeEntry(profileName, date, mealType);
+        diary.addEntry(entry);
+        std::cout << "  Overwritten.\n";
+      }
+      else if (choice == "a")
+      {
+        diary.addEntry(entry);
+        std::cout << "  Added both.\n";
       }
       else
       {
-        std::cout << "  Non-interactive mode: skipping.\n";
+        std::cout << "  Skipped.\n";
       }
     }
   }

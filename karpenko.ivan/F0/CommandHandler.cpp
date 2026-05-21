@@ -319,53 +319,48 @@ void CommandHandler::handlePlanMeal(const std::string* args, int count)
     ++optionNumber;
   }
 
-  int selectedIndex = 1;
+  int selectedIndex = 0;
   bool editMode = false;
-
-  if (Helpers::isInteractive())
+  while (true)
   {
-    while (true)
+    std::cout << "Select option (1-3) or edit (e): ";
+    std::string choice;
+    std::getline(std::cin, choice);
+    if (choice == "e")
     {
-      std::cout << "Select option (1-3) or edit (e): ";
-      std::string choice;
-      if (!std::getline(std::cin, choice))
-      {
-        break;
-      }
-      if (choice == "e")
-      {
-        editMode = true;
-        break;
-      }
-      if (choice.size() == 1 && choice[0] >= '1' && choice[0] <= '3')
-      {
-        selectedIndex = choice[0] - '0';
-        break;
-      }
-      printError("Invalid choice. Enter 1-3 or e.");
+      editMode = true;
+      break;
     }
+    if (choice.size() == 1 && choice[0] >= '1' && choice[0] <= '3')
+    {
+      selectedIndex = choice[0] - '0';
+      break;
+    }
+    printError("Invalid choice. Enter 1-3 or e.");
   }
 
   MealSolution selected;
-  int current = 1;
-  for (auto it = solutions.begin(); it != solutions.end(); ++it)
+  if (!editMode)
   {
-    if (current == selectedIndex)
+    int current = 1;
+    for (auto it = solutions.begin(); it != solutions.end(); ++it)
     {
-      selected = *it;
-      break;
+      if (current == selectedIndex)
+      {
+        selected = *it;
+        break;
+      }
+      ++current;
     }
-    ++current;
   }
-
-  if (editMode && Helpers::isInteractive())
+  else
   {
     int editIndex = 0;
     while (true)
     {
       std::cout << "Select option to edit (1-3): ";
       std::string choice;
-      if (!std::getline(std::cin, choice)) break;
+      std::getline(std::cin, choice);
       if (choice.size() == 1 && choice[0] >= '1' && choice[0] <= '3')
       {
         editIndex = choice[0] - '0';
@@ -373,8 +368,7 @@ void CommandHandler::handlePlanMeal(const std::string* args, int count)
       }
       printError("Invalid option. Enter 1-3.");
     }
-
-    current = 1;
+    int current = 1;
     for (auto it = solutions.begin(); it != solutions.end(); ++it)
     {
       if (current == editIndex)
@@ -400,9 +394,12 @@ void CommandHandler::handlePlanMeal(const std::string* args, int count)
     {
       std::cout << "> ";
       std::string line;
-      if (!std::getline(std::cin, line)) break;
+      std::getline(std::cin, line);
       line = Helpers::trim(line);
-      if (line.empty()) continue;
+      if (line.empty())
+      {
+        continue;
+      }
 
       if (line == "done")
       {
@@ -416,7 +413,10 @@ void CommandHandler::handlePlanMeal(const std::string* args, int count)
       }
 
       karpenko::List< std::string > tokens = Helpers::split(line, ' ');
-      if (tokens.empty()) continue;
+      if (tokens.empty())
+      {
+        continue;
+      }
       auto tokenIt = tokens.begin();
       std::string action = Helpers::toLower(*tokenIt);
       ++tokenIt;
