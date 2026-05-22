@@ -1,5 +1,5 @@
-#ifndef KARPENKO_COMMAND_HANDLER_HPP
-#define KARPENKO_COMMAND_HANDLER_HPP
+#ifndef COMMAND_HANDLER_HPP
+#define COMMAND_HANDLER_HPP
 
 #include "ProfileDB.hpp"
 #include "BaseDB.hpp"
@@ -7,41 +7,41 @@
 #include "CommandParser.hpp"
 #include "FileManager.hpp"
 
-namespace karpenko
-{
+namespace karpenko {
 
-class CommandHandler
-{
-public:
-  CommandHandler(ProfileDB& profiles, BaseDB& bases, MealDiary& diary);
+  class CommandHandler {
+  public:
+    CommandHandler(ProfileDB& profiles, BaseDB& bases, MealDiary& diary);
 
-  void handle(const ParsedCommand& cmd);
+    void handle(const ParsedCommand& cmd);
 
-private:
-  ProfileDB& profiles_;
-  BaseDB& bases_;
-  MealDiary& diary_;
-  FileManager fileManager_;
+  private:
+    ProfileDB& profiles_;
+    BaseDB& bases_;
+    MealDiary& diary_;
+    FileManager fileManager_;
 
-  void handleProfileCreate(const std::string* args, int count);
-  void handleProfileList();
-  void handleProfileDelete(const std::string* args, int count);
-  void handleBaseCreate(const std::string* args, int count);
-  void handleBaseList();
-  void handleBaseAdd(const std::string* args, int count);
-  void handleBaseRemove(const std::string* args, int count);
-  void handleBaseShow(const std::string* args, int count);
-  void handlePlanMeal(const std::string* args, int count);
-  void handleMealAdd(const std::string* args, int count);
-  void handleDayStats(const std::string* args, int count);
-  void handleSave(const std::string* args, int count);
-  void handleLoad(const std::string* args, int count);
-  void handleHelp(const std::string* args, int count);
+    void handleProfileCreate(const std::string* args, int count);
+    void handleProfileList();
+    void handleProfileDelete(const std::string* args, int count);
+    void handleBaseCreate(const std::string* args, int count);
+    void handleBaseList();
+    void handleBaseAdd(const std::string* args, int count);
+    void handleBaseRemove(const std::string* args, int count);
+    void handleBaseShow(const std::string* args, int count);
+    void handlePlanMeal(const std::string* args, int count);
+    void handleMealAdd(const std::string* args, int count);
+    void handleDayStats(const std::string* args, int count);
+    void handleSave(const std::string* args, int count);
+    void handleLoad(const std::string* args, int count);
+    void handleHelp(const std::string* args, int count);
 
-  void printSuccess(const std::string& msg);
-  void printError(const std::string& msg);
-  void printInfo(const std::string& msg);
-};
+    bool isProductUsedInDiary(const std::string& baseName, const std::string& productName) const;
+
+    void printSuccess(const std::string& msg);
+    void printError(const std::string& msg);
+    void printInfo(const std::string& msg);
+  };
 
 }
 

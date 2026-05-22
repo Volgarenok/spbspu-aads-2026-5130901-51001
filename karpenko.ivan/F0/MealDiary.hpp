@@ -9,14 +9,17 @@
 namespace karpenko {
 
   class MealDiary {
-   private:
-    List< MealEntry > entries_;
+  private:
+    List<MealEntry> entries_;
 
-   public:
+  public:
     void addEntry(const MealEntry& entry);
     bool removeEntry(const std::string& profile, const std::string& date, const std::string& mealType);
-    List< MealEntry > getEntriesByProfile(const std::string& profile) const;
-    List< MealEntry > getEntriesByDate(const std::string& profile, const std::string& date) const;
+
+    List<MealEntry> getEntriesByProfile(const std::string& profile) const;
+    List<MealEntry> getEntriesByDate(const std::string& profile, const std::string& date) const;
+
+    MealEntry* getEntry(const std::string& profile, const std::string& date, const std::string& mealType);
 
     std::string serialize() const;
     void deserialize(const std::string& data);

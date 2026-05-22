@@ -21,19 +21,13 @@ namespace karpenko {
   };
 
   class MealEntry {
-   private:
-    std::string profile_name_;
-    std::string date_;
-    std::string meal_type_;
-    List< MealItem > items_;
-
-   public:
+  public:
     MealEntry(const std::string& profile, const std::string& date, const std::string& meal_type);
 
     const std::string& getProfileName() const;
     const std::string& getDate() const;
     const std::string& getMealType() const;
-    const List< MealItem >& getItems() const;
+    const List<MealItem>& getItems() const;
 
     void addItem(const MealItem& item);
     bool removeItem(size_t index);
@@ -45,6 +39,12 @@ namespace karpenko {
     std::string toString() const;
     std::string serialize() const;
     static MealEntry deserialize(const std::string& line);
+
+  private:
+    std::string profile_name_;
+    std::string date_;
+    std::string meal_type_;
+    List<MealItem> items_;
   };
 
 }

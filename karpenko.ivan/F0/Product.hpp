@@ -6,14 +6,14 @@
 namespace karpenko {
 
   class Product {
-   private:
+  private:
     std::string name_;
     double proteins_;
     double fats_;
     double carbs_;
     double calories_;
 
-   public:
+  public:
     Product();
     Product(const std::string& name, double proteins, double fats, double carbs, double calories);
 
