@@ -25,7 +25,7 @@ namespace karpenko {
       height_(1)
     {}
 
-    AVLNode(const Key& k, Value&& v): 
+    AVLNode(const Key& k, Value&& v):
       data_(k, std::move(v)),
       left_(nullptr),
       right_(nullptr),
