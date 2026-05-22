@@ -11,7 +11,7 @@
 
 namespace karpenko {
 
-  CommandHandler::CommandHandler(ProfileDB& profiles, BaseDB& bases, MealDiary& diary): 
+  CommandHandler::CommandHandler(ProfileDB& profiles, BaseDB& bases, MealDiary& diary):
     profiles_(profiles),
     bases_(bases),
     diary_(diary)

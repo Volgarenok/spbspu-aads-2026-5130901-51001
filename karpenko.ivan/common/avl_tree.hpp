@@ -226,10 +226,9 @@ namespace karpenko {
 
   public:
     AVLTree():
-    root_(nullptr),
-    cmp_()
-    {
-    }
+      root_(nullptr),
+      cmp_()
+    {}
 
     ~AVLTree()
     {
@@ -332,11 +331,10 @@ namespace karpenko {
       }
 
     public:
-      const_iterator(const Node* p = nullptr, const Node* r = nullptr)
-        : ptr_(p),
-          root_(r)
-      {
-      }
+      const_iterator(const Node* p = nullptr, const Node* r = nullptr):
+        ptr_(p),
+        root_(r)
+      {}
 
       const std::pair<const Key, Value>& operator*() const
       {
