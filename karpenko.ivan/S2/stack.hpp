@@ -1,84 +1,84 @@
 #ifndef STACK_HPP
 #define STACK_HPP
 
-#include "../common/list.hpp"
 #include <stdexcept>
+#include "../common/list.hpp"
 
 namespace karpenko {
 
-template < typename T >
-class Stack
-{
-public:
-  Stack() = default;
-  Stack(const Stack&) = default;
-  Stack(Stack&&) = default;
-  Stack& operator=(const Stack&) = default;
-  Stack& operator=(Stack&&) = default;
-
-  bool empty() const noexcept
+  template < typename T >
+  class Stack
   {
-    return list_.empty();
-  }
+  public:
+    Stack() = default;
+    Stack(const Stack &) = default;
+    Stack(Stack &&) = default;
+    Stack & operator=(const Stack &) = default;
+    Stack & operator=(Stack &&) = default;
 
-  size_t size() const noexcept
-  {
-    return list_.size();
-  }
-
-  void push(const T& value)
-  {
-    list_.push_front(value);
-  }
-
-  void push(T&& value)
-  {
-    list_.push_front(std::move(value));
-  }
-
-  void pop()
-  {
-    if (empty()) {
-      throw std::out_of_range("Stack::pop(): empty stack");
+    bool empty() const noexcept
+    {
+      return list_.empty();
     }
-    list_.pop_front();
-  }
 
-  T& top()
-  {
-    if (empty()) {
-      throw std::out_of_range("Stack::top(): empty stack");
+    size_t size() const noexcept
+    {
+      return list_.size();
     }
-    return list_.front();
-  }
 
-  const T& top() const
-  {
-    if (empty()) {
-      throw std::out_of_range("Stack::top(): empty stack");
+    T & top()
+    {
+      if (empty()) {
+        throw std::out_of_range("Stack::top(): empty stack");
+      }
+      return list_.front();
     }
-    return list_.front();
-  }
 
-  void clear() noexcept
+    const T & top() const
+    {
+      if (empty()) {
+        throw std::out_of_range("Stack::top(): empty stack");
+      }
+      return list_.front();
+    }
+
+    void push(const T & value)
+    {
+      list_.push_front(value);
+    }
+
+    void push(T && value)
+    {
+      list_.push_front(std::move(value));
+    }
+
+    void pop()
+    {
+      if (empty()) {
+        throw std::out_of_range("Stack::pop(): empty stack");
+      }
+      list_.pop_front();
+    }
+
+    void clear() noexcept
+    {
+      list_.clear();
+    }
+
+    void swap(Stack & other) noexcept
+    {
+      list_.swap(other.list_);
+    }
+
+  private:
+    List< T > list_;
+  };
+
+  template < typename T >
+  void swap(Stack< T > & lhs, Stack< T > & rhs) noexcept
   {
-    list_.clear();
+    lhs.swap(rhs);
   }
-
-  void swap(Stack& other) noexcept
-  {
-    list_.swap(other.list_);
-  }
-
-private:
-  List< T > list_;
-};
-
-template < typename T >
-void swap(Stack< T >& lhs, Stack< T >& rhs) noexcept
-{
-  lhs.swap(rhs);
-}
 
 }
 

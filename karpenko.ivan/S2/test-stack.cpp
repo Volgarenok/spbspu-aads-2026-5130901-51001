@@ -1,32 +1,32 @@
-#include <boost/test/unit_test.hpp>
 #include "stack.hpp"
+#include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_SUITE(StackTest)
 
 BOOST_AUTO_TEST_CASE(ConstructAndOperatorsTests)
 {
-  karpenko::Stack<int> s1;
+  karpenko::Stack< int > s1;
   BOOST_CHECK(s1.empty());
   s1.push(1);
-  karpenko::Stack<int> s2(s1);
+  karpenko::Stack< int > s2(s1);
   BOOST_CHECK(s2.size() == 1);
   BOOST_CHECK(s2.top() == 1);
   s2.push(2);
-  karpenko::Stack<int> s3(std::move(s2));
+  karpenko::Stack< int > s3(std::move(s2));
   BOOST_CHECK(s3.size() == 2);
   BOOST_CHECK(s3.top() == 2);
   s3.push(3);
-  karpenko::Stack<int> s4 = s3;
+  karpenko::Stack< int > s4 = s3;
   BOOST_CHECK(s4.size() == 3);
   BOOST_CHECK(s4.top() == 3);
-  karpenko::Stack<int> s5 = std::move(s4);
+  karpenko::Stack< int > s5 = std::move(s4);
   BOOST_CHECK(s5.size() == 3);
   BOOST_CHECK(s5.top() == 3);
 }
 
 BOOST_AUTO_TEST_CASE(EmptyAndSizeTests)
 {
-  karpenko::Stack<int> s;
+  karpenko::Stack< int > s;
   BOOST_CHECK(s.empty());
   BOOST_CHECK(s.size() == 0);
   s.push(1);
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(EmptyAndSizeTests)
 
 BOOST_AUTO_TEST_CASE(PushPopTopTests)
 {
-  karpenko::Stack<int> s;
+  karpenko::Stack< int > s;
   s.push(1);
   BOOST_CHECK(s.top() == 1);
   s.push(2);
@@ -52,9 +52,9 @@ BOOST_AUTO_TEST_CASE(PushPopTopTests)
 
 BOOST_AUTO_TEST_CASE(SwapTests)
 {
-  karpenko::Stack<int> s1;
+  karpenko::Stack< int > s1;
   s1.push(1);
-  karpenko::Stack<int> s2;
+  karpenko::Stack< int > s2;
   s2.push(2);
   s2.push(3);
   s2.swap(s1);
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(SwapTests)
 
 BOOST_AUTO_TEST_CASE(ClearTests)
 {
-  karpenko::Stack<int> s;
+  karpenko::Stack< int > s;
   s.push(1);
   s.push(2);
   s.push(3);

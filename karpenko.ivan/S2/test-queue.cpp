@@ -1,28 +1,28 @@
-#include <boost/test/unit_test.hpp>
 #include "queue.hpp"
+#include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_SUITE(QueueTest)
 
 BOOST_AUTO_TEST_CASE(ConstructAndOperatorsTests)
 {
-  karpenko::Queue<int> q1;
+  karpenko::Queue< int > q1;
   BOOST_CHECK(q1.empty());
   q1.push(1);
-  karpenko::Queue<int> q2(q1);
+  karpenko::Queue< int > q2(q1);
   BOOST_CHECK(q2.size() == 1);
   BOOST_CHECK(q2.front() == 1);
   BOOST_CHECK(q2.back() == 1);
   q2.push(2);
-  karpenko::Queue<int> q3(std::move(q2));
+  karpenko::Queue< int > q3(std::move(q2));
   BOOST_CHECK(q3.size() == 2);
   BOOST_CHECK(q3.front() == 1);
   BOOST_CHECK(q3.back() == 2);
   q3.push(3);
-  karpenko::Queue<int> q4 = q3;
+  karpenko::Queue< int > q4 = q3;
   BOOST_CHECK(q4.size() == 3);
   BOOST_CHECK(q4.front() == 1);
   BOOST_CHECK(q4.back() == 3);
-  karpenko::Queue<int> q5 = std::move(q4);
+  karpenko::Queue< int > q5 = std::move(q4);
   BOOST_CHECK(q5.size() == 3);
   BOOST_CHECK(q5.front() == 1);
   BOOST_CHECK(q5.back() == 3);
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(ConstructAndOperatorsTests)
 
 BOOST_AUTO_TEST_CASE(EmptyAndSizeTests)
 {
-  karpenko::Queue<int> q;
+  karpenko::Queue< int > q;
   BOOST_CHECK(q.empty());
   BOOST_CHECK(q.size() == 0);
   q.push(1);
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(EmptyAndSizeTests)
 
 BOOST_AUTO_TEST_CASE(PushPopFrontBackTests)
 {
-  karpenko::Queue<int> q;
+  karpenko::Queue< int > q;
   q.push(1);
   BOOST_CHECK(q.back() == 1);
   q.push(2);
@@ -56,9 +56,9 @@ BOOST_AUTO_TEST_CASE(PushPopFrontBackTests)
 
 BOOST_AUTO_TEST_CASE(SwapTests)
 {
-  karpenko::Queue<int> q1;
+  karpenko::Queue< int > q1;
   q1.push(1);
-  karpenko::Queue<int> q2;
+  karpenko::Queue< int > q2;
   q2.push(2);
   q2.push(3);
   q2.swap(q1);
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(SwapTests)
 
 BOOST_AUTO_TEST_CASE(ClearTests)
 {
-  karpenko::Queue<int> q;
+  karpenko::Queue< int > q;
   q.push(1);
   q.push(2);
   q.push(3);
