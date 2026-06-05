@@ -1,0 +1,42 @@
+
+Paris Brussels 265
+Paris Lyon 465
+Paris Strasbourg 490
+
+Brussels Amsterdam 200
+Brussels Berlin 750
+Brussels Cologne 190
+Brussels Paris 265
+
+Berlin Munich 505
+Berlin Frankfurt 545
+Berlin Brussels 750
+
+Amsterdam Cologne 260
+Amsterdam Brussels 200
+
+Lyon Milan 350
+Lyon Strasbourg 335
+Lyon Paris 465
+
+Milan Munich 490
+Milan Lyon 350
+
+Frankfurt Cologne 190
+Frankfurt Munich 390
+Frankfurt Berlin 545
+
+Munich Strasbourg 365
+Munich Milan 490
+Munich Frankfurt 390
+Munich Berlin 505
+
+
+Strasbourg Paris 490
+Strasbourg Lyon 335
+Strasbourg Munich 365
+
+
+Cologne Frankfurt 190
+Cologne Brussels 190
+Cologne Amsterdam 260
