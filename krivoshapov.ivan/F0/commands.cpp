@@ -10,6 +10,7 @@
 #include <string>
 #include <utility>
 #include "document.hpp"
+#include "hash.hpp"
 #include "normalize.hpp"
 
 namespace krivoshapov
@@ -19,6 +20,7 @@ namespace krivoshapov
     using ShingleTree = Document::ShingleTree;
 
     const char *const invalidMessage = "<INVALID COMMAND>";
+    const char *const notFoundMessage = "<NOT FOUND>";
 
     struct scan_result_t
     {
@@ -78,12 +80,43 @@ namespace krivoshapov
       return true;
     }
 
+    std::string formatHash(std::uint32_t value)
+    {
+      const int hexDigits = 8;
+      std::ostringstream stream;
+      stream << "0x" << std::setw(hexDigits) << std::setfill('0') << std::hex << value;
+      return stream.str();
+    }
+
     std::string formatPercent(double value)
     {
       const int precision = 1;
       std::ostringstream stream;
       stream << std::fixed << std::setprecision(precision) << value << '%';
       return stream.str();
+    }
+
+    std::string buildShingle(const Array<std::string> &words, std::size_t start,
+                             std::size_t size)
+    {
+      std::string shingle = words[start];
+      for (std::size_t offset = 1; offset < size; ++offset)
+      {
+        shingle += ' ';
+        shingle += words[start + offset];
+      }
+      return shingle;
+    }
+
+    std::string joinWords(const Array<std::string> &words, std::size_t from, std::size_t to)
+    {
+      std::string text = words[from];
+      for (std::size_t i = from + 1; i <= to; ++i)
+      {
+        text += ' ';
+        text += words[i];
+      }
+      return text;
     }
 
     double jaccardPercent(const ShingleTree &first, const ShingleTree &second,
@@ -212,6 +245,18 @@ void krivoshapov::App::dispatch(const Array<std::string> &tokens, std::ostream &
   else if (command == "matrix")
   {
     doMatrix(tokens, out);
+  }
+  else if (command == "shingles")
+  {
+    doShingles(tokens, out);
+  }
+  else if (command == "common")
+  {
+    doCommon(tokens, out);
+  }
+  else if (command == "fragments")
+  {
+    doFragments(tokens, out);
   }
   else
   {
@@ -449,4 +494,148 @@ void krivoshapov::App::doMatrix(const Array<std::string> &tokens, std::ostream &
     }
     out << '\n';
   }
+}
+
+void krivoshapov::App::doShingles(const Array<std::string> &tokens, std::ostream &out)
+{
+  const std::size_t previewLimit = 10;
+  if (tokens.getSize() != 2)
+  {
+    out << invalidMessage << '\n';
+    return;
+  }
+  const Document *const document = store_.find(tokens[1]);
+  if (document == nullptr)
+  {
+    out << invalidMessage << '\n';
+    return;
+  }
+  const Array<std::string> &words = document->getWords();
+  const std::size_t size = document->getShingleSize();
+  std::size_t positions = 0;
+  if (size != 0 && words.getSize() >= size)
+  {
+    positions = words.getSize() - size + 1;
+  }
+  const std::size_t shown = positions < previewLimit ? positions : previewLimit;
+  out << "<SHINGLES: " << tokens[1]
+      << ", showing " << shown << " of " << document->getShingleCount() << ">\n";
+  for (std::size_t i = 0; i < shown; ++i)
+  {
+    const std::string shingle = buildShingle(words, i, size);
+    out << "[" << formatHash(hashShingle(shingle)) << "] \"" << shingle << "\"\n";
+  }
+}
+
+void krivoshapov::App::doCommon(const Array<std::string> &tokens, std::ostream &out)
+{
+  if (tokens.getSize() != 3)
+  {
+    out << invalidMessage << '\n';
+    return;
+  }
+  const Document *const first = store_.find(tokens[1]);
+  const Document *const second = store_.find(tokens[2]);
+  if (first == nullptr || second == nullptr)
+  {
+    out << invalidMessage << '\n';
+    return;
+  }
+  std::size_t common = 0;
+  jaccardPercent(first->getShingles(), second->getShingles(), common);
+  if (common == 0)
+  {
+    out << notFoundMessage << '\n';
+    return;
+  }
+  out << "<COMMON: " << tokens[1] << " & " << tokens[2] << ", " << common << " shingles>\n";
+  const ShingleTree &a = first->getShingles();
+  const ShingleTree &b = second->getShingles();
+  ShingleTree::ConstIterator ia = a.begin();
+  ShingleTree::ConstIterator aEnd = a.end();
+  ShingleTree::ConstIterator ib = b.begin();
+  ShingleTree::ConstIterator bEnd = b.end();
+  while (ia != aEnd && ib != bEnd)
+  {
+    if (ia.getKey() < ib.getKey())
+    {
+      ++ia;
+    }
+    else if (ib.getKey() < ia.getKey())
+    {
+      ++ib;
+    }
+    else
+    {
+      out << "[" << formatHash(ia.getValue().hash) << "] \"" << ia.getKey() << "\"\n";
+      ++ia;
+      ++ib;
+    }
+  }
+}
+
+void krivoshapov::App::doFragments(const Array<std::string> &tokens, std::ostream &out)
+{
+  if (tokens.getSize() != 3)
+  {
+    out << invalidMessage << '\n';
+    return;
+  }
+  const Document *const first = store_.find(tokens[1]);
+  const Document *const second = store_.find(tokens[2]);
+  if (first == nullptr || second == nullptr)
+  {
+    out << invalidMessage << '\n';
+    return;
+  }
+  const Array<std::string> &words = first->getWords();
+  const ShingleTree &target = second->getShingles();
+  const std::size_t size = first->getShingleSize();
+  if (size == 0 || words.getSize() < size)
+  {
+    out << notFoundMessage << '\n';
+    return;
+  }
+  const std::size_t lastStart = words.getSize() - size;
+  std::ostringstream body;
+  std::size_t fragments = 0;
+  std::size_t start = 0;
+  while (start <= lastStart)
+  {
+    const shingle_info_t *const info = target.find(buildShingle(words, start, size));
+    if (info == nullptr)
+    {
+      ++start;
+      continue;
+    }
+    const std::size_t startSecond = info->position;
+    std::size_t previousSecond = startSecond;
+    std::size_t end = start;
+    while (end + 1 <= lastStart)
+    {
+      const shingle_info_t *const next = target.find(buildShingle(words, end + 1, size));
+      if (next == nullptr || next->position != previousSecond + 1)
+      {
+        break;
+      }
+      previousSecond = next->position;
+      ++end;
+    }
+    ++fragments;
+    const std::size_t firstFrom = start;
+    const std::size_t firstTo = end + size - 1;
+    const std::size_t secondFrom = startSecond;
+    const std::size_t secondTo = previousSecond + size - 1;
+    body << "[" << fragments << "] " << tokens[1] << " words " << firstFrom << "-" << firstTo
+         << " ~ " << tokens[2] << " words " << secondFrom << "-" << secondTo << "\n";
+    body << "    \"" << joinWords(words, firstFrom, firstTo) << "\"\n";
+    start = end + 1;
+  }
+  if (fragments == 0)
+  {
+    out << notFoundMessage << '\n';
+    return;
+  }
+  out << "<FRAGMENTS: " << tokens[1] << " & " << tokens[2] << ">\n";
+  out << body.str();
 }
