@@ -1,7 +1,9 @@
 #include "commands.hpp"
 
 #include <cstddef>
+#include <cstdint>
 #include <fstream>
+#include <iomanip>
 #include <istream>
 #include <ostream>
 #include <sstream>
@@ -17,6 +19,12 @@ namespace krivoshapov
     using ShingleTree = Document::ShingleTree;
 
     const char *const invalidMessage = "<INVALID COMMAND>";
+
+    struct scan_result_t
+    {
+      std::string name;
+      double jaccard = 0.0;
+    };
 
     Array<std::string> splitWhitespace(const std::string &line)
     {
@@ -70,6 +78,71 @@ namespace krivoshapov
       return true;
     }
 
+    std::string formatPercent(double value)
+    {
+      const int precision = 1;
+      std::ostringstream stream;
+      stream << std::fixed << std::setprecision(precision) << value << '%';
+      return stream.str();
+    }
+
+    double jaccardPercent(const ShingleTree &first, const ShingleTree &second,
+                          std::size_t &common)
+    {
+      const double percentScale = 100.0;
+      common = 0;
+      ShingleTree::ConstIterator a = first.begin();
+      ShingleTree::ConstIterator aEnd = first.end();
+      ShingleTree::ConstIterator b = second.begin();
+      ShingleTree::ConstIterator bEnd = second.end();
+      while (a != aEnd && b != bEnd)
+      {
+        if (a.getKey() < b.getKey())
+        {
+          ++a;
+        }
+        else if (b.getKey() < a.getKey())
+        {
+          ++b;
+        }
+        else
+        {
+          ++common;
+          ++a;
+          ++b;
+        }
+      }
+      const std::size_t unionSize = first.getSize() + second.getSize() - common;
+      if (unionSize == 0)
+      {
+        return 0.0;
+      }
+      return static_cast<double>(common) * percentScale / static_cast<double>(unionSize);
+    }
+
+    std::string verdict(double jaccard, int threshold)
+    {
+      if (jaccard > static_cast<double>(threshold))
+      {
+        return "PLAGIARISM DETECTED";
+      }
+      return "OK";
+    }
+
+    void sortByJaccardDesc(Array<scan_result_t> &results)
+    {
+      for (std::size_t i = 1; i < results.getSize(); ++i)
+      {
+        scan_result_t current = results[i];
+        std::size_t j = i;
+        while (j > 0 && results[j - 1].jaccard < current.jaccard)
+        {
+          results[j] = results[j - 1];
+          --j;
+        }
+        results[j] = current;
+      }
+    }
   }
 }
 
@@ -127,6 +200,18 @@ void krivoshapov::App::dispatch(const Array<std::string> &tokens, std::ostream &
   else if (command == "clear")
   {
     doClear(tokens, out);
+  }
+  else if (command == "compare")
+  {
+    doCompare(tokens, out);
+  }
+  else if (command == "scan")
+  {
+    doScan(tokens, out);
+  }
+  else if (command == "matrix")
+  {
+    doMatrix(tokens, out);
   }
   else
   {
@@ -251,4 +336,117 @@ void krivoshapov::App::doClear(const Array<std::string> &tokens, std::ostream &o
     return;
   }
   store_.clear();
+}
+
+void krivoshapov::App::doCompare(const Array<std::string> &tokens, std::ostream &out)
+{
+  if (tokens.getSize() != 3)
+  {
+    out << invalidMessage << '\n';
+    return;
+  }
+  const Document *const first = store_.find(tokens[1]);
+  const Document *const second = store_.find(tokens[2]);
+  if (first == nullptr || second == nullptr)
+  {
+    out << invalidMessage << '\n';
+    return;
+  }
+  std::size_t common = 0;
+  const double jaccard = jaccardPercent(first->getShingles(), second->getShingles(), common);
+  out << "<" << tokens[1] << " vs " << tokens[2]
+      << " | COMMON: " << common
+      << " | JACCARD: " << formatPercent(jaccard)
+      << " | " << verdict(jaccard, threshold_) << ">\n";
+}
+
+void krivoshapov::App::doScan(const Array<std::string> &tokens, std::ostream &out)
+{
+  if (tokens.getSize() < 2)
+  {
+    out << invalidMessage << '\n';
+    return;
+  }
+  const Document *const target = store_.find(tokens[1]);
+  if (target == nullptr)
+  {
+    out << invalidMessage << '\n';
+    return;
+  }
+  for (std::size_t i = 2; i < tokens.getSize(); ++i)
+  {
+    if (store_.find(tokens[i]) == nullptr)
+    {
+      out << invalidMessage << '\n';
+      return;
+    }
+  }
+  Array<scan_result_t> results;
+  for (std::size_t i = 2; i < tokens.getSize(); ++i)
+  {
+    const Document *const other = store_.find(tokens[i]);
+    std::size_t common = 0;
+    scan_result_t result;
+    result.name = tokens[i];
+    result.jaccard = jaccardPercent(target->getShingles(), other->getShingles(), common);
+    results.push(result);
+  }
+  sortByJaccardDesc(results);
+  out << "<SCAN: " << tokens[1] << ">\n";
+  for (std::size_t i = 0; i < results.getSize(); ++i)
+  {
+    out << results[i].name
+        << " | JACCARD: " << formatPercent(results[i].jaccard)
+        << " | " << verdict(results[i].jaccard, threshold_) << '\n';
+  }
+}
+
+void krivoshapov::App::doMatrix(const Array<std::string> &tokens, std::ostream &out)
+{
+  const double identityPercent = 100.0;
+  if (tokens.getSize() < 3)
+  {
+    out << invalidMessage << '\n';
+    return;
+  }
+  for (std::size_t i = 1; i < tokens.getSize(); ++i)
+  {
+    if (store_.find(tokens[i]) == nullptr)
+    {
+      out << invalidMessage << '\n';
+      return;
+    }
+  }
+  const std::size_t count = tokens.getSize() - 1;
+  out << '\t';
+  for (std::size_t j = 0; j < count; ++j)
+  {
+    out << tokens[j + 1];
+    if (j + 1 < count)
+    {
+      out << '\t';
+    }
+  }
+  out << '\n';
+  for (std::size_t i = 0; i < count; ++i)
+  {
+    out << tokens[i + 1];
+    const Document *const rowDoc = store_.find(tokens[i + 1]);
+    for (std::size_t j = 0; j < count; ++j)
+    {
+      out << '\t';
+      if (i == j)
+      {
+        out << formatPercent(identityPercent);
+      }
+      else
+      {
+        const Document *const colDoc = store_.find(tokens[j + 1]);
+        std::size_t common = 0;
+        const double jaccard = jaccardPercent(rowDoc->getShingles(), colDoc->getShingles(), common);
+        out << formatPercent(jaccard);
+      }
+    }
+    out << '\n';
+  }
 }
