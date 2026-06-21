@@ -14,6 +14,8 @@ namespace krivoshapov
 {
   namespace
   {
+    using ShingleTree = Document::ShingleTree;
+
     const char *const invalidMessage = "<INVALID COMMAND>";
 
     Array<std::string> splitWhitespace(const std::string &line)
@@ -42,6 +44,32 @@ namespace krivoshapov
       }
       return tokens;
     }
+
+    bool parseInt(const std::string &text, int &result)
+    {
+      const long limit = 1000000;
+      if (text.empty())
+      {
+        return false;
+      }
+      long value = 0;
+      for (std::size_t i = 0; i < text.size(); ++i)
+      {
+        const char symbol = text[i];
+        if (symbol < '0' || symbol > '9')
+        {
+          return false;
+        }
+        value = value * 10 + (symbol - '0');
+        if (value > limit)
+        {
+          return false;
+        }
+      }
+      result = static_cast<int>(value);
+      return true;
+    }
+
   }
 }
 
@@ -79,6 +107,26 @@ void krivoshapov::App::dispatch(const Array<std::string> &tokens, std::ostream &
   else if (command == "list")
   {
     doList(tokens, out);
+  }
+  else if (command == "set-n")
+  {
+    doSetN(tokens, out);
+  }
+  else if (command == "set-threshold")
+  {
+    doSetThreshold(tokens, out);
+  }
+  else if (command == "drop")
+  {
+    doDrop(tokens, out);
+  }
+  else if (command == "rename")
+  {
+    doRename(tokens, out);
+  }
+  else if (command == "clear")
+  {
+    doClear(tokens, out);
   }
   else
   {
@@ -153,4 +201,54 @@ void krivoshapov::App::doList(const Array<std::string> &tokens, std::ostream &ou
         << " | " << it.getValue().getShingleCount() << " shingles\n";
     ++it;
   }
+}
+
+void krivoshapov::App::doSetN(const Array<std::string> &tokens, std::ostream &out)
+{
+  const int minSize = 2;
+  int value = 0;
+  if (tokens.getSize() != 2 || !parseInt(tokens[1], value) || value < minSize)
+  {
+    out << invalidMessage << '\n';
+    return;
+  }
+  shingleSize_ = static_cast<std::size_t>(value);
+}
+
+void krivoshapov::App::doSetThreshold(const Array<std::string> &tokens, std::ostream &out)
+{
+  const int maxValue = 100;
+  int value = 0;
+  if (tokens.getSize() != 2 || !parseInt(tokens[1], value) || value > maxValue)
+  {
+    out << invalidMessage << '\n';
+    return;
+  }
+  threshold_ = value;
+}
+
+void krivoshapov::App::doDrop(const Array<std::string> &tokens, std::ostream &out)
+{
+  if (tokens.getSize() != 2 || !store_.remove(tokens[1]))
+  {
+    out << invalidMessage << '\n';
+  }
+}
+
+void krivoshapov::App::doRename(const Array<std::string> &tokens, std::ostream &out)
+{
+  if (tokens.getSize() != 3 || !store_.rename(tokens[1], tokens[2]))
+  {
+    out << invalidMessage << '\n';
+  }
+}
+
+void krivoshapov::App::doClear(const Array<std::string> &tokens, std::ostream &out)
+{
+  if (tokens.getSize() != 1)
+  {
+    out << invalidMessage << '\n';
+    return;
+  }
+  store_.clear();
 }
