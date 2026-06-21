@@ -38,6 +38,46 @@ namespace krivoshapov
   class RBTree
   {
   public:
+    class ConstIterator
+    {
+    public:
+      ConstIterator(const detail::TreeNode<Key, Value> *node,
+                    const detail::TreeNode<Key, Value> *sentinel) : node_(node),
+                                                                    sentinel_(sentinel)
+      {
+      }
+
+      bool operator==(const ConstIterator &other) const
+      {
+        return node_ == other.node_;
+      }
+
+      bool operator!=(const ConstIterator &other) const
+      {
+        return node_ != other.node_;
+      }
+
+      ConstIterator &operator++()
+      {
+        node_ = successor(node_, sentinel_);
+        return *this;
+      }
+
+      const Key &getKey() const
+      {
+        return node_->key_;
+      }
+
+      const Value &getValue() const
+      {
+        return node_->value_;
+      }
+
+    private:
+      const detail::TreeNode<Key, Value> *node_;
+      const detail::TreeNode<Key, Value> *sentinel_;
+    };
+
     RBTree() : nil_(makeNil()),
                root_(nullptr),
                size_(0)
@@ -47,6 +87,15 @@ namespace krivoshapov
 
     RBTree(const RBTree<Key, Value> &) = delete;
 
+    RBTree(RBTree<Key, Value> &&other) noexcept : nil_(other.nil_),
+                                                  root_(other.root_),
+                                                  size_(other.size_)
+    {
+      other.nil_ = makeNil();
+      other.root_ = other.nil_;
+      other.size_ = 0;
+    }
+
     ~RBTree()
     {
       destroy(root_);
@@ -54,6 +103,22 @@ namespace krivoshapov
     }
 
     RBTree<Key, Value> &operator=(const RBTree<Key, Value> &) = delete;
+
+    RBTree<Key, Value> &operator=(RBTree<Key, Value> &&other) noexcept
+    {
+      if (this != &other)
+      {
+        destroy(root_);
+        delete nil_;
+        nil_ = other.nil_;
+        root_ = other.root_;
+        size_ = other.size_;
+        other.nil_ = makeNil();
+        other.root_ = other.nil_;
+        other.size_ = 0;
+      }
+      return *this;
+    }
 
     std::size_t getSize() const
     {
@@ -125,6 +190,35 @@ namespace krivoshapov
       return &node->value_;
     }
 
+    bool erase(const Key &key)
+    {
+      Node *const node = findNode(key);
+      if (node == nil_)
+      {
+        return false;
+      }
+      removeNode(node);
+      --size_;
+      return true;
+    }
+
+    void clear()
+    {
+      destroy(root_);
+      root_ = nil_;
+      size_ = 0;
+    }
+
+    ConstIterator begin() const
+    {
+      return ConstIterator(minimum(root_), nil_);
+    }
+
+    ConstIterator end() const
+    {
+      return ConstIterator(nil_, nil_);
+    }
+
   private:
     using Node = detail::TreeNode<Key, Value>;
 
@@ -161,6 +255,19 @@ namespace krivoshapov
         }
       }
       return nil_;
+    }
+
+    Node *minimum(Node *node) const
+    {
+      if (node == nil_)
+      {
+        return nil_;
+      }
+      while (node->left_ != nil_)
+      {
+        node = node->left_;
+      }
+      return node;
     }
 
     void leftRotate(Node *node)
@@ -263,6 +370,168 @@ namespace krivoshapov
         }
       }
       root_->color_ = detail::black;
+    }
+
+    void transplant(Node *target, Node *replacement)
+    {
+      if (target->parent_ == nil_)
+      {
+        root_ = replacement;
+      }
+      else if (target == target->parent_->left_)
+      {
+        target->parent_->left_ = replacement;
+      }
+      else
+      {
+        target->parent_->right_ = replacement;
+      }
+      replacement->parent_ = target->parent_;
+    }
+
+    void removeNode(Node *node)
+    {
+      Node *moved = node;
+      detail::NodeColor removedColor = moved->color_;
+      Node *fixupNode = nil_;
+      if (node->left_ == nil_)
+      {
+        fixupNode = node->right_;
+        transplant(node, node->right_);
+      }
+      else if (node->right_ == nil_)
+      {
+        fixupNode = node->left_;
+        transplant(node, node->left_);
+      }
+      else
+      {
+        moved = minimum(node->right_);
+        removedColor = moved->color_;
+        fixupNode = moved->right_;
+        if (moved->parent_ == node)
+        {
+          fixupNode->parent_ = moved;
+        }
+        else
+        {
+          transplant(moved, moved->right_);
+          moved->right_ = node->right_;
+          moved->right_->parent_ = moved;
+        }
+        transplant(node, moved);
+        moved->left_ = node->left_;
+        moved->left_->parent_ = moved;
+        moved->color_ = node->color_;
+      }
+      delete node;
+      if (removedColor == detail::black)
+      {
+        eraseFixup(fixupNode);
+      }
+      nil_->parent_ = nil_;
+    }
+
+    void eraseFixup(Node *node)
+    {
+      while (node != root_ && node->color_ == detail::black)
+      {
+        if (node == node->parent_->left_)
+        {
+          Node *sibling = node->parent_->right_;
+          if (sibling->color_ == detail::red)
+          {
+            sibling->color_ = detail::black;
+            node->parent_->color_ = detail::red;
+            leftRotate(node->parent_);
+            sibling = node->parent_->right_;
+          }
+          if (sibling->left_->color_ == detail::black && sibling->right_->color_ == detail::black)
+          {
+            sibling->color_ = detail::red;
+            node = node->parent_;
+          }
+          else
+          {
+            if (sibling->right_->color_ == detail::black)
+            {
+              sibling->left_->color_ = detail::black;
+              sibling->color_ = detail::red;
+              rightRotate(sibling);
+              sibling = node->parent_->right_;
+            }
+            sibling->color_ = node->parent_->color_;
+            node->parent_->color_ = detail::black;
+            sibling->right_->color_ = detail::black;
+            leftRotate(node->parent_);
+            node = root_;
+          }
+        }
+        else
+        {
+          Node *sibling = node->parent_->left_;
+          if (sibling->color_ == detail::red)
+          {
+            sibling->color_ = detail::black;
+            node->parent_->color_ = detail::red;
+            rightRotate(node->parent_);
+            sibling = node->parent_->left_;
+          }
+          if (sibling->right_->color_ == detail::black && sibling->left_->color_ == detail::black)
+          {
+            sibling->color_ = detail::red;
+            node = node->parent_;
+          }
+          else
+          {
+            if (sibling->left_->color_ == detail::black)
+            {
+              sibling->right_->color_ = detail::black;
+              sibling->color_ = detail::red;
+              leftRotate(sibling);
+              sibling = node->parent_->left_;
+            }
+            sibling->color_ = node->parent_->color_;
+            node->parent_->color_ = detail::black;
+            sibling->left_->color_ = detail::black;
+            rightRotate(node->parent_);
+            node = root_;
+          }
+        }
+      }
+      node->color_ = detail::black;
+    }
+
+    static const Node *subtreeMinimum(const Node *node, const Node *sentinel)
+    {
+      if (node == sentinel)
+      {
+        return sentinel;
+      }
+      while (node->left_ != sentinel)
+      {
+        node = node->left_;
+      }
+      return node;
+    }
+
+    static const Node *successor(const Node *node, const Node *sentinel)
+    {
+      if (node == sentinel)
+      {
+        return sentinel;
+      }
+      if (node->right_ != sentinel)
+      {
+        return subtreeMinimum(node->right_, sentinel);
+      }
+      const Node *parent = node->parent_;
+      while (parent != sentinel && node == parent->right_)
+      {
+        node = parent;
+        parent = parent->parent_;
+      }
+      return parent;
     }
 
     void destroy(Node *node)
