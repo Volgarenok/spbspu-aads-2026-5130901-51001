@@ -391,7 +391,7 @@ namespace karpenko
         tail_ = last;
     }
 
-    void spliceAfter(iterator pos, List& other, iterator it) noexcept
+    void spliceAfter(iterator pos, List& other, iterator it)
     {
       if (it.getPtr() == other.head_ || it.getPtr()->next_ == other.head_)
         throw std::out_of_range("Invalid iterator for spliceAfter");
