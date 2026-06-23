@@ -413,7 +413,7 @@ namespace karpenko
       detail::NodeBase* start = first.getPtr()->next_;
       detail::NodeBase* end = last.getPtr();
       first.getPtr()->next_ = end->next_;
-      if (other.tail_ == end)
+      if (other.tail_ == end || end == other.head_)
         other.tail_ = first.getPtr();
       detail::NodeBase* pos_next = pos.getPtr()->next_;
       pos.getPtr()->next_ = start;
@@ -442,6 +442,7 @@ namespace karpenko
     {
       if (this == &other)
         return;
+      iterator prev = iterator(head_);
       iterator pos = begin();
       while (!other.empty())
       {
@@ -452,11 +453,12 @@ namespace karpenko
         }
         if (other.front() < *pos)
         {
-          spliceAfter(pos, other, iterator(other.head_));
-          ++pos;
+          spliceAfter(prev, other, iterator(other.head_));
+          ++prev;
         }
         else
         {
+          ++prev;
           ++pos;
         }
       }
