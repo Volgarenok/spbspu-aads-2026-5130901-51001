@@ -411,31 +411,54 @@ namespace karpenko
       if (first.getPtr() == last.getPtr())
         return;
       detail::NodeBase* start = first.getPtr()->next_;
-      detail::NodeBase* end = last.getPtr();
-      first.getPtr()->next_ = end->next_;
-      if (other.tail_ == end || end == other.head_)
+      detail::NodeBase* end_node = last.getPtr();
+      first.getPtr()->next_ = end_node->next_;
+      if (last.getPtr() == other.head_ || other.tail_ == end_node)
         other.tail_ = first.getPtr();
       detail::NodeBase* pos_next = pos.getPtr()->next_;
       pos.getPtr()->next_ = start;
-      end->next_ = pos_next;
+      end_node->next_ = pos_next;
       if (tail_ == pos.getPtr())
-        tail_ = end;
+        tail_ = end_node;
     }
 
     void sort()
     {
       if (empty() || begin().getPtr()->next_ == head_)
         return;
-      size_type sz = size();
-      size_type half = sz / 2;
-      iterator mid = begin();
-      for (size_type i = 1; i < half; ++i)
-        ++mid;
-      List second;
-      second.spliceAfter(second.begin(), *this, mid, end());
-      sort();
-      second.sort();
-      merge(second);
+
+      List< List< T > > chunks;
+      while (!empty())
+      {
+        List< T > single;
+        single.spliceAfter(single.begin(), *this, iterator(head_));
+        chunks.pushBack(std::move(single));
+      }
+
+      while (chunks.size() > 1)
+      {
+        List< List< T > > merged;
+        auto it = chunks.begin();
+        while (it != chunks.end())
+        {
+          List< T > first = std::move(*it);
+          ++it;
+          if (it != chunks.end())
+          {
+            List< T > second = std::move(*it);
+            ++it;
+            first.merge(second);
+            merged.pushBack(std::move(first));
+          }
+          else
+          {
+            merged.pushBack(std::move(first));
+          }
+        }
+        chunks = std::move(merged);
+      }
+
+      spliceAfter(begin(), chunks.front());
     }
 
     void merge(List& other) noexcept(noexcept(std::declval< T >() < std::declval< T >()))
