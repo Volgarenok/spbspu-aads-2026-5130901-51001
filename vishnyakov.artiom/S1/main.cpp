@@ -1,0 +1,24 @@
+#include <iostream>
+#include "functions.hpp"
+
+int main()
+{
+  try
+  {
+    vishnyakov::List< vishnyakov::Sequence > seqs = vishnyakov::readInput(std::cin);
+
+    if (seqs.empty())
+    {
+      std::cout << "0\n";
+      return 0;
+    }
+
+    vishnyakov::outputNames(seqs, std::cout);
+    return vishnyakov::outputNums(seqs, std::cout);
+  }
+  catch (...)
+  {
+    return 2;
+  }
+}
+
