@@ -376,6 +376,7 @@ namespace karpenko
       other.tail_ = tmp_tail;
     }
 
+
     void spliceAfter(iterator pos, List& other) noexcept
     {
       if (other.empty())
@@ -452,9 +453,7 @@ namespace karpenko
         }
         if (other.front() < *pos)
         {
-          iterator next = other.begin();
-          ++next;
-          spliceAfter(pos, other, other.begin());
+          spliceAfter(pos, other, iterator(other.head_));
           ++pos;
         }
         else
