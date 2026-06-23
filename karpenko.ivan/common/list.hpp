@@ -414,7 +414,6 @@ namespace karpenko
       other.tail_ = tmp_tail;
     }
 
-
     void spliceAfter(iterator pos, List& other)
     {
       if (other.empty())
