@@ -4,8 +4,8 @@
 #include <stdexcept>
 #include "../common/list.hpp"
 
-namespace karpenko {
-
+namespace karpenko
+{
   template < typename T >
   class Stack
   {
@@ -28,36 +28,39 @@ namespace karpenko {
 
     T & top()
     {
-      if (empty()) {
+      if (empty())
         throw std::out_of_range("Stack::top(): empty stack");
-      }
       return list_.front();
     }
 
     const T & top() const
     {
-      if (empty()) {
+      if (empty())
         throw std::out_of_range("Stack::top(): empty stack");
-      }
       return list_.front();
     }
 
     void push(const T & value)
     {
-      list_.push_front(value);
+      list_.pushFront(value);
     }
 
     void push(T && value)
     {
-      list_.push_front(std::move(value));
+      list_.pushFront(std::move(value));
+    }
+
+    template< typename... Args >
+    void emplace(Args &&... args)
+    {
+      list_.emplaceFront(std::forward< Args >(args)...);
     }
 
     void pop()
     {
-      if (empty()) {
+      if (empty())
         throw std::out_of_range("Stack::pop(): empty stack");
-      }
-      list_.pop_front();
+      list_.popFront();
     }
 
     void clear() noexcept
@@ -79,7 +82,6 @@ namespace karpenko {
   {
     lhs.swap(rhs);
   }
-
 }
 
 #endif

@@ -1,5 +1,6 @@
 #include "queue.hpp"
 #include <boost/test/unit_test.hpp>
+#include <string>
 
 BOOST_AUTO_TEST_SUITE(QueueTest)
 
@@ -78,6 +79,18 @@ BOOST_AUTO_TEST_CASE(ClearTests)
   BOOST_CHECK(q.size() == 3);
   q.clear();
   BOOST_CHECK(q.size() == 0);
+}
+
+BOOST_AUTO_TEST_CASE(EmplaceTests)
+{
+  karpenko::Queue< std::string > q;
+  q.emplace(3, 'x');
+  q.emplace(2, 'y');
+  BOOST_CHECK(q.front() == "xxx");
+  BOOST_CHECK(q.back() == "yy");
+  q.pop();
+  BOOST_CHECK(q.front() == "yy");
+  BOOST_CHECK(q.size() == 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

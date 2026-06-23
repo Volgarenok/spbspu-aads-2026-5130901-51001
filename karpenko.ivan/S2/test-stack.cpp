@@ -1,5 +1,6 @@
 #include "stack.hpp"
 #include <boost/test/unit_test.hpp>
+#include <string>
 
 BOOST_AUTO_TEST_SUITE(StackTest)
 
@@ -73,6 +74,17 @@ BOOST_AUTO_TEST_CASE(ClearTests)
   BOOST_CHECK(s.size() == 3);
   s.clear();
   BOOST_CHECK(s.size() == 0);
+}
+
+BOOST_AUTO_TEST_CASE(EmplaceTests)
+{
+  karpenko::Stack< std::string > s;
+  s.emplace(3, 'a');
+  s.emplace(2, 'b');
+  BOOST_CHECK(s.top() == "bb");
+  s.pop();
+  BOOST_CHECK(s.top() == "aaa");
+  BOOST_CHECK(s.size() == 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

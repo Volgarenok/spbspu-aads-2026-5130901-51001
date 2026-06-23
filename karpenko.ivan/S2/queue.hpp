@@ -4,8 +4,8 @@
 #include <stdexcept>
 #include "../common/list.hpp"
 
-namespace karpenko {
-
+namespace karpenko
+{
   template < typename T >
   class Queue
   {
@@ -28,52 +28,53 @@ namespace karpenko {
 
     T & front()
     {
-      if (empty()) {
+      if (empty())
         throw std::out_of_range("Queue::front(): empty queue");
-      }
       return list_.front();
     }
 
     const T & front() const
     {
-      if (empty()) {
+      if (empty())
         throw std::out_of_range("Queue::front(): empty queue");
-      }
       return list_.front();
     }
 
     T & back()
     {
-      if (empty()) {
+      if (empty())
         throw std::out_of_range("Queue::back(): empty queue");
-      }
       return list_.back();
     }
 
     const T & back() const
     {
-      if (empty()) {
+      if (empty())
         throw std::out_of_range("Queue::back(): empty queue");
-      }
       return list_.back();
     }
 
     void push(const T & value)
     {
-      list_.push_back(value);
+      list_.pushBack(value);
     }
 
     void push(T && value)
     {
-      list_.push_back(std::move(value));
+      list_.pushBack(std::move(value));
+    }
+
+    template< typename... Args >
+    void emplace(Args &&... args)
+    {
+      list_.emplaceBack(std::forward< Args >(args)...);
     }
 
     void pop()
     {
-      if (empty()) {
+      if (empty())
         throw std::out_of_range("Queue::pop(): empty queue");
-      }
-      list_.pop_front();
+      list_.popFront();
     }
 
     void clear() noexcept
@@ -95,7 +96,6 @@ namespace karpenko {
   {
     lhs.swap(rhs);
   }
-
 }
 
 #endif
