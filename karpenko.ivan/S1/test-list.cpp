@@ -2,7 +2,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
-#include "../common/list.hpp"
+#include "list.hpp"
 
 using namespace karpenko;
 
