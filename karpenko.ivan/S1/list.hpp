@@ -376,7 +376,6 @@ namespace karpenko
       other.tail_ = tmp_tail;
     }
 
-
     void spliceAfter(iterator pos, List& other) noexcept
     {
       if (other.empty())
@@ -394,7 +393,7 @@ namespace karpenko
 
     void spliceAfter(iterator pos, List& other, iterator it)
     {
-      if (it.getPtr() == other.head_ || it.getPtr()->next_ == other.head_)
+      if (it.getPtr()->next_ == other.head_)
         throw std::out_of_range("Invalid iterator for spliceAfter");
       detail::NodeBase* node = it.getPtr()->next_;
       it.getPtr()->next_ = node->next_;
