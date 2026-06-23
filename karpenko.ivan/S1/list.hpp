@@ -376,6 +376,141 @@ namespace karpenko
       other.tail_ = tmp_tail;
     }
 
+    void spliceAfter(iterator pos, List& other) noexcept
+    {
+      if (other.empty())
+        return;
+      detail::NodeBase* first = other.head_->next_;
+      detail::NodeBase* last = other.tail_;
+      other.head_->next_ = other.head_;
+      other.tail_ = other.head_;
+      detail::NodeBase* pos_next = pos.getPtr()->next_;
+      pos.getPtr()->next_ = first;
+      last->next_ = pos_next;
+      if (tail_ == pos.getPtr())
+        tail_ = last;
+    }
+
+    void spliceAfter(iterator pos, List& other, iterator it) noexcept
+    {
+      if (it.getPtr() == other.head_ || it.getPtr()->next_ == other.head_)
+        throw std::out_of_range("Invalid iterator for spliceAfter");
+      detail::NodeBase* node = it.getPtr()->next_;
+      it.getPtr()->next_ = node->next_;
+      if (other.tail_ == node)
+        other.tail_ = it.getPtr();
+      detail::NodeBase* pos_next = pos.getPtr()->next_;
+      pos.getPtr()->next_ = node;
+      node->next_ = pos_next;
+      if (tail_ == pos.getPtr())
+        tail_ = node;
+    }
+
+    void spliceAfter(iterator pos, List& other, iterator first, iterator last) noexcept
+    {
+      if (first.getPtr() == last.getPtr())
+        return;
+      detail::NodeBase* start = first.getPtr()->next_;
+      detail::NodeBase* end = last.getPtr();
+      first.getPtr()->next_ = end->next_;
+      if (other.tail_ == end)
+        other.tail_ = first.getPtr();
+      detail::NodeBase* pos_next = pos.getPtr()->next_;
+      pos.getPtr()->next_ = start;
+      end->next_ = pos_next;
+      if (tail_ == pos.getPtr())
+        tail_ = end;
+    }
+
+    void sort()
+    {
+      if (empty() || begin().getPtr()->next_ == head_)
+        return;
+      size_type sz = size();
+      size_type half = sz / 2;
+      iterator mid = begin();
+      for (size_type i = 1; i < half; ++i)
+        ++mid;
+      List second;
+      second.spliceAfter(second.begin(), *this, mid, end());
+      sort();
+      second.sort();
+      merge(second);
+    }
+
+    void merge(List& other) noexcept(noexcept(std::declval< T >() < std::declval< T >()))
+    {
+      if (this == &other)
+        return;
+      iterator pos = begin();
+      while (!other.empty())
+      {
+        if (pos == end())
+        {
+          spliceAfter(iterator(tail_), other);
+          break;
+        }
+        if (other.front() < *pos)
+        {
+          iterator next = other.begin();
+          ++next;
+          spliceAfter(pos, other, other.begin());
+          ++pos;
+        }
+        else
+        {
+          ++pos;
+        }
+      }
+    }
+
+    template< typename UnaryPredicate >
+    iterator partition(UnaryPredicate p) noexcept(noexcept(p(std::declval< T >())))
+    {
+      if (empty())
+        return end();
+
+      detail::NodeBase true_head;
+      detail::NodeBase false_head;
+      detail::NodeBase* true_tail = &true_head;
+      detail::NodeBase* false_tail = &false_head;
+
+      detail::NodeBase* curr = head_->next_;
+      head_->next_ = head_;
+      while (curr != head_)
+      {
+        detail::NodeBase* next = curr->next_;
+        T& data = static_cast< detail::Node< T >* >(curr)->data_;
+        if (p(data))
+        {
+          true_tail->next_ = curr;
+          true_tail = curr;
+        }
+        else
+        {
+          false_tail->next_ = curr;
+          false_tail = curr;
+        }
+        curr = next;
+      }
+
+      true_tail->next_ = false_head.next_;
+      false_tail->next_ = head_;
+      head_->next_ = true_head.next_;
+
+      if (false_tail != &false_head)
+        tail_ = false_tail;
+      else if (true_tail != &true_head)
+        tail_ = true_tail;
+      else
+        tail_ = head_;
+
+      if (false_head.next_ == nullptr)
+        return end();
+      else
+        return iterator(false_head.next_);
+    }
+
   private:
     detail::NodeBase* head_;
     detail::NodeBase* tail_;
