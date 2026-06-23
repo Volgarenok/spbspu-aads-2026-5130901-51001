@@ -1,5 +1,4 @@
-#define BOOST_TEST_MODULE S1
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -18,19 +17,19 @@ BOOST_AUTO_TEST_CASE(test_empty)
 BOOST_AUTO_TEST_CASE(test_push_front)
 {
   List< int > lst;
-  lst.push_front(42);
+  lst.pushFront(42);
   BOOST_CHECK(!lst.empty());
   BOOST_CHECK(lst.front() == 42);
-
-  lst.push_front(24);
+  lst.pushFront(24);
   BOOST_CHECK(lst.front() == 24);
+  BOOST_CHECK(lst.back() == 42);
 }
 
 BOOST_AUTO_TEST_CASE(test_push_back)
 {
   List< int > lst;
-  lst.push_back(1);
-  lst.push_back(2);
+  lst.pushBack(1);
+  lst.pushBack(2);
   BOOST_CHECK(lst.front() == 1);
   BOOST_CHECK(lst.back() == 2);
   BOOST_CHECK(lst.size() == 2);
@@ -39,30 +38,30 @@ BOOST_AUTO_TEST_CASE(test_push_back)
 BOOST_AUTO_TEST_CASE(test_pop_front)
 {
   List< int > lst;
-  lst.push_back(1);
-  lst.push_back(2);
-  lst.pop_front();
+  lst.pushBack(1);
+  lst.pushBack(2);
+  lst.popFront();
   BOOST_CHECK(lst.front() == 2);
-  lst.pop_front();
+  lst.popFront();
   BOOST_CHECK(lst.empty());
 }
 
 BOOST_AUTO_TEST_CASE(test_pop_back)
 {
   List< int > lst;
-  lst.push_back(1);
-  lst.push_back(2);
-  lst.pop_back();
+  lst.pushBack(1);
+  lst.pushBack(2);
+  lst.popBack();
   BOOST_CHECK(lst.back() == 1);
-  lst.pop_back();
+  lst.popBack();
   BOOST_CHECK(lst.empty());
 }
 
 BOOST_AUTO_TEST_CASE(test_clear)
 {
   List< int > lst;
-  lst.push_back(1);
-  lst.push_back(2);
+  lst.pushBack(1);
+  lst.pushBack(2);
   lst.clear();
   BOOST_CHECK(lst.empty());
   BOOST_CHECK(lst.size() == 0);
@@ -72,20 +71,20 @@ BOOST_AUTO_TEST_CASE(test_size)
 {
   List< int > lst;
   BOOST_CHECK(lst.size() == 0);
-  lst.push_back(1);
+  lst.pushBack(1);
   BOOST_CHECK(lst.size() == 1);
-  lst.push_back(2);
+  lst.pushBack(2);
   BOOST_CHECK(lst.size() == 2);
-  lst.pop_front();
+  lst.popFront();
   BOOST_CHECK(lst.size() == 1);
 }
 
 BOOST_AUTO_TEST_CASE(test_iterator)
 {
   List< int > lst;
-  lst.push_back(10);
-  lst.push_back(20);
-  lst.push_back(30);
+  lst.pushBack(10);
+  lst.pushBack(20);
+  lst.pushBack(30);
 
   List< int >::iterator it = lst.begin();
   BOOST_CHECK(*it == 10);
@@ -100,7 +99,7 @@ BOOST_AUTO_TEST_CASE(test_iterator)
 BOOST_AUTO_TEST_CASE(test_const_iterator)
 {
   List< int > lst;
-  lst.push_back(42);
+  lst.pushBack(42);
 
   List< int >::const_iterator it = lst.cbegin();
   BOOST_CHECK(*it == 42);
@@ -111,8 +110,8 @@ BOOST_AUTO_TEST_CASE(test_const_iterator)
 BOOST_AUTO_TEST_CASE(test_copy_constructor)
 {
   List< int > a;
-  a.push_back(1);
-  a.push_back(2);
+  a.pushBack(1);
+  a.pushBack(2);
 
   List< int > b(a);
   BOOST_CHECK(b.size() == 2);
@@ -123,7 +122,7 @@ BOOST_AUTO_TEST_CASE(test_copy_constructor)
 BOOST_AUTO_TEST_CASE(test_move_constructor)
 {
   List< int > a;
-  a.push_back(99);
+  a.pushBack(99);
 
   List< int > b(std::move(a));
   BOOST_CHECK(a.empty());
@@ -134,8 +133,8 @@ BOOST_AUTO_TEST_CASE(test_move_constructor)
 BOOST_AUTO_TEST_CASE(test_assignment)
 {
   List< int > a;
-  a.push_back(5);
-  a.push_back(6);
+  a.pushBack(5);
+  a.pushBack(6);
 
   List< int > b;
   b = a;
@@ -147,17 +146,188 @@ BOOST_AUTO_TEST_CASE(test_assignment)
 BOOST_AUTO_TEST_CASE(test_swap)
 {
   List< int > a;
-  a.push_back(1);
-  a.push_back(2);
+  a.pushBack(1);
+  a.pushBack(2);
 
   List< int > b;
-  b.push_back(3);
+  b.pushBack(3);
 
   a.swap(b);
   BOOST_CHECK(a.size() == 1);
   BOOST_CHECK(a.front() == 3);
   BOOST_CHECK(b.size() == 2);
   BOOST_CHECK(b.front() == 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_insert_after)
+{
+  List< int > lst;
+  lst.pushBack(1);
+  lst.pushBack(3);
+  List< int >::iterator it = lst.begin();
+  ++it;
+  lst.insertAfter(it, 2);
+  BOOST_CHECK(lst.size() == 3);
+  it = lst.begin();
+  BOOST_CHECK(*it == 1);
+  ++it;
+  BOOST_CHECK(*it == 3);
+  ++it;
+  BOOST_CHECK(*it == 2);
+}
+
+BOOST_AUTO_TEST_CASE(test_erase_after)
+{
+  List< int > lst;
+  lst.pushBack(1);
+  lst.pushBack(2);
+  lst.pushBack(3);
+  lst.eraseAfter(lst.begin());
+  BOOST_CHECK(lst.size() == 2);
+  List< int >::iterator it = lst.begin();
+  BOOST_CHECK(*it == 1);
+  ++it;
+  BOOST_CHECK(*it == 3);
+}
+
+
+BOOST_AUTO_TEST_CASE(test_splice_all)
+{
+  List< int > lst1;
+  lst1.pushBack(1);
+  lst1.pushBack(2);
+  lst1.pushBack(3);
+
+  List< int > lst2;
+  lst2.pushBack(4);
+  lst2.pushBack(5);
+
+  lst1.spliceAfter(lst1.begin(), lst2);
+  BOOST_CHECK(lst2.empty());
+  BOOST_CHECK(lst1.size() == 5);
+  List< int >::iterator it = lst1.begin();
+  BOOST_CHECK(*it == 1); ++it;
+  BOOST_CHECK(*it == 4); ++it;
+  BOOST_CHECK(*it == 5); ++it;
+  BOOST_CHECK(*it == 2); ++it;
+  BOOST_CHECK(*it == 3); ++it;
+  BOOST_CHECK(it == lst1.end());
+}
+
+BOOST_AUTO_TEST_CASE(test_splice_one)
+{
+  List< int > lst1;
+  lst1.pushBack(1);
+  lst1.pushBack(2);
+  lst1.pushBack(3);
+
+  List< int > lst2;
+  lst2.pushBack(4);
+  lst2.pushBack(5);
+  lst2.pushBack(6);
+
+  List< int >::iterator it2 = lst2.begin();
+  ++it2;
+  lst1.spliceAfter(lst1.begin(), lst2, it2);
+  BOOST_CHECK(lst1.size() == 4);
+  BOOST_CHECK(lst2.size() == 2);
+  List< int >::iterator it1 = lst1.begin();
+  BOOST_CHECK(*it1 == 1); ++it1;
+  BOOST_CHECK(*it1 == 6); ++it1;
+  BOOST_CHECK(*it1 == 2); ++it1;
+  BOOST_CHECK(*it1 == 3);
+}
+
+BOOST_AUTO_TEST_CASE(test_splice_range)
+{
+  List< int > lst1;
+  lst1.pushBack(1);
+  lst1.pushBack(5);
+  lst1.pushBack(6);
+
+  List< int > lst2;
+  lst2.pushBack(2);
+  lst2.pushBack(3);
+  lst2.pushBack(4);
+  lst2.pushBack(7);
+
+  List< int >::iterator first = lst2.begin();
+  List< int >::iterator last = first;
+  ++last; ++last;
+  lst1.spliceAfter(lst1.begin(), lst2, first, last);
+  BOOST_CHECK(lst1.size() == 5);
+  BOOST_CHECK(lst2.size() == 2);
+  List< int >::iterator it1 = lst1.begin();
+  BOOST_CHECK(*it1 == 1); ++it1;
+  BOOST_CHECK(*it1 == 3); ++it1;
+  BOOST_CHECK(*it1 == 4); ++it1;
+  BOOST_CHECK(*it1 == 5); ++it1;
+  BOOST_CHECK(*it1 == 6);
+}
+
+BOOST_AUTO_TEST_CASE(test_merge)
+{
+  List< int > a;
+  a.pushBack(1);
+  a.pushBack(3);
+  a.pushBack(5);
+
+  List< int > b;
+  b.pushBack(2);
+  b.pushBack(4);
+  b.pushBack(6);
+
+  a.merge(b);
+  BOOST_CHECK(b.empty());
+  BOOST_CHECK(a.size() == 6);
+  List< int >::iterator it = a.begin();
+  BOOST_CHECK(*it == 1); ++it;
+  BOOST_CHECK(*it == 2); ++it;
+  BOOST_CHECK(*it == 3); ++it;
+  BOOST_CHECK(*it == 4); ++it;
+  BOOST_CHECK(*it == 5); ++it;
+  BOOST_CHECK(*it == 6);
+}
+
+BOOST_AUTO_TEST_CASE(test_sort)
+{
+  List< int > lst;
+  lst.pushBack(5);
+  lst.pushBack(2);
+  lst.pushBack(8);
+  lst.pushBack(1);
+  lst.pushBack(4);
+
+  lst.sort();
+  List< int >::iterator it = lst.begin();
+  BOOST_CHECK(*it == 1); ++it;
+  BOOST_CHECK(*it == 2); ++it;
+  BOOST_CHECK(*it == 4); ++it;
+  BOOST_CHECK(*it == 5); ++it;
+  BOOST_CHECK(*it == 8); ++it;
+  BOOST_CHECK(it == lst.end());
+}
+
+BOOST_AUTO_TEST_CASE(test_partition)
+{
+  List< int > lst;
+  lst.pushBack(1);
+  lst.pushBack(2);
+  lst.pushBack(3);
+  lst.pushBack(4);
+  lst.pushBack(5);
+
+  auto it = lst.partition([](int n) { return n % 2 == 0; });
+  bool even = true;
+  for (List< int >::const_iterator i = lst.cbegin(); i != lst.cend(); ++i)
+  {
+    if (even && (*i) % 2 != 0)
+      even = false;
+    if (!even)
+      BOOST_CHECK((*i) % 2 != 0);
+  }
+  BOOST_CHECK(it != lst.end());
+  BOOST_CHECK(*it % 2 != 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
