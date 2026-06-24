@@ -11,7 +11,6 @@ namespace
 {
   std::string dispatchLine(const std::string& line, karpenko::GraphCollection& storage)
   {
-    std::istringstream in;
     std::ostringstream out;
     karpenko::CommandSystem cs;
     cs.execute(line, out, storage);
@@ -126,10 +125,10 @@ BOOST_AUTO_TEST_CASE(graph_storage_operations)
   gc.addGraph("a", g);
 
   std::ostringstream oss;
-  karpenko::List < std::string > names;
+  karpenko::List<std::string> names;
   for (auto it = gc.getMap().begin(); it != gc.getMap().end(); ++it)
   {
-    names.push_back(it->first);
+    names.pushBack(it->first);
   }
   std::size_t n = names.size();
   std::string* arr = new std::string[n];
