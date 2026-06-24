@@ -4,8 +4,8 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
-#include <sstream>
 #include <string>
+#include <cctype>
 
 #include "graph_collection.hpp"
 
@@ -14,6 +14,66 @@ namespace karpenko
 
   namespace
   {
+
+    class StringParser
+    {
+    public:
+      explicit StringParser(const std::string& str) : str_(str), pos_(0) {}
+
+      bool readWord(std::string& out)
+      {
+        skipSpaces();
+        if (pos_ >= str_.size())
+          return false;
+        std::size_t start = pos_;
+        while (pos_ < str_.size() && !std::isspace(static_cast<unsigned char>(str_[pos_])))
+          ++pos_;
+        out = str_.substr(start, pos_ - start);
+        return true;
+      }
+
+      bool readInt(std::size_t& out)
+      {
+        std::string word;
+        if (!readWord(word))
+          return false;
+        char* end;
+        long val = std::strtol(word.c_str(), &end, 10);
+        if (*end != '\0' || val < 0)
+          return false;
+        out = static_cast<std::size_t>(val);
+        return true;
+      }
+
+      bool readInt(Weight& out)
+      {
+        std::string word;
+        if (!readWord(word))
+          return false;
+        char* end;
+        long val = std::strtol(word.c_str(), &end, 10);
+        if (*end != '\0')
+          return false;
+        out = static_cast<Weight>(val);
+        return true;
+      }
+
+      bool isEnd() const
+      {
+        skipSpaces();
+        return pos_ >= str_.size();
+      }
+
+    private:
+      const std::string& str_;
+      std::size_t pos_;
+
+      void skipSpaces()
+      {
+        while (pos_ < str_.size() && std::isspace(static_cast<unsigned char>(str_[pos_])))
+          ++pos_;
+      }
+    };
 
     std::string* listToSortedArray(const List < std::string >& lst, std::size_t& outSize)
     {
@@ -32,8 +92,14 @@ namespace karpenko
       return arr;
     }
 
-    void handleGraphs(std::istream&, std::ostream& out, GraphCollection& gc)
+    void handleGraphs(const std::string& args, std::ostream& out, GraphCollection& gc)
     {
+      StringParser parser(args);
+      if (!parser.isEnd())
+      {
+        out << "<INVALID COMMAND>\n";
+        return;
+      }
       List < std::string > names;
       for (auto it = gc.getMap().begin(); it != gc.getMap().end(); ++it)
       {
@@ -59,11 +125,11 @@ namespace karpenko
       ::operator delete(arr);
     }
 
-    void handleVertexes(std::istream& in, std::ostream& out, GraphCollection& gc)
+    void handleVertexes(const std::string& args, std::ostream& out, GraphCollection& gc)
     {
+      StringParser parser(args);
       std::string gname;
-      in >> gname;
-      if (!in || !gc.hasGraph(gname))
+      if (!parser.readWord(gname) || !parser.isEnd() || !gc.hasGraph(gname))
       {
         out << "<INVALID COMMAND>\n";
         return;
@@ -71,11 +137,12 @@ namespace karpenko
       printSortedVertices(out, gc.getGraph(gname));
     }
 
-    void handleOutbound(std::istream& in, std::ostream& out, GraphCollection& gc)
+    void handleOutbound(const std::string& args, std::ostream& out, GraphCollection& gc)
     {
+      StringParser parser(args);
       std::string gname, vertex;
-      in >> gname >> vertex;
-      if (!in || !gc.hasGraph(gname) || !gc.getGraph(gname).vertices_.has(vertex))
+      if (!parser.readWord(gname) || !parser.readWord(vertex) || !parser.isEnd() ||
+          !gc.hasGraph(gname) || !gc.getGraph(gname).vertices_.has(vertex))
       {
         out << "<INVALID COMMAND>\n";
         return;
@@ -84,11 +151,12 @@ namespace karpenko
       printEdges(out, vertex, g.out_edges_);
     }
 
-    void handleInbound(std::istream& in, std::ostream& out, GraphCollection& gc)
+    void handleInbound(const std::string& args, std::ostream& out, GraphCollection& gc)
     {
+      StringParser parser(args);
       std::string gname, vertex;
-      in >> gname >> vertex;
-      if (!in || !gc.hasGraph(gname) || !gc.getGraph(gname).vertices_.has(vertex))
+      if (!parser.readWord(gname) || !parser.readWord(vertex) || !parser.isEnd() ||
+          !gc.hasGraph(gname) || !gc.getGraph(gname).vertices_.has(vertex))
       {
         out << "<INVALID COMMAND>\n";
         return;
@@ -97,12 +165,13 @@ namespace karpenko
       printEdges(out, vertex, g.in_edges_);
     }
 
-    void handleBind(std::istream& in, std::ostream& out, GraphCollection& gc)
+    void handleBind(const std::string& args, std::ostream& out, GraphCollection& gc)
     {
+      StringParser parser(args);
       std::string gname, a, b;
-      Weight w{};
-      in >> gname >> a >> b >> w;
-      if (!in || !gc.hasGraph(gname))
+      Weight w;
+      if (!parser.readWord(gname) || !parser.readWord(a) || !parser.readWord(b) ||
+          !parser.readInt(w) || !parser.isEnd() || !gc.hasGraph(gname))
       {
         out << "<INVALID COMMAND>\n";
         return;
@@ -115,20 +184,21 @@ namespace karpenko
       gc.getGraph(gname) = graph;
     }
 
-    void handleCut(std::istream& in, std::ostream& out, GraphCollection& gc)
+    void handleCut(const std::string& args, std::ostream& out, GraphCollection& gc)
     {
+      StringParser parser(args);
       std::string gname, a, b;
-      Weight w{};
-      in >> gname >> a >> b >> w;
-      if (!in || !gc.hasGraph(gname) || !gc.getGraph(gname).vertices_.has(a)
-          || !gc.getGraph(gname).vertices_.has(b))
+      Weight w;
+      if (!parser.readWord(gname) || !parser.readWord(a) || !parser.readWord(b) ||
+          !parser.readInt(w) || !parser.isEnd() || !gc.hasGraph(gname) ||
+          !gc.getGraph(gname).vertices_.has(a) || !gc.getGraph(gname).vertices_.has(b))
       {
         out << "<INVALID COMMAND>\n";
         return;
       }
       Graph graph = gc.getGraph(gname);
-      if (!hasWeightInMap(graph.out_edges_, a, b, w)
-          || !hasWeightInMap(graph.in_edges_, b, a, w))
+      if (!hasWeightInMap(graph.out_edges_, a, b, w) ||
+          !hasWeightInMap(graph.in_edges_, b, a, w))
       {
         out << "<INVALID COMMAND>\n";
         return;
@@ -138,53 +208,51 @@ namespace karpenko
       gc.getGraph(gname) = graph;
     }
 
-    void handleCreate(std::istream& in, std::ostream& out, GraphCollection& gc)
+    void handleCreate(const std::string& args, std::ostream& out, GraphCollection& gc)
     {
+      StringParser parser(args);
       std::string gname;
-      in >> gname;
-      if (!in || gc.hasGraph(gname))
+      if (!parser.readWord(gname))
+      {
+        out << "<INVALID COMMAND>\n";
+        return;
+      }
+      if (gc.hasGraph(gname))
+      {
+        out << "<INVALID COMMAND>\n";
+        return;
+      }
+      std::size_t k;
+      if (!parser.readInt(k))
       {
         out << "<INVALID COMMAND>\n";
         return;
       }
       Graph g;
-      in >> std::ws;
-      if (in.peek() != std::char_traits < char >::eof())
+      for (std::size_t i = 0; i < k; ++i)
       {
-        std::size_t k;
-        if (in >> k)
-        {
-          for (std::size_t i = 0; i < k; ++i)
-          {
-            std::string v;
-            if (!(in >> v))
-            {
-              out << "<INVALID COMMAND>\n";
-              return;
-            }
-            g.vertices_.add(v, true);
-          }
-          in >> std::ws;
-          if (in.peek() != std::char_traits < char >::eof())
-          {
-            out << "<INVALID COMMAND>\n";
-            return;
-          }
-        }
-        else
+        std::string v;
+        if (!parser.readWord(v))
         {
           out << "<INVALID COMMAND>\n";
           return;
         }
+        g.vertices_.add(v, true);
+      }
+      if (!parser.isEnd())
+      {
+        out << "<INVALID COMMAND>\n";
+        return;
       }
       gc.addGraph(gname, g);
     }
 
-    void handleMerge(std::istream& in, std::ostream& out, GraphCollection& gc)
+    void handleMerge(const std::string& args, std::ostream& out, GraphCollection& gc)
     {
+      StringParser parser(args);
       std::string newg, g1, g2;
-      in >> newg >> g1 >> g2;
-      if (!in || gc.hasGraph(newg) || !gc.hasGraph(g1) || !gc.hasGraph(g2))
+      if (!parser.readWord(newg) || !parser.readWord(g1) || !parser.readWord(g2) ||
+          !parser.isEnd() || gc.hasGraph(newg) || !gc.hasGraph(g1) || !gc.hasGraph(g2))
       {
         out << "<INVALID COMMAND>\n";
         return;
@@ -213,12 +281,13 @@ namespace karpenko
       gc.addGraph(newg, result);
     }
 
-    void handleExtract(std::istream& in, std::ostream& out, GraphCollection& gc)
+    void handleExtract(const std::string& args, std::ostream& out, GraphCollection& gc)
     {
+      StringParser parser(args);
       std::string newg, oldg;
       std::size_t k;
-      in >> newg >> oldg >> k;
-      if (!in || gc.hasGraph(newg) || !gc.hasGraph(oldg))
+      if (!parser.readWord(newg) || !parser.readWord(oldg) || !parser.readInt(k) ||
+          gc.hasGraph(newg) || !gc.hasGraph(oldg))
       {
         out << "<INVALID COMMAND>\n";
         return;
@@ -228,12 +297,17 @@ namespace karpenko
       for (std::size_t i = 0; i < k; ++i)
       {
         std::string v;
-        if (!(in >> v) || !source.vertices_.has(v))
+        if (!parser.readWord(v) || !source.vertices_.has(v))
         {
           out << "<INVALID COMMAND>\n";
           return;
         }
         selected.push_back(v);
+      }
+      if (!parser.isEnd())
+      {
+        out << "<INVALID COMMAND>\n";
+        return;
       }
       Graph result;
       for (auto it = selected.begin(); it != selected.end(); ++it)
@@ -281,7 +355,7 @@ namespace karpenko
   class CommandSystem
   {
   public:
-    using Handler = std::function < void(std::istream&, std::ostream&, GraphCollection&) >;
+    using Handler = std::function < void(const std::string&, std::ostream&, GraphCollection&) >;
   private:
     BucketHashTable < std::string, Handler, Blake2Hash, std::equal_to < std::string > > handlers_;
   public:
@@ -308,13 +382,15 @@ namespace karpenko
     {
       return;
     }
-    std::istringstream iss(line);
-    std::string cmd;
-    iss >> cmd;
-    if (!iss)
-    {
-      return;
-    }
+    std::size_t pos = 0;
+    while (pos < line.size() && std::isspace(static_cast<unsigned char>(line[pos]))) ++pos;
+    if (pos >= line.size()) return;
+    std::size_t start = pos;
+    while (pos < line.size() && !std::isspace(static_cast<unsigned char>(line[pos]))) ++pos;
+    std::string cmd = line.substr(start, pos - start);
+    while (pos < line.size() && std::isspace(static_cast<unsigned char>(line[pos]))) ++pos;
+    std::string args = (pos < line.size()) ? line.substr(pos) : "";
+
     auto it = handlers_.find(cmd);
     if (it == handlers_.end())
     {
@@ -324,7 +400,7 @@ namespace karpenko
     {
       try
       {
-        it->second(iss, out, gc);
+        it->second(args, out, gc);
       }
       catch (...)
       {

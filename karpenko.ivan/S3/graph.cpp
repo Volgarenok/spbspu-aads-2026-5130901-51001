@@ -76,6 +76,8 @@ namespace karpenko
         if (weights.empty())
         {
           inner.remove(to);
+          if (inner.size() == 0)
+          {}
         }
         return true;
       }

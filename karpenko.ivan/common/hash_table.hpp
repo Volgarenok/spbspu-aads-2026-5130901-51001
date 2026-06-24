@@ -465,6 +465,19 @@ namespace karpenko
       return false;
     }
 
+    Value drop(const Key& key)
+    {
+      Slot* s = find_slot_any(key);
+      if (!s || s->state != Slot::OCCUPIED)
+      {
+        throw std::out_of_range("Key not found");
+      }
+      Value val = std::move(s->data.second);
+      s->state = Slot::TOMBSTONE;
+      --size_;
+      return val;
+    }
+
     iterator find(const Key& key)
     {
       Slot* s = find_slot(key);
@@ -475,6 +488,18 @@ namespace karpenko
     {
       const Slot* s = find_slot(key);
       return s ? const_iterator(s, slots_ + total_slots_) : end();
+    }
+
+    void rehash(std::size_t total_slots)
+    {
+      if (total_slots < bucket_size_ + 1)
+      {
+        total_slots = bucket_size_ + 1;
+      }
+      std::size_t new_bucket_count = total_slots / (bucket_size_ + 1);
+      if (new_bucket_count == 0) new_bucket_count = 1;
+      std::size_t new_overflow_size = total_slots - new_bucket_count * bucket_size_;
+      rehash(new_bucket_count, bucket_size_, new_overflow_size);
     }
 
     void rehash(std::size_t new_bucket_count, std::size_t new_bucket_size,

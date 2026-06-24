@@ -1,11 +1,47 @@
 #include "graph_collection.hpp"
 
 #include <fstream>
-#include <sstream>
 #include <stdexcept>
+#include <cctype>
+#include <cstdlib>
 
 namespace karpenko
 {
+
+  namespace
+  {
+    bool readWord(const std::string& line, std::size_t& pos, std::string& out)
+    {
+      while (pos < line.size() && std::isspace(static_cast<unsigned char>(line[pos]))) ++pos;
+      if (pos >= line.size()) return false;
+      std::size_t start = pos;
+      while (pos < line.size() && !std::isspace(static_cast<unsigned char>(line[pos]))) ++pos;
+      out = line.substr(start, pos - start);
+      return true;
+    }
+
+    bool readInt(const std::string& line, std::size_t& pos, std::size_t& out)
+    {
+      std::string word;
+      if (!readWord(line, pos, word)) return false;
+      char* end;
+      long val = std::strtol(word.c_str(), &end, 10);
+      if (*end != '\0' || val < 0) return false;
+      out = static_cast<std::size_t>(val);
+      return true;
+    }
+
+    bool readWeight(const std::string& line, std::size_t& pos, Weight& out)
+    {
+      std::string word;
+      if (!readWord(line, pos, word)) return false;
+      char* end;
+      long val = std::strtol(word.c_str(), &end, 10);
+      if (*end != '\0') return false;
+      out = static_cast<Weight>(val);
+      return true;
+    }
+  }
 
   GraphCollection readGraphs(const std::string& filename)
   {
@@ -22,13 +58,17 @@ namespace karpenko
       {
         continue;
       }
-      std::istringstream iss(line);
+      std::size_t pos = 0;
       std::string graph_name;
-      std::size_t edge_count;
-      if (!(iss >> graph_name >> edge_count))
-      {
+      if (!readWord(line, pos, graph_name))
         continue;
-      }
+      std::size_t edge_count;
+      if (!readInt(line, pos, edge_count))
+        continue;
+      while (pos < line.size() && std::isspace(static_cast<unsigned char>(line[pos]))) ++pos;
+      if (pos < line.size())
+        continue;
+
       Graph g;
       for (std::size_t i = 0; i < edge_count; ++i)
       {
@@ -36,13 +76,14 @@ namespace karpenko
         {
           break;
         }
-        std::istringstream edge_stream(line);
+        pos = 0;
         std::string from, to;
         Weight w;
-        if (!(edge_stream >> from >> to >> w))
-        {
+        if (!readWord(line, pos, from) || !readWord(line, pos, to) || !readWeight(line, pos, w))
           continue;
-        }
+        while (pos < line.size() && std::isspace(static_cast<unsigned char>(line[pos]))) ++pos;
+        if (pos < line.size())
+          continue;
         g.vertices_.add(from, true);
         g.vertices_.add(to, true);
         addEdgeToMap(g.out_edges_, from, to, w);
