@@ -15,6 +15,16 @@
 namespace karpenko
 {
 
+  static std::size_t defaultBucketUpdater(std::size_t before)
+  {
+    return before * 2 + 1;
+  }
+
+  static std::size_t defaultBucketSizeUpdater(std::size_t before)
+  {
+    return before;
+  }
+
   struct Blake2Hash
   {
     std::size_t operator()(const std::string& s) const
@@ -85,6 +95,11 @@ namespace karpenko
     std::size_t overflow_start_;
     std::size_t overflow_size_;
     std::size_t size_;
+    std::size_t overflow_used_;
+    double max_load_factor_;
+    std::size_t max_overflow_size_;
+    std::function< std::size_t(std::size_t) > bucket_updater_;
+    std::function< std::size_t(std::size_t) > bucket_size_updater_;
     Hash hasher_;
     Equal equal_;
 
@@ -130,13 +145,9 @@ namespace karpenko
       {
         Slot& s = slots_[start + i];
         if (s.state == Slot::EMPTY)
-        {
           break;
-        }
         if ((s.state == Slot::OCCUPIED || s.state == Slot::TOMBSTONE) && equal_(s.data.first, key))
-        {
           return &s;
-        }
       }
       return nullptr;
     }
@@ -148,13 +159,9 @@ namespace karpenko
       {
         const Slot& s = slots_[start + i];
         if (s.state == Slot::EMPTY)
-        {
           break;
-        }
         if ((s.state == Slot::OCCUPIED || s.state == Slot::TOMBSTONE) && equal_(s.data.first, key))
-        {
           return &s;
-        }
       }
       return nullptr;
     }
@@ -163,12 +170,8 @@ namespace karpenko
     {
       std::size_t start = bucket_offset(bucket);
       for (std::size_t i = 0; i < bucket_size_; ++i)
-      {
         if (slots_[start + i].state == Slot::EMPTY)
-        {
           return &slots_[start + i];
-        }
-      }
       return nullptr;
     }
 
@@ -178,13 +181,9 @@ namespace karpenko
       {
         Slot& s = slots_[overflow_start_ + i];
         if (s.state == Slot::EMPTY)
-        {
           break;
-        }
         if ((s.state == Slot::OCCUPIED || s.state == Slot::TOMBSTONE) && equal_(s.data.first, key))
-        {
           return &s;
-        }
       }
       return nullptr;
     }
@@ -195,13 +194,9 @@ namespace karpenko
       {
         const Slot& s = slots_[overflow_start_ + i];
         if (s.state == Slot::EMPTY)
-        {
           break;
-        }
         if ((s.state == Slot::OCCUPIED || s.state == Slot::TOMBSTONE) && equal_(s.data.first, key))
-        {
           return &s;
-        }
       }
       return nullptr;
     }
@@ -209,13 +204,38 @@ namespace karpenko
     Slot* find_empty_in_overflow()
     {
       for (std::size_t i = 0; i < overflow_size_; ++i)
-      {
         if (slots_[overflow_start_ + i].state == Slot::EMPTY)
-        {
           return &slots_[overflow_start_ + i];
-        }
-      }
       return nullptr;
+    }
+
+    bool is_overflow_slot(const Slot* s) const
+    {
+      std::size_t idx = static_cast< std::size_t >(s - slots_);
+      return idx >= overflow_start_;
+    }
+
+    void check_and_rehash()
+    {
+      bool need_rehash = false;
+      if (static_cast< double >(size_) / bucket_count_ > max_load_factor_)
+        need_rehash = true;
+      if (overflow_used_ > max_overflow_size_)
+        need_rehash = true;
+      if (!need_rehash)
+        return;
+
+      std::size_t new_bucket_count = bucket_updater_(bucket_count_);
+      std::size_t new_bucket_size = bucket_size_updater_(bucket_size_);
+      std::size_t new_overflow_size = overflow_size_;
+
+      if (new_bucket_count == bucket_count_ && new_bucket_size == bucket_size_)
+      {
+        new_bucket_count = bucket_count_ * 2 + 1;
+        new_bucket_size = bucket_size_;
+      }
+
+      rehash(new_bucket_count, new_bucket_size, new_overflow_size);
     }
 
   public:
@@ -227,13 +247,16 @@ namespace karpenko
         total_slots_(bucket_count_ * bucket_size_ + (overflow_size ? overflow_size : 1)),
         overflow_start_(bucket_count_ * bucket_size_),
         overflow_size_(overflow_size ? overflow_size : 1),
-        size_(0), hasher_(h), equal_(e)
+        size_(0), overflow_used_(0),
+        max_load_factor_(1.0),
+        max_overflow_size_(overflow_size_),
+        bucket_updater_(defaultBucketUpdater),
+        bucket_size_updater_(defaultBucketSizeUpdater),
+        hasher_(h), equal_(e)
     {
       slots_ = static_cast < Slot* >(::operator new(sizeof(Slot) * total_slots_));
       for (std::size_t i = 0; i < total_slots_; ++i)
-      {
         new (slots_ + i) Slot();
-      }
     }
 
     ~BucketHashTable()
@@ -241,35 +264,51 @@ namespace karpenko
       if (slots_)
       {
         for (std::size_t i = 0; i < total_slots_; ++i)
-        {
           slots_[i].~Slot();
-        }
         ::operator delete(slots_);
       }
     }
 
     BucketHashTable(const BucketHashTable& other)
-      : bucket_count_(other.bucket_count_), bucket_size_(other.bucket_size_),
-        total_slots_(other.total_slots_), overflow_start_(other.overflow_start_),
-        overflow_size_(other.overflow_size_), size_(other.size_),
-        hasher_(other.hasher_), equal_(other.equal_)
+      : slots_(nullptr),
+        bucket_count_(other.bucket_count_),
+        bucket_size_(other.bucket_size_),
+        total_slots_(other.total_slots_),
+        overflow_start_(other.overflow_start_),
+        overflow_size_(other.overflow_size_),
+        size_(other.size_),
+        overflow_used_(other.overflow_used_),
+        max_load_factor_(other.max_load_factor_),
+        max_overflow_size_(other.max_overflow_size_),
+        bucket_updater_(other.bucket_updater_),
+        bucket_size_updater_(other.bucket_size_updater_),
+        hasher_(other.hasher_),
+        equal_(other.equal_)
     {
       slots_ = static_cast < Slot* >(::operator new(sizeof(Slot) * total_slots_));
       for (std::size_t i = 0; i < total_slots_; ++i)
-      {
         new (slots_ + i) Slot(other.slots_[i]);
-      }
     }
 
     BucketHashTable(BucketHashTable&& other) noexcept
-      : slots_(other.slots_), bucket_count_(other.bucket_count_),
-        bucket_size_(other.bucket_size_), total_slots_(other.total_slots_),
-        overflow_start_(other.overflow_start_), overflow_size_(other.overflow_size_),
-        size_(other.size_), hasher_(std::move(other.hasher_)),
+      : slots_(other.slots_),
+        bucket_count_(other.bucket_count_),
+        bucket_size_(other.bucket_size_),
+        total_slots_(other.total_slots_),
+        overflow_start_(other.overflow_start_),
+        overflow_size_(other.overflow_size_),
+        size_(other.size_),
+        overflow_used_(other.overflow_used_),
+        max_load_factor_(other.max_load_factor_),
+        max_overflow_size_(other.max_overflow_size_),
+        bucket_updater_(std::move(other.bucket_updater_)),
+        bucket_size_updater_(std::move(other.bucket_size_updater_)),
+        hasher_(std::move(other.hasher_)),
         equal_(std::move(other.equal_))
     {
       other.slots_ = nullptr;
       other.size_ = 0;
+      other.overflow_used_ = 0;
     }
 
     void swap(BucketHashTable& other) noexcept
@@ -281,6 +320,11 @@ namespace karpenko
       std::swap(overflow_start_, other.overflow_start_);
       std::swap(overflow_size_, other.overflow_size_);
       std::swap(size_, other.size_);
+      std::swap(overflow_used_, other.overflow_used_);
+      std::swap(max_load_factor_, other.max_load_factor_);
+      std::swap(max_overflow_size_, other.max_overflow_size_);
+      std::swap(bucket_updater_, other.bucket_updater_);
+      std::swap(bucket_size_updater_, other.bucket_size_updater_);
       std::swap(hasher_, other.hasher_);
       std::swap(equal_, other.equal_);
     }
@@ -299,9 +343,7 @@ namespace karpenko
       void skip_empty()
       {
         while (ptr_ != end_ && ptr_->state != Slot::OCCUPIED)
-        {
           ++ptr_;
-        }
       }
     public:
       using difference_type = std::ptrdiff_t;
@@ -311,38 +353,13 @@ namespace karpenko
       using iterator_category = std::forward_iterator_tag;
 
       iterator() : ptr_(nullptr), end_(nullptr) {}
-      iterator(Slot* p, Slot* e) : ptr_(p), end_(e)
-      {
-        skip_empty();
-      }
-      reference operator*()
-      {
-        return ptr_->data;
-      }
-      pointer operator->()
-      {
-        return &ptr_->data;
-      }
-      iterator& operator++()
-      {
-        ++ptr_;
-        skip_empty();
-        return *this;
-      }
-      iterator operator++(int)
-      {
-        iterator tmp = *this;
-        ++(*this);
-        return tmp;
-      }
-      bool operator==(const iterator& other) const
-      {
-        return ptr_ == other.ptr_;
-      }
-      bool operator!=(const iterator& other) const
-      {
-        return !(*this == other);
-      }
+      iterator(Slot* p, Slot* e) : ptr_(p), end_(e) { skip_empty(); }
+      reference operator*() { return ptr_->data; }
+      pointer operator->() { return &ptr_->data; }
+      iterator& operator++() { ++ptr_; skip_empty(); return *this; }
+      iterator operator++(int) { iterator tmp = *this; ++(*this); return tmp; }
+      bool operator==(const iterator& other) const { return ptr_ == other.ptr_; }
+      bool operator!=(const iterator& other) const { return !(*this == other); }
     };
 
     class const_iterator
@@ -353,9 +370,7 @@ namespace karpenko
       void skip_empty()
       {
         while (ptr_ != end_ && ptr_->state != Slot::OCCUPIED)
-        {
           ++ptr_;
-        }
       }
     public:
       using difference_type = std::ptrdiff_t;
@@ -365,56 +380,19 @@ namespace karpenko
       using iterator_category = std::forward_iterator_tag;
 
       const_iterator() : ptr_(nullptr), end_(nullptr) {}
-      const_iterator(const Slot* p, const Slot* e) : ptr_(p), end_(e)
-      {
-        skip_empty();
-      }
-      reference operator*() const
-      {
-        return ptr_->data;
-      }
-      pointer operator->() const
-      {
-        return &ptr_->data;
-      }
-      const_iterator& operator++()
-      {
-        ++ptr_;
-        skip_empty();
-        return *this;
-      }
-      const_iterator operator++(int)
-      {
-        const_iterator tmp = *this;
-        ++(*this);
-        return tmp;
-      }
-      bool operator==(const const_iterator& other) const
-      {
-        return ptr_ == other.ptr_;
-      }
-      bool operator!=(const const_iterator& other) const
-      {
-        return !(*this == other);
-      }
+      const_iterator(const Slot* p, const Slot* e) : ptr_(p), end_(e) { skip_empty(); }
+      reference operator*() const { return ptr_->data; }
+      pointer operator->() const { return &ptr_->data; }
+      const_iterator& operator++() { ++ptr_; skip_empty(); return *this; }
+      const_iterator operator++(int) { const_iterator tmp = *this; ++(*this); return tmp; }
+      bool operator==(const const_iterator& other) const { return ptr_ == other.ptr_; }
+      bool operator!=(const const_iterator& other) const { return !(*this == other); }
     };
 
-    iterator begin()
-    {
-      return iterator(slots_, slots_ + total_slots_);
-    }
-    iterator end()
-    {
-      return iterator(slots_ + total_slots_, slots_ + total_slots_);
-    }
-    const_iterator begin() const
-    {
-      return const_iterator(slots_, slots_ + total_slots_);
-    }
-    const_iterator end() const
-    {
-      return const_iterator(slots_ + total_slots_, slots_ + total_slots_);
-    }
+    iterator begin() { return iterator(slots_, slots_ + total_slots_); }
+    iterator end() { return iterator(slots_ + total_slots_, slots_ + total_slots_); }
+    const_iterator begin() const { return const_iterator(slots_, slots_ + total_slots_); }
+    const_iterator end() const { return const_iterator(slots_ + total_slots_, slots_ + total_slots_); }
 
     bool has(const Key& key) const
     {
@@ -429,28 +407,32 @@ namespace karpenko
         exist->data.second = val;
         return;
       }
+
+      Slot* dest = nullptr;
       if (exist && exist->state == Slot::TOMBSTONE)
       {
-        exist->data.~value_type();
-        new (&exist->data) value_type(key, val);
-        exist->state = Slot::OCCUPIED;
-        ++size_;
-        return;
+        dest = exist;
       }
-      std::size_t b = home_bucket(key);
-      Slot* dest = find_empty_in_bucket(b);
-      if (!dest)
+      else
       {
-        dest = find_empty_in_overflow();
+        std::size_t b = home_bucket(key);
+        dest = find_empty_in_bucket(b);
+        if (!dest)
+          dest = find_empty_in_overflow();
       }
+
       if (!dest)
-      {
         throw std::runtime_error("Hash table overflow");
-      }
+
+      if (dest->state != Slot::OCCUPIED && is_overflow_slot(dest))
+        ++overflow_used_;
+
       dest->data.~value_type();
       new (&dest->data) value_type(key, val);
       dest->state = Slot::OCCUPIED;
       ++size_;
+
+      check_and_rehash();
     }
 
     bool remove(const Key& key)
@@ -458,6 +440,8 @@ namespace karpenko
       Slot* s = find_slot_any(key);
       if (s && s->state == Slot::OCCUPIED)
       {
+        if (is_overflow_slot(s))
+          --overflow_used_;
         s->state = Slot::TOMBSTONE;
         --size_;
         return true;
@@ -469,9 +453,9 @@ namespace karpenko
     {
       Slot* s = find_slot_any(key);
       if (!s || s->state != Slot::OCCUPIED)
-      {
         throw std::out_of_range("Key not found");
-      }
+      if (is_overflow_slot(s))
+        --overflow_used_;
       Value val = std::move(s->data.second);
       s->state = Slot::TOMBSTONE;
       --size_;
@@ -493,9 +477,7 @@ namespace karpenko
     void rehash(std::size_t total_slots)
     {
       if (total_slots < bucket_size_ + 1)
-      {
         total_slots = bucket_size_ + 1;
-      }
       std::size_t new_bucket_count = total_slots / (bucket_size_ + 1);
       if (new_bucket_count == 0) new_bucket_count = 1;
       std::size_t new_overflow_size = total_slots - new_bucket_count * bucket_size_;
@@ -506,17 +488,75 @@ namespace karpenko
                 std::size_t new_overflow_size)
     {
       BucketHashTable tmp(new_bucket_count, new_bucket_size, new_overflow_size, hasher_, equal_);
+      tmp.max_load_factor_ = max_load_factor_;
+      tmp.max_overflow_size_ = max_overflow_size_;
+      tmp.bucket_updater_ = bucket_updater_;
+      tmp.bucket_size_updater_ = bucket_size_updater_;
+
       for (auto it = begin(); it != end(); ++it)
-      {
         tmp.add(it->first, it->second);
-      }
+
       swap(tmp);
+    }
+
+    double load_factor() const
+    {
+      return static_cast< double >(size_) / bucket_count_;
+    }
+
+    double max_load_factor() const
+    {
+      return max_load_factor_;
+    }
+
+    void max_load_factor(double factor)
+    {
+      if (factor <= 0.0)
+        throw std::invalid_argument("max_load_factor must be positive");
+      max_load_factor_ = factor;
+    }
+
+    std::size_t overflow_used() const
+    {
+      return overflow_used_;
+    }
+
+    std::size_t overflow_size() const
+    {
+      return overflow_size_;
+    }
+
+    std::size_t max_overflow_size() const
+    {
+      return max_overflow_size_;
+    }
+
+    void max_overflow_size(std::size_t max_overflow)
+    {
+      max_overflow_size_ = max_overflow;
+    }
+
+    void set_bucket_updater(std::function< std::size_t(std::size_t) > updater)
+    {
+      if (updater)
+        bucket_updater_ = updater;
+      else
+        bucket_updater_ = defaultBucketUpdater;
+    }
+
+    void set_bucket_size_updater(std::function< std::size_t(std::size_t) > updater)
+    {
+      if (updater)
+        bucket_size_updater_ = updater;
+      else
+        bucket_size_updater_ = defaultBucketSizeUpdater;
     }
 
     std::size_t size() const
     {
       return size_;
     }
+
     std::size_t bucket_count() const
     {
       return bucket_count_;
