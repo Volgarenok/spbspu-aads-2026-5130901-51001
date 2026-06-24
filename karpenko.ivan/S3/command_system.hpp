@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <cctype>
+#include <cstdlib>
 
 #include "graph_collection.hpp"
 
@@ -60,8 +61,10 @@ namespace karpenko
 
       bool isEnd() const
       {
-        skipSpaces();
-        return pos_ >= str_.size();
+        std::size_t p = pos_;
+        while (p < str_.size() && std::isspace(static_cast<unsigned char>(str_[p])))
+          ++p;
+        return p >= str_.size();
       }
 
     private:
@@ -103,7 +106,7 @@ namespace karpenko
       List < std::string > names;
       for (auto it = gc.getMap().begin(); it != gc.getMap().end(); ++it)
       {
-        names.push_back(it->first);
+        names.pushBack(it->first);
       }
       std::size_t n = 0;
       std::string* arr = listToSortedArray(names, n);
@@ -302,7 +305,7 @@ namespace karpenko
           out << "<INVALID COMMAND>\n";
           return;
         }
-        selected.push_back(v);
+        selected.pushBack(v);
       }
       if (!parser.isEnd())
       {
