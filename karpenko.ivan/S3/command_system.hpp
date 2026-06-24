@@ -82,15 +82,11 @@ namespace karpenko
     {
       outSize = lst.size();
       if (outSize == 0)
-      {
         return nullptr;
-      }
       std::string* arr = static_cast < std::string* >(::operator new(sizeof(std::string) * outSize));
       std::size_t i = 0;
       for (auto it = lst.begin(); it != lst.end(); ++it, ++i)
-      {
         new (arr + i) std::string(*it);
-      }
       std::sort(arr, arr + outSize);
       return arr;
     }
@@ -105,26 +101,16 @@ namespace karpenko
       }
       List < std::string > names;
       for (auto it = gc.getMap().begin(); it != gc.getMap().end(); ++it)
-      {
         names.pushBack(it->first);
-      }
       std::size_t n = 0;
       std::string* arr = listToSortedArray(names, n);
       if (n == 0)
-      {
         out << '\n';
-      }
       else
-      {
         for (std::size_t i = 0; i < n; ++i)
-        {
           out << arr[i] << '\n';
-        }
-      }
       for (std::size_t i = 0; i < n; ++i)
-      {
         arr[i].~basic_string();
-      }
       ::operator delete(arr);
     }
 
@@ -225,28 +211,38 @@ namespace karpenko
         out << "<INVALID COMMAND>\n";
         return;
       }
-      std::size_t k;
-      if (!parser.readInt(k))
-      {
-        out << "<INVALID COMMAND>\n";
-        return;
-      }
+
       Graph g;
-      for (std::size_t i = 0; i < k; ++i)
+      std::size_t k;
+      bool hasCount = parser.readInt(k);
+
+      if (hasCount)
       {
-        std::string v;
-        if (!parser.readWord(v))
+        for (std::size_t i = 0; i < k; ++i)
+        {
+          std::string v;
+          if (!parser.readWord(v))
+          {
+            out << "<INVALID COMMAND>\n";
+            return;
+          }
+          g.vertices_.add(v, true);
+        }
+        if (!parser.isEnd())
         {
           out << "<INVALID COMMAND>\n";
           return;
         }
-        g.vertices_.add(v, true);
       }
-      if (!parser.isEnd())
+      else
       {
-        out << "<INVALID COMMAND>\n";
-        return;
+        if (!parser.isEnd())
+        {
+          out << "<INVALID COMMAND>\n";
+          return;
+        }
       }
+
       gc.addGraph(gname, g);
     }
 
@@ -263,9 +259,7 @@ namespace karpenko
       Graph result = gc.getGraph(g1);
       const Graph& other = gc.getGraph(g2);
       for (auto it = other.vertices_.begin(); it != other.vertices_.end(); ++it)
-      {
         result.vertices_.add(it->first, true);
-      }
       for (auto out_it = other.out_edges_.begin(); out_it != other.out_edges_.end(); ++out_it)
       {
         const Vertex& from = out_it->first;
@@ -314,34 +308,21 @@ namespace karpenko
       }
       Graph result;
       for (auto it = selected.begin(); it != selected.end(); ++it)
-      {
         result.vertices_.add(*it, true);
-      }
       for (auto sit = selected.begin(); sit != selected.end(); ++sit)
       {
         const std::string& from = *sit;
         auto out_it = source.out_edges_.find(from);
         if (out_it == source.out_edges_.end())
-        {
           continue;
-        }
         const InnerEdgeMap& inner = out_it->second;
         for (auto in_it = inner.begin(); in_it != inner.end(); ++in_it)
         {
           const std::string& to = in_it->first;
           bool found = false;
           for (auto sit2 = selected.begin(); sit2 != selected.end(); ++sit2)
-          {
-            if (*sit2 == to)
-            {
-              found = true;
-              break;
-            }
-          }
-          if (!found)
-          {
-            continue;
-          }
+            if (*sit2 == to) { found = true; break; }
+          if (!found) continue;
           const edge_weights_t& ew = in_it->second;
           for (auto wi = ew.weights.cbegin(); wi != ew.weights.cend(); ++wi)
           {
@@ -382,9 +363,7 @@ namespace karpenko
   void CommandSystem::execute(const std::string& line, std::ostream& out, GraphCollection& gc)
   {
     if (line.empty() || line[0] == '#')
-    {
       return;
-    }
     std::size_t pos = 0;
     while (pos < line.size() && std::isspace(static_cast<unsigned char>(line[pos]))) ++pos;
     if (pos >= line.size()) return;
@@ -396,9 +375,7 @@ namespace karpenko
 
     auto it = handlers_.find(cmd);
     if (it == handlers_.end())
-    {
       out << "<INVALID COMMAND>\n";
-    }
     else
     {
       try
