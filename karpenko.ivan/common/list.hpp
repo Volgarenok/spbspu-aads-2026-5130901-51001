@@ -8,19 +8,22 @@
 namespace karpenko {
 namespace detail {
 
-  struct NodeBase
-  {
-    NodeBase* next_;
-    explicit NodeBase(NodeBase* nxt = nullptr) noexcept : next_(nxt) {}
-  };
+struct NodeBase {
+  NodeBase* next_;
 
-  template<typename T>
-  struct Node final : NodeBase
-  {
-    T data_;
-    explicit Node(NodeBase* nxt, const T& value) : NodeBase(nxt), data_(value) {}
-    explicit Node(NodeBase* nxt, T&& value) : NodeBase(nxt), data_(std::move(value)) {}
-  };
+  explicit NodeBase(NodeBase* nxt = nullptr) noexcept : next_(nxt) {}
+};
+
+template<typename T>
+struct Node final : NodeBase {
+  T data_;
+
+  explicit Node(NodeBase* nxt, const T& value)
+      : NodeBase(nxt), data_(value) {}
+
+  explicit Node(NodeBase* nxt, T&& value)
+      : NodeBase(nxt), data_(std::move(value)) {}
+};
 
 }
 
@@ -28,49 +31,41 @@ template<typename T>
 class List;
 
 template<typename T>
-class LIter
-{
+class LIter {
 public:
   LIter() noexcept : ptr_(nullptr) {}
   explicit LIter(detail::NodeBase* p) noexcept : ptr_(p) {}
 
-  T& operator*() const noexcept
-  {
+  T& operator*() const noexcept {
     auto* node_ptr = static_cast<detail::Node<T>*>(ptr_);
     return node_ptr->data_;
   }
 
-  T* operator->() const noexcept
-  {
+  T* operator->() const noexcept {
     auto* node_ptr = static_cast<detail::Node<T>*>(ptr_);
     return &(node_ptr->data_);
   }
 
-  LIter& operator++() noexcept
-  {
+  LIter& operator++() noexcept {
     ptr_ = ptr_->next_;
     return *this;
   }
 
-  LIter operator++(int) noexcept
-  {
+  LIter operator++(int) noexcept {
     LIter tmp = *this;
     ptr_ = ptr_->next_;
     return tmp;
   }
 
-  bool operator==(const LIter& other) const noexcept
-  {
+  bool operator==(const LIter& other) const noexcept {
     return ptr_ == other.ptr_;
   }
 
-  bool operator!=(const LIter& other) const noexcept
-  {
+  bool operator!=(const LIter& other) const noexcept {
     return !(*this == other);
   }
 
-  detail::NodeBase* getPtr() const noexcept
-  {
+  detail::NodeBase* get_ptr() const noexcept {
     return ptr_;
   }
 
@@ -80,45 +75,38 @@ private:
 };
 
 template<typename T>
-class LCIter
-{
+class LCIter {
 public:
   LCIter() noexcept : ptr_(nullptr) {}
   explicit LCIter(const detail::NodeBase* p) noexcept : ptr_(p) {}
-  LCIter(const LIter<T>& it) noexcept : ptr_(it.getPtr()) {}
+  LCIter(const LIter<T>& it) noexcept : ptr_(it.get_ptr()) {}
 
-  const T& operator*() const noexcept
-  {
+  const T& operator*() const noexcept {
     auto* node_ptr = static_cast<const detail::Node<T>*>(ptr_);
     return node_ptr->data_;
   }
 
-  const T* operator->() const noexcept
-  {
+  const T* operator->() const noexcept {
     auto* node_ptr = static_cast<const detail::Node<T>*>(ptr_);
     return &(node_ptr->data_);
   }
 
-  LCIter& operator++() noexcept
-  {
+  LCIter& operator++() noexcept {
     ptr_ = ptr_->next_;
     return *this;
   }
 
-  LCIter operator++(int) noexcept
-  {
+  LCIter operator++(int) noexcept {
     LCIter tmp = *this;
     ptr_ = ptr_->next_;
     return tmp;
   }
 
-  bool operator==(const LCIter& other) const noexcept
-  {
+  bool operator==(const LCIter& other) const noexcept {
     return ptr_ == other.ptr_;
   }
 
-  bool operator!=(const LCIter& other) const noexcept
-  {
+  bool operator!=(const LCIter& other) const noexcept {
     return !(*this == other);
   }
 
@@ -128,8 +116,7 @@ private:
 };
 
 template<typename T>
-class List
-{
+class List {
 public:
   using iterator = LIter<T>;
   using const_iterator = LCIter<T>;
@@ -155,16 +142,16 @@ public:
   T& back();
   const T& back() const;
 
-  void pushFront(const T& value);
-  void pushFront(T&& value);
-  void pushBack(const T& value);
-  void pushBack(T&& value);
-  void popFront();
-  void popBack();
+  void push_front(const T& value);
+  void push_front(T&& value);
+  void push_back(const T& value);
+  void push_back(T&& value);
+  void pop_front();
+  void pop_back();
 
-  iterator insertAfter(iterator pos, const T& value);
-  iterator insertAfter(iterator pos, T&& value);
-  iterator eraseAfter(iterator pos);
+  iterator insert_after(iterator pos, const T& value);
+  iterator insert_after(iterator pos, T&& value);
+  iterator erase_after(iterator pos);
 
   void clear() noexcept;
   void swap(List& other) noexcept;
