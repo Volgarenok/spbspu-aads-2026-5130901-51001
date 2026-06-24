@@ -106,7 +106,7 @@ namespace karpenko
       List < std::string > names;
       for (auto it = gc.getMap().begin(); it != gc.getMap().end(); ++it)
       {
-        names.pushBack(it->first);
+        names.push_back(it->first);
       }
       std::size_t n = 0;
       std::string* arr = listToSortedArray(names, n);
@@ -225,28 +225,38 @@ namespace karpenko
         out << "<INVALID COMMAND>\n";
         return;
       }
-      std::size_t k;
-      if (!parser.readInt(k))
-      {
-        out << "<INVALID COMMAND>\n";
-        return;
-      }
+
       Graph g;
-      for (std::size_t i = 0; i < k; ++i)
+      std::size_t k;
+      bool hasCount = parser.readInt(k);
+
+      if (hasCount)
       {
-        std::string v;
-        if (!parser.readWord(v))
+        for (std::size_t i = 0; i < k; ++i)
+        {
+          std::string v;
+          if (!parser.readWord(v))
+          {
+            out << "<INVALID COMMAND>\n";
+            return;
+          }
+          g.vertices_.add(v, true);
+        }
+        if (!parser.isEnd())
         {
           out << "<INVALID COMMAND>\n";
           return;
         }
-        g.vertices_.add(v, true);
       }
-      if (!parser.isEnd())
+      else
       {
-        out << "<INVALID COMMAND>\n";
-        return;
+        if (!parser.isEnd())
+        {
+          out << "<INVALID COMMAND>\n";
+          return;
+        }
       }
+
       gc.addGraph(gname, g);
     }
 
@@ -305,7 +315,7 @@ namespace karpenko
           out << "<INVALID COMMAND>\n";
           return;
         }
-        selected.pushBack(v);
+        selected.push_back(v);
       }
       if (!parser.isEnd())
       {

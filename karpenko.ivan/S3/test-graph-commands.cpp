@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(graph_storage_operations)
   karpenko::List<std::string> names;
   for (auto it = gc.getMap().begin(); it != gc.getMap().end(); ++it)
   {
-    names.pushBack(it->first);
+    names.push_back(it->first);
   }
   std::size_t n = names.size();
   std::string* arr = new std::string[n];

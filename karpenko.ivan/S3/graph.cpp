@@ -11,7 +11,7 @@ namespace karpenko
     {
       InnerEdgeMap inner;
       edge_weights_t ew;
-      ew.weights.pushBack(w);
+      ew.weights.push_back(w);
       inner.add(to, ew);
       edges.add(from, inner);
     }
@@ -22,12 +22,12 @@ namespace karpenko
       if (to_it == inner.end())
       {
         edge_weights_t ew;
-        ew.weights.pushBack(w);
+        ew.weights.push_back(w);
         inner.add(to, ew);
       }
       else
       {
-        to_it->second.weights.pushBack(w);
+        to_it->second.weights.push_back(w);
       }
     }
   }
@@ -51,26 +51,26 @@ namespace karpenko
     {
       if (*cur == w)
       {
-        detail::NodeBase* target = cur.getPtr();
+        detail::NodeBase* target = cur.get_ptr();
 
         if (cur == weights.begin())
         {
-          weights.popFront();
+          weights.pop_front();
         }
-        else if (target->next_ == weights.end().getPtr())
+        else if (target->next_ == weights.end().get_ptr())
         {
-          weights.popBack();
+          weights.pop_back();
         }
         else
         {
-          detail::NodeBase* prev = weights.end().getPtr();
+          detail::NodeBase* prev = weights.end().get_ptr();
           auto scan = weights.begin();
-          while (scan != weights.end() && scan.getPtr() != target)
+          while (scan != weights.end() && scan.get_ptr() != target)
           {
-            prev = scan.getPtr();
+            prev = scan.get_ptr();
             ++scan;
           }
-          weights.eraseAfter(LIter < Weight >(prev));
+          weights.erase_after(LIter < Weight >(prev));
         }
 
         if (weights.empty())
@@ -118,7 +118,7 @@ namespace karpenko
     List < std::string > targetList;
     for (auto ti = inner.begin(); ti != inner.end(); ++ti)
     {
-      targetList.pushBack(ti->first);
+      targetList.push_back(ti->first);
     }
     std::size_t n = 0;
     std::string* targets = detail::listToSortedArray(targetList, n);
@@ -157,7 +157,7 @@ namespace karpenko
     List < std::string > vertList;
     for (auto it = g.vertices_.begin(); it != g.vertices_.end(); ++it)
     {
-      vertList.pushBack(it->first);
+      vertList.push_back(it->first);
     }
     std::size_t n = 0;
     std::string* verts = detail::listToSortedArray(vertList, n);
