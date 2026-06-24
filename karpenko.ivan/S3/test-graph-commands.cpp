@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <sstream>
 #include <string>
+
 #include "command_system.hpp"
 #include "graph.hpp"
 #include "graph_collection.hpp"
@@ -125,7 +126,7 @@ BOOST_AUTO_TEST_CASE(graph_storage_operations)
   gc.addGraph("a", g);
 
   std::ostringstream oss;
-  karpenko::List<std::string> names;
+  karpenko::List< std::string > names;
   for (auto it = gc.getMap().begin(); it != gc.getMap().end(); ++it)
   {
     names.pushBack(it->first);

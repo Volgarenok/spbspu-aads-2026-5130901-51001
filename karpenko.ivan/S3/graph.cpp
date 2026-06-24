@@ -45,7 +45,7 @@ namespace karpenko
     {
       return false;
     }
-    List < Weight >& weights = to_it->second.weights;
+    List< Weight >& weights = to_it->second.weights;
 
     for (auto cur = weights.begin(); cur != weights.end(); ++cur)
     {
@@ -70,7 +70,7 @@ namespace karpenko
             prev = scan.getPtr();
             ++scan;
           }
-          weights.eraseAfter(LIter < Weight >(prev));
+          weights.eraseAfter(LIter< Weight >(prev));
         }
 
         if (weights.empty())
@@ -86,15 +86,15 @@ namespace karpenko
   namespace detail
   {
 
-    template < typename T >
-    T* listToSortedArray(const List < T >& lst, std::size_t& outSize)
+    template< typename T >
+    T* listToSortedArray(const List< T >& lst, std::size_t& outSize)
     {
       outSize = lst.size();
       if (outSize == 0)
       {
         return nullptr;
       }
-      T* arr = static_cast < T* >(::operator new(sizeof(T) * outSize));
+      T* arr = static_cast< T* >(::operator new(sizeof(T) * outSize));
       std::size_t i = 0;
       for (auto it = lst.begin(); it != lst.end(); ++it, ++i)
       {
@@ -115,7 +115,7 @@ namespace karpenko
       return;
     }
     const InnerEdgeMap& inner = it->second;
-    List < std::string > targetList;
+    List< std::string > targetList;
     for (auto ti = inner.begin(); ti != inner.end(); ++ti)
     {
       targetList.pushBack(ti->first);
@@ -126,7 +126,7 @@ namespace karpenko
     {
       const std::string& target = targets[t];
       auto wi = inner.find(target);
-      const List < Weight >& wlist = wi->second.weights;
+      const List< Weight >& wlist = wi->second.weights;
       std::size_t wc = 0;
       Weight* sorted_weights = detail::listToSortedArray(wlist, wc);
       out << target;
@@ -154,7 +154,7 @@ namespace karpenko
 
   void printSortedVertices(std::ostream& out, const Graph& g)
   {
-    List < std::string > vertList;
+    List< std::string > vertList;
     for (auto it = g.vertices_.begin(); it != g.vertices_.end(); ++it)
     {
       vertList.pushBack(it->first);
@@ -192,7 +192,7 @@ namespace karpenko
     {
       return false;
     }
-    const List < Weight >& weights = to_it->second.weights;
+    const List< Weight >& weights = to_it->second.weights;
     for (auto wi = weights.cbegin(); wi != weights.cend(); ++wi)
     {
       if (*wi == w)

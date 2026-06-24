@@ -3,11 +3,13 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
+
 #include "../common/hash_table.hpp"
 
 namespace
 {
-  using HashTable = karpenko::BucketHashTable < std::string, int, karpenko::Blake2Hash, std::equal_to < std::string > >;
+  using HashTable =
+    karpenko::BucketHashTable< std::string, int, karpenko::Blake2Hash, std::equal_to< std::string > >;
 
   struct ConstantHash
   {
@@ -16,7 +18,9 @@ namespace
       return 0;
     }
   };
-  using CollisionTable = karpenko::BucketHashTable < std::string, int, ConstantHash, std::equal_to < std::string > >;
+
+  using CollisionTable =
+    karpenko::BucketHashTable< std::string, int, ConstantHash, std::equal_to< std::string > >;
 }
 
 BOOST_AUTO_TEST_CASE(blake2_hash_is_stable_and_distinguishes_keys)

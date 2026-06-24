@@ -11,14 +11,17 @@ namespace karpenko
   class GraphCollection
   {
   public:
-    using GraphMap = BucketHashTable < std::string, Graph, Blake2Hash, std::equal_to < std::string > >;
+    using GraphMap = BucketHashTable< std::string, Graph, Blake2Hash, std::equal_to< std::string > >;
+
   private:
     GraphMap graphs_;
+
   public:
     bool hasGraph(const std::string& name) const
     {
       return graphs_.has(name);
     }
+
     Graph& getGraph(const std::string& name)
     {
       auto it = graphs_.find(name);
@@ -28,6 +31,7 @@ namespace karpenko
       }
       return it->second;
     }
+
     const Graph& getGraph(const std::string& name) const
     {
       auto it = graphs_.find(name);
@@ -37,6 +41,7 @@ namespace karpenko
       }
       return it->second;
     }
+
     void addGraph(const std::string& name, const Graph& g = Graph())
     {
       if (graphs_.has(name))
@@ -45,10 +50,12 @@ namespace karpenko
       }
       graphs_.add(name, g);
     }
+
     GraphMap& getMap()
     {
       return graphs_;
     }
+
     const GraphMap& getMap() const
     {
       return graphs_;

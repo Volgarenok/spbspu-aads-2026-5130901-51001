@@ -16,15 +16,15 @@ namespace karpenko
 
   struct edge_weights_t
   {
-    List < Weight > weights;
+    List< Weight > weights;
   };
 
-  using InnerEdgeMap = BucketHashTable < Vertex, edge_weights_t, Blake2Hash, std::equal_to < Vertex > >;
-  using OuterEdgeMap = BucketHashTable < Vertex, InnerEdgeMap, Blake2Hash, std::equal_to < Vertex > >;
+  using InnerEdgeMap = BucketHashTable< Vertex, edge_weights_t, Blake2Hash, std::equal_to< Vertex > >;
+  using OuterEdgeMap = BucketHashTable< Vertex, InnerEdgeMap, Blake2Hash, std::equal_to< Vertex > >;
 
   struct Graph
   {
-    BucketHashTable < Vertex, bool, Blake2Hash, std::equal_to < Vertex > > vertices_;
+    BucketHashTable< Vertex, bool, Blake2Hash, std::equal_to< Vertex > > vertices_;
     OuterEdgeMap out_edges_;
     OuterEdgeMap in_edges_;
 
