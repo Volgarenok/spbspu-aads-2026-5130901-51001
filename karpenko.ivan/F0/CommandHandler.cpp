@@ -93,7 +93,9 @@ namespace karpenko {
       return;
     }
     std::cout << "=== PROFILES ===\n";
+
     int idx = 1;
+    
     for (auto it = profiles.begin(); it != profiles.end(); ++it) {
       std::cout << idx++ << ". " << it->toString() << "\n";
     }
