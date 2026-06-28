@@ -1,0 +1,37 @@
+#ifndef BASE_DB_HPP
+#define BASE_DB_HPP
+
+#include <string>
+
+#include "../common/robin_hood_hash.hpp"
+#include "../common/avl_tree.hpp"
+#include "../common/list.hpp"
+#include "FoodBase.hpp"
+
+namespace karpenko {
+
+  class BaseDB {
+  public:
+    BaseDB();
+
+    bool addBase(const FoodBase& base);
+    bool removeBase(const std::string& name);
+    FoodBase* getBase(const std::string& name);
+    const FoodBase* getBase(const std::string& name) const;
+    bool hasBase(const std::string& name) const;
+
+    List<const FoodBase*> getAllBases() const;
+    List<const FoodBase*> getAllBasesSorted() const;
+    size_t size() const;
+
+    std::string serialize() const;
+    void deserialize(const std::string& data);
+
+  private:
+    RobinHoodHashTable<std::string, FoodBase> bases_by_name_;
+    AVLTree<std::string, FoodBase> sorted_bases_;
+  };
+
+}
+
+#endif
