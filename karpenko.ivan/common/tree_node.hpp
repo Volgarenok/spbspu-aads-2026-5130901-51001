@@ -1,5 +1,5 @@
-#ifndef KARPENKO_TREE_NODE_HPP
-#define KARPENKO_TREE_NODE_HPP
+#ifndef TREE_NODE_HPP
+#define TREE_NODE_HPP
 
 #include <utility>
 
