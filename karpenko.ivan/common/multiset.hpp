@@ -1,0 +1,158 @@
+#ifndef MULTISET_HPP
+#define MULTISET_HPP
+
+#include "avl_tree.hpp"
+#include <utility>
+
+namespace karpenko
+{
+
+template < typename Key, typename Compare = std::less< Key > >
+class Multiset
+{
+public:
+  using key_type = Key;
+  using value_type = Key;
+  using iterator = typename AVLTree< Key, size_t, Compare >::iterator;
+  using const_iterator = typename AVLTree< Key, size_t, Compare >::const_iterator;
+
+  Multiset() = default;
+
+  void insert(const Key& key)
+  {
+    auto it = tree_.find(key);
+    if (it == tree_.end())
+    {
+      tree_.push(key, 1);
+    }
+    else
+    {
+      const_cast< size_t& >(it->second)++;
+    }
+  }
+
+  void insert(Key&& key)
+  {
+    auto it = tree_.find(key);
+    if (it == tree_.end())
+    {
+      tree_.push(std::move(key), 1);
+    }
+    else
+    {
+      const_cast< size_t& >(it->second)++;
+    }
+  }
+
+  bool contains(const Key& key) const
+  {
+    return tree_.find(key) != tree_.end();
+  }
+
+  size_t count(const Key& key) const
+  {
+    auto it = tree_.find(key);
+    return (it == tree_.end()) ? 0 : it->second;
+  }
+
+  bool erase_one(const Key& key)
+  {
+    auto it = tree_.find(key);
+    if (it == tree_.end())
+    {
+      return false;
+    }
+    size_t& cnt = const_cast< size_t& >(it->second);
+    --cnt;
+    if (cnt == 0)
+    {
+      tree_.drop(key);
+    }
+    return true;
+  }
+
+  size_t erase_all(const Key& key)
+  {
+    auto it = tree_.find(key);
+    if (it == tree_.end())
+    {
+      return 0;
+    }
+    size_t old_count = it->second;
+    tree_.drop(key);
+    return old_count;
+  }
+
+  iterator find(const Key& key)
+  {
+    return tree_.find(key);
+  }
+
+  const_iterator find(const Key& key) const
+  {
+    return tree_.find(key);
+  }
+
+  iterator begin()
+  {
+    return tree_.begin();
+  }
+
+  const_iterator begin() const
+  {
+    return tree_.begin();
+  }
+
+  const_iterator cbegin() const
+  {
+    return tree_.begin();
+  }
+
+  iterator end()
+  {
+    return tree_.end();
+  }
+
+  const_iterator end() const
+  {
+    return tree_.end();
+  }
+
+  const_iterator cend() const
+  {
+    return tree_.end();
+  }
+
+  bool empty() const
+  {
+    return tree_.begin() == tree_.end();
+  }
+
+  size_t size() const
+  {
+    size_t total = 0;
+    for (auto it = begin(); it != end(); ++it)
+    {
+      total += it->second;
+    }
+    return total;
+  }
+
+  size_t height() const
+  {
+    return tree_.height();
+  }
+
+  void clear()
+  {
+    AVLTree< Key, size_t, Compare > empty;
+    tree_ = std::move(empty);
+  }
+
+private:
+  AVLTree< Key, size_t, Compare > tree_;
+};
+
+}
+
+#endif
