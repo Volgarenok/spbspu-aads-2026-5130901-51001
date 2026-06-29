@@ -1,7 +1,8 @@
-#ifndef KARPENKO_MULTISET_HPP
-#define KARPENKO_MULTISET_HPP
+#ifndef MULTISET_HPP
+#define MULTISET_HPP
 
 #include "avl_tree.hpp"
+#include <utility>
 
 namespace karpenko
 {
@@ -26,8 +27,7 @@ public:
     }
     else
     {
-      auto node = const_cast< typename AVLTree< Key, size_t, Compare >::Node* >(it.node);
-      ++node->data.second;
+      const_cast< size_t& >(it->second)++;
     }
   }
 
@@ -40,19 +40,8 @@ public:
     }
     else
     {
-      auto node = const_cast< typename AVLTree< Key, size_t, Compare >::Node* >(it.node);
-      ++node->data.second;
+      const_cast< size_t& >(it->second)++;
     }
-  }
-
-  size_t count(const Key& key) const
-  {
-    auto it = tree_.find(key);
-    if (it == tree_.end())
-    {
-      return 0;
-    }
-    return it->second;
   }
 
   bool contains(const Key& key) const
@@ -60,32 +49,38 @@ public:
     return tree_.find(key) != tree_.end();
   }
 
-  void erase_one(const Key& key)
+  size_t count(const Key& key) const
+  {
+    auto it = tree_.find(key);
+    return (it == tree_.end()) ? 0 : it->second;
+  }
+
+  bool erase_one(const Key& key)
   {
     auto it = tree_.find(key);
     if (it == tree_.end())
     {
-      return;
+      return false;
     }
-    auto node = const_cast< typename AVLTree< Key, size_t, Compare >::Node* >(it.node);
-    if (node->data.second > 1)
-    {
-      --node->data.second;
-    }
-    else
+    size_t& cnt = const_cast< size_t& >(it->second);
+    --cnt;
+    if (cnt == 0)
     {
       tree_.drop(key);
     }
+    return true;
   }
 
-  void erase_all(const Key& key)
+  size_t erase_all(const Key& key)
   {
-    try
+    auto it = tree_.find(key);
+    if (it == tree_.end())
     {
-      tree_.drop(key);
+      return 0;
     }
-    catch (const std::out_of_range&)
-    {}
+    size_t old_count = it->second;
+    tree_.drop(key);
+    return old_count;
   }
 
   iterator find(const Key& key)
@@ -151,7 +146,8 @@ public:
 
   void clear()
   {
-    tree_ = AVLTree< Key, size_t, Compare >();
+    AVLTree< Key, size_t, Compare > empty;
+    tree_ = std::move(empty);
   }
 
 private:

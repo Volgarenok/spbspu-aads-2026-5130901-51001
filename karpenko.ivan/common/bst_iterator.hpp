@@ -1,5 +1,5 @@
-#ifndef KARPENKO_BST_ITERATOR_HPP
-#define KARPENKO_BST_ITERATOR_HPP
+#ifndef BST_ITERATOR_HPP
+#define BST_ITERATOR_HPP
 
 #include "tree_node.hpp"
 #include <ostream>

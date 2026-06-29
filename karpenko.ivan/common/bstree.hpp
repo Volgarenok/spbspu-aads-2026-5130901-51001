@@ -1,5 +1,5 @@
-#ifndef KARPENKO_BSTREE_HPP
-#define KARPENKO_BSTREE_HPP
+#ifndef BSTREE_HPP
+#define BSTREE_HPP
 
 #include <functional>
 #include <cstddef>

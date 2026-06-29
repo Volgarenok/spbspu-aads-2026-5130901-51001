@@ -1,8 +1,9 @@
-#ifndef KARPENKO_MAP_HPP
-#define KARPENKO_MAP_HPP
+#ifndef MAP_HPP
+#define MAP_HPP
 
 #include "avl_tree.hpp"
 #include <utility>
+#include <stdexcept>
 
 namespace karpenko
 {
@@ -27,6 +28,11 @@ public:
   void insert(const Key& key, Value&& value)
   {
     tree_.push(key, std::move(value));
+  }
+
+  bool contains(const Key& key) const
+  {
+    return tree_.find(key) != tree_.end();
   }
 
   Value& operator[](const Key& key)
@@ -138,6 +144,12 @@ public:
   size_t height() const
   {
     return tree_.height();
+  }
+
+  void clear()
+  {
+    AVLTree< Key, Value, Compare > empty;
+    tree_ = std::move(empty);
   }
 
 private:
