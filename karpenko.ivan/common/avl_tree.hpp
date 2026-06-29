@@ -279,8 +279,177 @@ private:
     return node_height(static_cast< Node* >(node->left)) - node_height(static_cast< Node* >(node->right));
   }
 
+  Node* rotate_left(Node* x)
+    {
+      Node* p = static_cast< Node* >(x->parent);
+      Node* y = static_cast< Node* >(x->right);
+      x->right = y->left;
+      if (y->left)
+      {
+        y->left->parent = x;
+      }
+      y->left = x;
+      x->parent = y;
+      y->parent = p;
+      if (p)
+      {
+        if (p->left == x)
+        {
+          p->left = y;
+        }
+        else
+        {
+          p->right = y;
+        }
+      }
+      update_height(x);
+      update_height(y);
+      return y;
+    }
+
+    Node* rotate_right(Node* x)
+    {
+      Node* p = static_cast< Node* >(x->parent);
+      Node* y = static_cast< Node* >(x->left);
+      x->left = y->right;
+      if (y->right)
+      {
+        y->right->parent = x;
+      }
+      y->right = x;
+      x->parent = y;
+      y->parent = p;
+      if (p)
+      {
+        if (p->left == x)
+        {
+          p->left = y;
+        }
+        else
+        {
+          p->right = y;
+        }
+      }
+      update_height(x);
+      update_height(y);
+      return y;
+    }
+
+    Node* balance(Node* node)
+    {
+      if (!node)
+      {
+        return nullptr;
+      }
+      update_height(node);
+      int bf = balance_factor(node);
+      if (bf > 1)
+      {
+        if (balance_factor(static_cast< Node* >(node->left)) < 0)
+        {
+          node->left = rotate_left(static_cast< Node* >(node->left));
+        }
+        return rotate_right(node);
+      }
+      if (bf < -1)
+      {
+        if (balance_factor(static_cast< Node* >(node->right)) > 0)
+        {
+          node->right = rotate_right(static_cast< Node* >(node->right));
+        }
+        return rotate_left(node);
+      }
+      return node;
+    }
+
+    Node* insert(Node* node, const Key& key, Value&& value)
+    {
+      if (!node)
+      {
+        return new Node(key, std::move(value));
+      }
+      if (cmp_(key, node->data.first))
+      {
+        node->left = insert(static_cast< Node* >(node->left), key, std::move(value));
+        node->left->parent = node;
+      }
+      else if (cmp_(node->data.first, key))
+      {
+        node->right = insert(static_cast< Node* >(node->right), key, std::move(value));
+        node->right->parent = node;
+      }
+      else
+      {
+        node->data.second = std::move(value);
+        return node;
+      }
+      return balance(node);
+    }
+
+    Node* erase(Node* node, const Key& key)
+    {
+      if (!node)
+      {
+        return nullptr;
+      }
+      if (cmp_(key, node->data.first))
+      {
+        node->left = erase(static_cast< Node* >(node->left), key);
+        if (node->left)
+        {
+          node->left->parent = node;
+        }
+      }
+      else if (cmp_(node->data.first, key))
+      {
+        node->right = erase(static_cast< Node* >(node->right), key);
+        if (node->right)
+        {
+          node->right->parent = node;
+        }
+      }
+      else
+      {
+        if (!node->left || !node->right)
+        {
+          Node* child = static_cast< Node* >(node->left ? node->left : node->right);
+          if (child)
+          {
+            child->parent = node->parent;
+          }
+          delete node;
+          return child;
+        }
+        else
+        {
+          Node* successor = static_cast< Node* >(node->right);
+          while (successor->left)
+          {
+            successor = static_cast< Node* >(successor->left);
+          }
+          const_cast< Key& >(node->data.first) = successor->data.first;
+          node->data.second = std::move(successor->data.second);
+          node->right = erase(static_cast< Node* >(node->right), successor->data.first);
+          if (node->right)
+          {
+            node->right->parent = node;
+          }
+        }
+      }
+      return balance(node);
+    }
+
+    void clear(Node* node)
+    {
+      if (!node)
+      {
+        return;
+      }
+      clear(static_cast< Node* >(node->left));
+      clear(static_cast< Node* >(node->right));
+      delete node;
+    }
   };
 
 }
-  
 #endif
