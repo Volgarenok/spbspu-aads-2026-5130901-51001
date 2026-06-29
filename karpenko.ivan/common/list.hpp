@@ -69,6 +69,10 @@ public:
     return ptr_;
   }
 
+  detail::NodeBase* getPtr() const noexcept {
+    return get_ptr();
+  }
+
 private:
   detail::NodeBase* ptr_;
   friend class List<T>;
@@ -108,6 +112,14 @@ public:
 
   bool operator!=(const LCIter& other) const noexcept {
     return !(*this == other);
+  }
+
+  const detail::NodeBase* get_ptr() const noexcept {
+    return ptr_;
+  }
+
+  const detail::NodeBase* getPtr() const noexcept {
+    return get_ptr();
   }
 
 private:
@@ -156,6 +168,12 @@ public:
   void clear() noexcept;
   void swap(List& other) noexcept;
   size_type size() const noexcept;
+
+  void pushBack(const T& value) { push_back(value); }
+  void pushBack(T&& value) { push_back(std::move(value)); }
+  void popFront() { pop_front(); }
+  void popBack() { pop_back(); }
+  iterator eraseAfter(iterator pos) { return erase_after(pos); }
 
 private:
   detail::NodeBase* head_;
