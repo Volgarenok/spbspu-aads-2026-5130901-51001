@@ -80,15 +80,9 @@ public:
     }
   }
 
-  size_t erase(const Key& key)
-  {
-    return erase(key) ? 1 : 0;
-  }
-
   iterator find(const Key& key)
   {
-    auto it = tree_.find(key);
-    return iterator(const_cast< typename AVLTree< Key, Value, Compare >::Node* >(it.node));
+    return tree_.find(key);
   }
 
   const_iterator find(const Key& key) const
@@ -98,7 +92,7 @@ public:
 
   iterator begin()
   {
-    return iterator(const_cast< typename AVLTree< Key, Value, Compare >::Node* >(tree_.begin().node));
+    return tree_.begin();
   }
 
   const_iterator begin() const
@@ -113,7 +107,7 @@ public:
 
   iterator end()
   {
-    return iterator(const_cast< typename AVLTree< Key, Value, Compare >::Node* >(tree_.end().node));
+    return tree_.end();
   }
 
   const_iterator end() const

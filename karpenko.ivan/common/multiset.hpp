@@ -85,8 +85,7 @@ public:
 
   iterator find(const Key& key)
   {
-    auto cit = tree_.find(key);
-    return iterator(const_cast< typename AVLTree< Key, size_t, Compare >::Node* >(cit.node));
+    return tree_.find(key);
   }
 
   const_iterator find(const Key& key) const
@@ -96,7 +95,7 @@ public:
 
   iterator begin()
   {
-    return iterator(const_cast< typename AVLTree< Key, size_t, Compare >::Node* >(tree_.begin().node));
+    return tree_.begin();
   }
 
   const_iterator begin() const
@@ -111,7 +110,7 @@ public:
 
   iterator end()
   {
-    return iterator(const_cast< typename AVLTree< Key, size_t, Compare >::Node* >(tree_.end().node));
+    return tree_.end();
   }
 
   const_iterator end() const

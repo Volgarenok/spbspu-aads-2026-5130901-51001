@@ -6,7 +6,8 @@
 namespace karpenko
 {
   template < typename Key, typename Value >
-  struct AVLNode : public TreeNode<K ey, Value>
+  struct AVLNode :
+  public TreeNode< Key, Value >
   {
     int height_;
 

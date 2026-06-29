@@ -10,102 +10,104 @@
 namespace karpenko
 {
 
-  template <typename Key, typename Value, typename Compare = std::less<Key>>
-  class AVLTree
+template < typename Key, typename Value, typename Compare = std::less< Key > >
+class AVLTree
+{
+public:
+  using Node = AVLNode< Key, Value >;
+  using iterator = BSTIterator< Key, Value >;
+  using const_iterator = BSTConstIterator< Key, Value >;
+
+  AVLTree()
+    : fake_root_(new Node()),
+      cmp_()
+  {}
+
+  ~AVLTree()
   {
-  public:
-    using Node = AVLNode<Key, Value>;
-    using iterator = BSTIterator<Key, Value>;
-    using const_iterator = BSTConstIterator<Key, Value>;
+    clear(static_cast< Node* >(fake_root_->left));
+    delete fake_root_;
+  }
 
-    AVLTree()
-        : fake_root_(new Node()),
-          cmp_()
-    {}
+  AVLTree(const AVLTree&) = delete;
+  AVLTree& operator=(const AVLTree&) = delete;
 
-    ~AVLTree()
+  AVLTree(AVLTree&& other) noexcept
+    : fake_root_(other.fake_root_),
+      cmp_(std::move(other.cmp_))
+  {
+    other.fake_root_ = new Node();
+  }
+
+  AVLTree& operator=(AVLTree&& other) noexcept
+  {
+    if (this != &other)
     {
-      clear(fake_root_->left);
+      clear(static_cast< Node* >(fake_root_->left));
       delete fake_root_;
-    }
-
-    AVLTree(const AVLTree &) = delete;
-    AVLTree &operator=(const AVLTree &) = delete;
-
-    AVLTree(AVLTree &&other) noexcept
-        : fake_root_(other.fake_root_),
-          cmp_(std::move(other.cmp_))
-    {
+      fake_root_ = other.fake_root_;
+      cmp_ = std::move(other.cmp_);
       other.fake_root_ = new Node();
     }
+    return *this;
+  }
 
-    AVLTree &operator=(AVLTree &&other) noexcept
+  void push(const Key& key, Value value)
+  {
+    if (fake_root_->left == nullptr)
     {
-      if (this != &other)
-      {
-        clear(fake_root_->left);
-        delete fake_root_;
-        fake_root_ = other.fake_root_;
-        cmp_ = std::move(other.cmp_);
-        other.fake_root_ = new Node();
-      }
-      return *this;
-    }
-
-    void push(const Key &key, Value value)
-    {
-      if (fake_root_->left == nullptr)
-      {
-        fake_root_->left = new Node(key, std::move(value));
-        fake_root_->left->parent = fake_root_;
-        return;
-      }
-      fake_root_->left = insert(fake_root_->left, key, std::move(value));
+      fake_root_->left = new Node(key, std::move(value));
       fake_root_->left->parent = fake_root_;
+      return;
     }
+    fake_root_->left = insert(static_cast< Node* >(fake_root_->left), key, std::move(value));
+    fake_root_->left->parent = fake_root_;
+  }
 
-    Value get(const Key &key) const
-    {
-      Node *node = find_node(key);
-      if (!node)
-      {
-        throw std::out_of_range("key not found");
-      }
-      return node->data.second;
-    }
-
-    Value drop(const Key &key)
-    {
-      Node *node = find_node(key);
-      if (!node)
-      {
-        throw std::out_of_range("key not found");
-      }
-      Value result = std::move(node->data.second);
-      fake_root_->left = erase(fake_root_->left, key);
-      if (fake_root_->left)
-      {
-        fake_root_->left->parent = fake_root_;
-      }
-      return result;
-    }
-    const_iterator find(const Key& key) const
+  Value get(const Key& key) const
   {
     Node* node = find_node(key);
-    return const_iterator(node ? node : fake_root_);
+    if (!node)
+    {
+      throw std::out_of_range("key not found");
+    }
+    return node->data.second;
+  }
+
+  Value drop(const Key& key)
+  {
+    Node* node = find_node(key);
+    if (!node)
+    {
+      throw std::out_of_range("key not found");
+    }
+    Value result = std::move(node->data.second);
+    fake_root_->left = erase(static_cast< Node* >(fake_root_->left), key);
+    if (fake_root_->left)
+    {
+      fake_root_->left->parent = fake_root_;
+    }
+    return result;
+  }
+
+  iterator begin()
+  {
+    Node* cur = static_cast< Node* >(fake_root_->left);
+    if (!cur) return end();
+    while (cur->left) cur = static_cast< Node* >(cur->left);
+    return iterator(cur);
+  }
+
+  iterator end()
+  {
+    return iterator(fake_root_);
   }
 
   const_iterator begin() const
   {
-    Node* cur = fake_root_->left;
-    if (!cur)
-    {
-      return end();
-    }
-    while (cur->left)
-    {
-      cur = static_cast< Node* >(cur->left);
-    }
+    Node* cur = static_cast< Node* >(fake_root_->left);
+    if (!cur) return end();
+    while (cur->left) cur = static_cast< Node* >(cur->left);
     return const_iterator(cur);
   }
 
@@ -114,9 +116,21 @@ namespace karpenko
     return const_iterator(fake_root_);
   }
 
+  iterator find(const Key& key)
+  {
+    Node* node = find_node(key);
+    return iterator(node ? node : fake_root_);
+  }
+
+  const_iterator find(const Key& key) const
+  {
+    Node* node = find_node(key);
+    return const_iterator(node ? node : fake_root_);
+  }
+
   size_t height() const
   {
-    return node_height(fake_root_->left);
+    return node_height(static_cast< Node* >(fake_root_->left));
   }
 
   size_t height(const_iterator it) const
@@ -272,184 +286,138 @@ private:
 
   int balance_factor(const Node* node) const
   {
-    if (!node)
-    {
-      return 0;
-    }
-    return node_height(static_cast< Node* >(node->left)) - node_height(static_cast< Node* >(node->right));
+    if (!node) return 0;
+    return node_height(static_cast< Node* >(node->left))
+           - node_height(static_cast< Node* >(node->right));
   }
 
   Node* rotate_left(Node* x)
+  {
+    Node* p = static_cast< Node* >(x->parent);
+    Node* y = static_cast< Node* >(x->right);
+    x->right = y->left;
+    if (y->left) y->left->parent = x;
+    y->left = x;
+    x->parent = y;
+    y->parent = p;
+    if (p)
     {
-      Node* p = static_cast< Node* >(x->parent);
-      Node* y = static_cast< Node* >(x->right);
-      x->right = y->left;
-      if (y->left)
-      {
-        y->left->parent = x;
-      }
-      y->left = x;
-      x->parent = y;
-      y->parent = p;
-      if (p)
-      {
-        if (p->left == x)
-        {
-          p->left = y;
-        }
-        else
-        {
-          p->right = y;
-        }
-      }
-      update_height(x);
-      update_height(y);
-      return y;
+      if (p->left == x) p->left = y;
+      else p->right = y;
     }
+    update_height(x);
+    update_height(y);
+    return y;
+  }
 
-    Node* rotate_right(Node* x)
+  Node* rotate_right(Node* x)
+  {
+    Node* p = static_cast< Node* >(x->parent);
+    Node* y = static_cast< Node* >(x->left);
+    x->left = y->right;
+    if (y->right) y->right->parent = x;
+    y->right = x;
+    x->parent = y;
+    y->parent = p;
+    if (p)
     {
-      Node* p = static_cast< Node* >(x->parent);
-      Node* y = static_cast< Node* >(x->left);
-      x->left = y->right;
-      if (y->right)
-      {
-        y->right->parent = x;
-      }
-      y->right = x;
-      x->parent = y;
-      y->parent = p;
-      if (p)
-      {
-        if (p->left == x)
-        {
-          p->left = y;
-        }
-        else
-        {
-          p->right = y;
-        }
-      }
-      update_height(x);
-      update_height(y);
-      return y;
+      if (p->left == x) p->left = y;
+      else p->right = y;
     }
+    update_height(x);
+    update_height(y);
+    return y;
+  }
 
-    Node* balance(Node* node)
+  Node* balance(Node* node)
+  {
+    if (!node) return nullptr;
+    update_height(node);
+    int bf = balance_factor(node);
+    if (bf > 1)
     {
-      if (!node)
+      if (balance_factor(static_cast< Node* >(node->left)) < 0)
       {
-        return nullptr;
+        node->left = rotate_left(static_cast< Node* >(node->left));
       }
-      update_height(node);
-      int bf = balance_factor(node);
-      if (bf > 1)
+      return rotate_right(node);
+    }
+    if (bf < -1)
+    {
+      if (balance_factor(static_cast< Node* >(node->right)) > 0)
       {
-        if (balance_factor(static_cast< Node* >(node->left)) < 0)
-        {
-          node->left = rotate_left(static_cast< Node* >(node->left));
-        }
-        return rotate_right(node);
+        node->right = rotate_right(static_cast< Node* >(node->right));
       }
-      if (bf < -1)
-      {
-        if (balance_factor(static_cast< Node* >(node->right)) > 0)
-        {
-          node->right = rotate_right(static_cast< Node* >(node->right));
-        }
-        return rotate_left(node);
-      }
+      return rotate_left(node);
+    }
+    return node;
+  }
+
+  Node* insert(Node* node, const Key& key, Value&& value)
+  {
+    if (!node) return new Node(key, std::move(value));
+    if (cmp_(key, node->data.first))
+    {
+      node->left = insert(static_cast< Node* >(node->left), key, std::move(value));
+      node->left->parent = node;
+    }
+    else if (cmp_(node->data.first, key))
+    {
+      node->right = insert(static_cast< Node* >(node->right), key, std::move(value));
+      node->right->parent = node;
+    }
+    else
+    {
+      node->data.second = std::move(value);
       return node;
     }
+    return balance(node);
+  }
 
-    Node* insert(Node* node, const Key& key, Value&& value)
+  Node* erase(Node* node, const Key& key)
+  {
+    if (!node) return nullptr;
+    if (cmp_(key, node->data.first))
     {
-      if (!node)
+      node->left = erase(static_cast< Node* >(node->left), key);
+      if (node->left) node->left->parent = node;
+    }
+    else if (cmp_(node->data.first, key))
+    {
+      node->right = erase(static_cast< Node* >(node->right), key);
+      if (node->right) node->right->parent = node;
+    }
+    else
+    {
+      if (!node->left || !node->right)
       {
-        return new Node(key, std::move(value));
-      }
-      if (cmp_(key, node->data.first))
-      {
-        node->left = insert(static_cast< Node* >(node->left), key, std::move(value));
-        node->left->parent = node;
-      }
-      else if (cmp_(node->data.first, key))
-      {
-        node->right = insert(static_cast< Node* >(node->right), key, std::move(value));
-        node->right->parent = node;
+        Node* child = static_cast< Node* >(node->left ? node->left : node->right);
+        if (child) child->parent = node->parent;
+        delete node;
+        return child;
       }
       else
       {
-        node->data.second = std::move(value);
-        return node;
+        Node* successor = static_cast< Node* >(node->right);
+        while (successor->left) successor = static_cast< Node* >(successor->left);
+        const_cast< Key& >(node->data.first) = successor->data.first;
+        node->data.second = std::move(successor->data.second);
+        node->right = erase(static_cast< Node* >(node->right), successor->data.first);
+        if (node->right) node->right->parent = node;
       }
-      return balance(node);
     }
+    return balance(node);
+  }
 
-    Node* erase(Node* node, const Key& key)
-    {
-      if (!node)
-      {
-        return nullptr;
-      }
-      if (cmp_(key, node->data.first))
-      {
-        node->left = erase(static_cast< Node* >(node->left), key);
-        if (node->left)
-        {
-          node->left->parent = node;
-        }
-      }
-      else if (cmp_(node->data.first, key))
-      {
-        node->right = erase(static_cast< Node* >(node->right), key);
-        if (node->right)
-        {
-          node->right->parent = node;
-        }
-      }
-      else
-      {
-        if (!node->left || !node->right)
-        {
-          Node* child = static_cast< Node* >(node->left ? node->left : node->right);
-          if (child)
-          {
-            child->parent = node->parent;
-          }
-          delete node;
-          return child;
-        }
-        else
-        {
-          Node* successor = static_cast< Node* >(node->right);
-          while (successor->left)
-          {
-            successor = static_cast< Node* >(successor->left);
-          }
-          const_cast< Key& >(node->data.first) = successor->data.first;
-          node->data.second = std::move(successor->data.second);
-          node->right = erase(static_cast< Node* >(node->right), successor->data.first);
-          if (node->right)
-          {
-            node->right->parent = node;
-          }
-        }
-      }
-      return balance(node);
-    }
-
-    void clear(Node* node)
-    {
-      if (!node)
-      {
-        return;
-      }
-      clear(static_cast< Node* >(node->left));
-      clear(static_cast< Node* >(node->right));
-      delete node;
-    }
-  };
+  void clear(Node* node)
+  {
+    if (!node) return;
+    clear(static_cast< Node* >(node->left));
+    clear(static_cast< Node* >(node->right));
+    delete node;
+  }
+};
 
 }
+
 #endif

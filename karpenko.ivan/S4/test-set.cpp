@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE(SetInsertAndContains)
   BOOST_CHECK(!set.contains(1));
   BOOST_CHECK_EQUAL(set.size(), 3);
 
-  set.insert(3); // дубликат
+  set.insert(3);
   BOOST_CHECK_EQUAL(set.size(), 3);
 }
 
@@ -30,15 +30,15 @@ BOOST_AUTO_TEST_CASE(SetOrder)
   set.insert(3);
 
   auto it = set.begin();
-  BOOST_CHECK_EQUAL(*it, 1);
+  BOOST_CHECK_EQUAL(it->first, 1);
   ++it;
-  BOOST_CHECK_EQUAL(*it, 2);
+  BOOST_CHECK_EQUAL(it->first, 2);
   ++it;
-  BOOST_CHECK_EQUAL(*it, 3);
+  BOOST_CHECK_EQUAL(it->first, 3);
   ++it;
-  BOOST_CHECK_EQUAL(*it, 4);
+  BOOST_CHECK_EQUAL(it->first, 4);
   ++it;
-  BOOST_CHECK_EQUAL(*it, 5);
+  BOOST_CHECK_EQUAL(it->first, 5);
   ++it;
   BOOST_CHECK(it == set.end());
 }
