@@ -1,5 +1,5 @@
-#ifndef KARPENKO_AVL_TREE_HPP
-#define KARPENKO_AVL_TREE_HPP
+#ifndef AVL_TREE_HPP
+#define AVL_TREE_HPP
 
 #include "avl_node.hpp"
 #include "bst_iterator.hpp"
