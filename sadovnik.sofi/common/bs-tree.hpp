@@ -340,8 +340,8 @@ namespace sadovnik
   class BSTree
   {
   public:
-    using iterator = BSTIterator< Key, Value >;
-    using const_iterator = BSTConstIterator< Key, Value >;
+    using iter = BSTIterator< Key, Value >;
+    using const_iter = BSTConstIterator< Key, Value >;
 
     BSTree()
       : root_(nullptr),
@@ -422,32 +422,32 @@ namespace sadovnik
       size_ = 0;
     }
 
-    iterator begin()
+    iter begin()
     {
-      return iterator(detail::minNode(root_), root_);
+      return iter(detail::minNode(root_), root_);
     }
 
-    iterator end()
+    iter end()
     {
-      return iterator(nullptr, root_);
+      return iter(nullptr, root_);
     }
 
-    const_iterator begin() const
+    const_iter begin() const
     {
-      return const_iterator(detail::minNode(root_), root_);
+      return const_iter(detail::minNode(root_), root_);
     }
 
-    const_iterator end() const
+    const_iter end() const
     {
-      return const_iterator(nullptr, root_);
+      return const_iter(nullptr, root_);
     }
 
-    const_iterator cbegin() const
+    const_iter cbegin() const
     {
       return begin();
     }
 
-    const_iterator cend() const
+    const_iter cend() const
     {
       return end();
     }
@@ -457,7 +457,7 @@ namespace sadovnik
       return heightSub(root_);
     }
 
-    std::size_t height(const_iterator it) const
+    std::size_t height(const_iter it) const
     {
       if (it.node_ == nullptr)
       {
@@ -466,14 +466,14 @@ namespace sadovnik
       return heightSub(it.node_);
     }
 
-    iterator find(const Key & key)
+    iter find(const Key & key)
     {
-      return iterator(findNode(key), root_);
+      return iter(findNode(key), root_);
     }
 
-    const_iterator find(const Key & key) const
+    const_iter find(const Key & key) const
     {
-      return const_iterator(findNode(key), root_);
+      return const_iter(findNode(key), root_);
     }
 
     void push(const Key & key, const Value & val)
@@ -523,7 +523,17 @@ namespace sadovnik
       return findNode(key) != nullptr;
     }
 
-    Value get(const Key & key) const
+    Value & get(const Key & key)
+    {
+      detail::BSTNode< Key, Value > * node = findNode(key);
+      if (node == nullptr)
+      {
+        throw std::out_of_range("missing key");
+      }
+      return node->val;
+    }
+
+    const Value & get(const Key & key) const
     {
       const detail::BSTNode< Key, Value > * node = findNode(key);
       if (node == nullptr)
@@ -533,7 +543,7 @@ namespace sadovnik
       return node->val;
     }
 
-    Value drop(const Key & key)
+    void drop(const Key & key)
     {
       detail::BSTNode< Key, Value > * node = findNode(key);
       if (node == nullptr)
@@ -541,13 +551,11 @@ namespace sadovnik
         throw std::out_of_range("missing key");
       }
 
-      const Value result = node->val;
       dropNode(node);
       --size_;
-      return result;
     }
 
-    const_iterator rotateLeft(const_iterator it)
+    const_iter rotateLeft(const_iter it)
     {
       detail::BSTNode< Key, Value > * rising =
         const_cast< detail::BSTNode< Key, Value > * >(it.node_);
@@ -573,10 +581,10 @@ namespace sadovnik
       setChild(pivot->parent, pivot, rising);
       pivot->parent = rising;
 
-      return const_iterator(rising, root_);
+      return const_iter(rising, root_);
     }
 
-    const_iterator rotateRight(const_iterator it)
+    const_iter rotateRight(const_iter it)
     {
       detail::BSTNode< Key, Value > * rising =
         const_cast< detail::BSTNode< Key, Value > * >(it.node_);
@@ -602,10 +610,10 @@ namespace sadovnik
       setChild(pivot->parent, pivot, rising);
       pivot->parent = rising;
 
-      return const_iterator(rising, root_);
+      return const_iter(rising, root_);
     }
 
-    const_iterator rotateLargeLeft(const_iterator it)
+    const_iter rotateLargeLeft(const_iter it)
     {
       detail::BSTNode< Key, Value > * rising =
         const_cast< detail::BSTNode< Key, Value > * >(it.node_);
@@ -621,11 +629,11 @@ namespace sadovnik
         throw std::logic_error("cannot rotate large left");
       }
 
-      const_iterator afterFirst = rotateLeft(it);
+      const_iter afterFirst = rotateLeft(it);
       return rotateRight(afterFirst);
     }
 
-    const_iterator rotateLargeRight(const_iterator it)
+    const_iter rotateLargeRight(const_iter it)
     {
       detail::BSTNode< Key, Value > * rising =
         const_cast< detail::BSTNode< Key, Value > * >(it.node_);
@@ -641,7 +649,7 @@ namespace sadovnik
         throw std::logic_error("cannot rotate large right");
       }
 
-      const_iterator afterFirst = rotateRight(it);
+      const_iter afterFirst = rotateRight(it);
       return rotateLeft(afterFirst);
     }
 
@@ -738,16 +746,34 @@ namespace sadovnik
       delete node;
     }
 
-    static void destroySub(detail::BSTNode< Key, Value > * node)
+    static void destroySub(detail::BSTNode< Key, Value > * node) noexcept
     {
-      if (node == nullptr)
+      while (node != nullptr)
       {
-        return;
+        if (node->left != nullptr)
+        {
+          detail::BSTNode< Key, Value > * rising = node->left;
+          node->left = rising->right;
+          if (rising->right != nullptr)
+          {
+            rising->right->parent = node;
+          }
+          rising->right = node;
+          rising->parent = node->parent;
+          node->parent = rising;
+          node = rising;
+        }
+        else
+        {
+          detail::BSTNode< Key, Value > * next = node->right;
+          delete node;
+          node = next;
+          if (node != nullptr)
+          {
+            node->parent = nullptr;
+          }
+        }
       }
-
-      destroySub(node->left);
-      destroySub(node->right);
-      delete node;
     }
 
     static detail::BSTNode< Key, Value > * cloneSub(
@@ -776,9 +802,7 @@ namespace sadovnik
       }
       catch (...)
       {
-        destroySub(copy->left);
-        destroySub(copy->right);
-        delete copy;
+        destroySub(copy);
         throw;
       }
 

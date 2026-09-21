@@ -109,16 +109,16 @@ BOOST_AUTO_TEST_CASE(bs_tree_push_updates_height_and_begin)
   BOOST_TEST(tree.height() == 2);
 }
 
-BOOST_AUTO_TEST_CASE(bs_tree_drop_leaf_returns_value)
+BOOST_AUTO_TEST_CASE(bs_tree_drop_leaf)
 {
   IntStrTree tree;
   tree.push(2, "two");
   tree.push(1, "one");
   tree.push(4, "four");
 
-  BOOST_TEST(tree.drop(1) == "one");
-  BOOST_TEST(tree.size() == 2);
+  tree.drop(1);
   BOOST_CHECK(!tree.has(1));
+  BOOST_TEST(tree.size() == 2);
   BOOST_CHECK(tree.has(2));
   BOOST_CHECK(tree.has(4));
 }
@@ -131,9 +131,9 @@ BOOST_AUTO_TEST_CASE(bs_tree_drop_node_with_one_child)
   tree.push(4, "four");
   tree.push(3, "three");
 
-  BOOST_TEST(tree.drop(4) == "four");
-  BOOST_CHECK(tree.has(3));
+  tree.drop(4);
   BOOST_CHECK(!tree.has(4));
+  BOOST_CHECK(tree.has(3));
   BOOST_TEST(tree.get(3) == "three");
 }
 
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(bs_tree_drop_node_with_two_children)
   tree.push(3, "three");
   tree.push(5, "five");
 
-  BOOST_TEST(tree.drop(2) == "two");
+  tree.drop(2);
   BOOST_CHECK(!tree.has(2));
   BOOST_CHECK(tree.has(1));
   BOOST_CHECK(tree.has(3));
@@ -169,7 +169,8 @@ BOOST_AUTO_TEST_CASE(bs_tree_drop_last_element_clears_tree)
   IntStrTree tree;
   tree.push(1, "one");
 
-  BOOST_TEST(tree.drop(1) == "one");
+  tree.drop(1);
+  BOOST_CHECK(!tree.has(1));
   BOOST_CHECK(tree.empty());
   BOOST_TEST(tree.size() == 0);
   BOOST_CHECK(tree.begin() == tree.end());

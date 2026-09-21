@@ -85,7 +85,9 @@ namespace sadovnik
       if (this != &other)
       {
         HashTable tmp(other);
-        swap(tmp);
+        swapStorage(tmp);
+        hash_ = tmp.hash_;
+        equal_ = tmp.equal_;
       }
       return *this;
     }
@@ -245,10 +247,22 @@ namespace sadovnik
       {
         fresh.add(it->key, it->val);
       }
-      swap(fresh);
+      swapStorage(fresh);
     }
 
-    void swap(HashTable & other) noexcept
+    void swap(HashTable & other)
+    {
+      swapStorage(other);
+      Hash tmpHash = std::move(hash_);
+      hash_ = std::move(other.hash_);
+      other.hash_ = std::move(tmpHash);
+
+      Equal tmpEqual = std::move(equal_);
+      equal_ = std::move(other.equal_);
+      other.equal_ = std::move(tmpEqual);
+    }
+
+    void swapStorage(HashTable & other) noexcept
     {
       Entry * tmpCells = cells_;
       cells_ = other.cells_;
@@ -265,14 +279,6 @@ namespace sadovnik
       std::size_t tmpElemCnt = elemCnt_;
       elemCnt_ = other.elemCnt_;
       other.elemCnt_ = tmpElemCnt;
-
-      Hash tmpHash = hash_;
-      hash_ = other.hash_;
-      other.hash_ = tmpHash;
-
-      Equal tmpEqual = equal_;
-      equal_ = other.equal_;
-      other.equal_ = tmpEqual;
     }
 
     class const_iterator;
@@ -519,7 +525,7 @@ namespace sadovnik
 
   template< class Key, class Value, class Hash, class Equal >
   void swap(HashTable< Key, Value, Hash, Equal > & lhs,
-            HashTable< Key, Value, Hash, Equal > & rhs) noexcept
+            HashTable< Key, Value, Hash, Equal > & rhs)
   {
     lhs.swap(rhs);
   }
